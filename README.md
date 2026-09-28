@@ -1,6 +1,6 @@
-# IOTAgriBackend
+# IOTAgri
 
-Backend API for an IoT hydroponics/agriculture monitoring system. Built with ASP.NET Core (.NET 10) and PostgreSQL, designed for eventual deployment to AWS.
+IoT hydroponics/agriculture monitoring system with an ASP.NET Core backend and Flutter frontend.
 
 ## Tech Stack
 

@@ -6,4 +6,4 @@ graphify-out
 **/bin
 **/obj
 .env
-IOTAgriBackend/appsettings.Development.json
+backend/appsettings.Development.json

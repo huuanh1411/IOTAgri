@@ -12,6 +12,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IOTAgriBackend\IOTAgriBackend.csproj" />
+    <ProjectReference Include="..\IOTAgriBackend.csproj" />
   </ItemGroup>
 </Project>
