@@ -10,6 +10,7 @@ Backend API for an IoT hydroponics/agriculture monitoring system. Built with ASP
 - **MQTT** (MQTTnet) for real-time sensor ingestion from ESP32 devices, via a local Mosquitto broker in dev
 - **Swagger / OpenAPI** for API exploration in Development
 - **GitHub Actions CI** for tests, Release builds, and Docker image builds
+- **Flutter Frontend** - Mobile app for device management and monitoring
 
 ## Features Implemented So Far
 
@@ -73,3 +74,45 @@ The local Mosquitto broker is anonymous and plaintext for trusted LAN developmen
 - Production MQTT: TLS, per-device credentials, and topic ACLs (the current broker is intentionally anonymous and plaintext for local development)
 - ESP32 HTTPS and MQTT TLS support
 - VPS deployment and continuous deployment after the production stack is verified
+
+## Frontend Application
+
+### Flutter Mobile App
+
+A Flutter frontend application is included in the `frontend/` directory with the following features:
+
+- **Authentication**: Login and registration with JWT token management
+- **Dashboard**: Overview of all devices with sensor readings and status
+- **Device Management**: Add, edit, delete devices, view device details
+- **Sensor Monitoring**: Real-time temperature, humidity, pH, TDS, and water level readings
+- **Pump Control**: Manual pump control and scheduling
+- **Alerts**: Threshold-based notifications for temperature and water level
+
+### Frontend Tech Stack
+
+- **Framework**: Flutter 3.10+
+- **Language**: Dart
+- **State Management**: Provider
+- **HTTP Client**: http package
+- **Secure Storage**: flutter_secure_storage
+- **Date Formatting**: intl
+- **Charts**: fl_chart
+
+### Running the Frontend
+
+```bash
+cd frontend
+flutter pub get
+flutter run
+```
+
+### Frontend Platforms
+
+- Android
+- iOS
+- Web
+- Windows
+- macOS
+- Linux
+
+All UI is in Vietnamese with Arial font as requested.
