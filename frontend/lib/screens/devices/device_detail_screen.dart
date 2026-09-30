@@ -5,6 +5,12 @@ import '../../models/sensor_reading.dart';
 import '../../models/pump_command.dart';
 import '../../models/device_alert.dart';
 import '../../services/api_service.dart';
+import '../../widgets/loading_indicators.dart';
+import '../../widgets/custom_cards.dart';
+import '../../widgets/custom_buttons.dart';
+import '../sensors/sensor_history_screen.dart';
+import '../alerts/alerts_screen.dart';
+import '../pumps/pump_schedules_screen.dart';
 
 class DeviceDetailScreen extends StatefulWidget {
   final Device device;
@@ -142,28 +148,13 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingState(message: 'Đang tải dữ liệu thiết bị...');
     }
 
     if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              'Lỗi: $_errorMessage',
-              style: const TextStyle(color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadDeviceData,
-              child: const Text('Thử lại'),
-            ),
-          ],
-        ),
+      return ErrorState(
+        message: _errorMessage!,
+        onRetry: _loadDeviceData,
       );
     }
 
@@ -244,41 +235,58 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           ),
           const SizedBox(height: 16),
           if (_latestReading != null)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
+            Column(
+              children: [
+                Row(
                   children: [
-                    _buildSensorRow(
-                      'Nhiệt độ',
-                      '${_latestReading!.temperature?.toStringAsFixed(1) ?? 'N/A'}°C',
-                      _getTemperatureColor(_latestReading!.temperature),
-                      Icons.thermostat,
+                    Expanded(
+                      child: SensorCard(
+                        label: 'Nhiệt độ',
+                        value: _latestReading!.temperature?.toStringAsFixed(1) ?? 'N/A',
+                        unit: '°C',
+                        icon: Icons.thermostat,
+                        color: _getTemperatureColor(_latestReading!.temperature),
+                        isWarning: (_latestReading!.temperature ?? 0) > 30 || (_latestReading!.temperature ?? 0) < 15,
+                      ),
                     ),
-                    const Divider(),
-                    _buildSensorRow(
-                      'Độ ẩm',
-                      '${_latestReading!.humidity?.toStringAsFixed(1) ?? 'N/A'}%',
-                      Colors.blue,
-                      Icons.water_drop,
-                    ),
-                    const Divider(),
-                    _buildSensorRow(
-                      'pH',
-                      _latestReading!.ph?.toStringAsFixed(1) ?? 'N/A',
-                      Colors.purple,
-                      Icons.science,
-                    ),
-                    const Divider(),
-                    _buildSensorRow(
-                      'Mực nước',
-                      '${_latestReading!.waterLevel?.toStringAsFixed(1) ?? 'N/A'}%',
-                      _getWaterLevelColor(_latestReading!.waterLevel),
-                      Icons.opacity,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SensorCard(
+                        label: 'Độ ẩm',
+                        value: _latestReading!.humidity?.toStringAsFixed(1) ?? 'N/A',
+                        unit: '%',
+                        icon: Icons.water_drop,
+                        color: Colors.blue,
+                      ),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SensorCard(
+                        label: 'pH',
+                        value: _latestReading!.ph?.toStringAsFixed(1) ?? 'N/A',
+                        unit: '',
+                        icon: Icons.science,
+                        color: Colors.purple,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SensorCard(
+                        label: 'Mực nước',
+                        value: _latestReading!.waterLevel?.toStringAsFixed(1) ?? 'N/A',
+                        unit: '%',
+                        icon: Icons.opacity,
+                        color: _getWaterLevelColor(_latestReading!.waterLevel),
+                        isWarning: (_latestReading!.waterLevel ?? 0) < 30,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             )
           else
             const Card(
@@ -287,37 +295,67 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                 child: Text('Chưa có dữ liệu cảm biến'),
               ),
             ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: CustomElevatedButton(
+                  text: 'Xem lịch sử',
+                  icon: Icons.history,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SensorHistoryScreen(device: widget.device),
+                      ),
+                    );
+                  },
+                  isFullWidth: true,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: CustomElevatedButton(
+                  text: 'Xem cảnh báo',
+                  icon: Icons.warning,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AlertsScreen(device: widget.device),
+                      ),
+                    );
+                  },
+                  isFullWidth: true,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          CustomElevatedButton(
+            text: 'Quản lý lịch trình bơm',
+            icon: Icons.schedule,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PumpSchedulesScreen(device: widget.device),
+                ),
+              );
+            },
+            isFullWidth: true,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSensorRow(String label, String value, Color color, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, color: color),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 16),
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildSensorsTab() {
     if (_readings.isEmpty) {
-      return const Center(child: Text('Chưa có dữ liệu cảm biến'));
+      return const EmptyState(
+        icon: Icons.sensors,
+        title: 'Chưa có dữ liệu cảm biến',
+      );
     }
 
     return ListView.builder(
@@ -396,24 +434,22 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           Row(
             children: [
               Expanded(
-                child: ElevatedButton.icon(
+                child: CustomElevatedButton(
+                  text: 'Bật bơm (1 phút)',
+                  icon: Icons.power_settings_new,
+                  backgroundColor: Colors.green,
                   onPressed: () => _sendPumpCommand(true, 60),
-                  icon: const Icon(Icons.power_settings_new),
-                  label: const Text('Bật bơm (1 phút)'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                  ),
+                  isFullWidth: true,
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: ElevatedButton.icon(
+                child: CustomElevatedButton(
+                  text: 'Tắt bơm',
+                  icon: Icons.power_off,
+                  backgroundColor: Colors.red,
                   onPressed: () => _sendPumpCommand(false, 0),
-                  icon: const Icon(Icons.power_off),
-                  label: const Text('Tắt bơm'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                  ),
+                  isFullWidth: true,
                 ),
               ),
             ],
@@ -425,7 +461,10 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           ),
           const SizedBox(height: 16),
           if (_pumpCommands.isEmpty)
-            const Text('Chưa có lệnh nào')
+            const EmptyState(
+              icon: Icons.history,
+              title: 'Chưa có lệnh nào',
+            )
           else
             ..._pumpCommands.map((command) => Card(
               margin: const EdgeInsets.only(bottom: 8),
@@ -466,7 +505,11 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
   Widget _buildAlertsTab() {
     if (_alerts.isEmpty) {
-      return const Center(child: Text('Không có cảnh báo nào'));
+      return const EmptyState(
+        icon: Icons.check_circle,
+        title: 'Không có cảnh báo nào',
+        subtitle: 'Tất cả thông số đang ở mức bình thường',
+      );
     }
 
     return ListView.builder(
@@ -474,18 +517,12 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       itemCount: _alerts.length,
       itemBuilder: (context, index) {
         final alert = _alerts[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          color: Colors.red[50],
-          child: ListTile(
-            leading: const Icon(Icons.warning, color: Colors.red),
-            title: Text(
-              alert.type == 'HighTemperature' ? 'Nhiệt độ cao' : 'Mực nước thấp',
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-            ),
-            subtitle: Text('Giá trị: ${alert.measuredValue} - Ngưỡng: ${alert.threshold}'),
-            trailing: Text(_formatDate(alert.triggeredAt)),
-          ),
+        final severity = alert.type == 'HighTemperature' ? AlertSeverity.warning : AlertSeverity.critical;
+        return AlertCard(
+          title: alert.type == 'HighTemperature' ? 'Nhiệt độ cao' : 'Mực nước thấp',
+          message: 'Giá trị: ${alert.measuredValue} - Ngưỡng: ${alert.threshold}',
+          timestamp: _formatDate(alert.triggeredAt),
+          severity: severity,
         );
       },
     );

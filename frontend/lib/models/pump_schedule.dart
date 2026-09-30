@@ -48,4 +48,17 @@ class PumpSchedule {
       'createdAt': createdAt,
     };
   }
+
+  // Helper getters for UI
+  List<int> get daysOfWeek {
+    final days = <int>[];
+    for (int i = 0; i < 7; i++) {
+      if ((weekdayMask & (1 << i)) != 0) {
+        days.add(i);
+      }
+    }
+    return days;
+  }
+
+  bool get isActive => isEnabled && lastDispatchedOccurrenceUtc != null;
 }

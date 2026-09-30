@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/device.dart';
 import '../../services/api_service.dart';
+import '../../widgets/loading_indicators.dart';
+import '../../widgets/custom_cards.dart';
 import 'device_detail_screen.dart';
 
 class DevicesScreen extends StatefulWidget {
@@ -89,49 +91,21 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingState(message: 'Đang tải thiết bị...');
     }
 
     if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              'Lỗi: $_errorMessage',
-              style: const TextStyle(color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadDevices,
-              child: const Text('Thử lại'),
-            ),
-          ],
-        ),
+      return ErrorState(
+        message: _errorMessage!,
+        onRetry: _loadDevices,
       );
     }
 
     if (_devices.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.devices_other, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text(
-              'Chưa có thiết bị nào',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Nhấn nút + để thêm thiết bị mới',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
+      return EmptyState(
+        icon: Icons.devices_other,
+        title: 'Chưa có thiết bị nào',
+        subtitle: 'Nhấn nút + để thêm thiết bị mới',
       );
     }
 
@@ -142,34 +116,37 @@ class _DevicesScreenState extends State<DevicesScreen> {
         itemCount: _devices.length,
         itemBuilder: (context, index) {
           final device = _devices[index];
-          return Card(
-            margin: const EdgeInsets.only(bottom: 16),
-            child: ListTile(
-              leading: Icon(
-                device.isOnline ? Icons.wifi : Icons.wifi_off,
-                color: device.isOnline ? Colors.green : Colors.red,
-              ),
-              title: Text(device.name),
-              subtitle: Text(
-                device.isOnline ? 'Đang hoạt động' : 'Mất kết nối',
-                style: TextStyle(
-                  color: device.isOnline ? Colors.green : Colors.red,
+          return InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DeviceDetailScreen(device: device),
                 ),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DeviceDetailScreen(device: device),
-                  ),
-                );
-              },
+              );
+            },
+            child: StatusCard(
+              title: device.name,
+              status: device.isOnline ? 'Đang hoạt động' : 'Mất kết nối',
+              subtitle: device.lastSeenAt != null 
+                  ? 'Lần hoạt động: ${_formatDate(device.lastSeenAt!)}' 
+                  : null,
+              isActive: device.isOnline,
+              statusIcon: device.isOnline ? Icons.wifi : Icons.wifi_off,
             ),
           );
         },
       ),
     );
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return dateString;
+    }
   }
 }
 

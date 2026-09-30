@@ -295,7 +295,7 @@ class ApiService {
     }
   }
 
-  Future<List<dynamic>> getPumpSchedules(String deviceId) async {
+  Future<Map<String, dynamic>> getPumpSchedules(String deviceId) async {
     final headers = await _getHeaders();
     final response = await _authenticatedRequest(() => _client.get(
       Uri.parse('${ApiConstants.baseUrl}${ApiConstants.pumpSchedules(deviceId)}'),
@@ -306,6 +306,42 @@ class ApiService {
       return jsonDecode(response.body);
     } else {
       throw Exception('Failed to load pump schedules: ${response.body}');
+    }
+  }
+
+  Future<Map<String, dynamic>> createPumpSchedule(
+    String deviceId,
+    String startTime,
+    int durationSeconds,
+    List<int> daysOfWeek,
+  ) async {
+    final headers = await _getHeaders();
+    final response = await _authenticatedRequest(() => _client.post(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.pumpSchedules(deviceId)}'),
+      headers: headers,
+      body: jsonEncode({
+        'startTime': startTime,
+        'durationSeconds': durationSeconds,
+        'daysOfWeek': daysOfWeek,
+      }),
+    ));
+
+    if (response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to create pump schedule: ${response.body}');
+    }
+  }
+
+  Future<void> deletePumpSchedule(String deviceId, String scheduleId) async {
+    final headers = await _getHeaders();
+    final response = await _authenticatedRequest(() => _client.delete(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.pumpSchedules(deviceId)}/$scheduleId'),
+      headers: headers,
+    ));
+
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete pump schedule: ${response.body}');
     }
   }
 
