@@ -12,6 +12,7 @@ public class SensorReading
     public double? Ph { get; set; }
     public double? Tds { get; set; }
     public double? WaterLevel { get; set; }
+    public double? Lux { get; set; }
 
     public DateTime RecordedAt { get; set; } = DateTime.UtcNow;
 }

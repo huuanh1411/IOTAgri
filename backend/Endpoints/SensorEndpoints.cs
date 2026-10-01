@@ -48,7 +48,7 @@ public static class SensorEndpoints
             .Where(r => r.DeviceId == deviceId)
             .OrderByDescending(r => r.RecordedAt)
             .Take(Math.Clamp(take, 1, 500))
-            .Select(r => new SensorReadingResponse(r.Id, r.Temperature, r.Humidity, r.Ph, r.Tds, r.WaterLevel, r.RecordedAt))
+            .Select(r => new SensorReadingResponse(r.Id, r.Temperature, r.Humidity, r.Ph, r.Tds, r.WaterLevel, r.Lux, r.RecordedAt))
             .ToListAsync();
 
         return Results.Ok(readings);
@@ -93,6 +93,7 @@ public static class SensorEndpoints
                    AVG("Ph") AS "AvgPh", MIN("Ph") AS "MinPh", MAX("Ph") AS "MaxPh",
                    AVG("Tds") AS "AvgTds", MIN("Tds") AS "MinTds", MAX("Tds") AS "MaxTds",
                    AVG("WaterLevel") AS "AvgWaterLevel", MIN("WaterLevel") AS "MinWaterLevel", MAX("WaterLevel") AS "MaxWaterLevel",
+                   AVG("Lux") AS "AvgLux", MIN("Lux") AS "MinLux", MAX("Lux") AS "MaxLux",
                    CAST(COUNT(*) AS integer) AS "SampleCount"
             FROM "SensorReadings"
             WHERE "DeviceId" = {1} AND "RecordedAt" >= {2} AND "RecordedAt" <= {3}
@@ -178,6 +179,7 @@ public static class SensorEndpoints
                    percentile_cont(0.5) WITHIN GROUP (ORDER BY "Ph") AS "MedianPh",
                    percentile_cont(0.5) WITHIN GROUP (ORDER BY "Tds") AS "MedianTds",
                    percentile_cont(0.5) WITHIN GROUP (ORDER BY "WaterLevel") AS "MedianWaterLevel",
+                   percentile_cont(0.5) WITHIN GROUP (ORDER BY "Lux") AS "MedianLux",
                    CAST(COUNT(*) AS integer) AS "SampleCount"
             FROM "SensorReadings"
             WHERE "DeviceId" = {1} AND "RecordedAt" >= {2} AND "RecordedAt" < {3}

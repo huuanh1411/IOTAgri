@@ -102,7 +102,7 @@ public static class AdminEndpoints
 
         var readings = await db.SensorReadings.Where(reading => reading.DeviceId == id).OrderByDescending(reading => reading.RecordedAt)
             .Take(Math.Clamp(take, 1, 500))
-            .Select(reading => new SensorReadingResponse(reading.Id, reading.Temperature, reading.Humidity, reading.Ph, reading.Tds, reading.WaterLevel, reading.RecordedAt))
+            .Select(reading => new SensorReadingResponse(reading.Id, reading.Temperature, reading.Humidity, reading.Ph, reading.Tds, reading.WaterLevel, reading.Lux, reading.RecordedAt))
             .ToListAsync();
         return Results.Ok(readings);
     }

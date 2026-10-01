@@ -6,6 +6,7 @@ class SensorReading {
   final double? ph;
   final double? tds;
   final double? waterLevel;
+  final double? lux;
   final String recordedAt;
 
   SensorReading({
@@ -16,6 +17,7 @@ class SensorReading {
     this.ph,
     this.tds,
     this.waterLevel,
+    this.lux,
     required this.recordedAt,
   });
 
@@ -28,6 +30,7 @@ class SensorReading {
       ph: json['ph']?.toDouble(),
       tds: json['tds']?.toDouble(),
       waterLevel: json['waterLevel']?.toDouble(),
+      lux: json['lux']?.toDouble(),
       recordedAt: json['recordedAt'] ?? '',
     );
   }
@@ -41,6 +44,7 @@ class SensorReading {
       'ph': ph,
       'tds': tds,
       'waterLevel': waterLevel,
+      'lux': lux,
       'recordedAt': recordedAt,
     };
   }
