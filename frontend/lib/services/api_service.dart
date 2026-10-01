@@ -97,7 +97,10 @@ class ApiService {
       await _saveTokens(data['accessToken'], data['refreshToken']);
       return data;
     } else {
-      throw Exception('Login failed: ${response.body}');
+      if (response.statusCode == 401) {
+        throw Exception('Email hoặc mật khẩu không đúng.');
+      }
+      throw Exception('Đăng nhập thất bại. Vui lòng thử lại.');
     }
   }
 
@@ -118,8 +121,21 @@ class ApiService {
 
     if (response.statusCode == 201) {
       return jsonDecode(response.body);
+    } else if (response.statusCode == 409) {
+      throw Exception('Email này đã được đăng ký.');
     } else {
-      throw Exception('Registration failed: ${response.body}');
+      var message = 'Đăng ký thất bại. Vui lòng kiểm tra thông tin.';
+      try {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final errors = data.values
+            .whereType<List<dynamic>>()
+            .expand((messages) => messages)
+            .join(' ');
+        if (errors.isNotEmpty) message = errors;
+      } catch (_) {
+        // Keep generic message when API response is not validation JSON.
+      }
+      throw Exception(message);
     }
   }
 

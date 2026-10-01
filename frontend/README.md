@@ -133,7 +133,7 @@ Sử dụng JWT token với refresh token rotation:
 ## 🚀 Triển Khai
 
 ### Environment Variables:
-- `API_BASE_URL`: URL của backend API (mặc định: http://localhost:8080)
+- `API_BASE_URL`: URL của backend API (mặc định: http://localhost:5261)
 
 ### Build Commands:
 ```bash
@@ -153,7 +153,7 @@ flutter build web    # Build web version
 ## 🔧 Cấu Hình
 
 ### Cấu hình API URL:
-Mặc định ứng dụng sử dụng `http://localhost:8080`. Để thay đổi:
+Mặc định ứng dụng sử dụng `http://localhost:5261`. Để thay đổi:
 
 1. Cập nhật trong `lib/constants/api_constants.dart`
 2. Hoặc sử dụng environment variable khi build:

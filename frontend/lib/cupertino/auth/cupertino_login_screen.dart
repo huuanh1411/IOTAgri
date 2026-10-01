@@ -1,0 +1,249 @@
+import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/auth_provider.dart';
+import 'cupertino_register_screen.dart';
+
+class CupertinoLoginScreen extends StatefulWidget {
+  const CupertinoLoginScreen({super.key});
+
+  @override
+  State<CupertinoLoginScreen> createState() => _CupertinoLoginScreenState();
+}
+
+class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    if (email.isEmpty || !email.contains('@') || password.length < 8) {
+      _showMessage('Vui lòng kiểm tra email và mật khẩu.');
+      return;
+    }
+
+    final success = await context.read<AuthProvider>().login(email, password);
+    if (!success && mounted) {
+      _showMessage(context.read<AuthProvider>().errorMessage ?? 'Đăng nhập thất bại.');
+    }
+  }
+
+  void _showMessage(String message) {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Không thể đăng nhập'),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(message),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Đã hiểu'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = CupertinoTheme.of(context);
+    return CupertinoPageScaffold(
+      child: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final contentWidth = constraints.maxWidth > 520 ? 420.0 : double.infinity;
+            return Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 48, 24, 32),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: contentWidth),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _BrandMark(color: colors.primaryColor),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Chào mừng đến\nAerogreen',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: CupertinoColors.label.resolveFrom(context),
+                          fontSize: 36,
+                          fontWeight: FontWeight.w700,
+                          height: 1.08,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Nông trại khỏe mạnh bắt đầu từ dữ liệu rõ ràng.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                          fontSize: 16,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      _FieldLabel(
+                        label: 'Email',
+                        child: CupertinoTextField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: const [AutofillHints.username],
+                          placeholder: 'you@example.com',
+                          prefix: const Padding(
+                            padding: EdgeInsets.only(left: 14),
+                            child: Icon(CupertinoIcons.mail, size: 19),
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          decoration: _fieldDecoration(context),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      _FieldLabel(
+                        label: 'Mật khẩu',
+                        child: CupertinoTextField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _submit(),
+                          autofillHints: const [AutofillHints.password],
+                          placeholder: 'Tối thiểu 8 ký tự',
+                          prefix: const Padding(
+                            padding: EdgeInsets.only(left: 14),
+                            child: Icon(CupertinoIcons.lock, size: 19),
+                          ),
+                          suffix: CupertinoButton(
+                            padding: const EdgeInsets.all(12),
+                            minSize: 44,
+                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                            child: Icon(
+                              _obscurePassword ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
+                              size: 19,
+                            ),
+                          ),
+                          padding: const EdgeInsets.fromLTRB(14, 16, 4, 16),
+                          decoration: _fieldDecoration(context),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      Consumer<AuthProvider>(
+                        builder: (context, authProvider, _) {
+                          return CupertinoButton.filled(
+                            minSize: 52,
+                            borderRadius: BorderRadius.circular(16),
+                            onPressed: authProvider.isLoading ? null : _submit,
+                            child: authProvider.isLoading
+                                ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                                : const Text(
+                                    'Đăng nhập',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 14),
+                      CupertinoButton(
+                        minSize: 44,
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            CupertinoPageRoute<void>(
+                              builder: (_) => const CupertinoRegisterScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text('Tạo tài khoản mới'),
+                      ),
+                      const SizedBox(height: 22),
+                      Text(
+                        'Aerogreen bảo vệ nhịp vận hành của nông trại bằng những tín hiệu nhỏ, đúng lúc.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  BoxDecoration _fieldDecoration(BuildContext context) {
+    return BoxDecoration(
+      color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: CupertinoColors.separator.resolveFrom(context),
+      ),
+    );
+  }
+}
+
+class _BrandMark extends StatelessWidget {
+  final Color color;
+
+  const _BrandMark({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 72,
+        height: 72,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Icon(CupertinoIcons.leaf_arrow_circlepath, color: color, size: 38),
+      ),
+    );
+  }
+}
+
+class _FieldLabel extends StatelessWidget {
+  final String label;
+  final Widget child;
+
+  const _FieldLabel({required this.label, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+}
