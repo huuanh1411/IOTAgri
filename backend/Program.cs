@@ -81,10 +81,25 @@ builder.Services.AddAuthorization(options =>
 var allowedCorsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(FlutterCorsPolicy, policy => policy
-        .WithOrigins(allowedCorsOrigins)
-        .AllowAnyHeader()
-        .AllowAnyMethod());
+    options.AddPolicy(FlutterCorsPolicy, policy =>
+    {
+        if (allowedCorsOrigins.Length > 0)
+        {
+            policy.WithOrigins(allowedCorsOrigins);
+        }
+        else
+        {
+            policy.SetIsOriginAllowed(origin =>
+            {
+                if (string.IsNullOrWhiteSpace(origin)) return false;
+                var uri = new Uri(origin);
+                return uri.Host == "localhost" || uri.Host == "127.0.0.1";
+            });
+        }
+
+        policy.AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
 builder.Services.AddRateLimiter(options => options.AddPolicy("deviceClaims", context =>

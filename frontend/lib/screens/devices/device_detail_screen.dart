@@ -11,6 +11,7 @@ import '../../widgets/custom_buttons.dart';
 import '../sensors/sensor_history_screen.dart';
 import '../alerts/alerts_screen.dart';
 import '../pumps/pump_schedules_screen.dart';
+import 'provisioning_code_screen.dart';
 
 class DeviceDetailScreen extends StatefulWidget {
   final Device device;
@@ -139,6 +140,18 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadDeviceData,
+          ),
+          IconButton(
+            icon: const Icon(Icons.qr_code_2),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProvisioningCodeScreen(device: widget.device),
+                ),
+              );
+            },
+            tooltip: 'Mã thiết lập',
           ),
         ],
       ),

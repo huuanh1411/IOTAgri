@@ -207,6 +207,20 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> createProvisioningCode(String deviceId) async {
+    final headers = await _getHeaders();
+    final response = await _authenticatedRequest(() => _client.post(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.deviceProvisioningCode(deviceId)}'),
+      headers: headers,
+    ));
+
+    if (response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to create provisioning code: ${response.body}');
+    }
+  }
+
   // Dashboard methods
   Future<List<dynamic>> getDashboardOverview() async {
     final headers = await _getHeaders();

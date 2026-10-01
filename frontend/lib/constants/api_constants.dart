@@ -13,6 +13,7 @@ class ApiConstants {
   // Device endpoints
   static const String devices = '/api/devices';
   static String device(String id) => '/api/devices/$id';
+  static String deviceProvisioningCode(String id) => '/api/devices/$id/provisioning-code';
 
   // Dashboard endpoints
   static const String dashboardOverview = '/api/dashboard/overview';

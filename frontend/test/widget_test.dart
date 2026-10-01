@@ -8,23 +8,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:iotagri_app/main.dart';
+import 'package:iotagri_app/screens/dashboard/dashboard_screen.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('dashboard shows gateway status summary', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: GatewayStatusCard(
+          status: 'Mất kết nối',
+          lastUpdate: '10:35',
+          runtime: '5h 12m',
+        ),
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('ESP32 Gateway'), findsOneWidget);
+    expect(find.text('🟢'), findsOneWidget);
+    expect(find.text('Last update'), findsOneWidget);
+    expect(find.text('Runtime'), findsOneWidget);
   });
 }

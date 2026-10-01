@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import '../../models/device.dart';
 import '../../services/api_service.dart';
 import '../../widgets/loading_indicators.dart';
-import '../../widgets/custom_cards.dart';
+import '../../widgets/custom_buttons.dart';
 import 'device_detail_screen.dart';
+import 'provisioning_code_screen.dart';
 
 class DevicesScreen extends StatefulWidget {
   const DevicesScreen({super.key});
@@ -116,23 +117,101 @@ class _DevicesScreenState extends State<DevicesScreen> {
         itemCount: _devices.length,
         itemBuilder: (context, index) {
           final device = _devices[index];
-          return InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DeviceDetailScreen(device: device),
-                ),
-              );
-            },
-            child: StatusCard(
-              title: device.name,
-              status: device.isOnline ? 'Đang hoạt động' : 'Mất kết nối',
-              subtitle: device.lastSeenAt != null 
-                  ? 'Lần hoạt động: ${_formatDate(device.lastSeenAt!)}' 
-                  : null,
-              isActive: device.isOnline,
-              statusIcon: device.isOnline ? Icons.wifi : Icons.wifi_off,
+          return Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DeviceDetailScreen(device: device),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          device.isOnline ? Icons.wifi : Icons.wifi_off,
+                          color: device.isOnline ? Colors.green : Colors.red,
+                          size: 32,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                device.name,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                device.isOnline ? 'Đang hoạt động' : 'Mất kết nối',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: device.isOnline ? Colors.green : Colors.red,
+                                ),
+                              ),
+                              if (device.lastSeenAt != null)
+                                Text(
+                                  'Lần hoạt động: ${_formatDate(device.lastSeenAt!)}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomElevatedButton(
+                          text: 'Chi tiết',
+                          icon: Icons.visibility,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DeviceDetailScreen(device: device),
+                              ),
+                            );
+                          },
+                          isFullWidth: true,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: CustomOutlinedButton(
+                          text: 'Mã thiết lập',
+                          icon: Icons.qr_code_2,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProvisioningCodeScreen(device: device),
+                              ),
+                            );
+                          },
+                          isFullWidth: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           );
         },
