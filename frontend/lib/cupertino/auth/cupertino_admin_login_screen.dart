@@ -1,24 +1,30 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
-
 import '../../providers/auth_provider.dart';
-import 'cupertino_register_screen.dart';
-import 'cupertino_admin_login_screen.dart';
 
-class CupertinoLoginScreen extends StatefulWidget {
-  const CupertinoLoginScreen({super.key});
+class CupertinoAdminLoginScreen extends StatefulWidget {
+  const CupertinoAdminLoginScreen({super.key});
 
   @override
-  State<CupertinoLoginScreen> createState() => _CupertinoLoginScreenState();
+  State<CupertinoAdminLoginScreen> createState() =>
+      _CupertinoAdminLoginScreenState();
 }
 
-class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
+class _CupertinoAdminLoginScreenState
+    extends State<CupertinoAdminLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   String? _emailError;
   String? _passwordError;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill email admin để tiện test
+    _emailController.text = 'admin@aerogreen.com';
+  }
 
   @override
   void dispose() {
@@ -44,11 +50,29 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
     });
     if (_emailError != null || _passwordError != null) return;
 
-    final success = await context.read<AuthProvider>().login(email, password);
-    if (!success && mounted) {
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.login(email, password);
+
+    if (!mounted) return;
+
+    // Nếu login thành công nhưng role không phải admin → báo lỗi
+    if (success && !authProvider.user!.isAdmin) {
+      await authProvider.logout();
+      if (!mounted) return;
       _showMessage(
-        context.read<AuthProvider>().errorMessage ?? 'Đăng nhập thất bại.',
+        'Tài khoản này không có quyền quản trị.\nVui lòng dùng tài khoản admin.',
       );
+      return;
+    }
+
+    if (!success && mounted) {
+      _showMessage(authProvider.errorMessage ?? 'Đăng nhập thất bại.');
+      return;
+    }
+
+    // Nếu login thành công và là admin → pop về root để AuthWrapper rebuild
+    if (success && mounted) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 
@@ -73,8 +97,22 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = CupertinoTheme.of(context);
     return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          minSize: 44,
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(CupertinoIcons.back, size: 22),
+              Text('Quay lại', style: TextStyle(fontSize: 15)),
+            ],
+          ),
+        ),
+        middle: const Text('Đăng nhập Admin'),
+      ),
       child: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -83,46 +121,82 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                 : double.infinity;
             return Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 48, 24, 32),
+                padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: contentWidth),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _BrandMark(color: colors.primaryColor),
-                      const SizedBox(height: 24),
+                      // === Badge Admin (khác biệt so với login user) ===
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF34C759)
+                                .withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(
+                                CupertinoIcons.shield_lefthalf_fill,
+                                size: 16,
+                                color: Color(0xFF34C759),
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                'KHU VỰC QUẢN TRỊ',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 1,
+                                  color: Color(0xFF34C759),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      Icon(
+                        CupertinoIcons.person_crop_circle_fill_badge_checkmark,
+                        size: 72,
+                        color: Color(0xFF34C759),
+                      ),
+                      const SizedBox(height: 20),
                       Text(
-                        'Chào mừng đến\nAerogreen',
+                        'Đăng nhập\nQuản trị viên',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: CupertinoColors.label.resolveFrom(context),
-                          fontSize: 36,
+                          fontSize: 32,
                           fontWeight: FontWeight.w700,
-                          height: 1.08,
+                          height: 1.1,
                           letterSpacing: -1,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
                       Text(
-                        'Nông trại khỏe mạnh bắt đầu từ dữ liệu rõ ràng.',
+                        'Chỉ dành cho tài khoản có quyền admin.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: CupertinoColors.secondaryLabel.resolveFrom(
-                            context,
-                          ),
-                          fontSize: 16,
-                          height: 1.4,
+                          color: CupertinoColors.secondaryLabel
+                              .resolveFrom(context),
+                          fontSize: 15,
                         ),
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 36),
                       _FieldLabel(
-                        label: 'Email',
+                        label: 'Email Admin',
                         child: CupertinoTextField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
-                          autofillHints: const [AutofillHints.username],
-                          placeholder: 'you@example.com',
+                          placeholder: 'admin@aerogreen.com',
                           prefix: const Padding(
                             padding: EdgeInsets.only(left: 14),
                             child: Icon(CupertinoIcons.mail, size: 19),
@@ -148,7 +222,6 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                           obscureText: _obscurePassword,
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => _submit(),
-                          autofillHints: const [AutofillHints.password],
                           placeholder: 'Tối thiểu 8 ký tự',
                           prefix: const Padding(
                             padding: EdgeInsets.only(left: 14),
@@ -158,7 +231,7 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                             padding: const EdgeInsets.all(12),
                             minSize: 44,
                             onPressed: () => setState(
-                              () => _obscurePassword = !_obscurePassword,
+                                  () => _obscurePassword = !_obscurePassword,
                             ),
                             child: Icon(
                               _obscurePassword
@@ -183,107 +256,35 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                       const SizedBox(height: 28),
                       Consumer<AuthProvider>(
                         builder: (context, authProvider, _) {
-                          return CupertinoButton.filled(
+                          return CupertinoButton(
                             minSize: 52,
+                            color: Color(0xFF34C759),
                             borderRadius: BorderRadius.circular(16),
-                            onPressed: authProvider.isLoading ? null : _submit,
+                            onPressed:
+                            authProvider.isLoading ? null : _submit,
                             child: authProvider.isLoading
                                 ? const CupertinoActivityIndicator(
-                                    color: CupertinoColors.white,
-                                  )
+                              color: CupertinoColors.white,
+                            )
                                 : const Text(
-                                    'Đăng nhập',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 14),
-                      CupertinoButton(
-                        minSize: 44,
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            CupertinoPageRoute<void>(
-                              builder: (_) => const CupertinoRegisterScreen(),
-                            ),
-                          );
-                        },
-                        child: const Text('Tạo tài khoản mới'),
-                      ),
-                      const SizedBox(height: 8),
-                      // === Nút Đăng nhập Admin (MỚI) ===
-                      // === Nút Đăng nhập Admin (MỚI) ===
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              height: 0.5,
-                              color: CupertinoColors.separator
-                                  .resolveFrom(context),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Text(
-                              'hoặc',
-                              style: TextStyle(
-                                color: CupertinoColors.tertiaryLabel
-                                    .resolveFrom(context),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Container(
-                              height: 0.5,
-                              color: CupertinoColors.separator
-                                  .resolveFrom(context),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      CupertinoButton(
-                        minSize: 44,
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            CupertinoPageRoute<void>(
-                              builder: (_) =>
-                              const CupertinoAdminLoginScreen(),
-                            ),
-                          );
-                        },
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              CupertinoIcons.shield_lefthalf_fill,
-                              size: 17,
-                              color: CupertinoColors.systemIndigo,
-                            ),
-                            SizedBox(width: 6),
-                            Text(
                               'Đăng nhập Admin',
                               style: TextStyle(
-                                color: CupertinoColors.systemIndigo,
                                 fontWeight: FontWeight.w600,
+                                color: CupertinoColors.white,
                               ),
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 20),
                       Text(
-                        'Aerogreen bảo vệ nhịp vận hành của nông trại bằng những tín hiệu nhỏ, đúng lúc.',
+                        'Nếu bạn là người dùng thông thường,\nvui lòng quay lại màn hình đăng nhập chính.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: CupertinoColors.tertiaryLabel.resolveFrom(
-                            context,
-                          ),
-                          fontSize: 13,
-                          height: 1.4,
+                          color: CupertinoColors.tertiaryLabel
+                              .resolveFrom(context),
+                          fontSize: 12,
+                          height: 1.5,
                         ),
                       ),
                     ],
@@ -298,9 +299,9 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
   }
 
   BoxDecoration _fieldDecoration(
-    BuildContext context, {
-    bool hasError = false,
-  }) {
+      BuildContext context, {
+        bool hasError = false,
+      }) {
     return BoxDecoration(
       color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
       borderRadius: BorderRadius.circular(16),
@@ -323,34 +324,10 @@ class _FieldError extends StatelessWidget {
     padding: const EdgeInsets.only(left: 8, top: 6),
     child: Text(
       message,
-      style: const TextStyle(color: CupertinoColors.systemRed, fontSize: 12),
+      style:
+      const TextStyle(color: CupertinoColors.systemRed, fontSize: 12),
     ),
   );
-}
-
-class _BrandMark extends StatelessWidget {
-  final Color color;
-
-  const _BrandMark({required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 72,
-        height: 72,
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Icon(
-          CupertinoIcons.leaf_arrow_circlepath,
-          color: color,
-          size: 38,
-        ),
-      ),
-    );
-  }
 }
 
 class _FieldLabel extends StatelessWidget {
