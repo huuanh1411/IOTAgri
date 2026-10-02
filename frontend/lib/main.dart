@@ -36,6 +36,11 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
+        if (!authProvider.isInitialized) {
+          return const CupertinoPageScaffold(
+            child: Center(child: CupertinoActivityIndicator(radius: 14)),
+          );
+        }
         if (authProvider.isAuthenticated) {
           return const ResponsiveLayout(
             mobile: CupertinoDashboardScreen(),

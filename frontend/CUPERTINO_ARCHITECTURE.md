@@ -38,20 +38,33 @@ AerogreenApp (CupertinoApp)
 │   └── ResponsiveLayout
 │       └── CupertinoDashboardScreen (when authenticated)
 │           ├── CupertinoSliverNavigationBar
-│           ├── CupertinoQuickActions
-│           └── ResponsiveGrid
-│               └── CupertinoDeviceCard[]
+│           ├── FarmHealthCard + attention list
+│           ├── Responsive device grid
+│           └── DevicesScreen (from Devices tab)
+│               └── CupertinoDeviceDetailScreen
+│                   ├── DeviceHeader
+│                   ├── SensorGrid / SensorCard[]
+│                   ├── PumpControlCard
+│                   ├── ScheduleSummaryCard
+│                   ├── HistoryPreviewCard
+│                   └── AlertsSummaryCard / DeviceSettingsScreen
 ```
 
 ## 2. Widget Structure
 
 ### Core Screens
-- **CupertinoDashboardScreen**: Main dashboard with device grid
-- **CupertinoLoginScreen**: Authentication screen (placeholder)
+- **CupertinoDashboardScreen**: Farm health, attention list, device grid, and device-gated actions
+- **DevicesScreen**: Device rows; search appears when more than six devices are present
+- **CupertinoDeviceDetailScreen**: Status, sensor grid, pump controls, schedule summary, 24-hour history preview, alerts, and threshold settings
+- **SensorHistoryScreen**: Sensor charts, optionally focused on the sensor selected from detail
+- **CupertinoLoginScreen**: Validated authentication entry point
 
 ### Reusable Widgets
-- **CupertinoDeviceCard**: Device card with sensor values and status
-- **CupertinoQuickActions**: Quick action buttons (Add, Refresh, Settings)
+- **FarmHealthCard**: Empty, healthy, attention, and critical states
+- **DeviceHeader / DeviceStatusChip**: Connection state and last update
+- **SensorGrid / SensorCard**: Responsive values with warning and missing-data states
+- **PumpControlCard / ScheduleSummaryCard**: Device controls and saved schedules
+- **HistoryPreviewCard / AlertsSummaryCard**: Recent sensor trend and active alert summary
 
 ### Responsive Components
 - **ResponsiveLayout**: Chooses layout based on screen size
@@ -130,8 +143,10 @@ ResponsiveGrid(
 
 ### Interaction Patterns
 - **44pt Touch Targets**: Minimum touch target size
-- **Context Menus**: Long-press for device options (future)
-- **Pull to Refresh**: Standard iOS refresh pattern
+- **Context Menus**: Long-press device tiles for open, mode, and pump actions
+- **Pull to Refresh**: Dashboard and detail use Cupertino refresh controls
+- **Periodic Updates**: Dashboard and detail poll every 20 seconds; backend has no client event stream
+- **Offline Controls**: Pump controls disable while offline; saved schedules remain visible
 - **Haptic Feedback**: Taptic engine integration (future)
 
 ## 5. Accessibility Features
@@ -150,27 +165,10 @@ ResponsiveGrid(
 
 ## 6. Recommended Improvements
 
-### Short-term
-1. **Complete Cupertino Login Screen**
-   - Implement full authentication flow
-   - Add biometric login option
-   - Error handling with CupertinoAlertDialog
-
-2. **Add Device Detail Screen**
-   - CupertinoSliverNavigationBar with large title
-   - Real-time sensor graphs with charts
-   - Quick controls for pumps
-   - History timeline
-
-3. **Implement Pull to Refresh**
-   - CustomRefreshIndicator for iOS feel
-   - Smooth animations
-   - Progress indicator
-
-4. **Add Context Menus**
-   - Long-press on device cards
-   - Quick actions: Edit, Delete, Share
-   - CupertinoContextMenuAction
+### Data Boundaries
+- Device API does not expose a location field; list rows show an unassigned-location placeholder.
+- Pump schedules store weekdays, start time, duration, and timezone, but no recurrence interval or active time window; summaries use persisted fields only.
+- Sensor updates use 20-second polling because no websocket or server-sent event endpoint is available.
 
 ### Medium-term
 1. **Add Sidebar Navigation (Desktop)**

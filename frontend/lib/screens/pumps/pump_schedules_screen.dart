@@ -33,10 +33,13 @@ class _PumpSchedulesScreenState extends State<PumpSchedulesScreen> {
     });
 
     try {
-      final schedulesData = await _apiService.getPumpSchedules(widget.device.id);
-      final items = schedulesData['items'] as List<dynamic>?;
+      final schedulesData = await _apiService.getPumpSchedules(
+        widget.device.id,
+      );
       setState(() {
-        _schedules = items?.map((data) => PumpSchedule.fromJson(data)).toList() ?? [];
+        _schedules = schedulesData
+            .map((data) => PumpSchedule.fromJson(data))
+            .toList();
         _isLoading = false;
       });
     } catch (e) {
@@ -73,10 +76,7 @@ class _PumpSchedulesScreenState extends State<PumpSchedulesScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Lỗi: $e'),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
           );
         }
       }
@@ -118,10 +118,7 @@ class _PumpSchedulesScreenState extends State<PumpSchedulesScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Lỗi: $e'),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
           );
         }
       }
@@ -168,10 +165,7 @@ class _PumpSchedulesScreenState extends State<PumpSchedulesScreen> {
     }
 
     if (_errorMessage != null) {
-      return ErrorState(
-        message: _errorMessage!,
-        onRetry: _loadSchedules,
-      );
+      return ErrorState(message: _errorMessage!, onRetry: _loadSchedules);
     }
 
     if (_schedules.isEmpty) {
@@ -207,8 +201,12 @@ class _PumpSchedulesScreenState extends State<PumpSchedulesScreen> {
                       Row(
                         children: [
                           Icon(
-                            schedule.isEnabled ? Icons.toggle_on : Icons.toggle_off,
-                            color: schedule.isEnabled ? Colors.green : Colors.grey,
+                            schedule.isEnabled
+                                ? Icons.toggle_on
+                                : Icons.toggle_off,
+                            color: schedule.isEnabled
+                                ? Colors.green
+                                : Colors.grey,
                             size: 32,
                           ),
                           const SizedBox(width: 12),
@@ -240,7 +238,10 @@ class _PumpSchedulesScreenState extends State<PumpSchedulesScreen> {
                   if (schedule.isActive) ...[
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),

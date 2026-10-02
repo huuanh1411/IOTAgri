@@ -15,6 +15,8 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  String? _emailError;
+  String? _passwordError;
 
   @override
   void dispose() {
@@ -26,14 +28,25 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
   Future<void> _submit() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-    if (email.isEmpty || !email.contains('@') || password.length < 8) {
-      _showMessage('Vui lòng kiểm tra email và mật khẩu.');
-      return;
-    }
+    setState(() {
+      _emailError = email.isEmpty
+          ? 'Vui lòng nhập email.'
+          : RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)
+          ? null
+          : 'Email không hợp lệ.';
+      _passwordError = password.isEmpty
+          ? 'Vui lòng nhập mật khẩu.'
+          : password.length < 8
+          ? 'Mật khẩu phải có ít nhất 8 ký tự.'
+          : null;
+    });
+    if (_emailError != null || _passwordError != null) return;
 
     final success = await context.read<AuthProvider>().login(email, password);
     if (!success && mounted) {
-      _showMessage(context.read<AuthProvider>().errorMessage ?? 'Đăng nhập thất bại.');
+      _showMessage(
+        context.read<AuthProvider>().errorMessage ?? 'Đăng nhập thất bại.',
+      );
     }
   }
 
@@ -63,7 +76,9 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
       child: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final contentWidth = constraints.maxWidth > 520 ? 420.0 : double.infinity;
+            final contentWidth = constraints.maxWidth > 520
+                ? 420.0
+                : double.infinity;
             return Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(24, 48, 24, 32),
@@ -90,7 +105,9 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                         'Nông trại khỏe mạnh bắt đầu từ dữ liệu rõ ràng.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                          color: CupertinoColors.secondaryLabel.resolveFrom(
+                            context,
+                          ),
                           fontSize: 16,
                           height: 1.4,
                         ),
@@ -109,9 +126,18 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                             child: Icon(CupertinoIcons.mail, size: 19),
                           ),
                           padding: const EdgeInsets.all(16),
-                          decoration: _fieldDecoration(context),
+                          onChanged: (_) {
+                            if (_emailError != null) {
+                              setState(() => _emailError = null);
+                            }
+                          },
+                          decoration: _fieldDecoration(
+                            context,
+                            hasError: _emailError != null,
+                          ),
                         ),
                       ),
+                      if (_emailError != null) _FieldError(_emailError!),
                       const SizedBox(height: 18),
                       _FieldLabel(
                         label: 'Mật khẩu',
@@ -129,16 +155,29 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                           suffix: CupertinoButton(
                             padding: const EdgeInsets.all(12),
                             minSize: 44,
-                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
                             child: Icon(
-                              _obscurePassword ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
+                              _obscurePassword
+                                  ? CupertinoIcons.eye
+                                  : CupertinoIcons.eye_slash,
                               size: 19,
                             ),
                           ),
                           padding: const EdgeInsets.fromLTRB(14, 16, 4, 16),
-                          decoration: _fieldDecoration(context),
+                          onChanged: (_) {
+                            if (_passwordError != null) {
+                              setState(() => _passwordError = null);
+                            }
+                          },
+                          decoration: _fieldDecoration(
+                            context,
+                            hasError: _passwordError != null,
+                          ),
                         ),
                       ),
+                      if (_passwordError != null) _FieldError(_passwordError!),
                       const SizedBox(height: 28),
                       Consumer<AuthProvider>(
                         builder: (context, authProvider, _) {
@@ -147,10 +186,14 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                             borderRadius: BorderRadius.circular(16),
                             onPressed: authProvider.isLoading ? null : _submit,
                             child: authProvider.isLoading
-                                ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                                ? const CupertinoActivityIndicator(
+                                    color: CupertinoColors.white,
+                                  )
                                 : const Text(
                                     'Đăng nhập',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                           );
                         },
@@ -172,7 +215,9 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                         'Aerogreen bảo vệ nhịp vận hành của nông trại bằng những tín hiệu nhỏ, đúng lúc.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                          color: CupertinoColors.tertiaryLabel.resolveFrom(
+                            context,
+                          ),
                           fontSize: 13,
                           height: 1.4,
                         ),
@@ -188,15 +233,35 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
     );
   }
 
-  BoxDecoration _fieldDecoration(BuildContext context) {
+  BoxDecoration _fieldDecoration(
+    BuildContext context, {
+    bool hasError = false,
+  }) {
     return BoxDecoration(
       color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
       borderRadius: BorderRadius.circular(16),
       border: Border.all(
-        color: CupertinoColors.separator.resolveFrom(context),
+        color: hasError
+            ? CupertinoColors.systemRed.resolveFrom(context)
+            : CupertinoColors.separator.resolveFrom(context),
       ),
     );
   }
+}
+
+class _FieldError extends StatelessWidget {
+  final String message;
+
+  const _FieldError(this.message);
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(left: 8, top: 6),
+    child: Text(
+      message,
+      style: const TextStyle(color: CupertinoColors.systemRed, fontSize: 12),
+    ),
+  );
 }
 
 class _BrandMark extends StatelessWidget {
@@ -214,7 +279,11 @@ class _BrandMark extends StatelessWidget {
           color: color.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(24),
         ),
-        child: Icon(CupertinoIcons.leaf_arrow_circlepath, color: color, size: 38),
+        child: Icon(
+          CupertinoIcons.leaf_arrow_circlepath,
+          color: color,
+          size: 38,
+        ),
       ),
     );
   }

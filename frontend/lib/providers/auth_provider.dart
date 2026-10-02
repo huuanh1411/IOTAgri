@@ -6,15 +6,34 @@ class AuthProvider with ChangeNotifier {
   final ApiService _apiService;
   User? _user;
   bool _isLoading = false;
+  bool _isInitialized = false;
+  bool _isDisposed = false;
   String? _errorMessage;
+  late final VoidCallback _sessionExpiredHandler;
 
   AuthProvider({ApiService? apiService})
-      : _apiService = apiService ?? ApiService();
+    : _apiService = apiService ?? ApiService() {
+    _sessionExpiredHandler = _handleSessionExpired;
+    ApiService.onSessionExpired = _sessionExpiredHandler;
+    initialize();
+  }
 
   User? get user => _user;
   bool get isLoading => _isLoading;
+  bool get isInitialized => _isInitialized;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _user != null;
+
+  Future<void> initialize() async {
+    try {
+      _user = await _apiService.restoreSession();
+    } catch (_) {
+      _user = null;
+    } finally {
+      _isInitialized = true;
+      if (!_isDisposed) notifyListeners();
+    }
+  }
 
   Future<bool> login(String email, String password) async {
     _isLoading = true;
@@ -22,21 +41,20 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      await _apiService.login(email, password);
-      
-      // Create a temporary user object (in real app, you'd fetch user profile)
-      _user = User(
-        id: 'temp_id',
-        email: email,
-        fullName: 'Người dùng',
-      );
-      
+      final data = await _apiService.login(email, password);
+      final accessToken = data['accessToken'];
+      final user = accessToken is String
+          ? _apiService.userFromAccessToken(accessToken)
+          : null;
+      if (user == null) throw Exception('Invalid access token');
+      _user = user;
+
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = _formatLoginError(e);
       notifyListeners();
       return false;
     }
@@ -49,15 +67,44 @@ class AuthProvider with ChangeNotifier {
 
     try {
       await _apiService.register(email, password, fullName);
-      
-      // Auto login after registration
       return await login(email, password);
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = _formatLoginError(e);
       notifyListeners();
       return false;
     }
+  }
+
+  bool _isNetworkError(Object error) {
+    final message = error.toString().toLowerCase();
+    return message.contains('clientexception') ||
+        message.contains('socketexception') ||
+        message.contains('failed to fetch') ||
+        message.contains('connection refused') ||
+        message.contains('timed out') ||
+        message.contains('failed host lookup');
+  }
+
+  String _formatLoginError(Object error) {
+    final message = error.toString();
+    if (_isNetworkError(error)) {
+      return 'Không thể kết nối máy chủ. Vui lòng thử lại sau.';
+    }
+    if (message.contains('Email hoặc mật khẩu')) {
+      return 'Email hoặc mật khẩu không đúng.';
+    }
+    if (message.contains('already been registered') ||
+        message.contains('đã được đăng ký')) {
+      return 'Email này đã được đăng ký.';
+    }
+    return 'Đăng nhập thất bại. Vui lòng thử lại.';
+  }
+
+  void _handleSessionExpired() {
+    if (_user == null) return;
+    _user = null;
+    notifyListeners();
   }
 
   Future<void> logout() async {
@@ -74,6 +121,15 @@ class AuthProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    if (identical(ApiService.onSessionExpired, _sessionExpiredHandler)) {
+      ApiService.onSessionExpired = null;
+    }
+    super.dispose();
   }
 
   void clearError() {
