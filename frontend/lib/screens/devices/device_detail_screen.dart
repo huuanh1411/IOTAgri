@@ -60,14 +60,20 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         if (readings1.isNotEmpty) {
           _latestReading = SensorReading.fromJson(readings1[0]);
         }
-        _readings = readings2.map((data) => SensorReading.fromJson(data)).toList();
-        
+        _readings = readings2
+            .map((data) => SensorReading.fromJson(data))
+            .toList();
+
         final commandsItems = commandsData['items'] as List<dynamic>?;
-        _pumpCommands = commandsItems?.map((data) => PumpCommand.fromJson(data)).toList() ?? [];
-        
+        _pumpCommands =
+            commandsItems?.map((data) => PumpCommand.fromJson(data)).toList() ??
+            [];
+
         final alertsItems = alertsData['items'] as List<dynamic>?;
-        _alerts = alertsItems?.map((data) => DeviceAlert.fromJson(data)).toList() ?? [];
-        
+        _alerts =
+            alertsItems?.map((data) => DeviceAlert.fromJson(data)).toList() ??
+            [];
+
         _isLoading = false;
       });
     } catch (e) {
@@ -103,12 +109,12 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
   Future<void> _sendPumpCommand(bool isOn, int durationSeconds) async {
     try {
-      final commandId = DateTime.now().millisecondsSinceEpoch.toString();
+      final commandId = ApiService.generatePumpCommandId();
       await _apiService.sendPumpCommand(
         widget.device.id,
         commandId,
         isOn,
-        durationSeconds,
+        isOn ? durationSeconds : null,
       );
       await _loadDeviceData();
       if (mounted) {
@@ -122,10 +128,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -147,7 +150,8 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ProvisioningCodeScreen(device: widget.device),
+                  builder: (context) =>
+                      ProvisioningCodeScreen(device: widget.device),
                 ),
               );
             },
@@ -165,10 +169,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     }
 
     if (_errorMessage != null) {
-      return ErrorState(
-        message: _errorMessage!,
-        onRetry: _loadDeviceData,
-      );
+      return ErrorState(message: _errorMessage!, onRetry: _loadDeviceData);
     }
 
     return DefaultTabController(
@@ -255,18 +256,26 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                     Expanded(
                       child: SensorCard(
                         label: 'Nhiệt độ',
-                        value: _latestReading!.temperature?.toStringAsFixed(1) ?? 'N/A',
+                        value:
+                            _latestReading!.temperature?.toStringAsFixed(1) ??
+                            'N/A',
                         unit: '°C',
                         icon: Icons.thermostat,
-                        color: _getTemperatureColor(_latestReading!.temperature),
-                        isWarning: (_latestReading!.temperature ?? 0) > 30 || (_latestReading!.temperature ?? 0) < 15,
+                        color: _getTemperatureColor(
+                          _latestReading!.temperature,
+                        ),
+                        isWarning:
+                            (_latestReading!.temperature ?? 0) > 30 ||
+                            (_latestReading!.temperature ?? 0) < 15,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: SensorCard(
                         label: 'Độ ẩm',
-                        value: _latestReading!.humidity?.toStringAsFixed(1) ?? 'N/A',
+                        value:
+                            _latestReading!.humidity?.toStringAsFixed(1) ??
+                            'N/A',
                         unit: '%',
                         icon: Icons.water_drop,
                         color: Colors.blue,
@@ -290,7 +299,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                     Expanded(
                       child: SensorCard(
                         label: 'Mực nước',
-                        value: _latestReading!.waterLevel?.toStringAsFixed(1) ?? 'N/A',
+                        value:
+                            _latestReading!.waterLevel?.toStringAsFixed(1) ??
+                            'N/A',
                         unit: '%',
                         icon: Icons.opacity,
                         color: _getWaterLevelColor(_latestReading!.waterLevel),
@@ -319,7 +330,8 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SensorHistoryScreen(device: widget.device),
+                        builder: (context) =>
+                            SensorHistoryScreen(device: widget.device),
                       ),
                     );
                   },
@@ -335,7 +347,8 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AlertsScreen(device: widget.device),
+                        builder: (context) =>
+                            AlertsScreen(device: widget.device),
                       ),
                     );
                   },
@@ -352,7 +365,8 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PumpSchedulesScreen(device: widget.device),
+                  builder: (context) =>
+                      PumpSchedulesScreen(device: widget.device),
                 ),
               );
             },
@@ -391,10 +405,16 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: _buildCompactSensor('Nhiệt độ', '${reading.temperature?.toStringAsFixed(1) ?? 'N/A'}°C'),
+                      child: _buildCompactSensor(
+                        'Nhiệt độ',
+                        '${reading.temperature?.toStringAsFixed(1) ?? 'N/A'}°C',
+                      ),
                     ),
                     Expanded(
-                      child: _buildCompactSensor('Độ ẩm', '${reading.humidity?.toStringAsFixed(1) ?? 'N/A'}%'),
+                      child: _buildCompactSensor(
+                        'Độ ẩm',
+                        '${reading.humidity?.toStringAsFixed(1) ?? 'N/A'}%',
+                      ),
                     ),
                   ],
                 ),
@@ -402,10 +422,16 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: _buildCompactSensor('pH', reading.ph?.toStringAsFixed(1) ?? 'N/A'),
+                      child: _buildCompactSensor(
+                        'pH',
+                        reading.ph?.toStringAsFixed(1) ?? 'N/A',
+                      ),
                     ),
                     Expanded(
-                      child: _buildCompactSensor('Mực nước', '${reading.waterLevel?.toStringAsFixed(1) ?? 'N/A'}%'),
+                      child: _buildCompactSensor(
+                        'Mực nước',
+                        '${reading.waterLevel?.toStringAsFixed(1) ?? 'N/A'}%',
+                      ),
                     ),
                   ],
                 ),
@@ -421,10 +447,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
         Text(
           value,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -474,43 +497,45 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
           ),
           const SizedBox(height: 16),
           if (_pumpCommands.isEmpty)
-            const EmptyState(
-              icon: Icons.history,
-              title: 'Chưa có lệnh nào',
-            )
+            const EmptyState(icon: Icons.history, title: 'Chưa có lệnh nào')
           else
-            ..._pumpCommands.map((command) => Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                leading: Icon(
-                  command.isOn ? Icons.toggle_on : Icons.toggle_off,
-                  color: command.isOn ? Colors.green : Colors.red,
-                ),
-                title: Text(command.isOn ? 'BẬT' : 'TẮT'),
-                subtitle: Text('${command.durationSeconds} giây'),
-                trailing: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      command.status,
-                      style: TextStyle(
-                        color: command.status == 'Acknowledged'
-                            ? Colors.green
-                            : command.status == 'Failed'
-                                ? Colors.red
-                                : Colors.orange,
-                        fontWeight: FontWeight.bold,
+            ..._pumpCommands.map(
+              (command) => Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  leading: Icon(
+                    command.isOn ? Icons.toggle_on : Icons.toggle_off,
+                    color: command.isOn ? Colors.green : Colors.red,
+                  ),
+                  title: Text(command.isOn ? 'BẬT' : 'TẮT'),
+                  subtitle: Text('${command.durationSeconds} giây'),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        command.status,
+                        style: TextStyle(
+                          color: command.status == 'Acknowledged'
+                              ? Colors.green
+                              : command.status == 'Failed'
+                              ? Colors.red
+                              : Colors.orange,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    Text(
-                      _formatDate(command.issuedAt),
-                      style: const TextStyle(fontSize: 10, color: Colors.grey),
-                    ),
-                  ],
+                      Text(
+                        _formatDate(command.issuedAt),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            )),
+            ),
         ],
       ),
     );
@@ -530,10 +555,15 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       itemCount: _alerts.length,
       itemBuilder: (context, index) {
         final alert = _alerts[index];
-        final severity = alert.type == 'HighTemperature' ? AlertSeverity.warning : AlertSeverity.critical;
+        final severity = alert.type == 'HighTemperature'
+            ? AlertSeverity.warning
+            : AlertSeverity.critical;
         return AlertCard(
-          title: alert.type == 'HighTemperature' ? 'Nhiệt độ cao' : 'Mực nước thấp',
-          message: 'Giá trị: ${alert.measuredValue} - Ngưỡng: ${alert.threshold}',
+          title: alert.type == 'HighTemperature'
+              ? 'Nhiệt độ cao'
+              : 'Mực nước thấp',
+          message:
+              'Giá trị: ${alert.measuredValue} - Ngưỡng: ${alert.threshold}',
           timestamp: _formatDate(alert.triggeredAt),
           severity: severity,
         );

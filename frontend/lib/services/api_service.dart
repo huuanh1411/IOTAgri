@@ -1,18 +1,39 @@
 import 'dart:convert';
+import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/api_constants.dart';
+import '../models/user.dart';
+import '../models/pump_schedule.dart';
+
+class _RefreshTokenRejected implements Exception {
+  const _RefreshTokenRejected();
+}
 
 class ApiService {
+  static VoidCallback? onSessionExpired;
+
+  static String generatePumpCommandId() {
+    final bytes = List<int>.generate(16, (_) => Random.secure().nextInt(256));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    final value = bytes
+        .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+        .join();
+    return '${value.substring(0, 8)}-${value.substring(8, 12)}-'
+        '${value.substring(12, 16)}-${value.substring(16, 20)}-'
+        '${value.substring(20)}';
+  }
+
   final http.Client _client;
   final FlutterSecureStorage _storage;
   String? _accessToken;
+  Future<http.Response>? _refreshFuture;
 
-  ApiService({
-    http.Client? client,
-    FlutterSecureStorage? storage,
-  })  : _client = client ?? http.Client(),
-        _storage = storage ?? const FlutterSecureStorage();
+  ApiService({http.Client? client, FlutterSecureStorage? storage})
+    : _client = client ?? http.Client(),
+      _storage = storage ?? const FlutterSecureStorage();
 
   Future<void> _loadTokens() async {
     _accessToken = await _storage.read(key: 'access_token');
@@ -32,52 +53,127 @@ class ApiService {
 
   Future<Map<String, String>> _getHeaders() async {
     await _loadTokens();
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-    };
+    final headers = <String, String>{'Content-Type': 'application/json'};
     if (_accessToken != null) {
       headers['Authorization'] = 'Bearer $_accessToken';
     }
     return headers;
   }
 
-  Future<http.Response> _refreshAccessToken() async {
+  Future<http.Response> _refreshAccessToken() {
+    final pendingRefresh = _refreshFuture;
+    if (pendingRefresh != null) return pendingRefresh;
+
+    final refresh = _performRefresh();
+    _refreshFuture = refresh;
+    return refresh.whenComplete(() {
+      if (identical(_refreshFuture, refresh)) _refreshFuture = null;
+    });
+  }
+
+  Future<http.Response> _performRefresh() async {
     final refreshToken = await _storage.read(key: 'refresh_token');
     if (refreshToken == null) {
-      throw Exception('No refresh token available');
+      throw const _RefreshTokenRejected();
     }
 
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse('${ApiConstants.baseUrl}${ApiConstants.refresh}'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'refreshToken': refreshToken}),
     );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      await _saveTokens(data['accessToken'], data['refreshToken']);
+    if (response.statusCode == 201) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      await _saveTokens(
+        data['accessToken'] as String,
+        data['refreshToken'] as String,
+      );
+      return response;
     }
 
-    return response;
+    if (response.statusCode == 401) throw const _RefreshTokenRejected();
+    throw http.ClientException(
+      'Refresh failed with status ${response.statusCode}.',
+    );
   }
 
   Future<http.Response> _authenticatedRequest(
-    Future<http.Response> Function() requestFn,
+    Future<http.Response> Function(Map<String, String> headers) requestFn,
   ) async {
+    final response = await requestFn(await _getHeaders());
+    if (response.statusCode != 401) return response;
+
     try {
-      return await requestFn();
-    } catch (e) {
-      // Try to refresh token and retry
-      try {
-        final refreshResponse = await _refreshAccessToken();
-        if (refreshResponse.statusCode == 200) {
-          return await requestFn();
-        }
-      } catch (refreshError) {
-        await _clearTokens();
-        throw Exception('Session expired. Please login again.');
+      await _refreshAccessToken();
+    } on _RefreshTokenRejected {
+      await _clearTokens();
+      onSessionExpired?.call();
+      throw Exception('Session expired. Please login again.');
+    }
+
+    final retryResponse = await requestFn(await _getHeaders());
+    if (retryResponse.statusCode == 401) {
+      await _clearTokens();
+      onSessionExpired?.call();
+    }
+    return retryResponse;
+  }
+
+  Future<User?> restoreSession() async {
+    final refreshToken = await _storage.read(key: 'refresh_token');
+    final accessToken = await _storage.read(key: 'access_token');
+    if (refreshToken == null && accessToken == null) return null;
+
+    final cachedUser = accessToken == null
+        ? null
+        : userFromAccessToken(accessToken);
+    if (cachedUser != null) return cachedUser;
+    if (refreshToken == null) {
+      await _clearTokens();
+      return null;
+    }
+
+    try {
+      await _refreshAccessToken();
+    } on _RefreshTokenRejected {
+      await _clearTokens();
+      return null;
+    }
+
+    final refreshedToken = _accessToken;
+    final refreshedUser = refreshedToken == null
+        ? null
+        : userFromAccessToken(refreshedToken);
+    if (refreshedUser == null) await _clearTokens();
+    return refreshedUser;
+  }
+
+  User? userFromAccessToken(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) return null;
+
+    try {
+      final payload =
+          jsonDecode(
+                utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+              )
+              as Map<String, dynamic>;
+      final expiresAt = payload['exp'];
+      if (expiresAt is! num ||
+          expiresAt <= DateTime.now().millisecondsSinceEpoch ~/ 1000) {
+        return null;
       }
-      rethrow;
+      final id = payload['sub'] as String? ?? '';
+      final email = payload['email'] as String? ?? '';
+      if (id.isEmpty || email.isEmpty) return null;
+      return User(
+        id: id,
+        email: email,
+        fullName: payload['fullName'] as String? ?? email.split('@').first,
+      );
+    } catch (_) {
+      return null;
     }
   }
 
@@ -86,10 +182,7 @@ class ApiService {
     final response = await http.post(
       Uri.parse('${ApiConstants.baseUrl}${ApiConstants.login}'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-      }),
+      body: jsonEncode({'email': email, 'password': password}),
     );
 
     if (response.statusCode == 200) {
@@ -119,7 +212,7 @@ class ApiService {
       }),
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else if (response.statusCode == 409) {
       throw Exception('Email này đã được đăng ký.');
@@ -140,25 +233,31 @@ class ApiService {
   }
 
   Future<void> logout() async {
-    final refreshToken = await _storage.read(key: 'refresh_token');
-    if (refreshToken != null) {
-      final headers = await _getHeaders();
-      await http.post(
-        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.logout}'),
-        headers: headers,
-        body: jsonEncode({'refreshToken': refreshToken}),
-      );
+    try {
+      if (await _storage.read(key: 'refresh_token') != null) {
+        await _refreshAccessToken();
+        final refreshToken = await _storage.read(key: 'refresh_token');
+        if (refreshToken != null) {
+          await _client.post(
+            Uri.parse('${ApiConstants.baseUrl}${ApiConstants.logout}'),
+            headers: await _getHeaders(),
+            body: jsonEncode({'refreshToken': refreshToken}),
+          );
+        }
+      }
+    } finally {
+      await _clearTokens();
     }
-    await _clearTokens();
   }
 
   // Device methods
   Future<List<dynamic>> getDevices() async {
-    final headers = await _getHeaders();
-    final response = await _authenticatedRequest(() => _client.get(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.devices}'),
-      headers: headers,
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.devices}'),
+        headers: headers,
+      ),
+    );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -168,11 +267,12 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> getDevice(String id) async {
-    final headers = await _getHeaders();
-    final response = await _authenticatedRequest(() => _client.get(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.device(id)}'),
-      headers: headers,
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.device(id)}'),
+        headers: headers,
+      ),
+    );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -182,12 +282,13 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> createDevice(String name) async {
-    final headers = await _getHeaders();
-    final response = await _authenticatedRequest(() => _client.post(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.devices}'),
-      headers: headers,
-      body: jsonEncode({'name': name}),
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.devices}'),
+        headers: headers,
+        body: jsonEncode({'name': name}),
+      ),
+    );
 
     if (response.statusCode == 201) {
       return jsonDecode(response.body);
@@ -197,12 +298,13 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> updateDevice(String id, String name) async {
-    final headers = await _getHeaders();
-    final response = await _authenticatedRequest(() => _client.put(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.device(id)}'),
-      headers: headers,
-      body: jsonEncode({'name': name}),
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.put(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.device(id)}'),
+        headers: headers,
+        body: jsonEncode({'name': name}),
+      ),
+    );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -212,11 +314,12 @@ class ApiService {
   }
 
   Future<void> deleteDevice(String id) async {
-    final headers = await _getHeaders();
-    final response = await _authenticatedRequest(() => _client.delete(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.device(id)}'),
-      headers: headers,
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.delete(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.device(id)}'),
+        headers: headers,
+      ),
+    );
 
     if (response.statusCode != 204) {
       throw Exception('Failed to delete device: ${response.body}');
@@ -224,13 +327,16 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> createProvisioningCode(String deviceId) async {
-    final headers = await _getHeaders();
-    final response = await _authenticatedRequest(() => _client.post(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.deviceProvisioningCode(deviceId)}'),
-      headers: headers,
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.deviceProvisioningCode(deviceId)}',
+        ),
+        headers: headers,
+      ),
+    );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
       throw Exception('Failed to create provisioning code: ${response.body}');
@@ -239,11 +345,12 @@ class ApiService {
 
   // Dashboard methods
   Future<List<dynamic>> getDashboardOverview() async {
-    final headers = await _getHeaders();
-    final response = await _authenticatedRequest(() => _client.get(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.dashboardOverview}'),
-      headers: headers,
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.dashboardOverview}'),
+        headers: headers,
+      ),
+    );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -254,14 +361,16 @@ class ApiService {
 
   // Sensor methods
   Future<List<dynamic>> getDeviceReadings(String deviceId, {int? limit}) async {
-    final headers = await _getHeaders();
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.deviceReadings(deviceId)}')
-        .replace(queryParameters: limit != null ? {'limit': limit.toString()} : null);
-    
-    final response = await _authenticatedRequest(() => _client.get(
-      uri,
-      headers: headers,
-    ));
+    final uri =
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.deviceReadings(deviceId)}',
+        ).replace(
+          queryParameters: limit != null ? {'take': limit.toString()} : null,
+        );
+
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(uri, headers: headers),
+    );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -275,18 +384,21 @@ class ApiService {
     String deviceId,
     String commandId,
     bool isOn,
-    int durationSeconds,
+    int? durationSeconds,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _authenticatedRequest(() => _client.post(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.pumpCommands(deviceId)}'),
-      headers: headers,
-      body: jsonEncode({
-        'commandId': commandId,
-        'isOn': isOn,
-        'durationSeconds': durationSeconds,
-      }),
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.pumpCommands(deviceId)}',
+        ),
+        headers: headers,
+        body: jsonEncode({
+          'commandId': commandId,
+          'isOn': isOn,
+          'durationSeconds': durationSeconds,
+        }),
+      ),
+    );
 
     if (response.statusCode == 201) {
       return jsonDecode(response.body);
@@ -301,7 +413,6 @@ class ApiService {
     int pageSize = 20,
     int? rangeHours,
   }) async {
-    final headers = await _getHeaders();
     final queryParams = <String, String>{
       'page': page.toString(),
       'pageSize': pageSize.toString(),
@@ -310,13 +421,13 @@ class ApiService {
       queryParams['rangeHours'] = rangeHours.toString();
     }
 
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.pumpCommandHistory(deviceId)}')
-        .replace(queryParameters: queryParams);
+    final uri = Uri.parse(
+      '${ApiConstants.baseUrl}${ApiConstants.pumpCommandHistory(deviceId)}',
+    ).replace(queryParameters: queryParams);
 
-    final response = await _authenticatedRequest(() => _client.get(
-      uri,
-      headers: headers,
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(uri, headers: headers),
+    );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -325,12 +436,15 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> getPumpSchedules(String deviceId) async {
-    final headers = await _getHeaders();
-    final response = await _authenticatedRequest(() => _client.get(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.pumpSchedules(deviceId)}'),
-      headers: headers,
-    ));
+  Future<List<dynamic>> getPumpSchedules(String deviceId) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.pumpSchedules(deviceId)}',
+        ),
+        headers: headers,
+      ),
+    );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -339,22 +453,62 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> updatePumpSchedule(
+    String deviceId,
+    PumpSchedule schedule, {
+    required bool isEnabled,
+  }) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.put(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.pumpSchedules(deviceId)}/${schedule.id}',
+        ),
+        headers: headers,
+        body: jsonEncode({
+          'isEnabled': isEnabled,
+          'weekdayMask': schedule.weekdayMask,
+          'startTime': schedule.startTime,
+          'durationSeconds': schedule.durationSeconds,
+          'timeZone': schedule.timeZone,
+        }),
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to update pump schedule: ${response.body}');
+  }
+
   Future<Map<String, dynamic>> createPumpSchedule(
     String deviceId,
     String startTime,
     int durationSeconds,
     List<int> daysOfWeek,
   ) async {
-    final headers = await _getHeaders();
-    final response = await _authenticatedRequest(() => _client.post(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.pumpSchedules(deviceId)}'),
-      headers: headers,
-      body: jsonEncode({
-        'startTime': startTime,
-        'durationSeconds': durationSeconds,
-        'daysOfWeek': daysOfWeek,
-      }),
-    ));
+    final localStart = DateTime.parse(startTime);
+    final weekdayMask = daysOfWeek.fold<int>(
+      0,
+      (mask, day) => mask | (1 << day),
+    );
+    final formattedStartTime =
+        '${localStart.hour.toString().padLeft(2, '0')}:'
+        '${localStart.minute.toString().padLeft(2, '0')}:00';
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.pumpSchedules(deviceId)}',
+        ),
+        headers: headers,
+        body: jsonEncode({
+          'isEnabled': true,
+          'weekdayMask': weekdayMask,
+          'startTime': formattedStartTime,
+          'durationSeconds': durationSeconds,
+          'timeZone': 'Asia/Ho_Chi_Minh',
+        }),
+      ),
+    );
 
     if (response.statusCode == 201) {
       return jsonDecode(response.body);
@@ -364,11 +518,14 @@ class ApiService {
   }
 
   Future<void> deletePumpSchedule(String deviceId, String scheduleId) async {
-    final headers = await _getHeaders();
-    final response = await _authenticatedRequest(() => _client.delete(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.pumpSchedules(deviceId)}/$scheduleId'),
-      headers: headers,
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.delete(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.pumpSchedules(deviceId)}/$scheduleId',
+        ),
+        headers: headers,
+      ),
+    );
 
     if (response.statusCode != 204) {
       throw Exception('Failed to delete pump schedule: ${response.body}');
@@ -377,11 +534,14 @@ class ApiService {
 
   // Alert methods
   Future<Map<String, dynamic>> getAlertSettings(String deviceId) async {
-    final headers = await _getHeaders();
-    final response = await _authenticatedRequest(() => _client.get(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.alertSettings(deviceId)}'),
-      headers: headers,
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.alertSettings(deviceId)}',
+        ),
+        headers: headers,
+      ),
+    );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -390,24 +550,48 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> updateAlertSettings(
+    String deviceId, {
+    double? highTemperatureC,
+    double? lowWaterLevelPercent,
+  }) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.put(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.alertSettings(deviceId)}',
+        ),
+        headers: headers,
+        body: jsonEncode({
+          'highTemperatureC': highTemperatureC,
+          'lowWaterLevelPercent': lowWaterLevelPercent,
+        }),
+      ),
+    );
+
+    if (response.statusCode == 200) return jsonDecode(response.body);
+    throw Exception('Failed to update alert settings: ${response.body}');
+  }
+
   Future<Map<String, dynamic>> getAlerts(
     String deviceId, {
     String status = 'all',
     int page = 1,
     int pageSize = 20,
   }) async {
-    final headers = await _getHeaders();
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.alerts(deviceId)}')
-        .replace(queryParameters: {
-      'status': status,
-      'page': page.toString(),
-      'pageSize': pageSize.toString(),
-    });
+    final uri =
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.alerts(deviceId)}',
+        ).replace(
+          queryParameters: {
+            'status': status,
+            'page': page.toString(),
+            'pageSize': pageSize.toString(),
+          },
+        );
 
-    final response = await _authenticatedRequest(() => _client.get(
-      uri,
-      headers: headers,
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(uri, headers: headers),
+    );
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
