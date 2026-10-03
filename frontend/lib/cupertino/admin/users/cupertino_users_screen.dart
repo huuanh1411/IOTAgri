@@ -19,6 +19,7 @@
 // ============================================================
 
 import 'package:flutter/cupertino.dart';
+import '../widgets/admin_logout_button.dart';
 
 import '../../../services/mock_admin_service.dart';
 import 'cupertino_user_detail_screen.dart';
@@ -144,11 +145,17 @@ class _CupertinoUsersScreenState extends State<CupertinoUsersScreen> {
         // Navigation bar
         CupertinoSliverNavigationBar(
           largeTitle: const Text('Người dùng'),
-          trailing: CupertinoButton(
-            padding: EdgeInsets.zero,
-            minimumSize: const Size(44, 44),
-            onPressed: _loadUsers,
-            child: const Icon(CupertinoIcons.arrow_2_circlepath),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
+                onPressed: _loadUsers,
+                child: const Icon(CupertinoIcons.arrow_2_circlepath),
+              ),
+              const AdminLogoutButton(),
+            ],
           ),
         ),
 

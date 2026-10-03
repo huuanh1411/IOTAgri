@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import '../widgets/admin_logout_button.dart';
 
 import '../../../providers/auth_provider.dart';
 import '../../../services/mock_admin_service.dart';
@@ -61,11 +62,17 @@ class _AdminOverviewTabState extends State<AdminOverviewTab> {
       slivers: [
         CupertinoSliverNavigationBar(
           largeTitle: const Text('Tổng quan'),
-          trailing: CupertinoButton(
-            padding: EdgeInsets.zero,
-            minSize: 44,
-            onPressed: _loadData,
-            child: const Icon(CupertinoIcons.arrow_2_circlepath),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
+                onPressed: _loadData,
+                child: const Icon(CupertinoIcons.arrow_2_circlepath),
+              ),
+              const AdminLogoutButton(),
+            ],
           ),
         ),
         CupertinoSliverRefreshControl(onRefresh: _loadData),

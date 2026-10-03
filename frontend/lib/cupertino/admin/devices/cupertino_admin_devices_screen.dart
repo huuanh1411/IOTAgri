@@ -10,6 +10,7 @@
 // ============================================================
 
 import 'package:flutter/cupertino.dart';
+import '../widgets/admin_logout_button.dart';
 
 import '../../../services/mock_admin_service.dart';
 import 'cupertino_admin_device_detail.dart';
@@ -120,11 +121,17 @@ class _CupertinoAdminDevicesScreenState
         // Navigation bar
         CupertinoSliverNavigationBar(
           largeTitle: const Text('Thiết bị'),
-          trailing: CupertinoButton(
-            padding: EdgeInsets.zero,
-            minimumSize: const Size(44, 44),
-            onPressed: _loadDevices,
-            child: const Icon(CupertinoIcons.arrow_2_circlepath),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
+                onPressed: _loadDevices,
+                child: const Icon(CupertinoIcons.arrow_2_circlepath),
+              ),
+              const AdminLogoutButton(),
+            ],
           ),
         ),
 
