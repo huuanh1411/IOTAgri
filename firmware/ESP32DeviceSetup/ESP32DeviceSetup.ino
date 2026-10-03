@@ -1,21 +1,64 @@
-// Requires the PubSubClient library. All other headers ship with ESP32 Arduino core.
+// Install: PubSubClient, DHT sensor library, and BH1750 by Christopher Laws.
+// Wiring: DHT11 DATA=GPIO4, HC-SR04 TRIG=GPIO5/ECHO=GPIO18, BH1750 SDA=GPIO21/SCL=GPIO22.
+// HC-SR04 ECHO is 5 V: use a level shifter or voltage divider before GPIO18.
+// ponytail: fixed pins and tank calibration; move them to setup only if devices need different wiring.
+  #include <BH1750.h>
   #include <DNSServer.h>
+  #include <DHT.h>
   #include <HTTPClient.h>
   #include <Preferences.h>
   #include <PubSubClient.h>
   #include <WebServer.h>
   #include <WiFi.h>
+  #include <Wire.h>
+
+  constexpr uint8_t DHT_PIN = 4;
+  constexpr uint8_t DHT_TYPE = DHT11;
+  constexpr uint8_t WATER_TRIG_PIN = 5;
+  constexpr uint8_t WATER_ECHO_PIN = 18;
+  constexpr uint8_t I2C_SDA_PIN = 21;
+  constexpr uint8_t I2C_SCL_PIN = 22;
+  constexpr float EMPTY_DISTANCE_CM = 30.0f;
+  constexpr float FULL_DISTANCE_CM = 4.0f;
+  constexpr unsigned long ULTRASONIC_TIMEOUT_US = 30000;
 
   DNSServer dns;
   WebServer server(80);
   Preferences settings;
   WiFiClient network;
   PubSubClient mqtt(network);
+  DHT dht(DHT_PIN, DHT_TYPE);
+  BH1750 lightMeter;
 
   String apiUrl, mqttHost, deviceKey;
   int mqttPort;
   bool setupMode;
   unsigned long lastPublish;
+
+  String jsonNumber(float value, uint8_t decimals = 1) {
+    if (isnan(value)) return "null";
+
+    char formatted[24];
+    snprintf(formatted, sizeof(formatted), "%.*f", decimals, static_cast<double>(value));
+    return formatted;
+  }
+
+  float waterLevelPercent() {
+    if (EMPTY_DISTANCE_CM <= FULL_DISTANCE_CM) return NAN;
+
+    digitalWrite(WATER_TRIG_PIN, LOW);
+    delayMicroseconds(2);
+    digitalWrite(WATER_TRIG_PIN, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(WATER_TRIG_PIN, LOW);
+
+    unsigned long duration = pulseIn(WATER_ECHO_PIN, HIGH, ULTRASONIC_TIMEOUT_US);
+    if (duration == 0) return NAN;
+
+    float distanceCm = duration * 0.0343f / 2.0f;
+    float level = (EMPTY_DISTANCE_CM - distanceCm) * 100.0f / (EMPTY_DISTANCE_CM - FULL_DISTANCE_CM);
+    return constrain(level, 0.0f, 100.0f);
+  }
 
   String hardwareId() {
     uint64_t id = ESP.getEfuseMac();
@@ -118,6 +161,13 @@
 
   void setup() {
     Serial.begin(115200);
+    pinMode(WATER_TRIG_PIN, OUTPUT);
+    pinMode(WATER_ECHO_PIN, INPUT);
+    Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
+    dht.begin();
+    if (!lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, 0x23, &Wire)) {
+      Serial.println("BH1750 not found; lux readings will be null");
+    }
     settings.begin("iotagri", true);
     String ssid = settings.getString("ssid");
     String password = settings.getString("pass");
@@ -149,6 +199,20 @@
 
     char topic[128];
     snprintf(topic, sizeof(topic), "devices/%s/readings", deviceKey.c_str());
-    const char* payload = "{\"temperature\":26.5,\"humidity\":61.2,\"ph\":6.1,\"tds\":850,\"waterLevel\":42}";
-    Serial.println(mqtt.publish(topic, payload) ? "Reading published" : "Publish failed");
+    float temperature = dht.readTemperature();
+    float humidity = dht.readHumidity();
+    float waterLevel = waterLevelPercent();
+    float lux = lightMeter.readLightLevel();
+    if (lux < 0) lux = NAN;
+
+    String payload = "{\"temperature\":";
+    payload += jsonNumber(temperature);
+    payload += ",\"humidity\":";
+    payload += jsonNumber(humidity);
+    payload += ",\"waterLevel\":";
+    payload += jsonNumber(waterLevel);
+    payload += ",\"lux\":";
+    payload += jsonNumber(lux);
+    payload += "}";
+    Serial.println(mqtt.publish(topic, payload.c_str()) ? "Reading published" : "Publish failed");
   }

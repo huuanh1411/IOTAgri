@@ -5,5 +5,6 @@ public record SensorReadingRequest(
     double? Humidity,
     double? Ph,
     double? Tds,
-    double? WaterLevel
+    double? WaterLevel,
+    double? Lux
 );

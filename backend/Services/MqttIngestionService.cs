@@ -86,7 +86,34 @@ public class MqttIngestionService : BackgroundService
                 _logger.LogWarning(ex, "MQTT connection attempt failed, retrying in 5s.");
             }
 
+            try
+            {
+                await MarkOfflineDevicesAsync();
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogError(ex, "Failed to update device presence.");
+            }
+
             await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        }
+    }
+
+    private async Task MarkOfflineDevicesAsync()
+    {
+        var now = DateTime.UtcNow;
+        using var scope = _scopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var onlineDevices = await db.Devices.Where(device => device.IsOnline).ToListAsync();
+
+        foreach (var device in onlineDevices.Where(device => DevicePresence.IsOffline(device.LastSeenAt, now)))
+        {
+            device.IsOnline = false;
+        }
+
+        if (db.ChangeTracker.HasChanges())
+        {
+            await db.SaveChangesAsync();
         }
     }
 
@@ -162,6 +189,7 @@ public class MqttIngestionService : BackgroundService
             Ph = request.Ph,
             Tds = request.Tds,
             WaterLevel = request.WaterLevel,
+            Lux = request.Lux,
         };
 
         db.SensorReadings.Add(reading);

@@ -8,8 +8,9 @@ import '../../widgets/loading_indicators.dart';
 
 class SensorHistoryScreen extends StatefulWidget {
   final Device device;
+  final String? sensor;
 
-  const SensorHistoryScreen({super.key, required this.device});
+  const SensorHistoryScreen({super.key, required this.device, this.sensor});
 
   @override
   State<SensorHistoryScreen> createState() => _SensorHistoryScreenState();
@@ -40,7 +41,9 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
         limit: _getLimitForInterval(),
       );
       setState(() {
-        _readings = readingsData.map((data) => SensorReading.fromJson(data)).toList();
+        _readings = readingsData
+            .map((data) => SensorReading.fromJson(data))
+            .toList();
         _isLoading = false;
       });
     } catch (e) {
@@ -77,7 +80,11 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lịch sử cảm biến - ${widget.device.name}'),
+        title: Text(
+          widget.sensor == null
+              ? 'Lịch sử cảm biến - ${widget.device.name}'
+              : '${_sensorLabel(widget.sensor!)} - ${widget.device.name}',
+        ),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -87,18 +94,9 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
               _loadReadings();
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'hour',
-                child: Text('1 giờ'),
-              ),
-              const PopupMenuItem(
-                value: 'day',
-                child: Text('1 ngày'),
-              ),
-              const PopupMenuItem(
-                value: 'week',
-                child: Text('1 tuần'),
-              ),
+              const PopupMenuItem(value: 'hour', child: Text('1 giờ')),
+              const PopupMenuItem(value: 'day', child: Text('1 ngày')),
+              const PopupMenuItem(value: 'week', child: Text('1 tuần')),
             ],
           ),
         ],
@@ -113,10 +111,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
     }
 
     if (_errorMessage != null) {
-      return ErrorState(
-        message: _errorMessage!,
-        onRetry: _loadReadings,
-      );
+      return ErrorState(message: _errorMessage!, onRetry: _loadReadings);
     }
 
     if (_readings.isEmpty) {
@@ -135,20 +130,39 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
           children: [
             _buildIntervalSelector(),
             const SizedBox(height: 16),
-            _buildTemperatureChart(),
-            const SizedBox(height: 24),
-            _buildHumidityChart(),
-            const SizedBox(height: 24),
-            _buildPhChart(),
-            const SizedBox(height: 24),
-            _buildWaterLevelChart(),
-            const SizedBox(height: 24),
+            if (_showsSensor('temperature')) ...[
+              _buildTemperatureChart(),
+              const SizedBox(height: 24),
+            ],
+            if (_showsSensor('humidity')) ...[
+              _buildHumidityChart(),
+              const SizedBox(height: 24),
+            ],
+            if (_showsSensor('ph')) ...[
+              _buildPhChart(),
+              const SizedBox(height: 24),
+            ],
+            if (_showsSensor('waterLevel')) ...[
+              _buildWaterLevelChart(),
+              const SizedBox(height: 24),
+            ],
             _buildReadingsList(),
           ],
         ),
       ),
     );
   }
+
+  bool _showsSensor(String sensor) =>
+      widget.sensor == null || widget.sensor == sensor;
+
+  String _sensorLabel(String sensor) => switch (sensor) {
+    'temperature' => 'Nhiệt độ',
+    'humidity' => 'Độ ẩm',
+    'ph' => 'pH',
+    'waterLevel' => 'Mực nước',
+    _ => 'Lịch sử cảm biến',
+  };
 
   Widget _buildIntervalSelector() {
     return Row(
@@ -223,9 +237,13 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 30,
-                        interval: data.length > 10 ? (data.length / 5).ceil().toDouble() : 1,
+                        interval: data.length > 10
+                            ? (data.length / 5).ceil().toDouble()
+                            : 1,
                         getTitlesWidget: (value, meta) {
-                          if (value.toInt() >= data.length) return const SizedBox.shrink();
+                          if (value.toInt() >= data.length) {
+                            return const SizedBox.shrink();
+                          }
                           return Text(
                             _formatDate(_readings[value.toInt()].recordedAt),
                             style: const TextStyle(fontSize: 8),
@@ -233,8 +251,12 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                         },
                       ),
                     ),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                   ),
                   borderData: FlBorderData(show: true),
                   lineBarsData: [
@@ -301,9 +323,13 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 30,
-                        interval: data.length > 10 ? (data.length / 5).ceil().toDouble() : 1,
+                        interval: data.length > 10
+                            ? (data.length / 5).ceil().toDouble()
+                            : 1,
                         getTitlesWidget: (value, meta) {
-                          if (value.toInt() >= data.length) return const SizedBox.shrink();
+                          if (value.toInt() >= data.length) {
+                            return const SizedBox.shrink();
+                          }
                           return Text(
                             _formatDate(_readings[value.toInt()].recordedAt),
                             style: const TextStyle(fontSize: 8),
@@ -311,8 +337,12 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                         },
                       ),
                     ),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                   ),
                   borderData: FlBorderData(show: true),
                   lineBarsData: [
@@ -379,9 +409,13 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 30,
-                        interval: data.length > 10 ? (data.length / 5).ceil().toDouble() : 1,
+                        interval: data.length > 10
+                            ? (data.length / 5).ceil().toDouble()
+                            : 1,
                         getTitlesWidget: (value, meta) {
-                          if (value.toInt() >= data.length) return const SizedBox.shrink();
+                          if (value.toInt() >= data.length) {
+                            return const SizedBox.shrink();
+                          }
                           return Text(
                             _formatDate(_readings[value.toInt()].recordedAt),
                             style: const TextStyle(fontSize: 8),
@@ -389,8 +423,12 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                         },
                       ),
                     ),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                   ),
                   borderData: FlBorderData(show: true),
                   lineBarsData: [
@@ -457,9 +495,13 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 30,
-                        interval: data.length > 10 ? (data.length / 5).ceil().toDouble() : 1,
+                        interval: data.length > 10
+                            ? (data.length / 5).ceil().toDouble()
+                            : 1,
                         getTitlesWidget: (value, meta) {
-                          if (value.toInt() >= data.length) return const SizedBox.shrink();
+                          if (value.toInt() >= data.length) {
+                            return const SizedBox.shrink();
+                          }
                           return Text(
                             _formatDate(_readings[value.toInt()].recordedAt),
                             style: const TextStyle(fontSize: 8),
@@ -467,8 +509,12 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                         },
                       ),
                     ),
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
                   ),
                   borderData: FlBorderData(show: true),
                   lineBarsData: [

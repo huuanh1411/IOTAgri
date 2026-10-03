@@ -17,5 +17,8 @@ public record AggregatedReadingBucket(
     double? AvgWaterLevel,
     double? MinWaterLevel,
     double? MaxWaterLevel,
+    double? AvgLux,
+    double? MinLux,
+    double? MaxLux,
     int SampleCount
 );

@@ -1,7 +1,7 @@
 class ApiConstants {
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:8080',
+    defaultValue: 'http://localhost:5261',
   );
 
   // Auth endpoints
@@ -13,6 +13,7 @@ class ApiConstants {
   // Device endpoints
   static const String devices = '/api/devices';
   static String device(String id) => '/api/devices/$id';
+  static String deviceProvisioningCode(String id) => '/api/devices/$id/provisioning-code';
 
   // Dashboard endpoints
   static const String dashboardOverview = '/api/dashboard/overview';

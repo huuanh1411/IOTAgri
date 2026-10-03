@@ -7,5 +7,6 @@ public record SensorReadingResponse(
     double? Ph,
     double? Tds,
     double? WaterLevel,
+    double? Lux,
     DateTime RecordedAt
 );

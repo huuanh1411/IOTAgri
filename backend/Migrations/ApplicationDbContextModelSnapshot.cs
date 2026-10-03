@@ -395,6 +395,9 @@ namespace IOTAgriBackend.Migrations
                     b.Property<double?>("Humidity")
                         .HasColumnType("double precision");
 
+                    b.Property<double?>("Lux")
+                        .HasColumnType("double precision");
+
                     b.Property<double?>("Ph")
                         .HasColumnType("double precision");
 

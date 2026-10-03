@@ -7,6 +7,7 @@ public record SensorMedianBucket(
     double? MedianPh,
     double? MedianTds,
     double? MedianWaterLevel,
+    double? MedianLux,
     int SampleCount
 );
 
@@ -23,7 +24,7 @@ public static class SensorMedianBuckets
                 var bucketStart = start.AddTicks(interval.Ticks * index);
                 return buckets.TryGetValue(bucketStart, out var bucket)
                     ? bucket
-                    : new SensorMedianBucket(bucketStart, null, null, null, null, null, 0);
+                    : new SensorMedianBucket(bucketStart, null, null, null, null, null, null, 0);
             })
             .ToList();
 }

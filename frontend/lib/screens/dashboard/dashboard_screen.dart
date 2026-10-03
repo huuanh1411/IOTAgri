@@ -27,13 +27,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hệ Thống Giám Sát Nông'),
+        toolbarHeight: 80,
+        backgroundColor: const Color(0xFF2CBF6B),
+        title: const Text(
+          'Hệ Thống Giám Sát Nông Nghiệp',
+          style: TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        titleSpacing: 0,
+        centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              Provider.of<AuthProvider>(context, listen: false).logout();
-            },
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: IconButton(
+              icon: const Icon(Icons.logout, color: Colors.white, size: 32),
+              onPressed: () {
+                Provider.of<AuthProvider>(context, listen: false).logout();
+              },
+            ),
           ),
         ],
       ),
@@ -141,6 +155,12 @@ class _HomeTabState extends State<HomeTab> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const GatewayStatusCard(
+              status: 'Đang hoạt động',
+              lastUpdate: '10:35',
+              runtime: '5h 12m',
+            ),
+            const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -288,6 +308,113 @@ class _HomeTabState extends State<HomeTab> {
     if (level < 30) return Colors.red;
     if (level < 50) return Colors.orange;
     return Colors.green;
+  }
+}
+
+class GatewayStatusCard extends StatelessWidget {
+  final String status;
+  final String lastUpdate;
+  final String runtime;
+
+  const GatewayStatusCard({
+    super.key,
+    required this.status,
+    required this.lastUpdate,
+    required this.runtime,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isOnline = status.toLowerCase() != 'mất kết nối';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFDBEAE0), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.signal_wifi_4_bar,
+            size: 34,
+            color: isOnline ? Colors.green : Colors.red,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'ESP32 Gateway',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[900],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text('🟢', style: TextStyle(fontSize: 18)),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  status,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: isOnline ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'Last update',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                lastUpdate,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1D1D1D),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Runtime',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                runtime,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1D1D1D),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 

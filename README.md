@@ -64,7 +64,8 @@ GitHub Actions runs on pull requests and pushes to `main`. It restores dependenc
 1. Register and sign in through Swagger, then create a device with `POST /api/devices`.
 2. Create its 15-minute, one-use setup code with authenticated `POST /api/devices/{deviceId}/provisioning-code`.
 3. Upload [`firmware/ESP32DeviceSetup/ESP32DeviceSetup.ino`](firmware/ESP32DeviceSetup/ESP32DeviceSetup.ino), join Wi-Fi network `IOTAgri-Setup`, and open the shown setup page.
-4. Enter Wi-Fi details, `http://<PC-LAN-IP>:8080`, and the setup code. The ESP32 saves its settings and publishes readings every 10 seconds.
+4. Install Arduino libraries `PubSubClient`, `DHT sensor library`, and `BH1750`, then wire DHT11 DATA to GPIO4, HC-SR04 TRIG to GPIO5 / ECHO to GPIO18, and BH1750 SDA/SCL to GPIO21/GPIO22. Put a level shifter or voltage divider between the 5 V HC-SR04 ECHO pin and GPIO18.
+5. Set `EMPTY_DISTANCE_CM` and `FULL_DISTANCE_CM` near the top of the sketch to measured empty/full tank distances. Enter Wi-Fi details, `http://<PC-LAN-IP>:8080`, and the setup code. The ESP32 saves its settings and publishes temperature, humidity, water-level percentage, and lux every 10 seconds.
 
 The local Mosquitto broker is anonymous and plaintext for trusted LAN development only. Do not expose port 1883 to the internet. A future production broker must use per-device credentials and TLS.
 
