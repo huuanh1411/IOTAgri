@@ -15,7 +15,7 @@
 
 import 'package:flutter/cupertino.dart';
 
-import '../../../services/mock_admin_service.dart';
+import '../../../services/api_service.dart';
 import '../../theme/cupertino_theme.dart';
 
 class CupertinoUserDetailScreen extends StatefulWidget {
@@ -36,9 +36,8 @@ class CupertinoUserDetailScreen extends StatefulWidget {
       _CupertinoUserDetailScreenState();
 }
 
-class _CupertinoUserDetailScreenState
-    extends State<CupertinoUserDetailScreen> {
-  final _mockService = MockAdminService();
+class _CupertinoUserDetailScreenState extends State<CupertinoUserDetailScreen> {
+  final _apiService = ApiService();
 
   // _user là bản copy của widget.user. Mọi thay đổi diễn ra ở đây,
   // sau đó được "đẩy" về UsersScreen qua callback onUserUpdated.
@@ -58,22 +57,16 @@ class _CupertinoUserDetailScreenState
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    final userId = _user['id'];
-    // Lọc devices thuộc user này
-    _devices = _mockService
-        .getMockDevices()
-        .where((d) => d['ownerId'] == userId)
-        .toList();
-    // Lọc tickets thuộc user này
-    _tickets = _mockService
-        .getMockTickets()
-        .where((t) => t['userId'] == userId)
-        .toList();
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
+    try {
+      final response = await _apiService.getAdminDevices();
+      _devices = (response['items'] as List<dynamic>? ?? [])
+          .cast<Map<String, dynamic>>()
+          .where((device) => device['ownerId'] == _user['id'])
+          .toList();
+      _tickets = [];
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -81,35 +74,28 @@ class _CupertinoUserDetailScreenState
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: Text(_user['fullName'] ?? 'Chi tiết'),
-        // Nút "..." ở góc phải nav bar
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          minimumSize: const Size(44, 44),
-          onPressed: _showMoreActions,
-          child: const Icon(CupertinoIcons.ellipsis_circle),
-        ),
       ),
       child: SafeArea(
         child: _isLoading
             ? const Center(child: CupertinoActivityIndicator(radius: 14))
             : SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildProfileHeader(context),
-              const SizedBox(height: 24),
-              _buildInfoCard(context),
-              const SizedBox(height: 24),
-              _buildDevicesSection(context),
-              const SizedBox(height: 24),
-              _buildTicketsSection(context),
-              const SizedBox(height: 24),
-              _buildActionsSection(context),
-            ],
-          ),
-        ),
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildProfileHeader(context),
+                    const SizedBox(height: 24),
+                    _buildInfoCard(context),
+                    const SizedBox(height: 24),
+                    _buildDevicesSection(context),
+                    const SizedBox(height: 24),
+                    _buildTicketsSection(context),
+                    const SizedBox(height: 24),
+                    _buildActionsSection(context),
+                  ],
+                ),
+              ),
       ),
     );
   }
@@ -199,11 +185,11 @@ class _CupertinoUserDetailScreenState
 
   // Widget badge nhỏ (dùng cho ADMIN / Hoạt động / Đã khóa)
   Widget _buildBadge(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required Color color,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -275,19 +261,20 @@ class _CupertinoUserDetailScreenState
 
   // Row thông tin: icon + label + value
   Widget _buildInfoRow(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required String value,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
     return Row(
       children: [
         Container(
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: CupertinoColors.tertiarySystemBackground
-                .resolveFrom(context),
+            color: CupertinoColors.tertiarySystemBackground.resolveFrom(
+              context,
+            ),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
@@ -332,11 +319,7 @@ class _CupertinoUserDetailScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionHeader(
-          context,
-          'Thiết bị',
-          '${_devices.length}',
-        ),
+        _sectionHeader(context, 'Thiết bị', '${_devices.length}'),
         const SizedBox(height: 10),
         if (_devices.isEmpty)
           _emptyState(
@@ -345,10 +328,14 @@ class _CupertinoUserDetailScreenState
             message: 'Chưa có thiết bị nào.',
           )
         else
-          ..._devices.take(5).map((device) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _buildDeviceTile(context, device),
-          )),
+          ..._devices
+              .take(5)
+              .map(
+                (device) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _buildDeviceTile(context, device),
+                ),
+              ),
       ],
     );
   }
@@ -417,11 +404,7 @@ class _CupertinoUserDetailScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionHeader(
-          context,
-          'Support Tickets',
-          '${_tickets.length}',
-        ),
+        _sectionHeader(context, 'Support Tickets', '${_tickets.length}'),
         const SizedBox(height: 10),
         if (_tickets.isEmpty)
           _emptyState(
@@ -430,10 +413,14 @@ class _CupertinoUserDetailScreenState
             message: 'Không có ticket nào.',
           )
         else
-          ..._tickets.take(3).map((ticket) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _buildTicketTile(context, ticket),
-          )),
+          ..._tickets
+              .take(3)
+              .map(
+                (ticket) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _buildTicketTile(context, ticket),
+                ),
+              ),
       ],
     );
   }
@@ -505,7 +492,7 @@ class _CupertinoUserDetailScreenState
   }
 
   // ==================== ACTIONS SECTION ====================
-  // Các nút hành động: Khóa/Mở, Reset password, Xóa
+  // Các nút hành động được API hỗ trợ.
   Widget _buildActionsSection(BuildContext context) {
     final isLocked = _user['isLocked'] as bool? ?? false;
     final isAdmin = _user['role'] == 'admin';
@@ -526,39 +513,18 @@ class _CupertinoUserDetailScreenState
                 : CupertinoColors.systemOrange,
             onPressed: _toggleLock,
           ),
-        if (!isAdmin) const SizedBox(height: 10),
-
-        // Nút Reset password
-        _buildActionButton(
-          context,
-          icon: CupertinoIcons.lock_rotation,
-          label: 'Reset mật khẩu',
-          color: CupertinoColors.systemBlue,
-          onPressed: _resetPassword,
-        ),
-        const SizedBox(height: 10),
-
-        // Nút Xóa user (ẩn nếu là admin)
-        if (!isAdmin)
-          _buildActionButton(
-            context,
-            icon: CupertinoIcons.trash_fill,
-            label: 'Xóa người dùng',
-            color: CupertinoColors.systemRed,
-            onPressed: _confirmDelete,
-          ),
       ],
     );
   }
 
   // Nút action button lớn (full width)
   Widget _buildActionButton(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required Color color,
-        required VoidCallback onPressed,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
       minimumSize: const Size(double.infinity, 48),
@@ -606,8 +572,9 @@ class _CupertinoUserDetailScreenState
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
-            color: CupertinoColors.secondarySystemBackground
-                .resolveFrom(context),
+            color: CupertinoColors.secondarySystemBackground.resolveFrom(
+              context,
+            ),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -625,10 +592,10 @@ class _CupertinoUserDetailScreenState
 
   // Empty state cho section (không có data)
   Widget _emptyState(
-      BuildContext context, {
-        required IconData icon,
-        required String message,
-      }) {
+    BuildContext context, {
+    required IconData icon,
+    required String message,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24),
       decoration: BoxDecoration(
@@ -669,105 +636,18 @@ class _CupertinoUserDetailScreenState
   }
 
   // ==================== ACTIONS HANDLERS ====================
-  // Action sheet từ nút "..." trên nav bar
-  void _showMoreActions() {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (actionContext) => CupertinoActionSheet(
-        title: Text(_user['fullName'] ?? ''),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.of(actionContext).pop();
-              _resetPassword();
-            },
-            child: const Text('Reset mật khẩu'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.of(actionContext).pop(),
-          child: const Text('Hủy'),
-        ),
-      ),
-    );
-  }
-
   // Khóa / Mở khóa tài khoản
-  void _toggleLock() {
+  Future<void> _toggleLock() async {
     final isLocked = _user['isLocked'] as bool? ?? false;
-
-    // Update state local
-    setState(() => _user['isLocked'] = !isLocked);
-
-    // 🔥 QUAN TRỌNG: Truyền data mới về UsersScreen qua callback
-    widget.onUserUpdated?.call(Map<String, dynamic>.from(_user));
-
-    _showMessage(
-      !isLocked ? 'Đã khóa tài khoản' : 'Đã mở khóa tài khoản',
-    );
-  }
-
-  // Reset mật khẩu user
-  void _resetPassword() {
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: const Text('Reset mật khẩu'),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text('Gửi email reset cho:\n${_user['email']}?'),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Hủy'),
-          ),
-          CupertinoDialogAction(
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-              _showMessage('Đã gửi email reset mật khẩu');
-            },
-            child: const Text('Gửi'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Xác nhận xóa user
-  void _confirmDelete() {
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: const Text('Xóa người dùng'),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(
-            'Bạn có chắc muốn xóa "${_user['fullName']}"?\n'
-                'Hành động này không thể hoàn tác.',
-          ),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Hủy'),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-
-              // 🔥 QUAN TRỌNG: Truyền data về UsersScreen trước khi pop
-              widget.onUserUpdated?.call(Map<String, dynamic>.from(_user));
-
-              // Đóng Detail screen
-              Navigator.of(context).pop();
-            },
-            child: const Text('Xóa'),
-          ),
-        ],
-      ),
-    );
+    try {
+      await _apiService.updateAdminUserLock(_user['id'] as String, !isLocked);
+      if (!mounted) return;
+      setState(() => _user['isLocked'] = !isLocked);
+      widget.onUserUpdated?.call(Map<String, dynamic>.from(_user));
+      _showMessage(!isLocked ? 'Đã khóa tài khoản' : 'Đã mở khóa tài khoản');
+    } catch (error) {
+      if (mounted) _showMessage(error.toString());
+    }
   }
 
   // Dialog thông báo đơn giản

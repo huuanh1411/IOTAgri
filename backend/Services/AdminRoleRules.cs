@@ -9,4 +9,11 @@ public static class AdminRoleRules
         if (targetIsAdmin && role == "User" && adminCount <= 1) return "Cannot remove the last administrator.";
         return null;
     }
+
+    public static string? ValidateLock(string actorUserId, string targetUserId, bool isLocked, bool targetIsAdmin, int adminCount)
+    {
+        if (actorUserId == targetUserId) return "Administrators cannot lock their own account.";
+        if (isLocked && targetIsAdmin && adminCount <= 1) return "Cannot lock the last administrator.";
+        return null;
+    }
 }

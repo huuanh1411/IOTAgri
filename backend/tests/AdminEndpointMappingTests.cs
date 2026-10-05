@@ -29,7 +29,7 @@ public class AdminEndpointMappingTests
             .Where(endpoint => endpoint.RoutePattern.RawText?.StartsWith("/api/admin") == true)
             .ToList();
 
-        Assert.Equal(6, endpoints.Count);
+        Assert.Equal(8, endpoints.Count);
         Assert.All(endpoints, endpoint => Assert.Contains(endpoint.Metadata.GetOrderedMetadata<IAuthorizeData>(), data => data.Policy == "AdminOnly"));
     }
 }

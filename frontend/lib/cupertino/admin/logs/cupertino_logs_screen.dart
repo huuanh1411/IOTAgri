@@ -9,16 +9,10 @@
 
 import 'package:flutter/cupertino.dart';
 
-import '../../../services/mock_admin_service.dart';
+import '../../../services/api_service.dart';
 import '../../theme/cupertino_theme.dart';
 
-enum LogFilter {
-  all,
-  info,
-  warning,
-  error,
-  critical,
-}
+enum LogFilter { all, info, warning, error, critical }
 
 class CupertinoLogsScreen extends StatefulWidget {
   const CupertinoLogsScreen({super.key});
@@ -28,7 +22,7 @@ class CupertinoLogsScreen extends StatefulWidget {
 }
 
 class _CupertinoLogsScreenState extends State<CupertinoLogsScreen> {
-  final _mockService = MockAdminService();
+  final _apiService = ApiService();
 
   List<Map<String, dynamic>> _allLogs = [];
   List<Map<String, dynamic>> _filteredLogs = [];
@@ -43,13 +37,30 @@ class _CupertinoLogsScreenState extends State<CupertinoLogsScreen> {
 
   Future<void> _loadLogs() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-    setState(() {
-      _allLogs = _mockService.getMockLogs();
-      _isLoading = false;
-      _applyFilter();
-    });
+    try {
+      final response = await _apiService.getAdminAuditLogs();
+      _allLogs = (response['items'] as List<dynamic>? ?? []).map((item) {
+        final log = item as Map<String, dynamic>;
+        return <String, dynamic>{
+          ...log,
+          'type': 'admin',
+          'severity': 'info',
+          'message': log['action'] ?? '',
+          'detail': '${log['previousValue'] ?? ''} ${log['newValue'] ?? ''}'
+              .trim(),
+          'userId': log['actorUserId'],
+          'deviceId': log['targetType'] == 'device' ? log['targetId'] : null,
+          'createdAt': log['createdAt'],
+        };
+      }).toList();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _applyFilter();
+        });
+      }
+    }
   }
 
   void _applyFilter() {
@@ -60,8 +71,9 @@ class _CupertinoLogsScreenState extends State<CupertinoLogsScreen> {
 
     final filterName = _selectedFilter.name;
     setState(() {
-      _filteredLogs =
-          _allLogs.where((log) => log['severity'] == filterName).toList();
+      _filteredLogs = _allLogs
+          .where((log) => log['severity'] == filterName)
+          .toList();
     });
   }
 
@@ -69,11 +81,13 @@ class _CupertinoLogsScreenState extends State<CupertinoLogsScreen> {
     return {
       LogFilter.all: _allLogs.length,
       LogFilter.info: _allLogs.where((l) => l['severity'] == 'info').length,
-      LogFilter.warning:
-      _allLogs.where((l) => l['severity'] == 'warning').length,
+      LogFilter.warning: _allLogs
+          .where((l) => l['severity'] == 'warning')
+          .length,
       LogFilter.error: _allLogs.where((l) => l['severity'] == 'error').length,
-      LogFilter.critical:
-      _allLogs.where((l) => l['severity'] == 'critical').length,
+      LogFilter.critical: _allLogs
+          .where((l) => l['severity'] == 'critical')
+          .length,
     };
   }
 
@@ -116,19 +130,13 @@ class _CupertinoLogsScreenState extends State<CupertinoLogsScreen> {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                  final log = _filteredLogs[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: _LogTile(
-                      log: log,
-                      onTap: () => _showLogDetail(log),
-                    ),
-                  );
-                },
-                childCount: _filteredLogs.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final log = _filteredLogs[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _LogTile(log: log, onTap: () => _showLogDetail(log)),
+                );
+              }, childCount: _filteredLogs.length),
             ),
           ),
       ],
@@ -145,26 +153,50 @@ class _CupertinoLogsScreenState extends State<CupertinoLogsScreen> {
       child: Row(
         children: [
           _buildChip(
-              context, LogFilter.all, 'Tất cả', counts[LogFilter.all] ?? 0),
+            context,
+            LogFilter.all,
+            'Tất cả',
+            counts[LogFilter.all] ?? 0,
+          ),
           const SizedBox(width: 8),
           _buildChip(
-              context, LogFilter.info, 'Info', counts[LogFilter.info] ?? 0),
-          const SizedBox(width: 8),
-          _buildChip(context, LogFilter.warning, 'Warning',
-              counts[LogFilter.warning] ?? 0),
+            context,
+            LogFilter.info,
+            'Info',
+            counts[LogFilter.info] ?? 0,
+          ),
           const SizedBox(width: 8),
           _buildChip(
-              context, LogFilter.error, 'Error', counts[LogFilter.error] ?? 0),
+            context,
+            LogFilter.warning,
+            'Warning',
+            counts[LogFilter.warning] ?? 0,
+          ),
           const SizedBox(width: 8),
-          _buildChip(context, LogFilter.critical, 'Critical',
-              counts[LogFilter.critical] ?? 0),
+          _buildChip(
+            context,
+            LogFilter.error,
+            'Error',
+            counts[LogFilter.error] ?? 0,
+          ),
+          const SizedBox(width: 8),
+          _buildChip(
+            context,
+            LogFilter.critical,
+            'Critical',
+            counts[LogFilter.critical] ?? 0,
+          ),
         ],
       ),
     );
   }
 
   Widget _buildChip(
-      BuildContext context, LogFilter filter, String label, int count) {
+    BuildContext context,
+    LogFilter filter,
+    String label,
+    int count,
+  ) {
     final isSelected = _selectedFilter == filter;
     final color = isSelected
         ? AerogreenCupertinoTheme.aerogreenPrimary
@@ -204,8 +236,8 @@ class _CupertinoLogsScreenState extends State<CupertinoLogsScreen> {
                 color: isSelected
                     ? CupertinoColors.white.withValues(alpha: 0.25)
                     : CupertinoColors.tertiaryLabel
-                    .resolveFrom(context)
-                    .withValues(alpha: 0.2),
+                          .resolveFrom(context)
+                          .withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -356,9 +388,7 @@ class _LogTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
           borderRadius: BorderRadius.circular(14),
-          border: Border(
-            left: BorderSide(color: color, width: 3),
-          ),
+          border: Border(left: BorderSide(color: color, width: 3)),
         ),
         child: Row(
           children: [
@@ -402,8 +432,9 @@ class _LogTile extends StatelessWidget {
                       Text(
                         _formatTime(log['createdAt']),
                         style: TextStyle(
-                          color: CupertinoColors.tertiaryLabel
-                              .resolveFrom(context),
+                          color: CupertinoColors.tertiaryLabel.resolveFrom(
+                            context,
+                          ),
                           fontSize: 10,
                         ),
                       ),

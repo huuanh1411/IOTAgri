@@ -72,6 +72,9 @@ class _CupertinoRegisterScreenState extends State<CupertinoRegisterScreen> {
         context.read<AuthProvider>().errorMessage ?? 'Đăng ký thất bại.',
       );
     }
+    if (success && mounted) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
   }
 
   void _showMessage(String message) {

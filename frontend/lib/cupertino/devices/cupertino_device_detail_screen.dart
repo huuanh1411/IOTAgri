@@ -209,15 +209,21 @@ class _CupertinoDeviceDetailScreenState
   @override
   Widget build(BuildContext context) {
     if (_isLoading && _readings.isEmpty && _errorMessage == null) {
-      return const CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(middle: Text('Thiết bị')),
+      return CupertinoPageScaffold(
+        navigationBar: CupertinoNavigationBar(
+          leading: _returnButton(context),
+          middle: Text('Thiết bị'),
+        ),
         child: Center(child: CupertinoActivityIndicator(radius: 14)),
       );
     }
 
     if (_errorMessage != null && _readings.isEmpty) {
       return CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(middle: Text(_device.name)),
+        navigationBar: CupertinoNavigationBar(
+          leading: _returnButton(context),
+          middle: Text(_device.name),
+        ),
         child: SafeArea(
           child: _DetailError(
             message: _errorMessage!,
@@ -230,6 +236,7 @@ class _CupertinoDeviceDetailScreenState
     final reading = _readings.isEmpty ? null : _readings.first;
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
+        leading: _returnButton(context),
         middle: Text(
           _device.name,
           maxLines: 1,
@@ -304,6 +311,12 @@ class _CupertinoDeviceDetailScreenState
       ),
     );
   }
+
+  Widget? _returnButton(BuildContext context) => Navigator.canPop(context)
+      ? CupertinoNavigationBarBackButton(
+          onPressed: () => Navigator.of(context).pop(),
+        )
+      : null;
 }
 
 class DeviceHeader extends StatelessWidget {

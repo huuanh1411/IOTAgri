@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Data;
 using IOTAgriBackend.Data;
 using IOTAgriBackend.Dtos.Admin;
+using IOTAgriBackend.Dtos.Pumps;
 using IOTAgriBackend.Dtos.Sensors;
 using IOTAgriBackend.Models;
 using IOTAgriBackend.Services;
@@ -17,8 +18,10 @@ public static class AdminEndpoints
         var group = app.MapGroup("/api/admin").WithTags("Admin").RequireAuthorization("AdminOnly");
         group.MapGet("/users", ListUsersAsync);
         group.MapPut("/users/{userId}/role", UpdateRoleAsync);
+        group.MapPut("/users/{userId}/lock", UpdateLockAsync);
         group.MapGet("/devices", ListDevicesAsync);
         group.MapGet("/devices/{id:guid}/readings", GetReadingsAsync);
+        group.MapGet("/devices/{id:guid}/pump-commands", GetPumpHistoryAsync);
         group.MapPut("/devices/{id:guid}/owner", UpdateDeviceOwnerAsync);
         group.MapGet("/audit-logs", ListAuditLogsAsync);
         return app;
@@ -36,7 +39,7 @@ public static class AdminEndpoints
         var users = await userManager.Users.OrderBy(user => user.Email).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
         var items = new List<AdminUserResponse>(users.Count);
         foreach (var user in users)
-            items.Add(new AdminUserResponse(user.Id, user.Email ?? string.Empty, user.FullName, (await userManager.GetRolesAsync(user)).ToList()));
+            items.Add(new AdminUserResponse(user.Id, user.Email ?? string.Empty, user.FullName, (await userManager.GetRolesAsync(user)).ToList(), user.LockoutEnd > DateTimeOffset.UtcNow));
 
         return Results.Ok(new AdminUserPage(items, page, pageSize, totalCount));
     }
@@ -62,7 +65,7 @@ public static class AdminEndpoints
         if (error is not null) return Results.BadRequest(new { error });
 
         if (roles.Count == 1 && roles[0] == request.Role)
-            return Results.Ok(new AdminUserResponse(target.Id, target.Email ?? string.Empty, target.FullName, roles.ToList()));
+            return Results.Ok(new AdminUserResponse(target.Id, target.Email ?? string.Empty, target.FullName, roles.ToList(), target.LockoutEnd > DateTimeOffset.UtcNow));
 
         var removeResult = await userManager.RemoveFromRolesAsync(target, roles.Where(role => role is "User" or "Admin"));
         if (!removeResult.Succeeded) return Results.ValidationProblem(removeResult.Errors.ToDictionary(error => error.Code, error => new[] { error.Description }));
@@ -82,7 +85,49 @@ public static class AdminEndpoints
         await db.SaveChangesAsync();
         await transaction.CommitAsync();
 
-        return Results.Ok(new AdminUserResponse(target.Id, target.Email ?? string.Empty, target.FullName, [request.Role!]));
+        return Results.Ok(new AdminUserResponse(target.Id, target.Email ?? string.Empty, target.FullName, [request.Role!], target.LockoutEnd > DateTimeOffset.UtcNow));
+    }
+
+    private static async Task<IResult> UpdateLockAsync(
+        string userId,
+        UpdateUserLockRequest request,
+        ClaimsPrincipal principal,
+        UserManager<ApplicationUser> userManager,
+        ApplicationDbContext db)
+    {
+        var actorUserId = GetUserId(principal);
+        if (actorUserId is null) return Results.Unauthorized();
+
+        var target = await userManager.FindByIdAsync(userId);
+        if (target is null) return Results.NotFound();
+
+        var roles = await userManager.GetRolesAsync(target);
+        var targetIsAdmin = roles.Contains("Admin");
+        var adminCount = targetIsAdmin ? (await userManager.GetUsersInRoleAsync("Admin")).Count : 0;
+        var error = AdminRoleRules.ValidateLock(actorUserId, userId, request.IsLocked, targetIsAdmin, adminCount);
+        if (error is not null) return Results.BadRequest(new { error });
+
+        var wasLocked = target.LockoutEnd > DateTimeOffset.UtcNow;
+        if (wasLocked == request.IsLocked)
+            return Results.Ok(new AdminUserResponse(target.Id, target.Email ?? string.Empty, target.FullName, roles.ToList(), wasLocked));
+
+        target.LockoutEnabled = true;
+        target.LockoutEnd = request.IsLocked ? DateTimeOffset.MaxValue : null;
+        var result = await userManager.UpdateAsync(target);
+        if (!result.Succeeded) return Results.ValidationProblem(result.Errors.ToDictionary(error => error.Code, error => new[] { error.Description }));
+
+        db.AdminAuditLogs.Add(new AdminAuditLog
+        {
+            ActorUserId = actorUserId,
+            Action = "user.lock.updated",
+            TargetType = "user",
+            TargetId = target.Id,
+            PreviousValue = wasLocked.ToString(),
+            NewValue = request.IsLocked.ToString(),
+        });
+        await db.SaveChangesAsync();
+
+        return Results.Ok(new AdminUserResponse(target.Id, target.Email ?? string.Empty, target.FullName, roles.ToList(), request.IsLocked));
     }
 
     private static async Task<IResult> ListDevicesAsync(ApplicationDbContext db, int page = 1, int pageSize = 50)
@@ -91,7 +136,7 @@ public static class AdminEndpoints
 
         var totalCount = await db.Devices.CountAsync();
         var items = await db.Devices.OrderByDescending(device => device.CreatedAt).Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(device => new AdminDeviceResponse(device.Id, device.Name, device.OwnerId, device.Owner == null ? null : device.Owner.Email, device.IsOnline, device.LastSeenAt, device.CreatedAt))
+            .Select(device => new AdminDeviceResponse(device.Id, device.Name, device.OwnerId, device.Owner == null ? null : device.Owner.Email, device.IsOnline, device.IsPumpOn, device.LastSeenAt, device.CreatedAt))
             .ToListAsync();
         return Results.Ok(new AdminDevicePage(items, page, pageSize, totalCount));
     }
@@ -105,6 +150,20 @@ public static class AdminEndpoints
             .Select(reading => new SensorReadingResponse(reading.Id, reading.Temperature, reading.Humidity, reading.Ph, reading.Tds, reading.WaterLevel, reading.Lux, reading.RecordedAt))
             .ToListAsync();
         return Results.Ok(readings);
+    }
+
+    private static async Task<IResult> GetPumpHistoryAsync(Guid id, ApplicationDbContext db, int take = 20)
+    {
+        if (!await db.Devices.AnyAsync(device => device.Id == id)) return Results.NotFound();
+
+        var commands = await db.PumpCommands.Where(command => command.DeviceId == id)
+            .OrderByDescending(command => command.IssuedAt).ThenByDescending(command => command.Id)
+            .Take(Math.Clamp(take, 1, 100))
+            .Select(command => new PumpCommandHistoryResponse(
+                command.Id, command.IsOn, command.DurationSeconds, command.Source, command.Status,
+                command.IssuedAt, command.AcknowledgedAt, command.AcknowledgedIsOn, command.FailureReason))
+            .ToListAsync();
+        return Results.Ok(commands);
     }
 
     private static async Task<IResult> UpdateDeviceOwnerAsync(
@@ -146,7 +205,7 @@ public static class AdminEndpoints
     }
 
     private static AdminDeviceResponse ToDeviceResponse(Device device, ApplicationUser? owner) =>
-        new(device.Id, device.Name, device.OwnerId, owner?.Email, device.IsOnline, device.LastSeenAt, device.CreatedAt);
+        new(device.Id, device.Name, device.OwnerId, owner?.Email, device.IsOnline, device.IsPumpOn, device.LastSeenAt, device.CreatedAt);
 
     private static async Task<IResult> ListAuditLogsAsync(ApplicationDbContext db, int page = 1, int pageSize = 50)
     {

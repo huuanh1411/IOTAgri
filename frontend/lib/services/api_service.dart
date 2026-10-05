@@ -599,4 +599,125 @@ class ApiService {
       throw Exception('Failed to load alerts: ${response.body}');
     }
   }
+
+  Future<Map<String, dynamic>> getAdminUsers({
+    int page = 1,
+    int pageSize = 100,
+  }) async {
+    final uri = Uri.parse(
+      '${ApiConstants.baseUrl}${ApiConstants.adminUsers}',
+    ).replace(queryParameters: {'page': '$page', 'pageSize': '$pageSize'});
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(uri, headers: headers),
+    );
+    if (response.statusCode == 200) return jsonDecode(response.body);
+    throw Exception('Failed to load admin users: ${response.body}');
+  }
+
+  Future<Map<String, dynamic>> updateAdminUserRole(
+    String userId,
+    String role,
+  ) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.put(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.adminUserRole(userId)}',
+        ),
+        headers: headers,
+        body: jsonEncode({'role': role}),
+      ),
+    );
+    if (response.statusCode == 200) return jsonDecode(response.body);
+    throw Exception('Failed to update user role: ${response.body}');
+  }
+
+  Future<Map<String, dynamic>> updateAdminUserLock(
+    String userId,
+    bool isLocked,
+  ) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.put(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.adminUserLock(userId)}',
+        ),
+        headers: headers,
+        body: jsonEncode({'isLocked': isLocked}),
+      ),
+    );
+    if (response.statusCode == 200) return jsonDecode(response.body);
+    throw Exception('Failed to update user lock: ${response.body}');
+  }
+
+  Future<Map<String, dynamic>> getAdminDevices({
+    int page = 1,
+    int pageSize = 100,
+  }) async {
+    final uri = Uri.parse(
+      '${ApiConstants.baseUrl}${ApiConstants.adminDevices}',
+    ).replace(queryParameters: {'page': '$page', 'pageSize': '$pageSize'});
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(uri, headers: headers),
+    );
+    if (response.statusCode == 200) return jsonDecode(response.body);
+    throw Exception('Failed to load admin devices: ${response.body}');
+  }
+
+  Future<List<dynamic>> getAdminDeviceReadings(
+    String deviceId, {
+    int take = 50,
+  }) async {
+    final uri = Uri.parse(
+      '${ApiConstants.baseUrl}${ApiConstants.adminDeviceReadings(deviceId)}',
+    ).replace(queryParameters: {'take': '$take'});
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(uri, headers: headers),
+    );
+    if (response.statusCode == 200) return jsonDecode(response.body);
+    throw Exception('Failed to load admin device readings: ${response.body}');
+  }
+
+  Future<List<dynamic>> getAdminDevicePumpCommands(
+    String deviceId, {
+    int take = 20,
+  }) async {
+    final uri = Uri.parse(
+      '${ApiConstants.baseUrl}${ApiConstants.adminDevicePumpCommands(deviceId)}',
+    ).replace(queryParameters: {'take': '$take'});
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(uri, headers: headers),
+    );
+    if (response.statusCode == 200) return jsonDecode(response.body);
+    throw Exception('Failed to load admin pump commands: ${response.body}');
+  }
+
+  Future<Map<String, dynamic>> updateAdminDeviceOwner(
+    String deviceId,
+    String? ownerId,
+  ) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.put(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.adminDeviceOwner(deviceId)}',
+        ),
+        headers: headers,
+        body: jsonEncode({'ownerId': ownerId}),
+      ),
+    );
+    if (response.statusCode == 200) return jsonDecode(response.body);
+    throw Exception('Failed to update device owner: ${response.body}');
+  }
+
+  Future<Map<String, dynamic>> getAdminAuditLogs({
+    int page = 1,
+    int pageSize = 100,
+  }) async {
+    final uri = Uri.parse(
+      '${ApiConstants.baseUrl}${ApiConstants.adminAuditLogs}',
+    ).replace(queryParameters: {'page': '$page', 'pageSize': '$pageSize'});
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(uri, headers: headers),
+    );
+    if (response.statusCode == 200) return jsonDecode(response.body);
+    throw Exception('Failed to load admin audit logs: ${response.body}');
+  }
 }

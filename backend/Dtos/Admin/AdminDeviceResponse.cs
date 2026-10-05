@@ -6,6 +6,7 @@ public record AdminDeviceResponse(
     string? OwnerId,
     string? OwnerEmail,
     bool IsOnline,
+    bool IsPumpOn,
     DateTime? LastSeenAt,
     DateTime CreatedAt);
 

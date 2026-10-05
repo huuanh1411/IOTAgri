@@ -150,7 +150,16 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
   }
 
   Widget _buildContent(BuildContext context, bool isDesktop) {
-    if (_selectedTab == 1) return const CupertinoDevicesScreen();
+    if (_selectedTab == 1) {
+      const devices = CupertinoDevicesScreen();
+      if (isDesktop) return devices;
+      return Column(
+        children: [
+          const Expanded(child: devices),
+          _buildBottomBar(context),
+        ],
+      );
+    }
     final summary = FarmHealthSummary.fromDevices(_devices);
     final content = CustomScrollView(
       physics: const BouncingScrollPhysics(),

@@ -4,18 +4,24 @@
 // utility in the flutter_test package. For example, you can send tap and scroll
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 import 'package:iotagri_app/cupertino/dashboard/farm_health_card.dart';
+import 'package:iotagri_app/cupertino/dashboard/cupertino_dashboard_screen.dart';
 import 'package:iotagri_app/cupertino/devices/cupertino_device_detail_screen.dart';
 import 'package:iotagri_app/models/device.dart';
 import 'package:iotagri_app/models/device_alert.dart';
 import 'package:iotagri_app/models/device_overview.dart';
 import 'package:iotagri_app/models/sensor_reading.dart';
 import 'package:iotagri_app/cupertino/devices/cupertino_devices_screen.dart';
+import 'package:iotagri_app/cupertino/auth/cupertino_register_screen.dart';
+import 'package:iotagri_app/screens/pumps/pump_schedules_screen.dart';
 import 'package:iotagri_app/providers/auth_provider.dart';
 import 'package:iotagri_app/screens/dashboard/dashboard_screen.dart';
 import 'package:iotagri_app/services/api_service.dart';
@@ -24,6 +30,29 @@ class _OfflineApiService extends ApiService {
   @override
   Future<Map<String, dynamic>> login(String email, String password) async {
     throw http.ClientException('Failed to fetch');
+  }
+}
+
+class _SuccessfulAuthApiService extends ApiService {
+  @override
+  Future<Map<String, dynamic>> register(
+    String email,
+    String password,
+    String fullName,
+  ) async => {};
+
+  @override
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    final payload = base64UrlEncode(
+      utf8.encode(
+        jsonEncode({
+          'sub': 'user-1',
+          'email': email,
+          'exp': DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch ~/ 1000,
+        }),
+      ),
+    ).replaceAll('=', '');
+    return {'accessToken': 'header.$payload.signature', 'refreshToken': 'refresh'};
   }
 }
 
@@ -193,6 +222,73 @@ Widget _healthCard(List<DeviceOverview> devices, {VoidCallback? onAddDevice}) =>
     );
 
 void main() {
+  testWidgets('pump schedule screen opens from the Cupertino app', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: PumpSchedulesScreen(
+          device: Device(
+            id: 'device-1',
+            name: 'Pump Simulator',
+            isOnline: false,
+            createdAt: '2026-10-05T00:00:00Z',
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('registration returns to the authenticated root screen', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final authProvider = AuthProvider(apiService: _SuccessfulAuthApiService());
+    addTearDown(authProvider.dispose);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: authProvider,
+        child: CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Builder(
+              builder: (context) => Center(
+                child: CupertinoButton(
+                  onPressed: () => Navigator.of(context).push(
+                    CupertinoPageRoute<void>(
+                      builder: (_) => const CupertinoRegisterScreen(),
+                    ),
+                  ),
+                  child: const Text('Open registration'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open registration'));
+    await tester.pumpAndSettle();
+    final fields = find.byType(CupertinoTextField);
+    await tester.enterText(fields.at(0), 'Test User');
+    await tester.enterText(fields.at(1), 'user@example.com');
+    await tester.enterText(fields.at(2), 'Password123');
+    await tester.enterText(fields.at(3), 'Password123');
+    final submitButton = find.widgetWithText(CupertinoButton, 'Đăng ký');
+    await tester.ensureVisible(submitButton);
+    await tester.tap(submitButton);
+    await tester.pumpAndSettle();
+
+    expect(authProvider.isAuthenticated, isTrue);
+    expect(find.byType(CupertinoRegisterScreen), findsNothing);
+  });
+
   test('login stays unauthenticated when backend is unavailable', () async {
     final authProvider = AuthProvider(apiService: _OfflineApiService());
     addTearDown(authProvider.dispose);
@@ -300,6 +396,23 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(CupertinoSearchTextField), findsOneWidget);
+  });
+
+  testWidgets('device tab keeps the dashboard menu', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const CupertinoApp(home: CupertinoDashboardScreen()),
+    );
+    await tester.pump();
+    await tester.tap(find.byIcon(CupertinoIcons.square_grid_2x2));
+    await tester.pump();
+
+    expect(find.byType(CupertinoDevicesScreen), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.house_fill), findsOneWidget);
   });
 
   testWidgets('device deletion requires confirmation and removes the row', (
