@@ -2,6 +2,12 @@ namespace IOTAgriBackend.Services;
 
 public static class AdminRoleRules
 {
+    public static string? ValidateListFilter(string? filter, out string? normalized)
+    {
+        normalized = string.IsNullOrWhiteSpace(filter) ? null : filter.Trim().ToLowerInvariant();
+        return normalized is null or "active" or "locked" or "admin" ? null : "Filter must be active, locked, or admin.";
+    }
+
     public static string? Validate(string actorUserId, string targetUserId, string? role, bool targetIsAdmin, int adminCount)
     {
         if (role is not "User" and not "Admin") return "Role must be User or Admin.";

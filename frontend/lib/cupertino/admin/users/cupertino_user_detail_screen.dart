@@ -58,10 +58,16 @@ class _CupertinoUserDetailScreenState extends State<CupertinoUserDetailScreen> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      final response = await _apiService.getAdminDevices();
-      _devices = (response['items'] as List<dynamic>? ?? [])
-          .cast<Map<String, dynamic>>()
-          .where((device) => device['ownerId'] == _user['id'])
+      final response = await _apiService.getAdminUser(_user['id'] as String);
+      final user = Map<String, dynamic>.from(response['user'] as Map);
+      final roles = (user['roles'] as List<dynamic>? ?? []).cast<String>();
+      _user = {
+        ..._user,
+        ...user,
+        'role': roles.contains('Admin') ? 'admin' : 'user',
+      };
+      _devices = (response['devices'] as List<dynamic>? ?? [])
+          .map((device) => Map<String, dynamic>.from(device as Map))
           .toList();
       _tickets = [];
     } finally {
@@ -500,6 +506,18 @@ class _CupertinoUserDetailScreenState extends State<CupertinoUserDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        _buildActionButton(
+          context,
+          icon: isAdmin
+              ? CupertinoIcons.person_fill
+              : CupertinoIcons.shield_lefthalf_fill,
+          label: isAdmin ? 'Chuyển thành người dùng' : 'Cấp quyền Admin',
+          color: isAdmin
+              ? CupertinoColors.systemOrange
+              : AerogreenCupertinoTheme.aerogreenPrimary,
+          onPressed: _toggleRole,
+        ),
+        if (!isAdmin) const SizedBox(height: 12),
         // Nút Khóa/Mở khóa (ẩn nếu là admin)
         if (!isAdmin)
           _buildActionButton(
@@ -645,6 +663,47 @@ class _CupertinoUserDetailScreenState extends State<CupertinoUserDetailScreen> {
       setState(() => _user['isLocked'] = !isLocked);
       widget.onUserUpdated?.call(Map<String, dynamic>.from(_user));
       _showMessage(!isLocked ? 'Đã khóa tài khoản' : 'Đã mở khóa tài khoản');
+    } catch (error) {
+      if (mounted) _showMessage(error.toString());
+    }
+  }
+
+  Future<void> _toggleRole() async {
+    final newRole = _user['role'] == 'admin' ? 'User' : 'Admin';
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('Xác nhận thay đổi quyền'),
+        content: Text('Chuyển ${_user['email']} thành $newRole?'),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Hủy'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: newRole == 'User',
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Xác nhận'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      final user = await _apiService.updateAdminUserRole(
+        _user['id'] as String,
+        newRole,
+      );
+      final roles = (user['roles'] as List<dynamic>? ?? []).cast<String>();
+      if (!mounted) return;
+      setState(() => _user = {
+            ..._user,
+            ...user,
+            'role': roles.contains('Admin') ? 'admin' : 'user',
+          });
+      widget.onUserUpdated?.call(Map<String, dynamic>.from(_user));
+      _showMessage('Đã cập nhật quyền');
     } catch (error) {
       if (mounted) _showMessage(error.toString());
     }

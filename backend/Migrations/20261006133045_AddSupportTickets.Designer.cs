@@ -3,6 +3,7 @@ using System;
 using IOTAgriBackend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IOTAgriBackend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261006133045_AddSupportTickets")]
+    partial class AddSupportTickets
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -488,32 +491,6 @@ namespace IOTAgriBackend.Migrations
                     b.HasIndex("TicketId", "CreatedAt");
 
                     b.ToTable("SupportTicketMessages");
-                });
-
-            modelBuilder.Entity("IOTAgriBackend.Models.SystemAlertDefaults", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<double>("HighTemperatureC")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("LowWaterLevelPercent")
-                        .HasColumnType("double precision");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SystemAlertDefaults", t =>
-                        {
-                            t.HasCheckConstraint("CK_SystemAlertDefaults_LowWaterLevelPercent", "\"LowWaterLevelPercent\" >= 0 AND \"LowWaterLevelPercent\" <= 100");
-                            t.HasCheckConstraint("CK_SystemAlertDefaults_Singleton", "\"Id\" = 1");
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

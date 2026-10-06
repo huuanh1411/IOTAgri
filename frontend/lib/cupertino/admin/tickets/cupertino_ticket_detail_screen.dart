@@ -13,6 +13,7 @@
 import 'package:flutter/cupertino.dart';
 
 import '../../theme/cupertino_theme.dart';
+import '../../../services/api_service.dart';
 
 class CupertinoTicketDetailScreen extends StatefulWidget {
   final Map<String, dynamic> ticket;
@@ -32,6 +33,7 @@ class _CupertinoTicketDetailScreenState
   late Map<String, dynamic> _ticket;
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
+  final _apiService = ApiService();
 
   List<Map<String, dynamic>> _messages = [];
   bool _isLoading = true;
@@ -53,47 +55,28 @@ class _CupertinoTicketDetailScreenState
   // Load tin nhắn (mock)
   Future<void> _loadMessages() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    _messages = [
-      {
-        'id': 'msg_1',
-        'sender': 'user',
-        'text': _ticket['subject'] ?? 'Nội dung ticket',
-        'time': DateTime.now()
-            .subtract(const Duration(hours: 5))
-            .toIso8601String(),
-      },
-      {
-        'id': 'msg_2',
-        'sender': 'admin',
-        'text': 'Chào bạn, tôi đã tiếp nhận ticket. Sẽ kiểm tra ngay.',
-        'time': DateTime.now()
-            .subtract(const Duration(hours: 4, minutes: 30))
-            .toIso8601String(),
-      },
-      {
-        'id': 'msg_3',
-        'sender': 'user',
-        'text': 'Cảm ơn admin. Thiết bị của mình bị mất kết nối từ sáng.',
-        'time': DateTime.now()
-            .subtract(const Duration(hours: 3))
-            .toIso8601String(),
-      },
-      {
-        'id': 'msg_4',
-        'sender': 'admin',
-        'text':
-        'Bạn vui lòng kiểm tra nguồn điện và kết nối WiFi của thiết bị nhé.',
-        'time': DateTime.now()
-            .subtract(const Duration(hours: 2))
-            .toIso8601String(),
-      },
-    ];
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-    _scrollToBottom();
+    try {
+      final response = await _apiService.getAdminTicket(_ticket['id'].toString());
+      final messages = (response['messages'] as List<dynamic>? ?? []).map((item) {
+        final message = item as Map<String, dynamic>;
+        return <String, dynamic>{
+          'id': message['id'],
+          'sender': message['isAdmin'] == true ? 'admin' : 'user',
+          'text': message['message'],
+          'time': message['createdAt'],
+        };
+      }).toList();
+      if (!mounted) return;
+      setState(() {
+        _ticket = Map<String, dynamic>.from(response['ticket'] as Map);
+        _messages = messages;
+        _isLoading = false;
+      });
+      _scrollToBottom();
+    } catch (error) {
+      if (mounted) setState(() => _isLoading = false);
+      if (mounted) _showToast('$error');
+    }
   }
 
   void _scrollToBottom() {
@@ -316,21 +299,17 @@ class _CupertinoTicketDetailScreenState
   }
 
   // ==================== ACTIONS HANDLERS ====================
-  void _sendMessage() {
+  Future<void> _sendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
-    setState(() {
-      _messages.add({
-        'id': 'msg_${DateTime.now().millisecondsSinceEpoch}',
-        'sender': 'admin',
-        'text': text,
-        'time': DateTime.now().toIso8601String(),
-      });
-    });
-
-    _messageController.clear();
-    _scrollToBottom();
+    try {
+      await _apiService.replyToAdminTicket(_ticket['id'].toString(), text);
+      _messageController.clear();
+      await _loadMessages();
+    } catch (error) {
+      if (mounted) _showToast('$error');
+    }
   }
 
   void _showMoreActions() {
@@ -373,12 +352,15 @@ class _CupertinoTicketDetailScreenState
         title: const Text('Chọn trạng thái'),
         actions: List.generate(statuses.length, (i) {
           return CupertinoActionSheetAction(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(actionContext).pop();
-              setState(() {
-                _ticket['status'] = statuses[i];
-              });
-              _showToast('Đã đổi trạng thái: ${labels[i]}');
+              try {
+                await _apiService.updateAdminTicketStatus(_ticket['id'].toString(), statuses[i]);
+                await _loadMessages();
+                if (mounted) _showToast('Đã đổi trạng thái: ${labels[i]}');
+              } catch (error) {
+                if (mounted) _showToast('$error');
+              }
             },
             child: Text(
               labels[i],
@@ -408,12 +390,15 @@ class _CupertinoTicketDetailScreenState
         title: const Text('Chọn độ ưu tiên'),
         actions: List.generate(priorities.length, (i) {
           return CupertinoActionSheetAction(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(actionContext).pop();
-              setState(() {
-                _ticket['priority'] = priorities[i];
-              });
-              _showToast('Đã đổi ưu tiên: ${labels[i]}');
+              try {
+                await _apiService.updateAdminTicketPriority(_ticket['id'].toString(), priorities[i]);
+                await _loadMessages();
+                if (mounted) _showToast('Đã đổi ưu tiên: ${labels[i]}');
+              } catch (error) {
+                if (mounted) _showToast('$error');
+              }
             },
             child: Text(labels[i]),
           );

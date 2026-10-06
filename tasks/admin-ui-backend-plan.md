@@ -61,11 +61,11 @@ Replace the matching device/role/audit mock reads.
 
 **Acceptance criteria:**
 
-- [ ] Empty bootstrap secrets create no account; supplied secrets create or
+- [x] Empty bootstrap secrets create no account; supplied secrets create or
   update one `Admin` account without logging its password.
-- [ ] A normal user receives `403`; an administrator can call every existing
+- [x] A normal user receives `403`; an administrator can call every existing
   route through Flutter.
-- [ ] Admin UI displays backend errors instead of mock data.
+- [x] Admin UI displays backend errors instead of mock data.
 
 **Verification:** focused bootstrap and authorization tests; Flutter API-client
 tests; `dotnet test`; `flutter test`; Compose login as bootstrap admin.
@@ -85,9 +85,9 @@ retention and email-provider decisions exist.
 
 **Acceptance criteria:**
 
-- [ ] Search and Active/Locked/Admin filters return paginated correct results.
-- [ ] Admin cannot lock self or the last administrator.
-- [ ] Role and lock changes create audit records; passwords/tokens never do.
+- [x] Search and Active/Locked/Admin filters return paginated correct results.
+- [x] Admin cannot lock self or the last administrator.
+- [x] Role and lock changes create audit records; passwords/tokens never do.
 
 **Verification:** endpoint authorization, last-admin, lockout, and paging
 tests; Flutter list/detail tests; manual login refusal for locked user.
@@ -107,10 +107,10 @@ Replace fake device delete with unassign owner.
 
 **Acceptance criteria:**
 
-- [ ] Filters, detail, readings, pump history, reassignment, and unassignment
+- [x] Filters, detail, readings, pump history, reassignment, and unassignment
   work only for admins.
-- [ ] A former owner loses access after unassignment or reassignment.
-- [ ] Every ownership action is audited; device/readings/commands remain.
+- [x] A former owner loses access after unassignment or reassignment.
+- [x] Every ownership action is audited; device/readings/commands remain.
 
 **Verification:** authorization and ownership-isolation tests; Flutter device
 screen test; Compose reassignment check.
@@ -129,10 +129,12 @@ reply routes. Record actor and changes in audit logs.
 
 **Acceptance criteria:**
 
-- [ ] Tickets paginate, search, and filter by Open/In progress/Closed.
-- [ ] Admin can change status/priority and reply; messages retain author and
+- [x] Tickets paginate, search, and filter by Open/In progress/Closed.
+- [x] Admin can change status/priority and reply; messages retain author and
   UTC time.
-- [ ] Cross-ticket access and invalid transitions return safe errors.
+- [x] Cross-ticket access and invalid transitions return safe errors.
+
+- [x] Authenticated users can create a ticket from the dashboard.
 
 **Verification:** migration, endpoint, transition, and authorization tests;
 Compose CRUD check.
@@ -149,8 +151,8 @@ endpoints/DTOs/tests. **Scope:** Medium.
 
 **Acceptance criteria:**
 
-- [ ] List, detail, reply, status, and priority survive reload.
-- [ ] UI does not report success when backend rejects a change.
+- [x] List, detail, reply, status, and priority survive reload.
+- [x] UI does not report success when backend rejects a change.
 
 **Verification:** Flutter widget tests and Android manual flow.
 
@@ -167,9 +169,9 @@ download generated from the same queries. Use CSV only; disable PDF button.
 
 **Acceptance criteria:**
 
-- [ ] Overview and report counts agree with database queries.
-- [ ] Log filters return only authorized audit records.
-- [ ] CSV has correct UTF-8 headers, values, and content disposition.
+- [x] Overview and report counts agree with database queries.
+- [x] Log filters return only authorized audit records.
+- [x] CSV has correct UTF-8 headers, values, and content disposition.
 
 **Verification:** aggregate/filter/export endpoint tests; Flutter overview/log/
 report tests; download check.
@@ -187,8 +189,8 @@ Do not expose fake CPU/RAM/message-rate values.
 
 **Acceptance criteria:**
 
-- [ ] Failed database or MQTT state reports degraded, never stale mock values.
-- [ ] Monitoring screen refreshes and labels unavailable metrics clearly.
+- [x] Failed database or MQTT state reports degraded, never stale mock values.
+- [x] Monitoring screen refreshes and labels unavailable metrics clearly.
 
 **Verification:** unit tests for status mapping; Compose stop/start dependency
 check; Flutter error/degraded state test.
@@ -207,9 +209,9 @@ switches disabled and explained in UI.
 
 **Acceptance criteria:**
 
-- [ ] Admin reload sees saved values.
-- [ ] Changed default affects only devices without an override.
-- [ ] No switch claims email/SMS/push delivery or maintenance enforcement.
+- [x] Admin reload sees saved values.
+- [x] Changed default affects only devices without an override.
+- [x] No switch claims email/SMS/push delivery or maintenance enforcement.
 
 **Verification:** migration and fallback-rule tests; admin authorization test;
 Flutter configuration save/reload test.
@@ -229,13 +231,13 @@ configuration screen. **Scope:** Medium.
 
 ### After Tasks 4-6
 
-- [ ] Tickets, overview, audit log, reports, and CSV survive reload.
+- [x] Tickets, overview, audit log, reports, and CSV survive reload.
 - [ ] No passwords, tokens, device keys, or private readings leak.
 
 ### Complete
 
-- [ ] Monitoring reports real dependency state.
-- [ ] Settings change real supported behavior only.
+- [x] Monitoring reports real dependency state.
+- [x] Settings change real supported behavior only.
 - [ ] Remove `MockAdminService` when no screen imports it.
 - [ ] Run full tests, Compose smoke check, `graphify update .`, and graph
   diagnosis.

@@ -9,7 +9,8 @@
 
 import 'package:flutter/cupertino.dart';
 
-import '../../../services/mock_admin_service.dart';
+import '../../../services/api_service.dart';
+import '../../../utils/download_csv.dart';
 import '../../theme/cupertino_theme.dart';
 
 class CupertinoReportsScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class CupertinoReportsScreen extends StatefulWidget {
 }
 
 class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
-  final _mockService = MockAdminService();
+  final _apiService = ApiService();
   Map<String, dynamic>? _stats;
   bool _isLoading = true;
 
@@ -33,12 +34,16 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-    setState(() {
-      _stats = _mockService.getMockReportStats();
-      _isLoading = false;
-    });
+    try {
+      final summary = await _apiService.getAdminReportSummary();
+      if (!mounted) return;
+      setState(() {
+        _stats = summary;
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -74,7 +79,6 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
                   stats: _stats!['users'] as Map<String, dynamic>,
                   metrics: [
                     {'label': 'Tổng', 'value': 'total'},
-                    {'label': 'Mới tháng này', 'value': 'newThisMonth'},
                     {'label': 'Hoạt động', 'value': 'active'},
                     {'label': 'Đã khóa', 'value': 'locked'},
                   ],
@@ -102,8 +106,7 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
                   stats: _stats!['alerts'] as Map<String, dynamic>,
                   metrics: [
                     {'label': 'Tổng', 'value': 'total'},
-                    {'label': 'Nghiêm trọng', 'value': 'critical'},
-                    {'label': 'Cảnh báo', 'value': 'warning'},
+                    {'label': 'Chưa xử lý', 'value': 'unresolved'},
                     {'label': 'Đã xử lý', 'value': 'resolved'},
                   ],
                 ),
@@ -250,7 +253,7 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
                 child: _buildExportButton(
                   context,
                   icon: CupertinoIcons.doc_fill,
-                  label: 'PDF',
+                   label: 'PDF',
                   color: CupertinoColors.systemRed,
                 ),
               ),
@@ -259,7 +262,7 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
                 child: _buildExportButton(
                   context,
                   icon: CupertinoIcons.table,
-                  label: 'CSV',
+                   label: 'CSV',
                   color: CupertinoColors.systemGreen,
                 ),
               ),
@@ -279,7 +282,7 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
     return CupertinoButton(
       padding: EdgeInsets.zero,
       minimumSize: const Size(double.infinity, 44),
-      onPressed: () => _exportReport(label),
+       onPressed: label == 'CSV' ? _exportCsv : null,
       child: Container(
         height: 44,
         decoration: BoxDecoration(
@@ -314,14 +317,7 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.of(actionContext).pop();
-              _exportReport('PDF');
-            },
-            child: const Text('Xuất PDF'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.of(actionContext).pop();
-              _exportReport('CSV');
+              _exportCsv();
             },
             child: const Text('Xuất CSV'),
           ),
@@ -334,14 +330,26 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
     );
   }
 
-  void _exportReport(String format) {
+  Future<void> _exportCsv() async {
+    try {
+      final response = await _apiService.downloadAdminReportCsv();
+      if (response.statusCode != 200) throw Exception(response.body);
+      await downloadCsv(response.bodyBytes, 'admin-report.csv');
+      if (!mounted) return;
+      _showExportResult('Đã tải CSV.');
+    } catch (error) {
+      if (mounted) _showExportResult('$error');
+    }
+  }
+
+  void _showExportResult(String message) {
     showCupertinoDialog<void>(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text('Xuất $format'),
+         title: const Text('Xuất CSV'),
         content: Padding(
           padding: const EdgeInsets.only(top: 8),
-          child: Text('Đang xuất báo cáo $format...\nVui lòng chờ.'),
+           child: Text(message),
         ),
         actions: [
           CupertinoDialogAction(

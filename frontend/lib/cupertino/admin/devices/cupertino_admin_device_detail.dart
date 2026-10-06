@@ -48,21 +48,18 @@ class _CupertinoAdminDeviceDetailScreenState
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      final results = await Future.wait([
-        _apiService.getAdminDeviceReadings(_device['id'] as String, take: 1),
-        _apiService.getAdminDevicePumpCommands(_device['id'] as String),
-      ]);
-      final readings = results[0] as List<dynamic>;
-      final reading = readings.isEmpty
-          ? null
-          : readings.first as Map<String, dynamic>;
+      final response = await _apiService.getAdminDevice(_device['id'] as String);
+      final device = Map<String, dynamic>.from(response['device'] as Map);
+      final reading = response['latestReading'] as Map<String, dynamic>?;
       _device = {
         ..._device,
+        ...device,
         'temperature': reading?['temperature'],
         'humidity': reading?['humidity'],
         'waterLevel': reading?['waterLevel'],
       };
-      _pumpHistory = (results[1] as List<dynamic>).map((item) {
+      _isPumping = _device['isPumpOn'] == true;
+      _pumpHistory = (response['pumpCommands'] as List<dynamic>? ?? []).map((item) {
         final command = item as Map<String, dynamic>;
         return <String, dynamic>{
           'id': command['id'],

@@ -3,9 +3,8 @@ import 'package:provider/provider.dart';
 import '../widgets/admin_logout_button.dart';
 
 import '../../../providers/auth_provider.dart';
-import '../../../services/mock_admin_service.dart';
+import '../../../services/api_service.dart';
 import '../../theme/cupertino_theme.dart';
-import 'admin_system_health_card.dart';
 import 'admin_quick_stats.dart';
 
 class AdminOverviewTab extends StatefulWidget {
@@ -16,12 +15,11 @@ class AdminOverviewTab extends StatefulWidget {
 }
 
 class _AdminOverviewTabState extends State<AdminOverviewTab> {
-  final _mockService = MockAdminService();
+  final _apiService = ApiService();
   bool _isLoading = true;
+  String? _error;
 
-  Map<String, dynamic>? _systemHealth;
-  List<Map<String, dynamic>> _alerts = [];
-  List<Map<String, dynamic>> _tickets = [];
+  Map<String, dynamic>? _stats;
 
   @override
   void initState() {
@@ -31,22 +29,27 @@ class _AdminOverviewTabState extends State<AdminOverviewTab> {
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 400)); // Giả lập loading
-    if (!mounted) return;
-    setState(() {
-      _systemHealth = _mockService.getMockSystemHealth();
-      _alerts = _mockService
-          .getMockAlerts()
-          .where((a) => a['severity'] == 'critical' && a['isResolved'] != true)
-          .take(5)
-          .toList();
-      _tickets = _mockService
-          .getMockTickets()
-          .where((t) => t['status'] != 'closed')
-          .take(3)
-          .toList();
-      _isLoading = false;
-    });
+    try {
+      final overview = await _apiService.getAdminOverview();
+      if (!mounted) return;
+      setState(() {
+        _stats = {
+          'totalUsers': overview['users'],
+          'totalDevices': overview['devices'],
+          'onlineDevices': overview['onlineDevices'],
+          'totalAlerts': overview['unresolvedAlerts'],
+          'unresolvedAlerts': overview['unresolvedAlerts'],
+          'openTickets': overview['openTickets'],
+        };
+        _error = null;
+        _isLoading = false;
+      });
+    } catch (error) {
+      if (mounted) setState(() {
+        _error = '$error';
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -55,6 +58,9 @@ class _AdminOverviewTabState extends State<AdminOverviewTab> {
       return const Center(
         child: CupertinoActivityIndicator(radius: 14),
       );
+    }
+    if (_error != null) {
+      return Center(child: CupertinoButton(onPressed: _loadData, child: Text(_error!)));
     }
 
     return CustomScrollView(
@@ -83,36 +89,7 @@ class _AdminOverviewTabState extends State<AdminOverviewTab> {
               _buildGreeting(context),
               const SizedBox(height: 20),
 
-              // 1. System Health Card
-              if (_systemHealth != null)
-                AdminSystemHealthCard(systemHealth: _systemHealth!),
-              const SizedBox(height: 20),
-
-              // 2. Quick Stats
-              if (_systemHealth != null)
-                AdminQuickStats(stats: _systemHealth!),
-              const SizedBox(height: 26),
-
-              // 3. Critical Alerts
-              if (_alerts.isNotEmpty) ...[
-                _sectionHeader(context, 'Cần xử lý ngay', '${_alerts.length} vấn đề'),
-                const SizedBox(height: 12),
-                ..._alerts.map((alert) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: _AlertCard(alert: alert),
-                )),
-                const SizedBox(height: 26),
-              ],
-
-              // 4. Open Tickets
-              if (_tickets.isNotEmpty) ...[
-                _sectionHeader(context, 'Tickets đang mở', '${_tickets.length} ticket'),
-                const SizedBox(height: 12),
-                ..._tickets.map((ticket) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: _TicketCard(ticket: ticket),
-                )),
-              ],
+              if (_stats != null) AdminQuickStats(stats: _stats!),
             ]),
           ),
         ),

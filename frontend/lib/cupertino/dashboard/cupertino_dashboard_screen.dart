@@ -9,6 +9,7 @@ import '../../models/pump_command.dart';
 import '../../models/pump_schedule.dart';
 import '../devices/cupertino_devices_screen.dart';
 import '../devices/cupertino_device_detail_screen.dart';
+import '../tickets/cupertino_create_ticket_screen.dart';
 import '../../screens/pumps/pump_schedules_screen.dart';
 import '../../services/api_service.dart';
 import '../theme/cupertino_theme.dart';
@@ -166,11 +167,26 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
       slivers: [
         CupertinoSliverNavigationBar(
           largeTitle: const Text('Aerogreen'),
-          trailing: CupertinoButton(
-            padding: EdgeInsets.zero,
-            minSize: 44,
-            onPressed: _loadDashboardData,
-            child: const Icon(CupertinoIcons.arrow_2_circlepath),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                minSize: 44,
+                onPressed: () => Navigator.of(context).push<void>(
+                  CupertinoPageRoute(
+                    builder: (_) => const CupertinoCreateTicketScreen(),
+                  ),
+                ),
+                child: const Icon(CupertinoIcons.chat_bubble_2),
+              ),
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                minSize: 44,
+                onPressed: _loadDashboardData,
+                child: const Icon(CupertinoIcons.arrow_2_circlepath),
+              ),
+            ],
           ),
         ),
         CupertinoSliverRefreshControl(onRefresh: _loadDashboardData),

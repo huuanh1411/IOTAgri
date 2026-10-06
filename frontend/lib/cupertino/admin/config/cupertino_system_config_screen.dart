@@ -1,39 +1,62 @@
-// ============================================================
-// cupertino_system_config_screen.dart
-// Màn hình Cấu hình hệ thống.
-// Chức năng:
-//   - Alert Thresholds (mặc định cho mọi device)
-//   - Notification settings (push/email/sms)
-//   - Maintenance mode
-// ============================================================
-
 import 'package:flutter/cupertino.dart';
 
+import '../../../services/api_service.dart';
 import '../../theme/cupertino_theme.dart';
 
 class CupertinoSystemConfigScreen extends StatefulWidget {
   const CupertinoSystemConfigScreen({super.key});
 
   @override
-  State<CupertinoSystemConfigScreen> createState() =>
-      _CupertinoSystemConfigScreenState();
+  State<CupertinoSystemConfigScreen> createState() => _CupertinoSystemConfigScreenState();
 }
 
-class _CupertinoSystemConfigScreenState
-    extends State<CupertinoSystemConfigScreen> {
-  // Alert thresholds
-  double _maxTemp = 35.0;
-  double _minTemp = 15.0;
-  double _minHumidity = 40.0;
-  double _minWaterLevel = 20.0;
+class _CupertinoSystemConfigScreenState extends State<CupertinoSystemConfigScreen> {
+  final _apiService = ApiService();
+  double _highTemperatureC = 35;
+  double _lowWaterLevelPercent = 20;
+  bool _loading = true;
+  bool _saving = false;
+  String? _error;
 
-  // Notification settings
-  bool _pushEnabled = true;
-  bool _emailEnabled = true;
-  bool _smsEnabled = false;
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
 
-  // Maintenance mode
-  bool _maintenanceMode = false;
+  Future<void> _load() async {
+    try {
+      final settings = await _apiService.getAdminAlertDefaults();
+      if (mounted) setState(() {
+        _highTemperatureC = (settings['highTemperatureC'] as num).toDouble();
+        _lowWaterLevelPercent = (settings['lowWaterLevelPercent'] as num).toDouble();
+        _loading = false;
+        _error = null;
+      });
+    } catch (error) {
+      if (mounted) setState(() {
+        _loading = false;
+        _error = '$error';
+      });
+    }
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      final settings = await _apiService.updateAdminAlertDefaults(_highTemperatureC, _lowWaterLevelPercent);
+      if (mounted) setState(() {
+        _highTemperatureC = (settings['highTemperatureC'] as num).toDouble();
+        _lowWaterLevelPercent = (settings['lowWaterLevelPercent'] as num).toDouble();
+        _saving = false;
+      });
+    } catch (error) {
+      if (mounted) setState(() {
+        _saving = false;
+        _error = '$error';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,267 +67,68 @@ class _CupertinoSystemConfigScreenState
           largeTitle: const Text('Cấu hình'),
           trailing: CupertinoButton(
             padding: EdgeInsets.zero,
-            minimumSize: const Size(44, 44),
-            onPressed: _saveConfig,
-            child: const Text(
-              'Lưu',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
+            onPressed: _saving ? null : _save,
+            child: _saving ? const CupertinoActivityIndicator() : const Text('Lưu'),
           ),
         ),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              _buildSectionHeader(context, 'Ngưỡng cảnh báo (mặc định)'),
-              const SizedBox(height: 10),
-              _buildSlider(
+          sliver: SliverList(delegate: SliverChildListDelegate([
+            if (_loading)
+              const Center(child: CupertinoActivityIndicator())
+            else if (_error != null)
+              CupertinoButton(onPressed: _load, child: Text(_error!))
+            else ...[
+              _slider(
                 context,
-                icon: CupertinoIcons.thermometer,
-                color: CupertinoColors.systemRed,
-                label: 'Nhiệt độ tối đa',
-                value: _maxTemp,
-                min: 20,
-                max: 50,
-                unit: '°C',
-                onChanged: (v) => setState(() => _maxTemp = v),
+                'Nhiệt độ cảnh báo mặc định',
+                _highTemperatureC,
+                20,
+                50,
+                '°C',
+                (value) => setState(() => _highTemperatureC = value),
               ),
-              const SizedBox(height: 10),
-              _buildSlider(
+              const SizedBox(height: 12),
+              _slider(
                 context,
-                icon: CupertinoIcons.thermometer,
-                color: CupertinoColors.systemBlue,
-                label: 'Nhiệt độ tối thiểu',
-                value: _minTemp,
-                min: 0,
-                max: 25,
-                unit: '°C',
-                onChanged: (v) => setState(() => _minTemp = v),
+                'Mực nước cảnh báo mặc định',
+                _lowWaterLevelPercent,
+                0,
+                100,
+                '%',
+                (value) => setState(() => _lowWaterLevelPercent = value),
               ),
+              const SizedBox(height: 20),
+              _notice(context, 'Thiết bị có ngưỡng riêng sẽ không bị thay đổi.'),
               const SizedBox(height: 10),
-              _buildSlider(
-                context,
-                icon: CupertinoIcons.drop_fill,
-                color: CupertinoColors.systemTeal,
-                label: 'Độ ẩm tối thiểu',
-                value: _minHumidity,
-                min: 20,
-                max: 80,
-                unit: '%',
-                onChanged: (v) => setState(() => _minHumidity = v),
-              ),
-              const SizedBox(height: 10),
-              _buildSlider(
-                context,
-                icon: CupertinoIcons.drop_triangle,
-                color: AerogreenCupertinoTheme.aerogreenPrimary,
-                label: 'Mực nước tối thiểu',
-                value: _minWaterLevel,
-                min: 5,
-                max: 50,
-                unit: '%',
-                onChanged: (v) => setState(() => _minWaterLevel = v),
-              ),
-
-              const SizedBox(height: 24),
-              _buildSectionHeader(context, 'Thông báo'),
-              const SizedBox(height: 10),
-              _buildToggle(
-                context,
-                icon: CupertinoIcons.bell_fill,
-                color: CupertinoColors.systemBlue,
-                label: 'Push notifications',
-                subtitle: 'Thông báo đẩy trên thiết bị di động',
-                value: _pushEnabled,
-                onChanged: (v) => setState(() => _pushEnabled = v),
-              ),
-              const SizedBox(height: 10),
-              _buildToggle(
-                context,
-                icon: CupertinoIcons.mail_solid,
-                color: CupertinoColors.systemOrange,
-                label: 'Email notifications',
-                subtitle: 'Gửi email khi có cảnh báo quan trọng',
-                value: _emailEnabled,
-                onChanged: (v) => setState(() => _emailEnabled = v),
-              ),
-              const SizedBox(height: 10),
-              _buildToggle(
-                context,
-                icon: CupertinoIcons.phone_fill,
-                color: CupertinoColors.systemGreen,
-                label: 'SMS notifications',
-                subtitle: 'Gửi SMS khi có sự cố nghiêm trọng',
-                value: _smsEnabled,
-                onChanged: (v) => setState(() => _smsEnabled = v),
-              ),
-
-              const SizedBox(height: 24),
-              _buildSectionHeader(context, 'Bảo trì'),
-              const SizedBox(height: 10),
-              _buildToggle(
-                context,
-                icon: CupertinoIcons.wrench_fill,
-                color: CupertinoColors.systemRed,
-                label: 'Chế độ bảo trì',
-                subtitle: 'Tạm dừng dịch vụ để bảo trì hệ thống',
-                value: _maintenanceMode,
-                onChanged: (v) => setState(() => _maintenanceMode = v),
-              ),
-            ]),
-          ),
+              _notice(context, 'Email, push, SMS và maintenance chưa được hỗ trợ.'),
+            ],
+          ])),
         ),
       ],
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 4),
-      child: Text(
-        title.toUpperCase(),
-        style: TextStyle(
-          color: CupertinoColors.secondaryLabel.resolveFrom(context),
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSlider(
-      BuildContext context, {
-        required IconData icon,
-        required Color color,
-        required String label,
-        required double value,
-        required double min,
-        required double max,
-        required String unit,
-        required ValueChanged<double> onChanged,
-      }) {
+  Widget _slider(BuildContext context, String label, double value, double min, double max, String unit, ValueChanged<double> onChanged) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: CupertinoColors.label.resolveFrom(context),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Text(
-                '${value.toStringAsFixed(0)}$unit',
-                style: TextStyle(
-                  color: color,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          CupertinoSlider(
-            value: value,
-            min: min,
-            max: max,
-            activeColor: color,
-            onChanged: onChanged,
-          ),
-        ],
-      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('$label: ${value.toStringAsFixed(0)}$unit'),
+        CupertinoSlider(value: value, min: min, max: max, activeColor: AerogreenCupertinoTheme.aerogreenPrimary, onChanged: onChanged),
+      ]),
     );
   }
 
-  Widget _buildToggle(
-      BuildContext context, {
-        required IconData icon,
-        required Color color,
-        required String label,
-        required String subtitle,
-        required bool value,
-        required ValueChanged<bool> onChanged,
-      }) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: CupertinoColors.label.resolveFrom(context),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          CupertinoSwitch(
-            value: value,
-            activeTrackColor: AerogreenCupertinoTheme.aerogreenPrimary,
-            onChanged: onChanged,
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _saveConfig() {
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: const Text('Đã lưu'),
-        content: const Padding(
-          padding: EdgeInsets.only(top: 8),
-          child: Text('Cấu hình hệ thống đã được cập nhật.'),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _notice(BuildContext context, String text) => Container(
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: CupertinoColors.systemGrey5.resolveFrom(context),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Text(text),
+  );
 }

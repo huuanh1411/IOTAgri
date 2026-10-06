@@ -27,4 +27,21 @@ public class AdminRoleRulesTests
         Assert.Null(AdminRoleRules.ValidateLock("other", "admin", true, true, 2));
         Assert.Null(AdminRoleRules.ValidateLock("other", "user", false, false, 1));
     }
+
+    [Theory]
+    [InlineData(null, null)]
+    [InlineData("active", "active")]
+    [InlineData("LOCKED", "locked")]
+    [InlineData("admin", "admin")]
+    public void Normalizes_supported_user_filters(string? filter, string? expected)
+    {
+        Assert.Null(AdminRoleRules.ValidateListFilter(filter, out var normalized));
+        Assert.Equal(expected, normalized);
+    }
+
+    [Fact]
+    public void Rejects_unknown_user_filter()
+    {
+        Assert.NotNull(AdminRoleRules.ValidateListFilter("pending", out _));
+    }
 }

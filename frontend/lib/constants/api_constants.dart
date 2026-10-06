@@ -38,13 +38,27 @@ class ApiConstants {
 
   // Admin endpoints
   static const String adminUsers = '/api/admin/users';
+  static String adminUser(String id) => '/api/admin/users/$id';
   static String adminUserRole(String id) => '/api/admin/users/$id/role';
   static String adminUserLock(String id) => '/api/admin/users/$id/lock';
   static const String adminDevices = '/api/admin/devices';
+  static String adminDevice(String id) => '/api/admin/devices/$id';
   static String adminDeviceReadings(String id) =>
       '/api/admin/devices/$id/readings';
   static String adminDevicePumpCommands(String id) =>
       '/api/admin/devices/$id/pump-commands';
   static String adminDeviceOwner(String id) => '/api/admin/devices/$id/owner';
   static const String adminAuditLogs = '/api/admin/audit-logs';
+  static const String adminOverview = '/api/admin/overview';
+  static const String adminReportSummary = '/api/admin/reports/summary';
+  static const String adminReportCsv = '/api/admin/reports.csv';
+  static const String adminStatus = '/api/admin/status';
+  static const String adminAlertDefaults = '/api/admin/settings/alert-defaults';
+
+  static const String tickets = '/api/tickets';
+  static const String adminTickets = '/api/admin/tickets';
+  static String adminTicket(String id) => '/api/admin/tickets/$id';
+  static String adminTicketStatus(String id) => '${adminTicket(id)}/status';
+  static String adminTicketPriority(String id) => '${adminTicket(id)}/priority';
+  static String adminTicketMessages(String id) => '${adminTicket(id)}/messages';
 }

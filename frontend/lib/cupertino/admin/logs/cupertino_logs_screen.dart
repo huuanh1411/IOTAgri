@@ -12,7 +12,7 @@ import 'package:flutter/cupertino.dart';
 import '../../../services/api_service.dart';
 import '../../theme/cupertino_theme.dart';
 
-enum LogFilter { all, info, warning, error, critical }
+enum LogFilter { all, user, device, ticket }
 
 class CupertinoLogsScreen extends StatefulWidget {
   const CupertinoLogsScreen({super.key});
@@ -71,23 +71,18 @@ class _CupertinoLogsScreenState extends State<CupertinoLogsScreen> {
 
     final filterName = _selectedFilter.name;
     setState(() {
-      _filteredLogs = _allLogs
-          .where((log) => log['severity'] == filterName)
-          .toList();
+       _filteredLogs = _allLogs
+           .where((log) => log['targetType'] == filterName)
+           .toList();
     });
   }
 
   Map<LogFilter, int> _getCounts() {
     return {
       LogFilter.all: _allLogs.length,
-      LogFilter.info: _allLogs.where((l) => l['severity'] == 'info').length,
-      LogFilter.warning: _allLogs
-          .where((l) => l['severity'] == 'warning')
-          .length,
-      LogFilter.error: _allLogs.where((l) => l['severity'] == 'error').length,
-      LogFilter.critical: _allLogs
-          .where((l) => l['severity'] == 'critical')
-          .length,
+      LogFilter.user: _allLogs.where((l) => l['targetType'] == 'user').length,
+      LogFilter.device: _allLogs.where((l) => l['targetType'] == 'device').length,
+      LogFilter.ticket: _allLogs.where((l) => l['targetType'] == 'ticket').length,
     };
   }
 
@@ -161,30 +156,23 @@ class _CupertinoLogsScreenState extends State<CupertinoLogsScreen> {
           const SizedBox(width: 8),
           _buildChip(
             context,
-            LogFilter.info,
-            'Info',
-            counts[LogFilter.info] ?? 0,
+             LogFilter.user,
+             'Users',
+             counts[LogFilter.user] ?? 0,
           ),
           const SizedBox(width: 8),
           _buildChip(
             context,
-            LogFilter.warning,
-            'Warning',
-            counts[LogFilter.warning] ?? 0,
+             LogFilter.device,
+             'Devices',
+             counts[LogFilter.device] ?? 0,
           ),
           const SizedBox(width: 8),
           _buildChip(
             context,
-            LogFilter.error,
-            'Error',
-            counts[LogFilter.error] ?? 0,
-          ),
-          const SizedBox(width: 8),
-          _buildChip(
-            context,
-            LogFilter.critical,
-            'Critical',
-            counts[LogFilter.critical] ?? 0,
+             LogFilter.ticket,
+             'Tickets',
+             counts[LogFilter.ticket] ?? 0,
           ),
         ],
       ),
