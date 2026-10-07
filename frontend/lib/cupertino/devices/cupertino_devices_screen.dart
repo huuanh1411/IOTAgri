@@ -176,9 +176,14 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
     final hasSearch = _devices.length > 6;
     final filtered = _devices
         .where(
-          (device) => device.name.toLowerCase().contains(
-            _searchQuery.trim().toLowerCase(),
-          ),
+          (device) =>
+              device.name.toLowerCase().contains(
+                _searchQuery.trim().toLowerCase(),
+              ) ||
+              (device.location?.toLowerCase().contains(
+                    _searchQuery.trim().toLowerCase(),
+                  ) ??
+                  false),
         )
         .toList();
     final hasNoResults = hasSearch && filtered.isEmpty;
@@ -216,7 +221,7 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
                   else ...[
                     if (hasSearch) ...[
                       CupertinoSearchTextField(
-                        placeholder: 'Tìm thiết bị',
+                        placeholder: 'Tìm theo tên hoặc vị trí',
                         onChanged: (value) =>
                             setState(() => _searchQuery = value),
                       ),
@@ -336,6 +341,7 @@ class _DeviceRow extends StatelessWidget {
         ? const Color(0xFF248A4B)
         : CupertinoColors.systemGrey;
     final lastSeen = DateTime.tryParse(device.lastSeenAt ?? '');
+    final location = device.location ?? 'Vị trí chưa gán';
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 15, 12, 12),
       decoration: BoxDecoration(
@@ -375,8 +381,8 @@ class _DeviceRow extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         lastSeen == null
-                            ? 'Chưa có kết nối · Vị trí chưa gán'
-                            : 'Lần cuối ${DateFormat('dd/MM HH:mm').format(lastSeen.toLocal())} · Vị trí chưa gán',
+                            ? 'Chưa có kết nối · $location'
+                            : 'Lần cuối ${DateFormat('dd/MM HH:mm').format(lastSeen.toLocal())} · $location',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

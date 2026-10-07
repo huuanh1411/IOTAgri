@@ -5,6 +5,7 @@ class PumpSchedule {
   final int weekdayMask;
   final String startTime;
   final int durationSeconds;
+  final int? intervalMinutes;
   final String timeZone;
   final String? lastDispatchedOccurrenceUtc;
   final String createdAt;
@@ -16,6 +17,7 @@ class PumpSchedule {
     required this.weekdayMask,
     required this.startTime,
     required this.durationSeconds,
+    this.intervalMinutes,
     required this.timeZone,
     this.lastDispatchedOccurrenceUtc,
     required this.createdAt,
@@ -29,6 +31,7 @@ class PumpSchedule {
       weekdayMask: json['weekdayMask'] ?? 0,
       startTime: json['startTime'] ?? '',
       durationSeconds: json['durationSeconds'] ?? 0,
+      intervalMinutes: json['intervalMinutes'],
       timeZone: json['timeZone'] ?? '',
       lastDispatchedOccurrenceUtc: json['lastDispatchedOccurrenceUtc'],
       createdAt: json['createdAt'] ?? '',
@@ -43,6 +46,7 @@ class PumpSchedule {
       'weekdayMask': weekdayMask,
       'startTime': startTime,
       'durationSeconds': durationSeconds,
+      'intervalMinutes': intervalMinutes,
       'timeZone': timeZone,
       'lastDispatchedOccurrenceUtc': lastDispatchedOccurrenceUtc,
       'createdAt': createdAt,

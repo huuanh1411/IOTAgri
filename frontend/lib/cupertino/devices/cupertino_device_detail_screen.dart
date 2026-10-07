@@ -720,7 +720,7 @@ class ScheduleSummaryCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
-                  'Phun ${schedule.durationSeconds} giây lúc ${_scheduleTime(schedule.startTime)} · ${_scheduleDays(schedule.weekdayMask)}',
+                  'Phun ${schedule.durationSeconds} giây mỗi ${schedule.intervalMinutes ?? 5} phút, ${_scheduleTime(schedule.startTime)}-${_scheduleEndTime(schedule.startTime, schedule.durationSeconds)}',
                   style: TextStyle(
                     color: CupertinoColors.label.resolveFrom(context),
                     fontSize: 13,
@@ -1158,6 +1158,17 @@ class _DetailError extends StatelessWidget {
 String _scheduleTime(String value) {
   final parts = value.split(':');
   return parts.length >= 2 ? '${parts[0]}:${parts[1]}' : value;
+}
+
+String _scheduleEndTime(String startTime, int durationSeconds) {
+  final parts = startTime.split(':');
+  if (parts.length < 2) return startTime;
+  final hour = int.tryParse(parts[0]) ?? 0;
+  final minute = int.tryParse(parts[1]) ?? 0;
+  final totalMinutes = hour * 60 + minute + (durationSeconds / 60).ceil();
+  final endHour = (totalMinutes ~/ 60) % 24;
+  final endMinute = totalMinutes % 60;
+  return '${endHour.toString().padLeft(2, '0')}:${endMinute.toString().padLeft(2, '0')}';
 }
 
 String _scheduleDays(int mask) {
