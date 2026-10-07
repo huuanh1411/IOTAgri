@@ -541,8 +541,9 @@ class ApiService {
     String deviceId,
     String startTime,
     int durationSeconds,
-    List<int> daysOfWeek,
-  ) async {
+    List<int> daysOfWeek, {
+    int? intervalMinutes,
+  }) async {
     final localStart = DateTime.parse(startTime);
     final weekdayMask = daysOfWeek.fold<int>(
       0,
@@ -562,6 +563,7 @@ class ApiService {
           'weekdayMask': weekdayMask,
           'startTime': formattedStartTime,
           'durationSeconds': durationSeconds,
+          if (intervalMinutes != null) 'intervalMinutes': intervalMinutes,
           'timeZone': 'Asia/Ho_Chi_Minh',
         }),
       ),

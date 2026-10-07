@@ -11,10 +11,10 @@ import '../../models/device_alert.dart';
 import '../../models/pump_command.dart';
 import '../../models/pump_schedule.dart';
 import '../../models/sensor_reading.dart';
-import '../../screens/pumps/pump_schedules_screen.dart';
 import '../../screens/sensors/sensor_history_screen.dart';
 import '../../services/api_service.dart';
 import '../theme/cupertino_theme.dart';
+import 'pump_schedules_screen.dart';
 
 enum PumpMode { auto, manual }
 
@@ -353,7 +353,7 @@ class _CupertinoDeviceDetailScreenState
   Future<void> _openSchedules() async {
     await Navigator.of(context).push<void>(
       CupertinoPageRoute<void>(
-        builder: (_) => PumpSchedulesScreen(device: _device),
+        builder: (_) => CupertinoPumpSchedulesScreen(device: _device),
       ),
     );
     if (mounted) await _loadDeviceData(showLoading: false);
