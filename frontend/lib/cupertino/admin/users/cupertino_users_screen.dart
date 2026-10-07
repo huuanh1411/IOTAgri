@@ -66,17 +66,15 @@ class _CupertinoUsersScreenState extends State<CupertinoUsersScreen> {
         _apiService.getAdminDevices(),
       ]);
       final devices =
-          (results[1] as Map<String, dynamic>)['items'] as List<dynamic>? ?? [];
+          (results[1]['items'] as List<dynamic>? ?? []);
       _allUsers =
-          ((results[0] as Map<String, dynamic>)['items'] as List<dynamic>? ??
-                  [])
+          (results[0]['items'] as List<dynamic>? ?? [])
               .map((item) {
                 final user = item as Map<String, dynamic>;
-                final roles = (user['roles'] as List<dynamic>? ?? [])
-                    .cast<String>();
+                final roles = (user['roles'] as List<dynamic>? ?? []);
                 return <String, dynamic>{
                   ...user,
-                  'role': roles.contains('Admin') ? 'admin' : 'user',
+                  'role': roles.any((r) => r == 'Admin') ? 'admin' : 'user',
                   'isLocked': user['isLocked'] == true,
                   'deviceCount': devices
                       .where(

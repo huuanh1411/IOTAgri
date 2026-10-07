@@ -24,12 +24,16 @@ class _CupertinoMonitoringScreenState extends State<CupertinoMonitoringScreen> {
   Future<void> _loadStatus() async {
     try {
       final status = await _apiService.getAdminSystemStatus();
-      if (mounted) setState(() {
-        _status = status;
-        _error = null;
-      });
+      if (mounted) {
+        setState(() {
+          _status = status;
+          _error = null;
+        });
+      }
     } catch (error) {
-      if (mounted) setState(() => _error = '$error');
+      if (mounted) {
+        setState(() => _error = '$error');
+      }
     }
   }
 
@@ -108,7 +112,7 @@ class _StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final healthy = status is 'healthy' or 'connected';
+    final healthy = status == 'healthy' || status == 'connected';
     final color = healthy ? AerogreenCupertinoTheme.aerogreenPrimary : CupertinoColors.systemRed;
     return Container(
       padding: const EdgeInsets.all(16),

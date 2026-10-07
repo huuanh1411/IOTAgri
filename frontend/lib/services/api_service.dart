@@ -416,10 +416,8 @@ class ApiService {
     final queryParams = <String, String>{
       'page': page.toString(),
       'pageSize': pageSize.toString(),
+      if (rangeHours case final r?) 'rangeHours': r.toString(),
     };
-    if (rangeHours != null) {
-      queryParams['rangeHours'] = rangeHours.toString();
-    }
 
     final uri = Uri.parse(
       '${ApiConstants.baseUrl}${ApiConstants.pumpCommandHistory(deviceId)}',
@@ -612,8 +610,8 @@ class ApiService {
       queryParameters: {
         'page': '$page',
         'pageSize': '$pageSize',
-        if (search != null && search.isNotEmpty) 'search': search,
-        if (filter != null) 'filter': filter,
+        ...?search != null && search.isNotEmpty ? {'search': search} : null,
+        ...?filter != null ? {'filter': filter} : null,
       },
     );
     final response = await _authenticatedRequest(

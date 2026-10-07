@@ -156,7 +156,7 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                           ),
                           suffix: CupertinoButton(
                             padding: const EdgeInsets.all(12),
-                            minSize: 44,
+                            minimumSize: const Size(44, 44),
                             onPressed: () => setState(
                               () => _obscurePassword = !_obscurePassword,
                             ),
@@ -184,7 +184,7 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                       Consumer<AuthProvider>(
                         builder: (context, authProvider, _) {
                           return CupertinoButton.filled(
-                            minSize: 52,
+                            minimumSize: const Size(52, 52),
                             borderRadius: BorderRadius.circular(16),
                             onPressed: authProvider.isLoading ? null : _submit,
                             child: authProvider.isLoading
@@ -202,7 +202,7 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                       ),
                       const SizedBox(height: 14),
                       CupertinoButton(
-                        minSize: 44,
+                        minimumSize: const Size(44, 44),
                         onPressed: () {
                           Navigator.of(context).push(
                             CupertinoPageRoute<void>(
@@ -246,7 +246,7 @@ class _CupertinoLoginScreenState extends State<CupertinoLoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       CupertinoButton(
-                        minSize: 44,
+                        minimumSize: const Size(44, 44),
                         onPressed: () {
                           Navigator.of(context).push(
                             CupertinoPageRoute<void>(

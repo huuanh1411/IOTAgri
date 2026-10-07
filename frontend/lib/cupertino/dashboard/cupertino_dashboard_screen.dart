@@ -172,7 +172,7 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
             children: [
               CupertinoButton(
                 padding: EdgeInsets.zero,
-                minSize: 44,
+                minimumSize: const Size(44, 44),
                 onPressed: () => Navigator.of(context).push<void>(
                   CupertinoPageRoute(
                     builder: (_) => const CupertinoCreateTicketScreen(),
@@ -182,7 +182,7 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
               ),
               CupertinoButton(
                 padding: EdgeInsets.zero,
-                minSize: 44,
+                minimumSize: const Size(44, 44),
                 onPressed: _loadDashboardData,
                 child: const Icon(CupertinoIcons.arrow_2_circlepath),
               ),
@@ -1243,7 +1243,7 @@ class _BottomItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CupertinoButton(
     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-    minSize: 44,
+    minimumSize: const Size(44, 44),
     onPressed: onTap,
     child: Column(
       mainAxisSize: MainAxisSize.min,

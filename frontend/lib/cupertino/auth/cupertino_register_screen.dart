@@ -211,7 +211,7 @@ class _CupertinoRegisterScreenState extends State<CupertinoRegisterScreen> {
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) =>
                           CupertinoButton.filled(
-                            minSize: 52,
+                            minimumSize: const Size(52, 52),
                             borderRadius: BorderRadius.circular(16),
                             onPressed: authProvider.isLoading ? null : _submit,
                             child: authProvider.isLoading
@@ -244,7 +244,7 @@ class _CupertinoRegisterScreenState extends State<CupertinoRegisterScreen> {
   Widget _visibilityButton(bool obscured, VoidCallback onPressed) =>
       CupertinoButton(
         padding: const EdgeInsets.all(12),
-        minSize: 44,
+        minimumSize: const Size(44, 44),
         onPressed: onPressed,
         child: Icon(
           obscured ? CupertinoIcons.eye : CupertinoIcons.eye_slash,

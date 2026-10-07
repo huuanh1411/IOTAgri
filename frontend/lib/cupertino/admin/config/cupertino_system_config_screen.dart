@@ -27,17 +27,21 @@ class _CupertinoSystemConfigScreenState extends State<CupertinoSystemConfigScree
   Future<void> _load() async {
     try {
       final settings = await _apiService.getAdminAlertDefaults();
-      if (mounted) setState(() {
-        _highTemperatureC = (settings['highTemperatureC'] as num).toDouble();
-        _lowWaterLevelPercent = (settings['lowWaterLevelPercent'] as num).toDouble();
-        _loading = false;
-        _error = null;
-      });
+      if (mounted) {
+        setState(() {
+          _highTemperatureC = (settings['highTemperatureC'] as num).toDouble();
+          _lowWaterLevelPercent = (settings['lowWaterLevelPercent'] as num).toDouble();
+          _loading = false;
+          _error = null;
+        });
+      }
     } catch (error) {
-      if (mounted) setState(() {
-        _loading = false;
-        _error = '$error';
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = '$error';
+        });
+      }
     }
   }
 
@@ -45,16 +49,20 @@ class _CupertinoSystemConfigScreenState extends State<CupertinoSystemConfigScree
     setState(() => _saving = true);
     try {
       final settings = await _apiService.updateAdminAlertDefaults(_highTemperatureC, _lowWaterLevelPercent);
-      if (mounted) setState(() {
-        _highTemperatureC = (settings['highTemperatureC'] as num).toDouble();
-        _lowWaterLevelPercent = (settings['lowWaterLevelPercent'] as num).toDouble();
-        _saving = false;
-      });
+      if (mounted) {
+        setState(() {
+          _highTemperatureC = (settings['highTemperatureC'] as num).toDouble();
+          _lowWaterLevelPercent = (settings['lowWaterLevelPercent'] as num).toDouble();
+          _saving = false;
+        });
+      }
     } catch (error) {
-      if (mounted) setState(() {
-        _saving = false;
-        _error = '$error';
-      });
+      if (mounted) {
+        setState(() {
+          _saving = false;
+          _error = '$error';
+        });
+      }
     }
   }
 

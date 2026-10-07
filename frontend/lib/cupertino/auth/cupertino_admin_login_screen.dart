@@ -101,7 +101,7 @@ class _CupertinoAdminLoginScreenState
       navigationBar: CupertinoNavigationBar(
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
-          minSize: 44,
+          minimumSize: const Size(44, 44),
           onPressed: () => Navigator.of(context).pop(),
           child: const Row(
             mainAxisSize: MainAxisSize.min,
@@ -229,7 +229,7 @@ class _CupertinoAdminLoginScreenState
                           ),
                           suffix: CupertinoButton(
                             padding: const EdgeInsets.all(12),
-                            minSize: 44,
+                            minimumSize: const Size(44, 44),
                             onPressed: () => setState(
                                   () => _obscurePassword = !_obscurePassword,
                             ),
@@ -257,7 +257,7 @@ class _CupertinoAdminLoginScreenState
                       Consumer<AuthProvider>(
                         builder: (context, authProvider, _) {
                           return CupertinoButton(
-                            minSize: 52,
+                            minimumSize: const Size(52, 52),
                             color: Color(0xFF34C759),
                             borderRadius: BorderRadius.circular(16),
                             onPressed:
