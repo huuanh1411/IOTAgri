@@ -9,6 +9,7 @@ import '../../models/pump_command.dart';
 import '../../models/pump_schedule.dart';
 import '../devices/cupertino_devices_screen.dart';
 import '../devices/cupertino_device_detail_screen.dart';
+import '../profile/cupertino_profile_screen.dart';
 import '../tickets/cupertino_create_ticket_screen.dart';
 import '../../screens/pumps/pump_schedules_screen.dart';
 import '../../services/api_service.dart';
@@ -157,6 +158,16 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
       return Column(
         children: [
           const Expanded(child: devices),
+          _buildBottomBar(context),
+        ],
+      );
+    }
+    if (_selectedTab == 3) {
+      const profile = CupertinoProfileScreen();
+      if (isDesktop) return profile;
+      return Column(
+        children: [
+          const Expanded(child: profile),
           _buildBottomBar(context),
         ],
       );
@@ -778,6 +789,12 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
             selected: _selectedTab == 2,
             onTap: () => setState(() => _selectedTab = 2),
           ),
+          _SidebarItem(
+            icon: CupertinoIcons.person_fill,
+            label: 'Tài khoản',
+            selected: _selectedTab == 3,
+            onTap: () => setState(() => _selectedTab = 3),
+          ),
           const Spacer(),
           Text(
             'TRẠNG THÁI HỆ THỐNG',
@@ -844,6 +861,12 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
             label: 'Cảnh báo',
             selected: _selectedTab == 2,
             onTap: () => setState(() => _selectedTab = 2),
+          ),
+          _BottomItem(
+            icon: CupertinoIcons.person,
+            label: 'Tài khoản',
+            selected: _selectedTab == 3,
+            onTap: () => setState(() => _selectedTab = 3),
           ),
         ],
       ),

@@ -27,6 +27,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> initialize() async {
     try {
       _user = await _apiService.restoreSession();
+      if (_user != null) await loadProfile();
     } catch (_) {
       _user = null;
     } finally {
@@ -48,6 +49,7 @@ class AuthProvider with ChangeNotifier {
           : null;
       if (user == null) throw Exception('Invalid access token');
       _user = user;
+      await loadProfile();
 
       _isLoading = false;
       notifyListeners();
@@ -119,6 +121,45 @@ class AuthProvider with ChangeNotifier {
       _user = null;
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  /// Tải hồ sơ đầy đủ (số điện thoại, vai trò) từ API. Trả về false khi không tải được.
+  Future<bool> loadProfile() async {
+    try {
+      final data = await _apiService.getProfile();
+      _user = User.fromProfileJson(data);
+      if (!_isDisposed) notifyListeners();
+      return true;
+    } catch (error) {
+      debugPrint('Profile load error: $error');
+      return false;
+    }
+  }
+
+  /// Cập nhật họ tên và số điện thoại. Trả về false và đặt errorMessage khi thất bại.
+  Future<bool> updateProfile({
+    required String fullName,
+    String? phoneNumber,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final data = await _apiService.updateProfile(
+        fullName: fullName,
+        phoneNumber: phoneNumber,
+      );
+      _user = User.fromProfileJson(data);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (error) {
+      _isLoading = false;
+      _errorMessage = error.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
     }
   }
 

@@ -250,6 +250,55 @@ class ApiService {
     }
   }
 
+  // Profile methods
+  Future<Map<String, dynamic>> getProfile() async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.profile}'),
+        headers: headers,
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    }
+    throw Exception('Không tải được thông tin tài khoản.');
+  }
+
+  Future<Map<String, dynamic>> updateProfile({
+    required String fullName,
+    String? phoneNumber,
+  }) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.put(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.profile}'),
+        headers: headers,
+        body: jsonEncode({'fullName': fullName, 'phoneNumber': phoneNumber}),
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    }
+    throw Exception(_profileErrorMessage(response));
+  }
+
+  String _profileErrorMessage(http.Response response) {
+    try {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final error = data['error'];
+      if (error is String && error.isNotEmpty) return error;
+      final messages = data.values
+          .whereType<List<dynamic>>()
+          .expand((values) => values)
+          .join(' ');
+      if (messages.isNotEmpty) return messages;
+    } catch (_) {
+      // Keep the generic message when the response body is not error JSON.
+    }
+    return 'Cập nhật thông tin thất bại. Vui lòng thử lại.';
+  }
+
   // Device methods
   Future<List<dynamic>> getDevices() async {
     final response = await _authenticatedRequest(

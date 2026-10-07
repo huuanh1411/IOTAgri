@@ -9,6 +9,7 @@ class ApiConstants {
   static const String register = '/api/auth/register';
   static const String refresh = '/api/auth/refresh';
   static const String logout = '/api/auth/logout';
+  static const String profile = '/api/auth/profile';
 
   // Device endpoints
   static const String devices = '/api/devices';
