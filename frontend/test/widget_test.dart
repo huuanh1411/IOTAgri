@@ -20,7 +20,9 @@ import 'package:iotagri_app/models/device_alert.dart';
 import 'package:iotagri_app/models/device_overview.dart';
 import 'package:iotagri_app/models/sensor_reading.dart';
 import 'package:iotagri_app/cupertino/devices/cupertino_devices_screen.dart';
+import 'package:iotagri_app/cupertino/profile/cupertino_profile_screen.dart';
 import 'package:iotagri_app/cupertino/auth/cupertino_register_screen.dart';
+import 'package:iotagri_app/models/user.dart';
 import 'package:iotagri_app/screens/pumps/pump_schedules_screen.dart';
 import 'package:iotagri_app/providers/auth_provider.dart';
 import 'package:iotagri_app/screens/dashboard/dashboard_screen.dart';
@@ -54,6 +56,25 @@ class _SuccessfulAuthApiService extends ApiService {
     ).replaceAll('=', '');
     return {'accessToken': 'header.$payload.signature', 'refreshToken': 'refresh'};
   }
+}
+
+class _ProfileApiService extends ApiService {
+  @override
+  Future<User?> restoreSession() async => User(
+    id: 'user-1',
+    email: 'profile@example.com',
+    fullName: 'Nguyen Van A',
+    role: 'user',
+  );
+
+  @override
+  Future<Map<String, dynamic>> getProfile() async => {
+    'id': 'user-1',
+    'email': 'profile@example.com',
+    'fullName': 'Nguyen Van A',
+    'phoneNumber': '0912345678',
+    'roles': ['User'],
+  };
 }
 
 class _DetailApiService extends ApiService {
@@ -303,6 +324,43 @@ void main() {
     expect(authProvider.errorMessage, isNotNull);
   });
 
+  test('access token role claim drives admin routing, including role arrays', () {
+    final apiService = ApiService();
+    String tokenWithRole(Object? role) {
+      final payload = <String, dynamic>{
+        'sub': 'user-1',
+        'email': 'user@example.com',
+        'exp':
+            DateTime.now()
+                .add(const Duration(hours: 1))
+                .millisecondsSinceEpoch ~/
+            1000,
+        ApiService.roleClaimType: ?role,
+      };
+      final encoded = base64UrlEncode(
+        utf8.encode(jsonEncode(payload)),
+      ).replaceAll('=', '');
+      return 'header.$encoded.signature';
+    }
+
+    expect(
+      apiService.userFromAccessToken(tokenWithRole('User'))!.isAdmin,
+      isFalse,
+    );
+    expect(
+      apiService.userFromAccessToken(tokenWithRole('Admin'))!.isAdmin,
+      isTrue,
+    );
+    expect(
+      apiService.userFromAccessToken(tokenWithRole(['User', 'Admin']))!.isAdmin,
+      isTrue,
+    );
+    expect(
+      apiService.userFromAccessToken(tokenWithRole(null))!.isAdmin,
+      isFalse,
+    );
+  });
+
   testWidgets('dashboard shows gateway status summary', (
     WidgetTester tester,
   ) async {
@@ -413,6 +471,42 @@ void main() {
 
     expect(find.byType(CupertinoDevicesScreen), findsOneWidget);
     expect(find.byIcon(CupertinoIcons.house_fill), findsOneWidget);
+  });
+
+  testWidgets('profile tab shows account info and logout below the form', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final authProvider = AuthProvider(apiService: _ProfileApiService());
+    addTearDown(authProvider.dispose);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: authProvider,
+        child: const CupertinoApp(home: CupertinoDashboardScreen()),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Tài khoản'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.byType(CupertinoProfileScreen), findsOneWidget);
+    expect(find.text('Họ và tên'), findsOneWidget);
+    expect(find.text('Số điện thoại'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Lưu thay đổi'), findsOneWidget);
+    expect(find.text('Đăng xuất'), findsOneWidget);
+    // Nút đăng xuất phải nằm dưới nút lưu, tức ở cuối màn hình hồ sơ.
+    expect(
+      tester.getCenter(find.text('Đăng xuất')).dy,
+      greaterThan(tester.getCenter(find.text('Lưu thay đổi')).dy),
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('device deletion requires confirmation and removes the row', (

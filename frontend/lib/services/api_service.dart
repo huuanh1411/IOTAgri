@@ -12,6 +12,11 @@ class _RefreshTokenRejected implements Exception {
 }
 
 class ApiService {
+  // Backend phát hành vai trò dưới URI claim chuẩn của .NET Identity, không phải
+  // tên ngắn 'role'. Giá trị là chuỗi khi có một vai trò và là mảng khi có nhiều.
+  static const String roleClaimType =
+      'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
+
   static VoidCallback? onSessionExpired;
 
   static String generatePumpCommandId() {
@@ -167,10 +172,15 @@ class ApiService {
       final id = payload['sub'] as String? ?? '';
       final email = payload['email'] as String? ?? '';
       if (id.isEmpty || email.isEmpty) return null;
+      final roleClaim = payload[roleClaimType];
+      final roles = roleClaim is List
+          ? roleClaim.map((role) => role.toString())
+          : <String>[if (roleClaim is String) roleClaim];
       return User(
         id: id,
         email: email,
         fullName: payload['fullName'] as String? ?? email.split('@').first,
+        role: roles.contains('Admin') ? 'admin' : 'user',
       );
     } catch (_) {
       return null;

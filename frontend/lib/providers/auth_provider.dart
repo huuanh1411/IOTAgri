@@ -27,7 +27,6 @@ class AuthProvider with ChangeNotifier {
   Future<void> initialize() async {
     try {
       _user = await _apiService.restoreSession();
-      if (_user != null) await loadProfile();
     } catch (_) {
       _user = null;
     } finally {
@@ -49,7 +48,6 @@ class AuthProvider with ChangeNotifier {
           : null;
       if (user == null) throw Exception('Invalid access token');
       _user = user;
-      await loadProfile();
 
       _isLoading = false;
       notifyListeners();

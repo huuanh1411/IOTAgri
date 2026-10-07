@@ -842,31 +842,38 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
       ),
       padding: const EdgeInsets.only(bottom: 8, top: 6),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _BottomItem(
-            icon: CupertinoIcons.house_fill,
-            label: 'Trang chủ',
-            selected: _selectedTab == 0,
-            onTap: () => setState(() => _selectedTab = 0),
+          Expanded(
+            child: _BottomItem(
+              icon: CupertinoIcons.house_fill,
+              label: 'Trang chủ',
+              selected: _selectedTab == 0,
+              onTap: () => setState(() => _selectedTab = 0),
+            ),
           ),
-          _BottomItem(
-            icon: CupertinoIcons.square_grid_2x2,
-            label: 'Thiết bị',
-            selected: _selectedTab == 1,
-            onTap: () => setState(() => _selectedTab = 1),
+          Expanded(
+            child: _BottomItem(
+              icon: CupertinoIcons.square_grid_2x2,
+              label: 'Thiết bị',
+              selected: _selectedTab == 1,
+              onTap: () => setState(() => _selectedTab = 1),
+            ),
           ),
-          _BottomItem(
-            icon: CupertinoIcons.bell,
-            label: 'Cảnh báo',
-            selected: _selectedTab == 2,
-            onTap: () => setState(() => _selectedTab = 2),
+          Expanded(
+            child: _BottomItem(
+              icon: CupertinoIcons.bell,
+              label: 'Cảnh báo',
+              selected: _selectedTab == 2,
+              onTap: () => setState(() => _selectedTab = 2),
+            ),
           ),
-          _BottomItem(
-            icon: CupertinoIcons.person,
-            label: 'Tài khoản',
-            selected: _selectedTab == 3,
-            onTap: () => setState(() => _selectedTab = 3),
+          Expanded(
+            child: _BottomItem(
+              icon: CupertinoIcons.person,
+              label: 'Tài khoản',
+              selected: _selectedTab == 3,
+              onTap: () => setState(() => _selectedTab = 3),
+            ),
           ),
         ],
       ),
@@ -1265,7 +1272,9 @@ class _BottomItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => CupertinoButton(
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+    // Các mục được chia đều bề rộng nên đệm ngang phải nhỏ, nếu không thanh
+    // điều hướng sẽ tràn trên màn hình hẹp.
+    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
     minimumSize: const Size(44, 44),
     onPressed: onTap,
     child: Column(
@@ -1281,6 +1290,8 @@ class _BottomItem extends StatelessWidget {
         const SizedBox(height: 3),
         Text(
           label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 10,
             color: selected
