@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/device.dart';
@@ -14,6 +15,8 @@ import '../../screens/pumps/pump_schedules_screen.dart';
 import '../../screens/sensors/sensor_history_screen.dart';
 import '../../services/api_service.dart';
 import '../theme/cupertino_theme.dart';
+
+enum PumpMode { auto, manual }
 
 class CupertinoDeviceDetailScreen extends StatefulWidget {
   final Device device;
@@ -44,6 +47,10 @@ class _CupertinoDeviceDetailScreenState
   String? _errorMessage;
   DateTime? _lastUpdated;
   Timer? _refreshTimer;
+  PumpMode _pumpMode = PumpMode.auto;
+  Timer? _manualModeReminderTimer;
+  Timer? _pumpCountdownTimer;
+  int _remainingSeconds = 0;
 
   @override
   void initState() {
@@ -60,6 +67,8 @@ class _CupertinoDeviceDetailScreenState
   @override
   void dispose() {
     _refreshTimer?.cancel();
+    _manualModeReminderTimer?.cancel();
+    _pumpCountdownTimer?.cancel();
     super.dispose();
   }
 
@@ -143,10 +152,110 @@ class _CupertinoDeviceDetailScreenState
         DateTime.now().toUtc().difference(issuedAt).inMinutes < 2;
   }
 
+  DateTime? _getNextScheduleTime() {
+    final enabled = _enabledSchedules;
+    if (enabled.isEmpty) return null;
+    
+    final now = DateTime.now();
+    final today = now.weekday == 7 ? 0 : now.weekday;
+    
+    for (final schedule in enabled) {
+      if ((schedule.weekdayMask & (1 << today)) != 0) {
+        final parts = schedule.startTime.split(':');
+        if (parts.length >= 2) {
+          final hour = int.tryParse(parts[0]) ?? 0;
+          final minute = int.tryParse(parts[1]) ?? 0;
+          final scheduleTime = DateTime(now.year, now.month, now.day, hour, minute);
+          
+          if (scheduleTime.isAfter(now)) {
+            return scheduleTime;
+          }
+        }
+      }
+    }
+    
+    return null;
+  }
+
+  String _formatTimeRemaining(DateTime? time) {
+    if (time == null) return 'Không có lịch';
+    final now = DateTime.now();
+    final difference = time.difference(now);
+    
+    if (difference.isNegative) return 'Đã qua';
+    
+    final hours = difference.inHours;
+    final minutes = difference.inMinutes % 60;
+    
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+    }
+    return '${minutes.toString().padLeft(2, '0')} phút';
+  }
+
+  void _startManualModeReminder() {
+    _manualModeReminderTimer?.cancel();
+    _manualModeReminderTimer = Timer(const Duration(minutes: 30), () {
+      if (mounted && _pumpMode == PumpMode.manual && !_isPumpRunning) {
+        _showManualModeReminder();
+      }
+    });
+  }
+
+  void _stopManualModeReminder() {
+    _manualModeReminderTimer?.cancel();
+  }
+
+  void _showManualModeReminder() {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('Chế độ Thủ công'),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text('${_device.name} đang ở chế độ Thủ công và chưa phun. Chuyển về Tự động?'),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Giữ Thủ công'),
+          ),
+          CupertinoDialogAction(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              setState(() => _pumpMode = PumpMode.auto);
+            },
+            child: const Text('Chuyển Tự động'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _startPumpCountdown(int durationSeconds) {
+    _remainingSeconds = durationSeconds;
+    _pumpCountdownTimer?.cancel();
+    _pumpCountdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _remainingSeconds--;
+          if (_remainingSeconds <= 0) {
+            timer.cancel();
+          }
+        });
+      }
+    });
+  }
+
+  void _stopPumpCountdown() {
+    _pumpCountdownTimer?.cancel();
+    _remainingSeconds = 0;
+  }
+
   List<PumpSchedule> get _enabledSchedules =>
       _schedules.where((schedule) => schedule.isEnabled).toList();
 
-  Future<void> _sendPumpCommand() async {
+  Future<void> _sendPumpCommand({int? durationSeconds}) async {
     if (!_device.isOnline || _isCommandPending) return;
     setState(() => _isSendingCommand = true);
     try {
@@ -154,13 +263,90 @@ class _CupertinoDeviceDetailScreenState
         _device.id,
         ApiService.generatePumpCommandId(),
         !_isPumpRunning,
-        _isPumpRunning ? null : 60,
+        durationSeconds ?? (_isPumpRunning ? null : 60),
       );
+      if (durationSeconds != null && durationSeconds > 0) {
+        _startPumpCountdown(durationSeconds);
+      }
       await _loadDeviceData(showLoading: false);
+      if (mounted && durationSeconds != null && durationSeconds > 0) {
+        HapticFeedback.lightImpact();
+      }
     } catch (error) {
       if (mounted) _showMessage('Không thể gửi lệnh: $error');
     } finally {
       if (mounted) setState(() => _isSendingCommand = false);
+    }
+  }
+
+  Future<void> _switchPumpMode(PumpMode mode) async {
+    if (mode == PumpMode.manual && _pumpMode == PumpMode.auto) {
+      final confirmed = await showCupertinoDialog<bool>(
+        context: context,
+        builder: (dialogContext) => CupertinoAlertDialog(
+          title: const Text('Chuyển sang Thủ công'),
+          content: const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: Text('Lịch tự động sẽ tạm dừng. Bạn có chắc?'),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Hủy'),
+            ),
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              isDestructiveAction: true,
+              child: const Text('Chuyển'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !mounted) return;
+    }
+    
+    setState(() => _pumpMode = mode);
+    
+    if (mode == PumpMode.manual) {
+      _startManualModeReminder();
+    } else {
+      _stopManualModeReminder();
+    }
+  }
+
+  Future<void> _showManualDurationDialog() async {
+    final duration = await showCupertinoModalPopup<int>(
+      context: context,
+      builder: (popupContext) => CupertinoActionSheet(
+        title: const Text('Chọn thời gian chạy'),
+        message: const Text('Bơm sẽ tự động tắt sau thời gian đã chọn'),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.of(popupContext).pop(30),
+            child: const Text('30 giây'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.of(popupContext).pop(60),
+            child: const Text('1 phút'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.of(popupContext).pop(300),
+            child: const Text('5 phút'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.of(popupContext).pop(600),
+            child: const Text('10 phút'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(popupContext).pop(),
+          child: const Text('Hủy'),
+        ),
+      ),
+    );
+    
+    if (duration != null && mounted) {
+      await _sendPumpCommand(durationSeconds: duration);
     }
   }
 
@@ -288,7 +474,12 @@ class _CupertinoDeviceDetailScreenState
                     isOnline: _device.isOnline,
                     isRunning: _isPumpRunning,
                     isSending: _isCommandPending,
-                    onPressed: _sendPumpCommand,
+                    pumpMode: _pumpMode,
+                    nextScheduleTime: _getNextScheduleTime(),
+                    remainingSeconds: _remainingSeconds,
+                    onModeChange: _switchPumpMode,
+                    onManualToggle: _showManualDurationDialog,
+                    onStop: () => _sendPumpCommand(),
                   ),
                   const SizedBox(height: 16),
                   ScheduleSummaryCard(
@@ -623,62 +814,177 @@ class PumpControlCard extends StatelessWidget {
   final bool isOnline;
   final bool isRunning;
   final bool isSending;
-  final VoidCallback onPressed;
+  final PumpMode pumpMode;
+  final DateTime? nextScheduleTime;
+  final int remainingSeconds;
+  final ValueChanged<PumpMode> onModeChange;
+  final VoidCallback onManualToggle;
+  final VoidCallback onStop;
 
   const PumpControlCard({
     super.key,
     required this.isOnline,
     required this.isRunning,
     required this.isSending,
-    required this.onPressed,
+    required this.pumpMode,
+    required this.nextScheduleTime,
+    required this.remainingSeconds,
+    required this.onModeChange,
+    required this.onManualToggle,
+    required this.onStop,
   });
 
   @override
   Widget build(BuildContext context) => _DetailSurface(
-    child: Row(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          isRunning ? CupertinoIcons.power : CupertinoIcons.power,
-          color: isOnline
-              ? (isRunning
-                    ? CupertinoColors.systemOrange
-                    : AerogreenCupertinoTheme.aerogreenPrimary)
-              : CupertinoColors.systemGrey,
-          size: 22,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const _DetailSectionTitle(title: 'Điều khiển bơm'),
-              const SizedBox(height: 3),
-              Text(
-                !isOnline
-                    ? 'Không khả dụng khi ngoại tuyến'
-                    : isSending
-                    ? 'Đang gửi lệnh…'
-                    : isRunning
-                    ? 'Bơm đang chạy'
-                    : 'Bơm đang tắt',
-                style: const TextStyle(
-                  color: CupertinoColors.secondaryLabel,
-                  fontSize: 12,
-                ),
+        Row(
+          children: [
+            Icon(
+              isRunning ? CupertinoIcons.power : CupertinoIcons.power,
+              color: isOnline
+                  ? (isRunning
+                        ? CupertinoColors.systemOrange
+                        : AerogreenCupertinoTheme.aerogreenPrimary)
+                  : CupertinoColors.systemGrey,
+              size: 22,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _DetailSectionTitle(title: 'Điều khiển bơm'),
+                  const SizedBox(height: 3),
+                  Text(
+                    !isOnline
+                        ? 'Không khả dụng khi ngoại tuyến'
+                        : isSending
+                        ? 'Đang gửi lệnh…'
+                        : isRunning
+                        ? 'Bơm đang chạy'
+                        : 'Bơm đang tắt',
+                    style: const TextStyle(
+                      color: CupertinoColors.secondaryLabel,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        CupertinoButton.filled(
-          onPressed: isOnline && !isSending ? onPressed : null,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          child: isSending
-              ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-              : Text(isRunning ? 'Tắt' : 'Bật 60s'),
+        const SizedBox(height: 16),
+        CupertinoSlidingSegmentedControl<PumpMode>(
+          groupValue: pumpMode,
+          children: const {
+            PumpMode.auto: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text('Tự động'),
+            ),
+            PumpMode.manual: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text('Thủ công'),
+            ),
+          },
+          onValueChanged: isOnline ? onModeChange : null,
         ),
+        const SizedBox(height: 16),
+        if (pumpMode == PumpMode.auto) ...[
+          if (nextScheduleTime != null)
+            Row(
+              children: [
+                const Icon(
+                  CupertinoIcons.clock,
+                  size: 16,
+                  color: CupertinoColors.secondaryLabel,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Lần phun tiếp theo sau ${_formatTimeRemaining(nextScheduleTime)}',
+                  style: const TextStyle(
+                    color: CupertinoColors.secondaryLabel,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            )
+          else
+            const Text(
+              'Không có lịch phun được kích hoạt',
+              style: TextStyle(
+                color: CupertinoColors.secondaryLabel,
+                fontSize: 13,
+              ),
+            ),
+        ] else ...[
+          if (isRunning) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(
+                  CupertinoIcons.play_fill,
+                  size: 16,
+                  color: CupertinoColors.systemOrange,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Bơm đang chạy - còn ${_formatCountdown(remainingSeconds)}',
+                  style: const TextStyle(
+                    color: CupertinoColors.systemOrange,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                CupertinoButton(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  color: CupertinoColors.systemRed,
+                  borderRadius: BorderRadius.circular(12),
+                  onPressed: isOnline && !isSending ? onStop : null,
+                  child: isSending
+                      ? const CupertinoActivityIndicator(color: CupertinoColors.white, radius: 8)
+                      : const Text('Dừng', style: TextStyle(fontSize: 13)),
+                ),
+              ],
+            ),
+          ] else ...[
+            CupertinoButton.filled(
+              onPressed: isOnline && !isSending ? onManualToggle : null,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: isSending
+                  ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                  : const Text('BẬT BƠM', style: TextStyle(fontWeight: FontWeight.w600)),
+            ),
+          ],
+        ],
       ],
     ),
   );
+
+  String _formatCountdown(int seconds) {
+    if (seconds <= 0) return '00:00';
+    final minutes = seconds ~/ 60;
+    final secs = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+  }
+
+  String _formatTimeRemaining(DateTime? time) {
+    if (time == null) return 'Không có lịch';
+    final now = DateTime.now();
+    final difference = time.difference(now);
+    
+    if (difference.isNegative) return 'Đã qua';
+    
+    final hours = difference.inHours;
+    final minutes = difference.inMinutes % 60;
+    
+    if (hours > 0) {
+      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+    }
+    return '${minutes.toString().padLeft(2, '0')} phút';
+  }
 }
 
 class ScheduleSummaryCard extends StatelessWidget {
