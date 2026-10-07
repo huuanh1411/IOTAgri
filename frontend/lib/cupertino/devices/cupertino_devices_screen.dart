@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../models/device.dart';
 import '../../services/api_service.dart';
+import 'add_device_screen.dart';
 import 'cupertino_device_detail_screen.dart';
 import 'cupertino_provisioning_code_screen.dart';
 
@@ -58,36 +59,13 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
   }
 
   Future<void> _createAndProvisionDevice() async {
-    final name = await showCupertinoDialog<String>(
-      context: context,
-      builder: (_) => const _AddDeviceDialog(),
+    final result = await Navigator.of(context).push<Device>(
+      CupertinoPageRoute(
+        builder: (_) => const AddDeviceScreen(),
+      ),
     );
-    if (name == null || name.trim().isEmpty || !mounted) return;
-
-    setState(() => _isCreating = true);
-    try {
-      final created = await _apiService.createDevice(name.trim());
-      final deviceId = created['id'] as String?;
-      if (deviceId == null || deviceId.isEmpty) {
-        throw const FormatException(
-          'The device response did not include an ID.',
-        );
-      }
-      if (!mounted) return;
-      final device = Device.fromJson(created);
-      await Navigator.of(context).push<void>(
-        CupertinoPageRoute<void>(
-          builder: (_) => CupertinoProvisioningCodeScreen(
-            device: device,
-            apiService: _apiService,
-          ),
-        ),
-      );
-      if (mounted) await _loadDevices(showLoading: false);
-    } catch (error) {
-      if (mounted) _showError('Không thể tạo thiết bị: $error');
-    } finally {
-      if (mounted) setState(() => _isCreating = false);
+    if (result != null && mounted) {
+      await _loadDevices(showLoading: false);
     }
   }
 
@@ -251,72 +229,6 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
         ),
       ),
     );
-  }
-}
-
-class _AddDeviceDialog extends StatefulWidget {
-  const _AddDeviceDialog();
-
-  @override
-  State<_AddDeviceDialog> createState() => _AddDeviceDialogState();
-}
-
-class _AddDeviceDialogState extends State<_AddDeviceDialog> {
-  final _controller = TextEditingController();
-  String? _errorMessage;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => CupertinoAlertDialog(
-    title: const Text('Tạo thiết bị'),
-    content: Padding(
-      padding: const EdgeInsets.only(top: 14),
-      child: Column(
-        children: [
-          CupertinoTextField(
-            controller: _controller,
-            autofocus: true,
-            placeholder: 'Tên thiết bị',
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _submit(),
-          ),
-          if (_errorMessage != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              _errorMessage!,
-              style: const TextStyle(
-                color: CupertinoColors.systemRed,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ],
-      ),
-    ),
-    actions: [
-      CupertinoDialogAction(
-        onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Hủy'),
-      ),
-      CupertinoDialogAction(
-        onPressed: _submit,
-        child: const Text('Tạo và thiết lập'),
-      ),
-    ],
-  );
-
-  void _submit() {
-    final name = _controller.text.trim();
-    if (name.isEmpty) {
-      setState(() => _errorMessage = 'Nhập tên thiết bị.');
-      return;
-    }
-    Navigator.of(context).pop(name);
   }
 }
 
