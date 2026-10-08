@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../models/device.dart';
 import '../../models/device_overview.dart';
 import '../../models/pump_command.dart';
 import '../../models/pump_schedule.dart';
+import '../../providers/alert_center_provider.dart';
+import '../../screens/alerts/alerts_screen.dart';
 import '../devices/cupertino_devices_screen.dart';
 import '../devices/cupertino_device_detail_screen.dart';
 import '../profile/cupertino_profile_screen.dart';
@@ -80,6 +83,24 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
         _hasLoaded = true;
         _refreshError = null;
       });
+      final alertCenter = _maybeAlertCenter(context);
+      if (alertCenter != null) {
+        unawaited(
+          alertCenter.loadDevices(
+            devices
+                .map(
+                  (device) => Device(
+                    id: device.id,
+                    name: device.name,
+                    isOnline: device.isOnline,
+                    lastSeenAt: device.lastSeenAt,
+                    createdAt: DateTime.now().toUtc().toIso8601String(),
+                  ),
+                )
+                .toList(),
+          ),
+        );
+      }
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -158,6 +179,16 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
       return Column(
         children: [
           const Expanded(child: devices),
+          _buildBottomBar(context),
+        ],
+      );
+    }
+    if (_selectedTab == 2) {
+      final alerts = AlertsScreen(devices: _alertDevices);
+      if (isDesktop) return alerts;
+      return Column(
+        children: [
+          Expanded(child: alerts),
           _buildBottomBar(context),
         ],
       );
@@ -263,6 +294,18 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
       ],
     );
   }
+
+  List<Device> get _alertDevices => _devices
+      .map(
+        (device) => Device(
+          id: device.id,
+          name: device.name,
+          isOnline: device.isOnline,
+          lastSeenAt: device.lastSeenAt,
+          createdAt: DateTime.now().toUtc().toIso8601String(),
+        ),
+      )
+      .toList();
 
   Widget _buildGreeting(BuildContext context) {
     final hour = DateTime.now().hour;
@@ -862,6 +905,8 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
           Expanded(
             child: _BottomItem(
               icon: CupertinoIcons.bell,
+              badgeCount:
+                  _maybeAlertCenter(context, listen: true)?.unreadCount ?? 0,
               label: 'Cảnh báo',
               selected: _selectedTab == 2,
               onTap: () => setState(() => _selectedTab = 2),
@@ -878,6 +923,17 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
         ],
       ),
     );
+  }
+}
+
+AlertCenterProvider? _maybeAlertCenter(
+  BuildContext context, {
+  bool listen = false,
+}) {
+  try {
+    return Provider.of<AlertCenterProvider>(context, listen: listen);
+  } on ProviderNotFoundException {
+    return null;
   }
 }
 
@@ -1262,12 +1318,14 @@ class _BottomItem extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final int badgeCount;
 
   const _BottomItem({
     required this.icon,
     required this.label,
     required this.selected,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
   @override
@@ -1280,12 +1338,42 @@ class _BottomItem extends StatelessWidget {
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          size: 21,
-          color: selected
-              ? AerogreenCupertinoTheme.aerogreenPrimary
-              : CupertinoColors.secondaryLabel.resolveFrom(context),
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Icon(
+              icon,
+              size: 21,
+              color: selected
+                  ? AerogreenCupertinoTheme.aerogreenPrimary
+                  : CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+            if (badgeCount > 0)
+              Positioned(
+                right: -9,
+                top: -7,
+                child: Container(
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: const BoxDecoration(
+                    color: CupertinoColors.systemRed,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    badgeCount > 99 ? '99+' : '$badgeCount',
+                    style: const TextStyle(
+                      color: CupertinoColors.white,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 3),
         Text(

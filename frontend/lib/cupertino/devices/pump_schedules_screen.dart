@@ -15,7 +15,11 @@ enum SchedulePreset {
   final int defaultMistLength;
   final int defaultInterval;
 
-  const SchedulePreset(this.label, this.defaultMistLength, this.defaultInterval);
+  const SchedulePreset(
+    this.label,
+    this.defaultMistLength,
+    this.defaultInterval,
+  );
 }
 
 class CupertinoPumpSchedulesScreen extends StatefulWidget {
@@ -143,10 +147,20 @@ class _CupertinoPumpSchedulesScreenState
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: Text('Lịch tưới - ${widget.device.name}'),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _isLoading ? null : _addSchedule,
-          child: const Icon(CupertinoIcons.add),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: _isLoading ? null : _addSchedule,
+              child: const Icon(CupertinoIcons.add),
+            ),
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: _isLoading ? null : _loadSchedules,
+              child: const Icon(CupertinoIcons.arrow_2_circlepath),
+            ),
+          ],
         ),
       ),
       child: SafeArea(
@@ -185,7 +199,9 @@ class _CupertinoPumpSchedulesScreenState
                       Text(
                         _errorMessage!,
                         style: TextStyle(
-                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                          color: CupertinoColors.secondaryLabel.resolveFrom(
+                            context,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -222,7 +238,9 @@ class _CupertinoPumpSchedulesScreenState
                       Text(
                         'Thêm lịch trình tưới tự động',
                         style: TextStyle(
-                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                          color: CupertinoColors.secondaryLabel.resolveFrom(
+                            context,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -238,19 +256,16 @@ class _CupertinoPumpSchedulesScreenState
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(18, 12, 18, 32),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final schedule = _schedules[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _ScheduleCard(
-                          schedule: schedule,
-                          onDelete: () => _deleteSchedule(schedule),
-                        ),
-                      );
-                    },
-                    childCount: _schedules.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final schedule = _schedules[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _ScheduleCard(
+                        schedule: schedule,
+                        onDelete: () => _deleteSchedule(schedule),
+                      ),
+                    );
+                  }, childCount: _schedules.length),
                 ),
               ),
           ],
@@ -264,10 +279,7 @@ class _ScheduleCard extends StatelessWidget {
   final PumpSchedule schedule;
   final VoidCallback onDelete;
 
-  const _ScheduleCard({
-    required this.schedule,
-    required this.onDelete,
-  });
+  const _ScheduleCard({required this.schedule, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -378,12 +390,12 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
   final ApiService _apiService = ApiService();
   final _mistLengthController = TextEditingController(text: '30');
   final _intervalController = TextEditingController(text: '30');
-  
+
   SchedulePreset _selectedPreset = SchedulePreset.custom;
   DateTime _startTime = DateTime.now();
   DateTime _endTime = DateTime.now().add(const Duration(hours: 12));
   final List<int> _selectedDays = [1, 2, 3, 4, 5];
-  
+
   bool _isSaving = false;
   String? _errorMessage;
   bool _hasUnsavedChanges = false;
@@ -444,7 +456,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
   String? _validateTimeWindow() {
     final startMinutes = _startTime.hour * 60 + _startTime.minute;
     final endMinutes = _endTime.hour * 60 + _endTime.minute;
-    
+
     if (endMinutes <= startMinutes && endMinutes < startMinutes + 60) {
       return 'Giờ kết thúc phải sau giờ bắt đầu (trừ khi qua đêm)';
     }
@@ -454,8 +466,10 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
   String _getLiveSummary() {
     final mistLength = _mistLengthController.text;
     final interval = _intervalController.text;
-    final days = _selectedDays.map((d) => ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][d]).join(', ');
-    
+    final days = _selectedDays
+        .map((d) => ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][d])
+        .join(', ');
+
     return 'Phun $mistLength giây mỗi $interval phút, ${_startTime.format(context)}-${_endTime.format(context)}, $days';
   }
 
@@ -463,8 +477,10 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
     final mistLengthError = _validateMistLength(_mistLengthController.text);
     final intervalError = _validateInterval(_intervalController.text);
     final timeWindowError = _validateTimeWindow();
-    
-    if (mistLengthError != null || intervalError != null || timeWindowError != null) {
+
+    if (mistLengthError != null ||
+        intervalError != null ||
+        timeWindowError != null) {
       setState(() {
         _errorMessage = mistLengthError ?? intervalError ?? timeWindowError;
       });
@@ -543,7 +559,9 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
       context: context,
       builder: (context) => CupertinoAlertDialog(
         title: const Text('Chưa lưu'),
-        content: const Text('Bạn có thay đổi chưa được lưu. Bạn có muốn rời đi?'),
+        content: const Text(
+          'Bạn có thay đổi chưa được lưu. Bạn có muốn rời đi?',
+        ),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(context).pop(false),
@@ -605,7 +623,8 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                           ),
                           color: _selectedPreset == preset
                               ? CupertinoColors.activeBlue
-                              : CupertinoColors.secondarySystemBackground.resolveFrom(context),
+                              : CupertinoColors.secondarySystemBackground
+                                    .resolveFrom(context),
                           borderRadius: BorderRadius.circular(20),
                           onPressed: () => _applyPreset(preset),
                           child: Text(
@@ -629,7 +648,9 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                       controller: _mistLengthController,
                       keyboardType: TextInputType.number,
                       placeholder: '1-120',
-                      errorText: _validateMistLength(_mistLengthController.text),
+                      errorText: _validateMistLength(
+                        _mistLengthController.text,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -696,7 +717,15 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                       spacing: 8,
                       runSpacing: 8,
                       children: List.generate(7, (index) {
-                        final dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                        final dayNames = [
+                          'CN',
+                          'T2',
+                          'T3',
+                          'T4',
+                          'T5',
+                          'T6',
+                          'T7',
+                        ];
                         return CupertinoButton(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 14,
@@ -704,7 +733,8 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                           ),
                           color: _selectedDays.contains(index)
                               ? CupertinoColors.activeBlue
-                              : CupertinoColors.secondarySystemBackground.resolveFrom(context),
+                              : CupertinoColors.secondarySystemBackground
+                                    .resolveFrom(context),
                           borderRadius: BorderRadius.circular(20),
                           onPressed: () {
                             setState(() {
@@ -750,7 +780,8 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                             child: Text(
                               _getLiveSummary(),
                               style: TextStyle(
-                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                color: CupertinoColors.secondaryLabel
+                                    .resolveFrom(context),
                                 fontSize: 12,
                               ),
                             ),
@@ -763,7 +794,9 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: CupertinoColors.systemRed.withValues(alpha: 0.1),
+                          color: CupertinoColors.systemRed.withValues(
+                            alpha: 0.1,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -831,7 +864,6 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
         ),
       ),
     );
-
   }
 }
 

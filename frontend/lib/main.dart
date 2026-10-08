@@ -4,9 +4,15 @@ import 'package:provider/provider.dart';
 import 'cupertino/auth/cupertino_login_screen.dart';
 import 'cupertino/dashboard/cupertino_dashboard_screen.dart';
 import 'cupertino/admin/cupertino_admin_dashboard_screen.dart';
+import 'cupertino/devices/cupertino_device_detail_screen.dart';
+import 'cupertino/notifications/notification_banner_host.dart';
 import 'cupertino/responsive/responsive_layout.dart';
 import 'cupertino/theme/cupertino_theme.dart' as theme;
+import 'providers/alert_center_provider.dart';
 import 'providers/auth_provider.dart';
+import 'services/notification_service.dart';
+
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,13 +24,43 @@ class AerogreenApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthProvider(),
-      child: CupertinoApp(
-        title: 'Aerogreen',
-        debugShowCheckedModeBanner: false,
-        theme: theme.AerogreenCupertinoTheme.lightTheme,
-        home: const AuthWrapper(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        Provider<NotificationService>(
+          create: (_) => FakeNotificationService(),
+          dispose: (_, service) => service.dispose(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => AlertCenterProvider(
+            notificationService: context.read<NotificationService>(),
+          ),
+        ),
+      ],
+      child: Builder(
+        builder: (context) => CupertinoApp(
+          navigatorKey: rootNavigatorKey,
+          title: 'Aerogreen',
+          debugShowCheckedModeBanner: false,
+          theme: theme.AerogreenCupertinoTheme.lightTheme,
+          builder: (appContext, child) => NotificationBannerHost(
+            service: context.read<NotificationService>(),
+            onOpen: (message) {
+              final device = message.device;
+              if (device == null) return;
+              rootNavigatorKey.currentState?.push<void>(
+                CupertinoPageRoute(
+                  builder: (_) => CupertinoDeviceDetailScreen(
+                    device: device,
+                    initialSensor: message.sensor,
+                  ),
+                ),
+              );
+            },
+            child: child ?? const SizedBox.shrink(),
+          ),
+          home: const AuthWrapper(),
+        ),
       ),
     );
   }

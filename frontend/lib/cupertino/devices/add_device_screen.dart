@@ -1,20 +1,13 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 
 import '../../models/device.dart';
 import '../../services/api_service.dart';
 
-enum AddDeviceStep {
-  prepare,
-  findDevice,
-  wifi,
-  connecting,
-  nameAndPlace,
-  done,
-}
+enum AddDeviceStep { prepare, findDevice, wifi, connecting, nameAndPlace, done }
 
 class AddDeviceScreen extends StatefulWidget {
   const AddDeviceScreen({super.key});
@@ -25,38 +18,44 @@ class AddDeviceScreen extends StatefulWidget {
 
 class _AddDeviceScreenState extends State<AddDeviceScreen> {
   final ApiService _apiService = ApiService();
-  
+
   AddDeviceStep _currentStep = AddDeviceStep.prepare;
   int _currentStepIndex = 0;
-  
+
   // Step 2: Find device
   String? _deviceId;
   String? _claimCode;
   bool _isScanning = false;
   bool _isScanningBle = false;
   List<String> _nearbyDevices = [];
-  
+
   // Step 3: Wi-Fi
   String _selectedNetwork = '';
   final _wifiPasswordController = TextEditingController();
   bool _is5GHz = false;
   List<String> _networks = ['Wi-Fi Home', 'IOTAgri-Setup', 'Guest Network'];
-  
+
   // Step 4: Connecting
   ConnectionStage _connectionStage = ConnectionStage.connectingToDevice;
   String? _connectionError;
   Timer? _connectionTimeoutTimer;
-  
+
   // Step 5: Name and place
   final _deviceNameController = TextEditingController(text: 'Tháp 1');
   final _locationController = TextEditingController();
   String? _cropType;
-  final List<String> _cropTypes = ['Rau lá', 'Cây giống', 'Thảo mộc', 'Hoa', 'Khác'];
-  
+  final List<String> _cropTypes = [
+    'Rau lá',
+    'Cây giống',
+    'Thảo mộc',
+    'Hoa',
+    'Khác',
+  ];
+
   bool _isSaving = false;
   String? _errorMessage;
   Device? _createdDevice;
-  
+
   @override
   void dispose() {
     _wifiPasswordController.dispose();
@@ -125,7 +124,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
       setState(() => _errorMessage = 'Thiết bị chỉ hỗ trợ mạng 2.4 GHz');
       return;
     }
-    
+
     setState(() {
       _errorMessage = null;
       _currentStep = AddDeviceStep.connecting;
@@ -153,13 +152,13 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         setState(() => _connectionStage = ConnectionStage.connectingToWifi);
       }
     });
-    
+
     Future.delayed(const Duration(seconds: 4), () {
       if (mounted) {
         setState(() => _connectionStage = ConnectionStage.registeringAccount);
       }
     });
-    
+
     Future.delayed(const Duration(seconds: 6), () {
       if (mounted) {
         _connectionTimeoutTimer?.cancel();
@@ -192,9 +191,11 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
     });
 
     try {
-      final response = await _apiService.createDevice(_deviceNameController.text);
+      final response = await _apiService.createDevice(
+        _deviceNameController.text,
+      );
       if (!mounted) return;
-      
+
       setState(() {
         _createdDevice = Device.fromJson(response);
         _isSaving = false;
@@ -221,7 +222,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
         _currentStepIndex++;
         _currentStep = AddDeviceStep.values[_currentStepIndex];
       });
-      
+
       if (_currentStep == AddDeviceStep.connecting) {
         _simulateConnection();
       }
@@ -289,9 +290,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
           children: [
             // Progress indicator
             _buildProgressIndicator(),
-            Expanded(
-              child: _buildCurrentStep(),
-            ),
+            Expanded(child: _buildCurrentStep()),
           ],
         ),
       ),
@@ -316,8 +315,8 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
                       color: isCompleted
                           ? CupertinoColors.activeBlue
                           : isCurrent
-                              ? CupertinoColors.activeBlue
-                              : CupertinoColors.separator,
+                          ? CupertinoColors.activeBlue
+                          : CupertinoColors.separator,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -380,7 +379,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
           isScanning: _isScanning,
           isScanningBle: _isScanningBle,
           nearbyDevices: _nearbyDevices,
-          isWeb: Platform.isAndroid || Platform.isIOS,
+          isWeb: kIsWeb,
         );
       case AddDeviceStep.wifi:
         return _WifiStep(
@@ -522,11 +521,7 @@ class _PermissionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: CupertinoColors.systemBlue,
-          size: 20,
-        ),
+        Icon(icon, color: CupertinoColors.systemBlue, size: 20),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
@@ -607,7 +602,10 @@ class _FindDeviceStep extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (isScanning)
-                          const CupertinoActivityIndicator(color: CupertinoColors.white, radius: 10)
+                          const CupertinoActivityIndicator(
+                            color: CupertinoColors.white,
+                            radius: 10,
+                          )
                         else
                           const Icon(CupertinoIcons.qrcode_viewfinder),
                         const SizedBox(width: 8),
@@ -640,42 +638,45 @@ class _FindDeviceStep extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    ...nearbyDevices.map((device) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: CupertinoButton(
-                        padding: const EdgeInsets.all(12),
-                        color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
-                        onPressed: () => onSelectDevice(device),
-                        child: Text(device),
+                    ...nearbyDevices.map(
+                      (device) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: CupertinoButton(
+                          padding: const EdgeInsets.all(12),
+                          color: CupertinoColors.secondarySystemBackground
+                              .resolveFrom(context),
+                          onPressed: () => onSelectDevice(device),
+                          child: Text(device),
+                        ),
                       ),
-                    )),
+                    ),
                   ],
-                const SizedBox(height: 24),
-                Container(
-                  height: 1,
-                  color: CupertinoColors.separator.resolveFrom(context),
-                ),
-                const SizedBox(height: 24),
-                CupertinoButton(
-                  onPressed: onUseClaimCode,
-                  child: const Text('Sử dụng mã cấp thiết bị'),
-                ),
-              ] else ...[
-                CupertinoButton.filled(
-                  onPressed: onUseClaimCode,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: const Text('Nhập mã cấp thiết bị'),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Hãy thiết lập trên điện thoại cho lần kết nối đầu tiên.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: CupertinoColors.secondaryLabel,
-                    fontSize: 13,
+                  const SizedBox(height: 24),
+                  Container(
+                    height: 1,
+                    color: CupertinoColors.separator.resolveFrom(context),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 24),
+                  CupertinoButton(
+                    onPressed: onUseClaimCode,
+                    child: const Text('Sử dụng mã cấp thiết bị'),
+                  ),
+                ] else ...[
+                  CupertinoButton.filled(
+                    onPressed: onUseClaimCode,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: const Text('Nhập mã cấp thiết bị'),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Hãy thiết lập trên điện thoại cho lần kết nối đầu tiên.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: CupertinoColors.secondaryLabel,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -746,43 +747,48 @@ class _WifiStep extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                ...networks.map((network) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: CupertinoButton(
-                    padding: const EdgeInsets.all(14),
-                    color: selectedNetwork == network
-                        ? CupertinoColors.activeBlue
-                        : CupertinoColors.secondarySystemBackground.resolveFrom(context),
-                    onPressed: () => onNetworkSelect(network),
-                    child: Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.wifi,
-                          color: selectedNetwork == network
-                              ? CupertinoColors.white
-                              : CupertinoColors.label.resolveFrom(context),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            network,
-                            style: TextStyle(
-                              color: selectedNetwork == network
-                                  ? CupertinoColors.white
-                                  : CupertinoColors.label.resolveFrom(context),
+                ...networks.map(
+                  (network) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: CupertinoButton(
+                      padding: const EdgeInsets.all(14),
+                      color: selectedNetwork == network
+                          ? CupertinoColors.activeBlue
+                          : CupertinoColors.secondarySystemBackground
+                                .resolveFrom(context),
+                      onPressed: () => onNetworkSelect(network),
+                      child: Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.wifi,
+                            color: selectedNetwork == network
+                                ? CupertinoColors.white
+                                : CupertinoColors.label.resolveFrom(context),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              network,
+                              style: TextStyle(
+                                color: selectedNetwork == network
+                                    ? CupertinoColors.white
+                                    : CupertinoColors.label.resolveFrom(
+                                        context,
+                                      ),
+                              ),
                             ),
                           ),
-                        ),
-                        if (network.contains('5G'))
-                          const Icon(
-                            CupertinoIcons.exclamationmark_triangle,
-                            color: CupertinoColors.systemOrange,
-                            size: 16,
-                          ),
-                      ],
+                          if (network.contains('5G'))
+                            const Icon(
+                              CupertinoIcons.exclamationmark_triangle,
+                              color: CupertinoColors.systemOrange,
+                              size: 16,
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                )),
+                ),
                 const SizedBox(height: 24),
                 CupertinoTextField(
                   controller: passwordController,
@@ -790,7 +796,8 @@ class _WifiStep extends StatelessWidget {
                   obscureText: true,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+                    color: CupertinoColors.secondarySystemBackground
+                        .resolveFrom(context),
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
@@ -799,7 +806,9 @@ class _WifiStep extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: CupertinoColors.systemOrange.withValues(alpha: 0.1),
+                      color: CupertinoColors.systemOrange.withValues(
+                        alpha: 0.1,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Row(
@@ -1005,7 +1014,8 @@ class _NameAndPlaceStep extends StatelessWidget {
                     placeholder: 'Tháp 1',
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+                      color: CupertinoColors.secondarySystemBackground
+                          .resolveFrom(context),
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
@@ -1024,7 +1034,8 @@ class _NameAndPlaceStep extends StatelessWidget {
                     placeholder: 'Nhà kính, sân sau...',
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+                      color: CupertinoColors.secondarySystemBackground
+                          .resolveFrom(context),
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
@@ -1049,9 +1060,11 @@ class _NameAndPlaceStep extends StatelessWidget {
                         ),
                         color: cropType == type
                             ? CupertinoColors.activeBlue
-                            : CupertinoColors.secondarySystemBackground.resolveFrom(context),
+                            : CupertinoColors.secondarySystemBackground
+                                  .resolveFrom(context),
                         borderRadius: BorderRadius.circular(20),
-                        onPressed: () => onCropTypeSelect(cropType == type ? null : type),
+                        onPressed: () =>
+                            onCropTypeSelect(cropType == type ? null : type),
                         child: Text(
                           type,
                           style: TextStyle(
@@ -1083,7 +1096,10 @@ class _NameAndPlaceStep extends StatelessWidget {
           CupertinoButton.filled(
             onPressed: isSaving ? null : onSave,
             child: isSaving
-                ? const CupertinoActivityIndicator(color: CupertinoColors.white, radius: 10)
+                ? const CupertinoActivityIndicator(
+                    color: CupertinoColors.white,
+                    radius: 10,
+                  )
                 : const Text('Lưu thiết bị'),
           ),
         ],

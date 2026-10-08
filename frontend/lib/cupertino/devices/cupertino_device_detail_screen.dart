@@ -12,6 +12,7 @@ import '../../models/pump_command.dart';
 import '../../models/pump_schedule.dart';
 import '../../models/sensor_reading.dart';
 import '../../screens/sensors/sensor_history_screen.dart';
+import '../../screens/alerts/alerts_screen.dart';
 import '../../services/api_service.dart';
 import '../theme/cupertino_theme.dart';
 import 'pump_schedules_screen.dart';
@@ -21,11 +22,13 @@ enum PumpMode { auto, manual }
 class CupertinoDeviceDetailScreen extends StatefulWidget {
   final Device device;
   final ApiService? apiService;
+  final String? initialSensor;
 
   const CupertinoDeviceDetailScreen({
     super.key,
     required this.device,
     this.apiService,
+    this.initialSensor,
   });
 
   @override
@@ -58,6 +61,11 @@ class _CupertinoDeviceDetailScreenState
     _apiService = widget.apiService ?? ApiService();
     _device = widget.device;
     _loadDeviceData();
+    if (widget.initialSensor != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _openSensorHistory(widget.initialSensor!);
+      });
+    }
     _refreshTimer = Timer.periodic(
       const Duration(seconds: 20),
       (_) => _loadDeviceData(showLoading: false),
@@ -155,25 +163,31 @@ class _CupertinoDeviceDetailScreenState
   DateTime? _getNextScheduleTime() {
     final enabled = _enabledSchedules;
     if (enabled.isEmpty) return null;
-    
+
     final now = DateTime.now();
     final today = now.weekday == 7 ? 0 : now.weekday;
-    
+
     for (final schedule in enabled) {
       if ((schedule.weekdayMask & (1 << today)) != 0) {
         final parts = schedule.startTime.split(':');
         if (parts.length >= 2) {
           final hour = int.tryParse(parts[0]) ?? 0;
           final minute = int.tryParse(parts[1]) ?? 0;
-          final scheduleTime = DateTime(now.year, now.month, now.day, hour, minute);
-          
+          final scheduleTime = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            hour,
+            minute,
+          );
+
           if (scheduleTime.isAfter(now)) {
             return scheduleTime;
           }
         }
       }
     }
-    
+
     return null;
   }
 
@@ -181,12 +195,12 @@ class _CupertinoDeviceDetailScreenState
     if (time == null) return 'Không có lịch';
     final now = DateTime.now();
     final difference = time.difference(now);
-    
+
     if (difference.isNegative) return 'Đã qua';
-    
+
     final hours = difference.inHours;
     final minutes = difference.inMinutes % 60;
-    
+
     if (hours > 0) {
       return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
     }
@@ -213,7 +227,9 @@ class _CupertinoDeviceDetailScreenState
         title: const Text('Chế độ Thủ công'),
         content: Padding(
           padding: const EdgeInsets.only(top: 8),
-          child: Text('${_device.name} đang ở chế độ Thủ công và chưa phun. Chuyển về Tự động?'),
+          child: Text(
+            '${_device.name} đang ở chế độ Thủ công và chưa phun. Chuyển về Tự động?',
+          ),
         ),
         actions: [
           CupertinoDialogAction(
@@ -304,9 +320,9 @@ class _CupertinoDeviceDetailScreenState
       );
       if (confirmed != true || !mounted) return;
     }
-    
+
     setState(() => _pumpMode = mode);
-    
+
     if (mode == PumpMode.manual) {
       _startManualModeReminder();
     } else {
@@ -344,7 +360,7 @@ class _CupertinoDeviceDetailScreenState
         ),
       ),
     );
-    
+
     if (duration != null && mounted) {
       await _sendPumpCommand(durationSeconds: duration);
     }
@@ -365,6 +381,13 @@ class _CupertinoDeviceDetailScreenState
         builder: (_) => SensorHistoryScreen(device: _device, sensor: sensor),
       ),
     );
+  }
+
+  Future<void> _openAlerts() async {
+    await Navigator.of(context).push<void>(
+      CupertinoPageRoute<void>(builder: (_) => AlertsScreen(device: _device)),
+    );
+    if (mounted) await _loadDeviceData(showLoading: false);
   }
 
   Future<void> _openSettings() async {
@@ -493,7 +516,11 @@ class _CupertinoDeviceDetailScreenState
                     onTap: () => _openSensorHistory('temperature'),
                   ),
                   const SizedBox(height: 16),
-                  AlertsSummaryCard(alerts: _alerts, device: _device),
+                  AlertsSummaryCard(
+                    alerts: _alerts,
+                    device: _device,
+                    onTap: _openAlerts,
+                  ),
                 ],
               ),
             ),
@@ -817,21 +844,23 @@ class PumpControlCard extends StatelessWidget {
   final PumpMode pumpMode;
   final DateTime? nextScheduleTime;
   final int remainingSeconds;
-  final ValueChanged<PumpMode> onModeChange;
-  final VoidCallback onManualToggle;
-  final VoidCallback onStop;
+  final ValueChanged<PumpMode>? onModeChange;
+  final VoidCallback? onManualToggle;
+  final VoidCallback? onStop;
+  final VoidCallback? onPressed;
 
   const PumpControlCard({
     super.key,
     required this.isOnline,
     required this.isRunning,
     required this.isSending,
-    required this.pumpMode,
-    required this.nextScheduleTime,
-    required this.remainingSeconds,
-    required this.onModeChange,
-    required this.onManualToggle,
-    required this.onStop,
+    this.pumpMode = PumpMode.manual,
+    this.nextScheduleTime,
+    this.remainingSeconds = 0,
+    this.onModeChange,
+    this.onManualToggle,
+    this.onStop,
+    this.onPressed,
   });
 
   @override
@@ -888,8 +917,8 @@ class PumpControlCard extends StatelessWidget {
               child: Text('Thủ công'),
             ),
           },
-          onValueChanged: (mode) {
-            if (isOnline && mode != null) onModeChange(mode);
+          onValueChanged: (value) {
+            if (isOnline && value != null) onModeChange?.call(value);
           },
         ),
         const SizedBox(height: 16),
@@ -941,23 +970,38 @@ class PumpControlCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 CupertinoButton(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   color: CupertinoColors.systemRed,
                   borderRadius: BorderRadius.circular(12),
-                  onPressed: isOnline && !isSending ? onStop : null,
+                  onPressed: isOnline && !isSending
+                      ? (onStop ?? onPressed)
+                      : null,
                   child: isSending
-                      ? const CupertinoActivityIndicator(color: CupertinoColors.white, radius: 8)
+                      ? const CupertinoActivityIndicator(
+                          color: CupertinoColors.white,
+                          radius: 8,
+                        )
                       : const Text('Dừng', style: TextStyle(fontSize: 13)),
                 ),
               ],
             ),
           ] else ...[
             CupertinoButton.filled(
-              onPressed: isOnline && !isSending ? onManualToggle : null,
+              onPressed: isOnline && !isSending
+                  ? (onManualToggle ?? onPressed)
+                  : null,
               padding: const EdgeInsets.symmetric(vertical: 14),
               child: isSending
-                  ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                  : const Text('BẬT BƠM', style: TextStyle(fontWeight: FontWeight.w600)),
+                  ? const CupertinoActivityIndicator(
+                      color: CupertinoColors.white,
+                    )
+                  : const Text(
+                      'BẬT BƠM',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
             ),
           ],
         ],
@@ -976,12 +1020,12 @@ class PumpControlCard extends StatelessWidget {
     if (time == null) return 'Không có lịch';
     final now = DateTime.now();
     final difference = time.difference(now);
-    
+
     if (difference.isNegative) return 'Đã qua';
-    
+
     final hours = difference.inHours;
     final minutes = difference.inMinutes % 60;
-    
+
     if (hours > 0) {
       return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
     }
@@ -1154,57 +1198,62 @@ class HistoryPreviewCard extends StatelessWidget {
 class AlertsSummaryCard extends StatelessWidget {
   final List<DeviceAlert> alerts;
   final Device device;
+  final VoidCallback onTap;
 
   const AlertsSummaryCard({
     super.key,
     required this.alerts,
     required this.device,
+    required this.onTap,
   });
 
   @override
-  Widget build(BuildContext context) => _DetailSurface(
-    child: Row(
-      children: [
-        Icon(
-          alerts.isEmpty
-              ? CupertinoIcons.checkmark_circle_fill
-              : CupertinoIcons.exclamationmark_triangle_fill,
-          color: alerts.isEmpty
-              ? AerogreenCupertinoTheme.aerogreenPrimary
-              : CupertinoColors.systemOrange,
-          size: 21,
-        ),
-        const SizedBox(width: 11),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const _DetailSectionTitle(title: 'Cảnh báo'),
-              const SizedBox(height: 3),
-              Text(
-                alerts.isEmpty
-                    ? 'Không có cảnh báo đang mở.'
-                    : '${alerts.length} cảnh báo đang mở',
-                style: const TextStyle(
-                  color: CupertinoColors.secondaryLabel,
-                  fontSize: 12,
-                ),
-              ),
-            ],
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: _DetailSurface(
+      child: Row(
+        children: [
+          Icon(
+            alerts.isEmpty
+                ? CupertinoIcons.checkmark_circle_fill
+                : CupertinoIcons.exclamationmark_triangle_fill,
+            color: alerts.isEmpty
+                ? AerogreenCupertinoTheme.aerogreenPrimary
+                : CupertinoColors.systemOrange,
+            size: 21,
           ),
-        ),
-        if (alerts.isNotEmpty)
-          Text(
-            alerts.first.type == 'LOW_WATER_LEVEL'
-                ? 'Mực nước thấp'
-                : 'Nhiệt độ cao',
-            style: const TextStyle(
-              color: CupertinoColors.systemOrange,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _DetailSectionTitle(title: 'Cảnh báo'),
+                const SizedBox(height: 3),
+                Text(
+                  alerts.isEmpty
+                      ? 'Không có cảnh báo đang mở.'
+                      : '${alerts.length} cảnh báo đang mở',
+                  style: const TextStyle(
+                    color: CupertinoColors.secondaryLabel,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
           ),
-      ],
+          if (alerts.isNotEmpty)
+            Text(
+              alerts.first.type == 'LOW_WATER_LEVEL'
+                  ? 'Mực nước thấp'
+                  : 'Nhiệt độ cao',
+              style: const TextStyle(
+                color: CupertinoColors.systemOrange,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+        ],
+      ),
     ),
   );
 }

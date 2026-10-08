@@ -438,6 +438,33 @@ class ApiService {
     }
   }
 
+  Future<List<dynamic>> getAggregatedDeviceReadings(
+    String deviceId, {
+    required DateTime from,
+    required DateTime to,
+    String interval = 'hour',
+  }) async {
+    final uri =
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.aggregatedReadings(deviceId)}',
+        ).replace(
+          queryParameters: {
+            'from': from.toUtc().toIso8601String(),
+            'to': to.toUtc().toIso8601String(),
+            'interval': interval,
+          },
+        );
+
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(uri, headers: headers),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to load aggregated readings: ${response.body}');
+  }
+
   // Pump control methods
   Future<Map<String, dynamic>> sendPumpCommand(
     String deviceId,
@@ -672,16 +699,15 @@ class ApiService {
     String? search,
     String? filter,
   }) async {
-    final uri = Uri.parse(
-      '${ApiConstants.baseUrl}${ApiConstants.adminUsers}',
-    ).replace(
-      queryParameters: {
-        'page': '$page',
-        'pageSize': '$pageSize',
-        ...?search != null && search.isNotEmpty ? {'search': search} : null,
-        ...?filter != null ? {'filter': filter} : null,
-      },
-    );
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminUsers}')
+        .replace(
+          queryParameters: {
+            'page': '$page',
+            'pageSize': '$pageSize',
+            ...?search != null && search.isNotEmpty ? {'search': search} : null,
+            ...?filter != null ? {'filter': filter} : null,
+          },
+        );
     final response = await _authenticatedRequest(
       (headers) => _client.get(uri, headers: headers),
     );
@@ -751,7 +777,9 @@ class ApiService {
   Future<Map<String, dynamic>> getAdminDevice(String deviceId) async {
     final response = await _authenticatedRequest(
       (headers) => _client.get(
-        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminDevice(deviceId)}'),
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.adminDevice(deviceId)}',
+        ),
         headers: headers,
       ),
     );
@@ -811,15 +839,20 @@ class ApiService {
     String? targetType,
     String? actorUserId,
   }) async {
-    final uri = Uri.parse(
-      '${ApiConstants.baseUrl}${ApiConstants.adminAuditLogs}',
-    ).replace(queryParameters: {
-      'page': '$page',
-      'pageSize': '$pageSize',
-      if (action != null && action.isNotEmpty) 'action': action,
-      if (targetType != null && targetType.isNotEmpty) 'targetType': targetType,
-      if (actorUserId != null && actorUserId.isNotEmpty) 'actorUserId': actorUserId,
-    });
+    final uri =
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.adminAuditLogs}',
+        ).replace(
+          queryParameters: {
+            'page': '$page',
+            'pageSize': '$pageSize',
+            if (action != null && action.isNotEmpty) 'action': action,
+            if (targetType != null && targetType.isNotEmpty)
+              'targetType': targetType,
+            if (actorUserId != null && actorUserId.isNotEmpty)
+              'actorUserId': actorUserId,
+          },
+        );
     final response = await _authenticatedRequest(
       (headers) => _client.get(uri, headers: headers),
     );
@@ -848,80 +881,123 @@ class ApiService {
     int page = 1,
     int pageSize = 100,
   }) async {
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminTickets}').replace(queryParameters: {
-      'page': '$page',
-      'pageSize': '$pageSize',
-      if (status != null && status.isNotEmpty) 'status': status,
-      if (search != null && search.isNotEmpty) 'search': search,
-    });
-    final response = await _authenticatedRequest((headers) => _client.get(uri, headers: headers));
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminTickets}')
+        .replace(
+          queryParameters: {
+            'page': '$page',
+            'pageSize': '$pageSize',
+            if (status != null && status.isNotEmpty) 'status': status,
+            if (search != null && search.isNotEmpty) 'search': search,
+          },
+        );
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(uri, headers: headers),
+    );
     if (response.statusCode == 200) return jsonDecode(response.body);
     throw Exception('Failed to load support tickets: ${response.body}');
   }
 
   Future<Map<String, dynamic>> getAdminTicket(String id) async {
-    final response = await _authenticatedRequest((headers) => _client.get(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminTicket(id)}'), headers: headers));
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminTicket(id)}'),
+        headers: headers,
+      ),
+    );
     if (response.statusCode == 200) return jsonDecode(response.body);
     throw Exception('Failed to load support ticket: ${response.body}');
   }
 
-  Future<Map<String, dynamic>> updateAdminTicketStatus(String id, String status) =>
-      _updateAdminTicket(ApiConstants.adminTicketStatus(id), {'status': status});
+  Future<Map<String, dynamic>> updateAdminTicketStatus(
+    String id,
+    String status,
+  ) => _updateAdminTicket(ApiConstants.adminTicketStatus(id), {
+    'status': status,
+  });
 
-  Future<Map<String, dynamic>> updateAdminTicketPriority(String id, String priority) =>
-      _updateAdminTicket(ApiConstants.adminTicketPriority(id), {'priority': priority});
+  Future<Map<String, dynamic>> updateAdminTicketPriority(
+    String id,
+    String priority,
+  ) => _updateAdminTicket(ApiConstants.adminTicketPriority(id), {
+    'priority': priority,
+  });
 
   Future<Map<String, dynamic>> replyToAdminTicket(String id, String message) =>
-      _updateAdminTicket(ApiConstants.adminTicketMessages(id), {'message': message}, post: true);
+      _updateAdminTicket(ApiConstants.adminTicketMessages(id), {
+        'message': message,
+      }, post: true);
 
   Future<Map<String, dynamic>> _updateAdminTicket(
     String path,
     Map<String, String> body, {
     bool post = false,
   }) async {
-    final response = await _authenticatedRequest((headers) => post
-        ? _client.post(Uri.parse('${ApiConstants.baseUrl}$path'), headers: headers, body: jsonEncode(body))
-        : _client.put(Uri.parse('${ApiConstants.baseUrl}$path'), headers: headers, body: jsonEncode(body)));
+    final response = await _authenticatedRequest(
+      (headers) => post
+          ? _client.post(
+              Uri.parse('${ApiConstants.baseUrl}$path'),
+              headers: headers,
+              body: jsonEncode(body),
+            )
+          : _client.put(
+              Uri.parse('${ApiConstants.baseUrl}$path'),
+              headers: headers,
+              body: jsonEncode(body),
+            ),
+    );
     if (response.statusCode == 200) return jsonDecode(response.body);
     throw Exception('Failed to update support ticket: ${response.body}');
   }
 
   Future<Map<String, dynamic>> getAdminOverview() async {
-    final response = await _authenticatedRequest((headers) => _client.get(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminOverview}'), headers: headers));
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminOverview}'),
+        headers: headers,
+      ),
+    );
     if (response.statusCode == 200) return jsonDecode(response.body);
     throw Exception('Failed to load admin overview: ${response.body}');
   }
 
   Future<Map<String, dynamic>> getAdminReportSummary() async {
-    final response = await _authenticatedRequest((headers) => _client.get(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminReportSummary}'), headers: headers));
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminReportSummary}'),
+        headers: headers,
+      ),
+    );
     if (response.statusCode == 200) return jsonDecode(response.body);
     throw Exception('Failed to load report summary: ${response.body}');
   }
 
   Future<http.Response> downloadAdminReportCsv() {
-    return _authenticatedRequest((headers) => _client.get(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminReportCsv}'),
-      headers: headers,
-    ));
+    return _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminReportCsv}'),
+        headers: headers,
+      ),
+    );
   }
 
   Future<Map<String, dynamic>> getAdminSystemStatus() async {
-    final response = await _authenticatedRequest((headers) => _client.get(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminStatus}'),
-      headers: headers,
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminStatus}'),
+        headers: headers,
+      ),
+    );
     if (response.statusCode == 200) return jsonDecode(response.body);
     throw Exception('Failed to load system status: ${response.body}');
   }
 
   Future<Map<String, dynamic>> getAdminAlertDefaults() async {
-    final response = await _authenticatedRequest((headers) => _client.get(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminAlertDefaults}'),
-      headers: headers,
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminAlertDefaults}'),
+        headers: headers,
+      ),
+    );
     if (response.statusCode == 200) return jsonDecode(response.body);
     throw Exception('Failed to load alert defaults: ${response.body}');
   }
@@ -930,14 +1006,16 @@ class ApiService {
     double highTemperatureC,
     double lowWaterLevelPercent,
   ) async {
-    final response = await _authenticatedRequest((headers) => _client.put(
-      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminAlertDefaults}'),
-      headers: headers,
-      body: jsonEncode({
-        'highTemperatureC': highTemperatureC,
-        'lowWaterLevelPercent': lowWaterLevelPercent,
-      }),
-    ));
+    final response = await _authenticatedRequest(
+      (headers) => _client.put(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminAlertDefaults}'),
+        headers: headers,
+        body: jsonEncode({
+          'highTemperatureC': highTemperatureC,
+          'lowWaterLevelPercent': lowWaterLevelPercent,
+        }),
+      ),
+    );
     if (response.statusCode == 200) return jsonDecode(response.body);
     throw Exception('Failed to update alert defaults: ${response.body}');
   }
