@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 
 import '../../models/device.dart';
 import '../../models/pump_schedule.dart';
@@ -146,8 +145,8 @@ class _CupertinoPumpSchedulesScreenState
         middle: Text('Lịch tưới - ${widget.device.name}'),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: _isLoading ? null : _loadSchedules,
-          child: const Icon(CupertinoIcons.arrow_2_circlepath),
+          onPressed: _isLoading ? null : _addSchedule,
+          child: const Icon(CupertinoIcons.add),
         ),
       ),
       child: SafeArea(
@@ -256,12 +255,6 @@ class _CupertinoPumpSchedulesScreenState
               ),
           ],
         ),
-      ),
-      floatingActionButton: CupertinoButton.filled(
-        padding: const EdgeInsets.all(16),
-        borderRadius: BorderRadius.circular(30),
-        onPressed: _isLoading ? null : _addSchedule,
-        child: const Icon(CupertinoIcons.add, size: 28),
       ),
     );
   }
@@ -387,8 +380,8 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
   final _intervalController = TextEditingController(text: '30');
   
   SchedulePreset _selectedPreset = SchedulePreset.custom;
-  TimeOfDay _startTime = TimeOfDay.now();
-  TimeOfDay _endTime = TimeOfDay.now().add(const Duration(hours: 12));
+  DateTime _startTime = DateTime.now();
+  DateTime _endTime = DateTime.now().add(const Duration(hours: 12));
   final List<int> _selectedDays = [1, 2, 3, 4, 5];
   
   bool _isSaving = false;
@@ -497,6 +490,13 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
         _startTime.hour,
         _startTime.minute,
       ).toIso8601String();
+      final endTimeStr = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        _endTime.hour,
+        _endTime.minute,
+      ).toIso8601String();
 
       await _apiService.createPumpSchedule(
         widget.device.id,
@@ -504,6 +504,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
         int.parse(_mistLengthController.text),
         _selectedDays,
         intervalMinutes: int.parse(_intervalController.text),
+        endTime: endTimeStr,
       );
 
       if (mounted) {
@@ -802,7 +803,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
   }
 
   Future<void> _selectTime(bool isStart) async {
-    final picked = await showCupertinoModalPopup<TimeOfDay>(
+    await showCupertinoModalPopup<void>(
       context: context,
       builder: (context) => Container(
         height: 216,
@@ -815,19 +816,13 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
           top: false,
           child: CupertinoDatePicker(
             mode: CupertinoDatePickerMode.time,
-            initialDateTime: DateTime(
-              DateTime.now().year,
-              DateTime.now().month,
-              DateTime.now().day,
-              isStart ? _startTime.hour : _endTime.hour,
-              isStart ? _startTime.minute : _endTime.minute,
-            ),
+            initialDateTime: isStart ? _startTime : _endTime,
             onDateTimeChanged: (DateTime newTime) {
               setState(() {
                 if (isStart) {
-                  _startTime = TimeOfDay(hour: newTime.hour, minute: newTime.minute);
+                  _startTime = newTime;
                 } else {
-                  _endTime = TimeOfDay(hour: newTime.hour, minute: newTime.minute);
+                  _endTime = newTime;
                 }
                 _hasUnsavedChanges = true;
               });
@@ -837,16 +832,6 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
       ),
     );
 
-    if (picked != null && mounted) {
-      setState(() {
-        if (isStart) {
-          _startTime = picked;
-        } else {
-          _endTime = picked;
-        }
-        _hasUnsavedChanges = true;
-      });
-    }
   }
 }
 
@@ -914,7 +899,7 @@ class _ScheduleField extends StatelessWidget {
 
 class _TimeButton extends StatelessWidget {
   final String label;
-  final TimeOfDay time;
+  final DateTime time;
   final VoidCallback onTap;
 
   const _TimeButton({
@@ -957,7 +942,7 @@ class _TimeButton extends StatelessWidget {
   );
 }
 
-extension on TimeOfDay {
+extension on DateTime {
   String format(BuildContext context) {
     return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
   }

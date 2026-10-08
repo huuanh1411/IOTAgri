@@ -650,9 +650,11 @@ class _FindDeviceStep extends StatelessWidget {
                       ),
                     )),
                   ],
-                ],
                 const SizedBox(height: 24),
-                const Divider(),
+                Container(
+                  height: 1,
+                  color: CupertinoColors.separator.resolveFrom(context),
+                ),
                 const SizedBox(height: 24),
                 CupertinoButton(
                   onPressed: onUseClaimCode,
@@ -910,6 +912,7 @@ class _ConnectingStep extends StatelessWidget {
       ConnectionStage.connectingToWifi => 'Đang vào Wi-Fi...',
       ConnectionStage.registeringAccount => 'Đang đăng ký tài khoản...',
       ConnectionStage.completed => 'Hoàn tất!',
+      ConnectionStage.failed => '',
     };
 
     return Padding(

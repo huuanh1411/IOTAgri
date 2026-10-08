@@ -26,6 +26,8 @@ services:
     image: eclipse-mosquitto:2
     profiles: ["pump-simulator"]
     command: ["/bin/sh", "/simulator.sh"]
+    environment:
+      SIMULATOR_DEVICE_KEY: ${PUMP_SIMULATOR_DEVICE_KEY:-}
     volumes:
       - ./tools/pump-simulator.sh:/simulator.sh:ro
     depends_on:

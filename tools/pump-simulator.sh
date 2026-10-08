@@ -1,6 +1,16 @@
 #!/bin/sh
 set -eu
 
+if [ -n "${SIMULATOR_DEVICE_KEY:-}" ]; then
+  (
+    while true; do
+      mosquitto_pub -h mosquitto -t "devices/$SIMULATOR_DEVICE_KEY/readings" \
+        -m '{"temperature":25,"humidity":60,"ph":6.5,"tds":500,"waterLevel":70,"lux":400}'
+      sleep 10
+    done
+  ) &
+fi
+
 while true; do
   mosquitto_sub -h mosquitto -t 'devices/+/commands/pump' -F '%t %p' |
     while IFS=' ' read -r topic payload; do

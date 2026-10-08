@@ -525,6 +525,8 @@ class ApiService {
           'isEnabled': isEnabled,
           'weekdayMask': schedule.weekdayMask,
           'startTime': schedule.startTime,
+          'endTime': schedule.endTime,
+          'intervalMinutes': schedule.intervalMinutes,
           'durationSeconds': schedule.durationSeconds,
           'timeZone': schedule.timeZone,
         }),
@@ -543,8 +545,10 @@ class ApiService {
     int durationSeconds,
     List<int> daysOfWeek, {
     int? intervalMinutes,
+    String? endTime,
   }) async {
     final localStart = DateTime.parse(startTime);
+    final localEnd = endTime == null ? null : DateTime.parse(endTime);
     final weekdayMask = daysOfWeek.fold<int>(
       0,
       (mask, day) => mask | (1 << day),
@@ -563,6 +567,9 @@ class ApiService {
           'weekdayMask': weekdayMask,
           'startTime': formattedStartTime,
           'durationSeconds': durationSeconds,
+          if (localEnd != null)
+            'endTime': '${localEnd.hour.toString().padLeft(2, '0')}:'
+                '${localEnd.minute.toString().padLeft(2, '0')}:00',
           if (intervalMinutes != null) 'intervalMinutes': intervalMinutes,
           'timeZone': 'Asia/Ho_Chi_Minh',
         }),

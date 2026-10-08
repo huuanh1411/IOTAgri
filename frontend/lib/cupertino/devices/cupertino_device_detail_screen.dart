@@ -888,7 +888,9 @@ class PumpControlCard extends StatelessWidget {
               child: Text('Thủ công'),
             ),
           },
-          onValueChanged: isOnline ? onModeChange : null,
+          onValueChanged: (mode) {
+            if (isOnline && mode != null) onModeChange(mode);
+          },
         ),
         const SizedBox(height: 16),
         if (pumpMode == PumpMode.auto) ...[

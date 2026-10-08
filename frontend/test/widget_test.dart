@@ -682,7 +682,12 @@ void main() {
               isOnline: true,
               isRunning: false,
               isSending: true,
-              onPressed: _noop,
+              pumpMode: PumpMode.auto,
+              nextScheduleTime: null,
+              remainingSeconds: 0,
+              onModeChange: _noopMode,
+              onManualToggle: _noop,
+              onStop: _noop,
             ),
           ),
         ),
@@ -695,3 +700,5 @@ void main() {
 }
 
 void _noop() {}
+
+void _noopMode(PumpMode _) {}
