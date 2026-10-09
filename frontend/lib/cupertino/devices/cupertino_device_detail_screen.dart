@@ -391,13 +391,67 @@ class _CupertinoDeviceDetailScreenState
   }
 
   Future<void> _openSettings() async {
-    await Navigator.of(context).push<void>(
-      CupertinoPageRoute<void>(
+    final result = await Navigator.of(context).push<dynamic>(
+      CupertinoPageRoute<dynamic>(
         builder: (_) =>
             DeviceSettingsScreen(device: _device, apiService: _apiService),
       ),
     );
-    if (mounted) await _loadDeviceData(showLoading: false);
+    if (!mounted) return;
+    if (result == 'removed') {
+      // Show toast before returning to devices list
+      final overlay = Overlay.maybeOf(context, rootOverlay: true);
+      if (overlay != null) {
+        late OverlayEntry entry;
+        entry = OverlayEntry(
+          builder: (context) => Positioned(
+            bottom: 50,
+            left: 24,
+            right: 24,
+            child: SafeArea(
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.darkBackgroundGray.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: CupertinoColors.systemGrey,
+                        blurRadius: 10,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    'Đã xóa thiết bị thành công',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: CupertinoColors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        overlay.insert(entry);
+        Timer(const Duration(seconds: 2), () {
+          entry.remove();
+        });
+      }
+      Navigator.of(context).pop();
+      return;
+    }
+    if (result is Device) {
+      setState(() {
+        _device = result;
+      });
+    }
+    await _loadDeviceData(showLoading: false);
   }
 
   void _showMessage(String message) {
@@ -1273,20 +1327,29 @@ class DeviceSettingsScreen extends StatefulWidget {
 }
 
 class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
+  late Device _currentDevice;
   final _temperatureController = TextEditingController();
   final _waterController = TextEditingController();
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _isRemoving = false;
   String? _errorMessage;
+  Timer? _toastTimer;
+  OverlayEntry? _toastEntry;
 
   @override
   void initState() {
     super.initState();
+    _currentDevice = widget.device;
     _loadSettings();
   }
 
   @override
   void dispose() {
+    _toastTimer?.cancel();
+    if (_toastEntry?.mounted == true) {
+      _toastEntry?.remove();
+    }
     _temperatureController.dispose();
     _waterController.dispose();
     super.dispose();
@@ -1295,7 +1358,7 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
   Future<void> _loadSettings() async {
     try {
       final settings = await widget.apiService.getAlertSettings(
-        widget.device.id,
+        _currentDevice.id,
       );
       if (!mounted) return;
       _temperatureController.text =
@@ -1309,6 +1372,93 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
         _errorMessage = error.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _showRenameDialog() async {
+    final nameController = TextEditingController(text: _currentDevice.name);
+    String? dialogError;
+
+    final newName = await showCupertinoDialog<String>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => CupertinoAlertDialog(
+          title: const Text('Đổi tên thiết bị'),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CupertinoTextField(
+                  controller: nameController,
+                  autofocus: true,
+                  placeholder: 'Tên thiết bị',
+                  onChanged: (_) {
+                    if (dialogError != null) {
+                      setDialogState(() => dialogError = null);
+                    }
+                  },
+                ),
+                if (dialogError != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    dialogError!,
+                    style: const TextStyle(
+                      color: CupertinoColors.systemRed,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Hủy'),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () {
+                final trimmed = nameController.text.trim();
+                if (trimmed.isEmpty) {
+                  setDialogState(() {
+                    dialogError = 'Tên thiết bị không được để trống';
+                  });
+                  return;
+                }
+                Navigator.of(dialogContext).pop(trimmed);
+              },
+              child: const Text('Lưu'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (newName != null && newName != _currentDevice.name && mounted) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+      try {
+        final updatedData = await widget.apiService.updateDevice(
+          _currentDevice.id,
+          newName,
+        );
+        if (!mounted) return;
+        setState(() {
+          _currentDevice = Device.fromJson(updatedData);
+          _isLoading = false;
+        });
+        _showToast(context, 'Đã đổi tên thiết bị');
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Không thể đổi tên: $e';
+        });
+      }
     }
   }
 
@@ -1334,11 +1484,11 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
     });
     try {
       await widget.apiService.updateAlertSettings(
-        widget.device.id,
+        _currentDevice.id,
         highTemperatureC: temperature,
         lowWaterLevelPercent: water,
       );
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) Navigator.of(context).pop(_currentDevice);
     } catch (error) {
       if (mounted) {
         setState(() {
@@ -1349,10 +1499,123 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
     }
   }
 
+  Future<void> _confirmRemoveDevice() async {
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('Xóa thiết bị?'),
+        content: const Padding(
+          padding: EdgeInsets.only(top: 8),
+          child: Text(
+            'Thiết bị sẽ được đặt lại và ngừng báo cáo. Lịch phun đã lưu có thể dừng. Hãy chắc chắn cây đã được chăm sóc.',
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Hủy'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Xóa thiết bị'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      _isRemoving = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await widget.apiService.deleteDevice(_currentDevice.id);
+      if (!mounted) return;
+      Navigator.of(context).pop('removed');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isRemoving = false;
+        _errorMessage = 'Không thể xóa thiết bị: $e';
+      });
+    }
+  }
+
+  void _showToast(BuildContext context, String message) {
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    if (overlay == null) return;
+
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 50,
+        left: 24,
+        right: 24,
+        child: SafeArea(
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: CupertinoColors.darkBackgroundGray.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: const [
+                  BoxShadow(
+                    color: CupertinoColors.systemGrey,
+                    blurRadius: 10,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: CupertinoColors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    _toastTimer?.cancel();
+    if (_toastEntry?.mounted == true) {
+      _toastEntry?.remove();
+    }
+    _toastEntry = entry;
+    overlay.insert(entry);
+    _toastTimer = Timer(const Duration(seconds: 2), () {
+      if (entry.mounted) {
+        entry.remove();
+      }
+      if (_toastEntry == entry) {
+        _toastEntry = null;
+      }
+    });
+  }
+
+  String _formatSerial(String id) {
+    if (id.isEmpty) return 'AGRI-000000';
+    final clean = id.replaceAll('-', '').toUpperCase();
+    return clean.length >= 8 ? 'AGRI-${clean.substring(0, 8)}' : 'AGRI-$clean';
+  }
+
   @override
   Widget build(BuildContext context) => CupertinoPageScaffold(
-    navigationBar: const CupertinoNavigationBar(
-      middle: Text('Cài đặt thiết bị'),
+    navigationBar: CupertinoNavigationBar(
+      middle: const Text('Cài đặt thiết bị'),
+      leading: CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: () => Navigator.of(context).pop(_currentDevice),
+        child: const Icon(CupertinoIcons.back),
+      ),
     ),
     child: SafeArea(
       child: _isLoading
@@ -1360,6 +1623,15 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
           : ListView(
               padding: const EdgeInsets.all(20),
               children: [
+                // 1. Rename section
+                _buildRenameCard(),
+                const SizedBox(height: 20),
+
+                // 2. Device info section
+                _buildInfoCard(),
+                const SizedBox(height: 20),
+
+                // 3. Alert thresholds
                 _SettingsField(
                   label: 'Cảnh báo nhiệt độ cao (°C)',
                   controller: _temperatureController,
@@ -1378,15 +1650,203 @@ class _DeviceSettingsScreenState extends State<DeviceSettingsScreen> {
                 ],
                 const SizedBox(height: 24),
                 CupertinoButton.filled(
-                  onPressed: _isSaving ? null : _saveSettings,
+                  onPressed: (_isSaving || _isRemoving) ? null : _saveSettings,
                   child: _isSaving
                       ? const CupertinoActivityIndicator(
                           color: CupertinoColors.white,
                         )
                       : const Text('Lưu cài đặt'),
                 ),
+                const SizedBox(height: 32),
+
+                // 4. Destructive Remove Device button at the bottom
+                CupertinoButton(
+                  color: CupertinoColors.systemRed.withValues(alpha: 0.12),
+                  onPressed: (_isSaving || _isRemoving) ? null : _confirmRemoveDevice,
+                  child: _isRemoving
+                      ? const CupertinoActivityIndicator(
+                          color: CupertinoColors.systemRed,
+                        )
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              CupertinoIcons.delete,
+                              color: CupertinoColors.systemRed,
+                              size: 18,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Xóa thiết bị',
+                              style: TextStyle(
+                                color: CupertinoColors.systemRed,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+                const SizedBox(height: 24),
               ],
             ),
+    ),
+  );
+
+  Widget _buildRenameCard() => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Tên thiết bị',
+                style: TextStyle(
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _currentDevice.name,
+                style: TextStyle(
+                  color: CupertinoColors.label.resolveFrom(context),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+        CupertinoButton(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          color: CupertinoColors.activeBlue.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(10),
+          onPressed: _showRenameDialog,
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(CupertinoIcons.pencil, size: 16, color: CupertinoColors.activeBlue),
+              SizedBox(width: 4),
+              Text(
+                'Đổi tên',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: CupertinoColors.activeBlue,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _buildInfoCard() {
+    final isOnline = _currentDevice.isOnline;
+    final wifiIcon = isOnline ? CupertinoIcons.wifi : CupertinoIcons.wifi_slash;
+    final wifiColor = isOnline ? const Color(0xFF248A4B) : CupertinoColors.systemGrey;
+    final wifiText = isOnline ? 'Tốt (-65 dBm)' : 'Không có tín hiệu';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Thông tin thiết bị',
+            style: TextStyle(
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildInfoRow('Model', 'ESP32 Hydroponic Gateway'),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            height: 0.5,
+            color: CupertinoColors.separator.resolveFrom(context),
+          ),
+          _buildInfoRow('Firmware', 'v1.2.0'),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            height: 0.5,
+            color: CupertinoColors.separator.resolveFrom(context),
+          ),
+          _buildInfoRow('Serial', _formatSerial(_currentDevice.id)),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            height: 0.5,
+            color: CupertinoColors.separator.resolveFrom(context),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Tín hiệu Wi-Fi',
+                  style: TextStyle(
+                    color: CupertinoColors.label.resolveFrom(context),
+                    fontSize: 14,
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(wifiIcon, color: wifiColor, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      wifiText,
+                      style: TextStyle(
+                        color: wifiColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: CupertinoColors.label.resolveFrom(context),
+            fontSize: 14,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     ),
   );
 }
