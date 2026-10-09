@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme.dart';
 
 class InfoCard extends StatelessWidget {
   final String title;
@@ -22,7 +23,7 @@ class InfoCard extends StatelessWidget {
       elevation: 4,
       color: backgroundColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(UIConsts.cardRadius),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -83,7 +84,7 @@ class SensorCard extends StatelessWidget {
       elevation: 2,
       color: isWarning ? Colors.red[50] : null,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(UIConsts.cardRadius),
         side: isWarning ? BorderSide(color: Colors.red.withValues(alpha: 0.3)) : BorderSide.none,
       ),
       child: Padding(
@@ -154,7 +155,7 @@ class StatusCard extends StatelessWidget {
       elevation: 2,
       color: isActive ? Colors.green[50] : Colors.red[50],
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(UIConsts.cardRadius),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
