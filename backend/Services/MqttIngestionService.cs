@@ -187,6 +187,7 @@ public class MqttIngestionService : BackgroundService
         {
             DeviceId = device.Id,
             Temperature = request.Temperature,
+            SolutionTemperature = request.SolutionTemperature,
             Humidity = request.Humidity,
             Ph = request.Ph,
             Tds = request.Tds,
@@ -287,9 +288,14 @@ public class MqttIngestionService : BackgroundService
             }
             else
             {
-                command.Status = PumpCommandStatus.Acknowledged;
+                command.Status = status.WasSuccessful
+                    ? PumpCommandStatus.Acknowledged
+                    : PumpCommandStatus.Failed;
                 command.AcknowledgedAt = now;
                 command.AcknowledgedIsOn = status.IsOn;
+                command.FailureReason = status.WasSuccessful
+                    ? null
+                    : status.NormalizedReason ?? "DEVICE_REJECTED";
             }
         }
 

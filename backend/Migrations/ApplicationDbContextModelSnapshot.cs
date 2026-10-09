@@ -410,6 +410,9 @@ namespace IOTAgriBackend.Migrations
                     b.Property<DateTime>("RecordedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<double?>("SolutionTemperature")
+                        .HasColumnType("double precision");
+
                     b.Property<double?>("Tds")
                         .HasColumnType("double precision");
 

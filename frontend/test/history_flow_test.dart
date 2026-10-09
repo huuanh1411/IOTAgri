@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:iotagri_app/models/history_data.dart';
+import 'package:iotagri_app/models/sensor_reading.dart';
 import 'package:iotagri_app/services/history_export_service.dart';
 
 void main() {
@@ -25,6 +26,21 @@ void main() {
     expect(stats?.minimum, 24);
     expect(stats?.average, 27);
     expect(stats?.maximum, 30);
+  });
+
+  test('maps solution temperature and TDS into history samples', () {
+    final sample = HistorySample.fromReading(
+      SensorReading(
+        id: 'reading-1',
+        deviceId: 'device-1',
+        solutionTemperature: 26.7,
+        tds: 520,
+        recordedAt: '2026-10-08T08:00:00Z',
+      ),
+    );
+
+    expect(sample.values[HistorySensor.solutionTemperature], 26.7);
+    expect(sample.values[HistorySensor.tds], 520);
   });
 
   test('generates a real CSV export with readings and pump events', () async {

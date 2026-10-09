@@ -16,6 +16,9 @@ class ApiConstants {
   static String device(String id) => '/api/devices/$id';
   static String deviceProvisioningCode(String id) =>
       '/api/devices/$id/provisioning-code';
+  static String provisioningCodes(String id) => deviceProvisioningCode(id);
+  static String activeProvisioningCode(String id) => deviceProvisioningCode(id);
+  static const String claimDevice = '/api/device-provisioning/claims';
 
   // Dashboard endpoints
   static const String dashboardOverview = '/api/dashboard/overview';
@@ -24,6 +27,7 @@ class ApiConstants {
   static String deviceReadings(String id) => '/api/devices/$id/readings';
   static String aggregatedReadings(String id) =>
       '/api/devices/$id/readings/aggregated';
+  static String deviceAggregatedReadings(String id) => aggregatedReadings(id);
 
   // Pump control endpoints
   static String pumpCommands(String id) => '/api/devices/$id/pump/commands';
@@ -36,6 +40,8 @@ class ApiConstants {
   // Alert endpoints
   static String alertSettings(String id) => '/api/devices/$id/alert-settings';
   static String alerts(String id) => '/api/devices/$id/alerts';
+  static String resolveAlert(String deviceId, String alertId) =>
+      '/api/devices/$deviceId/alerts/$alertId/resolve';
 
   // Admin endpoints
   static const String adminUsers = '/api/admin/users';

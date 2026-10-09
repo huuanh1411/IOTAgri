@@ -191,22 +191,6 @@ class _CupertinoDeviceDetailScreenState
     return null;
   }
 
-  String _formatTimeRemaining(DateTime? time) {
-    if (time == null) return 'Không có lịch';
-    final now = DateTime.now();
-    final difference = time.difference(now);
-
-    if (difference.isNegative) return 'Đã qua';
-
-    final hours = difference.inHours;
-    final minutes = difference.inMinutes % 60;
-
-    if (hours > 0) {
-      return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
-    }
-    return '${minutes.toString().padLeft(2, '0')} phút';
-  }
-
   void _startManualModeReminder() {
     _manualModeReminderTimer?.cancel();
     _manualModeReminderTimer = Timer(const Duration(minutes: 30), () {
@@ -261,11 +245,6 @@ class _CupertinoDeviceDetailScreenState
         });
       }
     });
-  }
-
-  void _stopPumpCountdown() {
-    _pumpCountdownTimer?.cancel();
-    _remainingSeconds = 0;
   }
 
   List<PumpSchedule> get _enabledSchedules =>
@@ -730,7 +709,7 @@ class SensorGrid extends StatelessWidget {
     final specs = [
       _SensorSpec(
         keyName: 'temperature',
-        label: 'Nhiệt độ',
+        label: 'Nhiệt độ không khí',
         value: reading?.temperature,
         unit: '°C',
         icon: CupertinoIcons.thermometer,
@@ -747,13 +726,22 @@ class SensorGrid extends StatelessWidget {
         color: CupertinoColors.systemBlue,
       ),
       _SensorSpec(
-        keyName: 'ph',
-        label: 'pH',
-        value: reading?.ph,
-        unit: '',
+        keyName: 'solutionTemperature',
+        label: 'Nhiệt độ dung dịch',
+        value: reading?.solutionTemperature,
+        unit: '°C',
+        icon: CupertinoIcons.thermometer,
+        warning: false,
+        color: CupertinoColors.systemRed,
+      ),
+      _SensorSpec(
+        keyName: 'tds',
+        label: 'TDS',
+        value: reading?.tds,
+        unit: 'ppm',
         icon: CupertinoIcons.info_circle,
-        warning: (reading?.ph ?? 7) < 5.5 || (reading?.ph ?? 7) > 7.5,
-        color: CupertinoColors.systemPurple,
+        warning: false,
+        color: CupertinoColors.systemIndigo,
       ),
       _SensorSpec(
         keyName: 'waterLevel',
@@ -1986,13 +1974,4 @@ String _scheduleEndTime(String startTime, int durationSeconds) {
   final endHour = (totalMinutes ~/ 60) % 24;
   final endMinute = totalMinutes % 60;
   return '${endHour.toString().padLeft(2, '0')}:${endMinute.toString().padLeft(2, '0')}';
-}
-
-String _scheduleDays(int mask) {
-  const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-  final selected = [
-    for (var day = 0; day < days.length; day++)
-      if ((mask & (1 << day)) != 0) days[day],
-  ];
-  return selected.isEmpty ? 'chưa chọn ngày' : selected.join(', ');
 }

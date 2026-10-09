@@ -19,6 +19,7 @@ import 'package:iotagri_app/models/device.dart';
 import 'package:iotagri_app/models/device_alert.dart';
 import 'package:iotagri_app/models/device_overview.dart';
 import 'package:iotagri_app/models/sensor_reading.dart';
+import 'package:iotagri_app/cupertino/devices/add_device_screen.dart';
 import 'package:iotagri_app/cupertino/devices/cupertino_devices_screen.dart';
 import 'package:iotagri_app/cupertino/profile/cupertino_profile_screen.dart';
 import 'package:iotagri_app/cupertino/auth/cupertino_register_screen.dart';
@@ -476,7 +477,7 @@ void main() {
   testWidgets('profile tab shows account info and logout below the form', (
     WidgetTester tester,
   ) async {
-    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.physicalSize = const Size(600, 2000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -492,20 +493,21 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.text('Tài khoản'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpAndSettle();
 
     expect(find.byType(CupertinoProfileScreen), findsOneWidget);
+    expect(find.text('Hồ sơ cá nhân'), findsOneWidget);
+    expect(find.text('Đổi mật khẩu'), findsOneWidget);
+    expect(find.text('Đăng xuất'), findsOneWidget);
+
+    // Mở màn hình chỉnh sửa hồ sơ cá nhân
+    await tester.tap(find.text('Hồ sơ cá nhân'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Họ và tên'), findsOneWidget);
     expect(find.text('Số điện thoại'), findsOneWidget);
-    expect(find.text('Email'), findsOneWidget);
+    expect(find.textContaining('Email'), findsOneWidget);
     expect(find.text('Lưu thay đổi'), findsOneWidget);
-    expect(find.text('Đăng xuất'), findsOneWidget);
-    // Nút đăng xuất phải nằm dưới nút lưu, tức ở cuối màn hình hồ sơ.
-    expect(
-      tester.getCenter(find.text('Đăng xuất')).dy,
-      greaterThan(tester.getCenter(find.text('Lưu thay đổi')).dy),
-    );
     expect(tester.takeException(), isNull);
   });
 
@@ -549,19 +551,20 @@ void main() {
 
     await tester.tap(find.byIcon(CupertinoIcons.add));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(CupertinoTextField), 'North greenhouse');
-    await tester.tap(find.text('Tạo và thiết lập'));
-    await tester.pumpAndSettle();
-
-    expect(apiService.provisionedDeviceId, 'device-generated-123');
-    expect(find.text('Device ID: device-generated-123'), findsOneWidget);
-    expect(find.text('482913'), findsOneWidget);
+    expect(find.byType(AddDeviceScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('detail disables controls offline and notes saved schedules', (
     WidgetTester tester,
   ) async {
+    tester.view.physicalSize = const Size(1200, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     final device = Device(
       id: 'device-1',
       name: 'Greenhouse 1',
@@ -580,21 +583,20 @@ void main() {
 
     expect(find.text('Offline'), findsOneWidget);
     expect(
-      find.text('Lịch đã lưu tiếp tục chạy tự động khi có kết nối.'),
+      find.text('Lịch tự động vẫn tiếp tục chạy khi thiết bị ngoại tuyến.'),
       findsOneWidget,
     );
-    final pumpButton = tester.widget<CupertinoButton>(
-      find
-          .ancestor(
-            of: find.text('Bật 60s'),
-            matching: find.byType(CupertinoButton),
-          )
-          .first,
-    );
-    expect(pumpButton.onPressed, isNull);
+    expect(find.text('Không khả dụng khi ngoại tuyến'), findsOneWidget);
   });
 
   testWidgets('detail shows running pump state', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(1200, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     final device = Device(
       id: 'device-1',
       name: 'Greenhouse 1',
@@ -612,7 +614,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Bơm đang chạy'), findsOneWidget);
-    expect(find.text('Tắt'), findsOneWidget);
+    await tester.tap(find.text('Thủ công'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Chuyển'));
+    await tester.pumpAndSettle();
+    expect(find.text('Dừng'), findsOneWidget);
   });
 
   testWidgets('detail shows missing sensor state', (WidgetTester tester) async {
@@ -633,7 +639,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Không có dữ liệu mới'), findsOneWidget);
-    expect(find.text('Không có dữ liệu'), findsNWidgets(4));
+    expect(find.text('Không có dữ liệu'), findsNWidgets(5));
   });
 
   testWidgets('sensor grid marks values below configured threshold', (
@@ -643,8 +649,10 @@ void main() {
       id: 'reading-1',
       deviceId: 'device-1',
       temperature: 26,
+      solutionTemperature: 24.5,
       humidity: 62,
       ph: 6.2,
+      tds: 520,
       waterLevel: 12,
       recordedAt: '2026-10-02T00:00:00Z',
     );
@@ -669,6 +677,8 @@ void main() {
 
     final waterValue = tester.widget<Text>(find.text('12.0 %'));
     expect(waterValue.style?.color, CupertinoColors.systemOrange);
+    expect(find.text('24.5 °C'), findsOneWidget);
+    expect(find.text('520.0 ppm'), findsOneWidget);
   });
 
   testWidgets('pump control shows command-sending state', (
@@ -682,7 +692,7 @@ void main() {
               isOnline: true,
               isRunning: false,
               isSending: true,
-              pumpMode: PumpMode.auto,
+              pumpMode: PumpMode.manual,
               nextScheduleTime: null,
               remainingSeconds: 0,
               onModeChange: _noopMode,

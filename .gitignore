@@ -4,3 +4,4 @@ graphify-out/
 .env
 .compose-start.stderr.log
 .compose-start.stdout.log
+.run/

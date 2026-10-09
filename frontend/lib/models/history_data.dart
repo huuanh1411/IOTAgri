@@ -1,8 +1,10 @@
 import 'sensor_reading.dart';
 
 enum HistorySensor {
-  temperature('temperature', 'Nhiệt độ', '°C'),
+  temperature('temperature', 'Nhiệt độ không khí', '°C'),
+  solutionTemperature('solutionTemperature', 'Nhiệt độ dung dịch', '°C'),
   humidity('humidity', 'Độ ẩm', '%'),
+  tds('tds', 'TDS', 'ppm'),
   ph('ph', 'pH', ''),
   waterLevel('waterLevel', 'Mực nước', '%');
 
@@ -14,7 +16,9 @@ enum HistorySensor {
 
   double? valueFromReading(SensorReading reading) => switch (this) {
     HistorySensor.temperature => reading.temperature,
+    HistorySensor.solutionTemperature => reading.solutionTemperature,
     HistorySensor.humidity => reading.humidity,
+    HistorySensor.tds => reading.tds,
     HistorySensor.ph => reading.ph,
     HistorySensor.waterLevel => reading.waterLevel,
   };
@@ -22,7 +26,9 @@ enum HistorySensor {
   double? valueFromAggregate(Map<String, dynamic> json) {
     final key = switch (this) {
       HistorySensor.temperature => 'avgTemperature',
+      HistorySensor.solutionTemperature => 'avgSolutionTemperature',
       HistorySensor.humidity => 'avgHumidity',
+      HistorySensor.tds => 'avgTds',
       HistorySensor.ph => 'avgPh',
       HistorySensor.waterLevel => 'avgWaterLevel',
     };

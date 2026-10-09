@@ -225,7 +225,7 @@ public static class AdminEndpoints
         if (device is null) return Results.NotFound();
 
         var latestReading = await db.SensorReadings.Where(reading => reading.DeviceId == id).OrderByDescending(reading => reading.RecordedAt)
-            .Select(reading => new SensorReadingResponse(reading.Id, reading.Temperature, reading.Humidity, reading.Ph, reading.Tds, reading.WaterLevel, reading.Lux, reading.RecordedAt))
+            .Select(reading => new SensorReadingResponse(reading.Id, reading.Temperature, reading.SolutionTemperature, reading.Humidity, reading.Ph, reading.Tds, reading.WaterLevel, reading.Lux, reading.RecordedAt))
             .FirstOrDefaultAsync();
         var pumpCommands = await db.PumpCommands.Where(command => command.DeviceId == id)
             .OrderByDescending(command => command.IssuedAt).ThenByDescending(command => command.Id).Take(20)
@@ -240,7 +240,7 @@ public static class AdminEndpoints
 
         var readings = await db.SensorReadings.Where(reading => reading.DeviceId == id).OrderByDescending(reading => reading.RecordedAt)
             .Take(Math.Clamp(take, 1, 500))
-            .Select(reading => new SensorReadingResponse(reading.Id, reading.Temperature, reading.Humidity, reading.Ph, reading.Tds, reading.WaterLevel, reading.Lux, reading.RecordedAt))
+            .Select(reading => new SensorReadingResponse(reading.Id, reading.Temperature, reading.SolutionTemperature, reading.Humidity, reading.Ph, reading.Tds, reading.WaterLevel, reading.Lux, reading.RecordedAt))
             .ToListAsync();
         return Results.Ok(readings);
     }

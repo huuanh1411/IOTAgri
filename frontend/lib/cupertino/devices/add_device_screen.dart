@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/services.dart';
 
 import '../../models/device.dart';
 import '../../services/api_service.dart';
@@ -24,7 +23,6 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
 
   // Step 2: Find device
   String? _deviceId;
-  String? _claimCode;
   bool _isScanning = false;
   bool _isScanningBle = false;
   List<String> _nearbyDevices = [];

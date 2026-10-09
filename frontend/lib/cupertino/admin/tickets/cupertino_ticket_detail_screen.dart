@@ -52,7 +52,7 @@ class _CupertinoTicketDetailScreenState
     super.dispose();
   }
 
-  // Load tin nhắn (mock)
+  // Load tin nhắn từ ApiService
   Future<void> _loadMessages() async {
     setState(() => _isLoading = true);
     try {

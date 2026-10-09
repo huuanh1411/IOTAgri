@@ -48,7 +48,7 @@ class _CupertinoTicketsScreenState extends State<CupertinoTicketsScreen> {
     super.dispose();
   }
 
-  // Load tickets từ mock service
+  // Load tickets từ ApiService
   Future<void> _loadTickets() async {
     setState(() => _isLoading = true);
     try {

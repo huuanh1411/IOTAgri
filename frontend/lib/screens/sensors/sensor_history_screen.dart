@@ -95,7 +95,10 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
 
   HistorySensor? _sensorFromKey(String? key) => switch (key) {
     'temperature' => HistorySensor.temperature,
+    'solutionTemperature' ||
+    'solution_temperature' => HistorySensor.solutionTemperature,
     'humidity' => HistorySensor.humidity,
+    'tds' => HistorySensor.tds,
     'ph' => HistorySensor.ph,
     'waterLevel' || 'water_level' => HistorySensor.waterLevel,
     _ => null,
@@ -1039,7 +1042,9 @@ class _HistoryEmpty extends StatelessWidget {
 
 Color _sensorColor(HistorySensor sensor) => switch (sensor) {
   HistorySensor.temperature => CupertinoColors.systemOrange,
+  HistorySensor.solutionTemperature => CupertinoColors.systemRed,
   HistorySensor.humidity => CupertinoColors.systemBlue,
+  HistorySensor.tds => CupertinoColors.systemIndigo,
   HistorySensor.ph => CupertinoColors.systemPurple,
   HistorySensor.waterLevel => CupertinoColors.systemTeal,
 };

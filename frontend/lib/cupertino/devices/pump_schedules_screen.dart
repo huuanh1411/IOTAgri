@@ -125,23 +125,6 @@ class _CupertinoPumpSchedulesScreenState
     }
   }
 
-  String _formatTime(String timeString) {
-    final parts = timeString.split(':');
-    if (parts.length >= 2) {
-      return '${parts[0]}:${parts[1]}';
-    }
-    return timeString;
-  }
-
-  String _formatDays(int mask) {
-    const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-    final selected = [
-      for (var day = 0; day < days.length; day++)
-        if ((mask & (1 << day)) != 0) days[day],
-    ];
-    return selected.isEmpty ? 'chưa chọn ngày' : selected.join(', ');
-  }
-
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(

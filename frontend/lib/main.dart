@@ -8,8 +8,11 @@ import 'cupertino/devices/cupertino_device_detail_screen.dart';
 import 'cupertino/notifications/notification_banner_host.dart';
 import 'cupertino/responsive/responsive_layout.dart';
 import 'cupertino/theme/cupertino_theme.dart' as theme;
+import 'cupertino/widgets/global_offline_banner.dart';
 import 'providers/alert_center_provider.dart';
+import 'providers/app_settings_provider.dart';
 import 'providers/auth_provider.dart';
+import 'services/connectivity_service.dart';
 import 'services/notification_service.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -27,6 +30,8 @@ class AerogreenApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
+        ChangeNotifierProvider(create: (_) => ConnectivityService()),
         Provider<NotificationService>(
           create: (_) => FakeNotificationService(),
           dispose: (_, service) => service.dispose(),
@@ -37,30 +42,39 @@ class AerogreenApp extends StatelessWidget {
           ),
         ),
       ],
-      child: Builder(
-        builder: (context) => CupertinoApp(
-          navigatorKey: rootNavigatorKey,
-          title: 'Aerogreen',
-          debugShowCheckedModeBanner: false,
-          theme: theme.AerogreenCupertinoTheme.lightTheme,
-          builder: (appContext, child) => NotificationBannerHost(
-            service: context.read<NotificationService>(),
-            onOpen: (message) {
-              final device = message.device;
-              if (device == null) return;
-              rootNavigatorKey.currentState?.push<void>(
-                CupertinoPageRoute(
-                  builder: (_) => CupertinoDeviceDetailScreen(
-                    device: device,
-                    initialSensor: message.sensor,
-                  ),
-                ),
-              );
-            },
-            child: child ?? const SizedBox.shrink(),
-          ),
-          home: const AuthWrapper(),
-        ),
+      child: Consumer<AppSettingsProvider>(
+        builder: (context, settings, _) {
+          final activeTheme = settings.themeMode == AppThemeMode.dark
+              ? theme.AerogreenCupertinoTheme.darkTheme
+              : theme.AerogreenCupertinoTheme.lightTheme;
+
+          return CupertinoApp(
+            navigatorKey: rootNavigatorKey,
+            title: 'Aerogreen',
+            debugShowCheckedModeBanner: false,
+            locale: settings.locale,
+            theme: activeTheme,
+            builder: (appContext, child) => GlobalOfflineBanner(
+              child: NotificationBannerHost(
+                service: context.read<NotificationService>(),
+                onOpen: (message) {
+                  final device = message.device;
+                  if (device == null) return;
+                  rootNavigatorKey.currentState?.push<void>(
+                    CupertinoPageRoute(
+                      builder: (_) => CupertinoDeviceDetailScreen(
+                        device: device,
+                        initialSensor: message.sensor,
+                      ),
+                    ),
+                  );
+                },
+                child: child ?? const SizedBox.shrink(),
+              ),
+            ),
+            home: const AuthWrapper(),
+          );
+        },
       ),
     );
   }
