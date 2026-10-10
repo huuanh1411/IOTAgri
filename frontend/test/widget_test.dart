@@ -18,6 +18,7 @@ import 'package:iotagri_app/cupertino/devices/cupertino_device_detail_screen.dar
 import 'package:iotagri_app/models/device.dart';
 import 'package:iotagri_app/models/device_alert.dart';
 import 'package:iotagri_app/models/device_overview.dart';
+import 'package:iotagri_app/models/pump_schedule.dart';
 import 'package:iotagri_app/models/sensor_reading.dart';
 import 'package:iotagri_app/cupertino/devices/add_device_screen.dart';
 import 'package:iotagri_app/cupertino/devices/cupertino_devices_screen.dart';
@@ -83,6 +84,7 @@ class _DetailApiService extends ApiService {
   final bool pumpIsRunning;
   final bool includeReading;
   final bool includeSchedule;
+  final List<bool> scheduleEnabledUpdates = <bool>[];
 
   _DetailApiService({
     this.isOnline = true,
@@ -173,6 +175,16 @@ class _DetailApiService extends ApiService {
     'highTemperatureC': 30,
     'lowWaterLevelPercent': 20,
   };
+
+  @override
+  Future<Map<String, dynamic>> updatePumpSchedule(
+    String deviceId,
+    PumpSchedule schedule, {
+    required bool isEnabled,
+  }) async {
+    scheduleEnabledUpdates.add(isEnabled);
+    return {...schedule.toJson(), 'isEnabled': isEnabled};
+  }
 }
 
 class _DeviceListApiService extends ApiService {
@@ -619,6 +631,35 @@ void main() {
     await tester.tap(find.text('Chuyển'));
     await tester.pumpAndSettle();
     expect(find.text('Dừng'), findsOneWidget);
+  });
+
+  testWidgets('manual mode pauses schedules and auto mode restores them', (
+    WidgetTester tester,
+  ) async {
+    final api = _DetailApiService(includeSchedule: true);
+    final device = Device(
+      id: 'device-1',
+      name: 'Greenhouse 1',
+      isOnline: true,
+      createdAt: '2026-10-02T00:00:00Z',
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoDeviceDetailScreen(device: device, apiService: api),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Thủ công'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Chuyển'));
+    await tester.pumpAndSettle();
+    expect(api.scheduleEnabledUpdates, equals(<bool>[false]));
+
+    await tester.tap(find.text('Tự động'));
+    await tester.pumpAndSettle();
+    expect(api.scheduleEnabledUpdates, equals(<bool>[false, true]));
   });
 
   testWidgets('detail shows missing sensor state', (WidgetTester tester) async {

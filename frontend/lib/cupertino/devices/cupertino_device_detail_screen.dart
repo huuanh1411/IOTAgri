@@ -54,6 +54,7 @@ class _CupertinoDeviceDetailScreenState
   Timer? _manualModeReminderTimer;
   Timer? _pumpCountdownTimer;
   int _remainingSeconds = 0;
+  final Set<String> _pausedScheduleIds = <String>{};
 
   @override
   void initState() {
@@ -252,6 +253,16 @@ class _CupertinoDeviceDetailScreenState
 
   Future<void> _sendPumpCommand({int? durationSeconds}) async {
     if (!_device.isOnline || _isCommandPending) return;
+    final latestReading = _readings.isEmpty ? null : _readings.first;
+    final lowWaterThreshold =
+        (_alertSettings['lowWaterLevelPercent'] as num?)?.toDouble() ?? 30;
+    final isStartingPump = !_isPumpRunning;
+    if (isStartingPump &&
+        latestReading != null &&
+        latestReading.waterLevel < lowWaterThreshold) {
+      _showMessage('Không thể bật bơm khi mực nước đang thấp.');
+      return;
+    }
     setState(() => _isSendingCommand = true);
     try {
       await _apiService.sendPumpCommand(
@@ -300,13 +311,59 @@ class _CupertinoDeviceDetailScreenState
       if (confirmed != true || !mounted) return;
     }
 
-    setState(() => _pumpMode = mode);
-
     if (mode == PumpMode.manual) {
+      final enabledSchedules = List<PumpSchedule>.from(_enabledSchedules);
+      final pausedThisAttempt = <PumpSchedule>[];
+      try {
+        for (final schedule in enabledSchedules) {
+          await _apiService.updatePumpSchedule(
+            _device.id,
+            schedule,
+            isEnabled: false,
+          );
+          pausedThisAttempt.add(schedule);
+        }
+      } catch (error) {
+        // Preserve the automatic-mode invariant if schedule pausing fails.
+        for (final schedule in pausedThisAttempt) {
+          try {
+            await _apiService.updatePumpSchedule(
+              _device.id,
+              schedule,
+              isEnabled: true,
+            );
+          } catch (_) {}
+        }
+        if (mounted) {
+          _showMessage('Không thể tạm dừng lịch tự động: $error');
+        }
+        return;
+      }
+      _pausedScheduleIds
+        ..clear()
+        ..addAll(enabledSchedules.map((schedule) => schedule.id));
+      if (mounted) setState(() => _pumpMode = PumpMode.manual);
       _startManualModeReminder();
     } else {
+      try {
+        for (final schedule in _schedules.where(
+          (schedule) => _pausedScheduleIds.contains(schedule.id),
+        )) {
+          await _apiService.updatePumpSchedule(
+            _device.id,
+            schedule,
+            isEnabled: true,
+          );
+        }
+      } catch (error) {
+        if (mounted) _showMessage('Không thể khôi phục lịch tự động: $error');
+        return;
+      }
+      _pausedScheduleIds.clear();
+      if (mounted) setState(() => _pumpMode = PumpMode.auto);
       _stopManualModeReminder();
     }
+    await _loadDeviceData(showLoading: false);
   }
 
   Future<void> _showManualDurationDialog() async {
