@@ -42,9 +42,8 @@ All private endpoints require an `Authorization: Bearer <access_token>` header.
 | `POST` | `/api/devices` | Create new device entity | `{ name }` | `Device` (201) |
 | `PUT` | `/api/devices/{id}` | Rename device | `{ name }` | `Device` |
 | `DELETE` | `/api/devices/{id}` | Unclaim / remove device | None | `204 No Content` |
-| `POST` | `/api/devices/{id}/provisioning-codes` | Generate claim code | None | `{ code, expiresAt, deviceId }` |
-| `GET` | `/api/devices/{id}/provisioning-codes/active` | Get active code | None | `{ code, expiresAt, deviceId }` |
-| `POST` | `/api/devices/claim` | Claim device via code | `{ code, name }` | `Device` (200) |
+| `POST` | `/api/devices/{id}/provisioning-code` | Generate one-use claim code | None | `{ code, expiresAt }` |
+| `POST` | `/api/device-provisioning/claims` | Firmware claims a device | `{ code, hardwareId }` | `{ deviceKey, mqttHost, mqttPort, useTls }` |
 
 ---
 
@@ -77,7 +76,8 @@ All private endpoints require an `Authorization: Bearer <access_token>` header.
 
 | Method | Endpoint | Description | Request Body | Response |
 |---|---|---|---|---|
-| `POST` | `/api/devices/{id}/pump-commands` | Issue manual command | `{ commandId, on, durationSeconds }` | `PumpCommand` (201) |
+| `POST` | `/api/devices/{id}/pump/commands` | Issue manual command | `{ commandId, isOn, durationSeconds }` | `PumpCommand` (201) |
+| `POST` | `/api/devices/{id}/light/commands` | Issue manual light command | `{ commandId, isOn }` | `{ commandId, isOn, status }` (202) |
 | `GET` | `/api/devices/{id}/pump-commands` | Command audit log | `page`, `pageSize`, `rangeHours` | `{ items: PumpCommand[], totalCount }` |
 | `GET` | `/api/devices/{id}/pump-schedules` | List recurring schedules | None | `PumpSchedule[]` |
 | `POST` | `/api/devices/{id}/pump-schedules` | Create recurring schedule | `{ isEnabled, weekdayMask, startTime, durationSeconds, timeZone }` | `PumpSchedule` (201) |
@@ -119,25 +119,37 @@ devices/{deviceKey}/
   ├── readings              (Telemetry: ESP32 -> Backend)
   ├── commands/pump         (Command:   Backend -> ESP32)
   ├── pump-status           (ACK/State: ESP32 -> Backend)
-  └── alerts                (Immediate: Backend -> Clients)
+  ├── commands/light        (Extension: MQTT client -> ESP32)
+  └── light-status          (Extension: ESP32 -> MQTT clients)
 ```
+
+The backend publishes both actuator command topics and consumes telemetry plus both status topics. Light state is stored on the device and is also refreshed from the telemetry `lightState` field.
 
 ### 3.2 Telemetry Message: `devices/{deviceKey}/readings`
 - **Direction**: ESP32 Firmware -> Mosquitto -> Ingestion Service
-- **QoS**: 1
+- **QoS**: 0 from the current `PubSubClient` firmware
 - **Retain**: false
 - **Payload**:
 ```json
 {
-  "temp": 26.5,
-  "solTemp": 24.2,
-  "hum": 68.0,
-  "ph": 6.20,
+  "temperature": 26.5,
+  "solutionTemperature": 24.2,
+  "humidity": 68.0,
+  "ph": null,
   "tds": 540,
-  "water": 85.0,
-  "timestamp": 1791550800
+  "waterLevel": 85.0,
+  "lux": null,
+  "waterDistanceCm": 4.5,
+  "waterLevelCm": 25.5,
+  "waterLevelValid": true,
+  "lowWater": false,
+  "pumpState": false,
+  "lightState": true,
+  "wifiRssi": -55
 }
 ```
+
+`temperature`, `solutionTemperature`, `humidity`, `ph`, `tds`, `waterLevel`, and `lux` are persisted as sensor readings. `lightState` updates the device actuator state. The remaining fields are forward-compatible diagnostics currently ignored by .NET JSON deserialization. Invalid sensor values are sent as JSON `null`, never as a fabricated zero.
 
 ### 3.3 Pump Actuator Command: `devices/{deviceKey}/commands/pump`
 - **Direction**: Backend Service -> Mosquitto -> ESP32
@@ -146,26 +158,40 @@ devices/{deviceKey}/
 - **Payload**:
 ```json
 {
-  "commandId": "cmd_94821048",
-  "on": true,
-  "duration": 60
+  "commandId": "ad2ff566-68e4-4e96-a799-9bb617c0e491",
+  "isOn": true,
+  "durationSeconds": 60
 }
 ```
 
 ### 3.4 Pump Status & Acknowledgement: `devices/{deviceKey}/pump-status`
 - **Direction**: ESP32 Firmware -> Mosquitto -> Backend & Mobile
-- **QoS**: 1
+- **QoS**: 0 from the current `PubSubClient` firmware
 - **Retain**: true
 - **Payload**:
 ```json
 {
-  "commandId": "cmd_94821048",
+  "commandId": "ad2ff566-68e4-4e96-a799-9bb617c0e491",
   "isOn": true,
-  "reason": "command_acknowledged",
-  "remainingSeconds": 59,
-  "timestamp": 1791550801
+  "success": true,
+  "remainingSeconds": 59
 }
 ```
+
+On a safety rejection, firmware responds with `isOn:false`, `success:false`, and `reason:"LOW_WATER"` or `reason:"WATER_LEVEL_SENSOR_INVALID"`. State-only transitions (timer completion, local safety, boot/reconnect synchronization) may omit `commandId`.
+
+### 3.5 Light Control: `commands/light` and `light-status`
+
+Command payload:
+
+```json
+{
+  "commandId": "87e946f2-4701-48f3-8843-5823662c15f1",
+  "isOn": true
+}
+```
+
+Status payload uses the same `{ commandId?, isOn, success, reason? }` shape as pump status. The backend subscribes to `light-status`, persists `isOn`, and exposes the current state in device responses.
 
 ---
 

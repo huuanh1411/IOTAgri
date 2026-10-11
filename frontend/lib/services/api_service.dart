@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/api_constants.dart';
 import '../models/user.dart';
 import '../models/pump_schedule.dart';
@@ -33,26 +34,73 @@ class ApiService {
 
   final http.Client _client;
   final FlutterSecureStorage _storage;
+  final bool _allowWebStorageFallback;
   String? _accessToken;
   Future<http.Response>? _refreshFuture;
 
-  ApiService({http.Client? client, FlutterSecureStorage? storage})
-    : _client = client ?? http.Client(),
-      _storage = storage ?? const FlutterSecureStorage();
+  ApiService({
+    http.Client? client,
+    FlutterSecureStorage? storage,
+    bool? allowWebStorageFallback,
+  }) : _client = client ?? http.Client(),
+       _storage = storage ?? const FlutterSecureStorage(),
+       _allowWebStorageFallback = allowWebStorageFallback ?? kIsWeb;
+
+  static String _webFallbackKey(String key) => 'iotagri.auth.$key';
+
+  Future<String?> _readToken(String key) async {
+    try {
+      final value = await _storage.read(key: key);
+      if (value != null || !_allowWebStorageFallback) return value;
+    } catch (error) {
+      if (!_allowWebStorageFallback) rethrow;
+      debugPrint(
+        'Secure token storage unavailable; using web fallback: $error',
+      );
+    }
+
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getString(_webFallbackKey(key));
+  }
+
+  Future<void> _removeWebFallbackTokens() async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove(_webFallbackKey('access_token'));
+    await preferences.remove(_webFallbackKey('refresh_token'));
+  }
 
   Future<void> _loadTokens() async {
-    _accessToken = await _storage.read(key: 'access_token');
+    _accessToken = await _readToken('access_token');
   }
 
   Future<void> _saveTokens(String accessToken, String refreshToken) async {
-    await _storage.write(key: 'access_token', value: accessToken);
-    await _storage.write(key: 'refresh_token', value: refreshToken);
+    try {
+      await _storage.write(key: 'access_token', value: accessToken);
+      await _storage.write(key: 'refresh_token', value: refreshToken);
+      if (_allowWebStorageFallback) await _removeWebFallbackTokens();
+    } catch (error) {
+      if (!_allowWebStorageFallback) rethrow;
+      debugPrint(
+        'Secure token storage unavailable; using web fallback: $error',
+      );
+      final preferences = await SharedPreferences.getInstance();
+      await preferences.setString(_webFallbackKey('access_token'), accessToken);
+      await preferences.setString(
+        _webFallbackKey('refresh_token'),
+        refreshToken,
+      );
+    }
     _accessToken = accessToken;
   }
 
   Future<void> _clearTokens() async {
-    await _storage.delete(key: 'access_token');
-    await _storage.delete(key: 'refresh_token');
+    try {
+      await _storage.delete(key: 'access_token');
+      await _storage.delete(key: 'refresh_token');
+    } catch (_) {
+      if (!_allowWebStorageFallback) rethrow;
+    }
+    if (_allowWebStorageFallback) await _removeWebFallbackTokens();
     _accessToken = null;
   }
 
@@ -77,7 +125,7 @@ class ApiService {
   }
 
   Future<http.Response> _performRefresh() async {
-    final refreshToken = await _storage.read(key: 'refresh_token');
+    final refreshToken = await _readToken('refresh_token');
     if (refreshToken == null) {
       throw const _RefreshTokenRejected();
     }
@@ -88,7 +136,7 @@ class ApiService {
       body: jsonEncode({'refreshToken': refreshToken}),
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       await _saveTokens(
         data['accessToken'] as String,
@@ -126,8 +174,8 @@ class ApiService {
   }
 
   Future<User?> restoreSession() async {
-    final refreshToken = await _storage.read(key: 'refresh_token');
-    final accessToken = await _storage.read(key: 'access_token');
+    final refreshToken = await _readToken('refresh_token');
+    final accessToken = await _readToken('access_token');
     if (refreshToken == null && accessToken == null) return null;
 
     final cachedUser = accessToken == null
@@ -189,7 +237,7 @@ class ApiService {
 
   // Auth methods
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse('${ApiConstants.baseUrl}${ApiConstants.login}'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
@@ -212,7 +260,7 @@ class ApiService {
     String password,
     String fullName,
   ) async {
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse('${ApiConstants.baseUrl}${ApiConstants.register}'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -246,9 +294,9 @@ class ApiService {
 
   Future<void> logout() async {
     try {
-      if (await _storage.read(key: 'refresh_token') != null) {
+      if (await _readToken('refresh_token') != null) {
         await _refreshAccessToken();
-        final refreshToken = await _storage.read(key: 'refresh_token');
+        final refreshToken = await _readToken('refresh_token');
         if (refreshToken != null) {
           await _client.post(
             Uri.parse('${ApiConstants.baseUrl}${ApiConstants.logout}'),
@@ -495,6 +543,27 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> sendLightCommand(
+    String deviceId,
+    String commandId,
+    bool isOn,
+  ) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.lightCommands(deviceId)}',
+        ),
+        headers: headers,
+        body: jsonEncode({'commandId': commandId, 'isOn': isOn}),
+      ),
+    );
+
+    if (response.statusCode == 202) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to send light command: ${response.body}');
+  }
+
   Future<Map<String, dynamic>> getPumpCommands(
     String deviceId, {
     int page = 1,
@@ -597,7 +666,8 @@ class ApiService {
           'startTime': formattedStartTime,
           'durationSeconds': durationSeconds,
           if (localEnd != null)
-            'endTime': '${localEnd.hour.toString().padLeft(2, '0')}:'
+            'endTime':
+                '${localEnd.hour.toString().padLeft(2, '0')}:'
                 '${localEnd.minute.toString().padLeft(2, '0')}:00',
           'intervalMinutes': ?intervalMinutes,
           'timeZone': 'Asia/Ho_Chi_Minh',
@@ -881,7 +951,9 @@ class ApiService {
       final devInfo = deviceName != null && deviceName.isNotEmpty
           ? '$deviceName ($deviceId)'
           : deviceId;
-      final fwInfo = firmwareVersion != null ? ', Firmware: $firmwareVersion' : '';
+      final fwInfo = firmwareVersion != null
+          ? ', Firmware: $firmwareVersion'
+          : '';
       metadataPrefixes.add('[Thiết bị: $devInfo$fwInfo]');
     }
     if (metadataPrefixes.isNotEmpty) {
@@ -925,7 +997,7 @@ class ApiService {
           'isStaff': false,
           'body': formattedMessage,
           'createdAt': DateTime.now().toUtc().toIso8601String(),
-        }
+        },
       ],
     };
     _userTicketsStore.insert(0, ticketObj);
@@ -961,9 +1033,16 @@ class ApiService {
           'deviceId': 'device-1',
           'deviceName': 'Tháp 1',
           'firmwareVersion': 'v1.0.4',
-          'createdAt': DateTime.now().subtract(const Duration(hours: 4)).toUtc().toIso8601String(),
-          'updatedAt': DateTime.now().subtract(const Duration(minutes: 30)).toUtc().toIso8601String(),
-          'lastMessage': 'Kỹ thuật viên đã tiếp nhận và đang hiệu chuẩn lại cảm biến từ xa.',
+          'createdAt': DateTime.now()
+              .subtract(const Duration(hours: 4))
+              .toUtc()
+              .toIso8601String(),
+          'updatedAt': DateTime.now()
+              .subtract(const Duration(minutes: 30))
+              .toUtc()
+              .toIso8601String(),
+          'lastMessage':
+              'Kỹ thuật viên đã tiếp nhận và đang hiệu chuẩn lại cảm biến từ xa.',
           'messagesCount': 2,
           'messages': [
             {
@@ -971,17 +1050,25 @@ class ApiService {
               'authorUserId': 'user_1',
               'authorName': 'Bạn',
               'isStaff': false,
-              'body': 'Chỉ số pH hôm nay dao động từ 4.5 đến 8.0 liên tục dù dung dịch ổn định.',
-              'createdAt': DateTime.now().subtract(const Duration(hours: 4)).toUtc().toIso8601String(),
+              'body':
+                  'Chỉ số pH hôm nay dao động từ 4.5 đến 8.0 liên tục dù dung dịch ổn định.',
+              'createdAt': DateTime.now()
+                  .subtract(const Duration(hours: 4))
+                  .toUtc()
+                  .toIso8601String(),
             },
             {
               'id': 'msg_2',
               'authorUserId': 'staff_1',
               'authorName': 'Hỗ trợ Aerogreen',
               'isStaff': true,
-              'body': 'Kỹ thuật viên đã tiếp nhận và đang hiệu chuẩn lại cảm biến từ xa.',
-              'createdAt': DateTime.now().subtract(const Duration(minutes: 30)).toUtc().toIso8601String(),
-            }
+              'body':
+                  'Kỹ thuật viên đã tiếp nhận và đang hiệu chuẩn lại cảm biến từ xa.',
+              'createdAt': DateTime.now()
+                  .subtract(const Duration(minutes: 30))
+                  .toUtc()
+                  .toIso8601String(),
+            },
           ],
         },
         {
@@ -990,9 +1077,16 @@ class ApiService {
           'category': 'Kỹ thuật',
           'status': 'resolved',
           'priority': 'medium',
-          'createdAt': DateTime.now().subtract(const Duration(days: 2)).toUtc().toIso8601String(),
-          'updatedAt': DateTime.now().subtract(const Duration(days: 1)).toUtc().toIso8601String(),
-          'lastMessage': 'Đã áp dụng công thức 15s mỗi 10 phút. Cảm ơn đội ngũ hỗ trợ!',
+          'createdAt': DateTime.now()
+              .subtract(const Duration(days: 2))
+              .toUtc()
+              .toIso8601String(),
+          'updatedAt': DateTime.now()
+              .subtract(const Duration(days: 1))
+              .toUtc()
+              .toIso8601String(),
+          'lastMessage':
+              'Đã áp dụng công thức 15s mỗi 10 phút. Cảm ơn đội ngũ hỗ trợ!',
           'messagesCount': 3,
           'messages': [
             {
@@ -1000,32 +1094,50 @@ class ApiService {
               'authorUserId': 'user_1',
               'authorName': 'Bạn',
               'isStaff': false,
-              'body': 'Nên đặt chu kỳ phun như thế nào khi nhiệt độ mùa hè đạt 32 độ C?',
-              'createdAt': DateTime.now().subtract(const Duration(days: 2)).toUtc().toIso8601String(),
+              'body':
+                  'Nên đặt chu kỳ phun như thế nào khi nhiệt độ mùa hè đạt 32 độ C?',
+              'createdAt': DateTime.now()
+                  .subtract(const Duration(days: 2))
+                  .toUtc()
+                  .toIso8601String(),
             },
             {
               'id': 'msg_2',
               'authorUserId': 'staff_2',
               'authorName': 'Chuyên gia Nông nghiệp',
               'isStaff': true,
-              'body': 'Với xà lách vào ngày nắng gắt, bạn nên dùng preset Rau lá: phun 15s mỗi 10 phút vào ban ngày (06:00-18:00).',
-              'createdAt': DateTime.now().subtract(const Duration(days: 1, hours: 2)).toUtc().toIso8601String(),
+              'body':
+                  'Với xà lách vào ngày nắng gắt, bạn nên dùng preset Rau lá: phun 15s mỗi 10 phút vào ban ngày (06:00-18:00).',
+              'createdAt': DateTime.now()
+                  .subtract(const Duration(days: 1, hours: 2))
+                  .toUtc()
+                  .toIso8601String(),
             },
             {
               'id': 'msg_3',
               'authorUserId': 'user_1',
               'authorName': 'Bạn',
               'isStaff': false,
-              'body': 'Đã áp dụng công thức 15s mỗi 10 phút. Cảm ơn đội ngũ hỗ trợ!',
-              'createdAt': DateTime.now().subtract(const Duration(days: 1)).toUtc().toIso8601String(),
-            }
+              'body':
+                  'Đã áp dụng công thức 15s mỗi 10 phút. Cảm ơn đội ngũ hỗ trợ!',
+              'createdAt': DateTime.now()
+                  .subtract(const Duration(days: 1))
+                  .toUtc()
+                  .toIso8601String(),
+            },
           ],
         },
       ]);
     }
 
     if (status != null && status.isNotEmpty && status != 'all') {
-      return _userTicketsStore.where((t) => (t['status'] as String?).toString().toLowerCase() == status.toLowerCase()).toList();
+      return _userTicketsStore
+          .where(
+            (t) =>
+                (t['status'] as String?).toString().toLowerCase() ==
+                status.toLowerCase(),
+          )
+          .toList();
     }
     return List.from(_userTicketsStore);
   }
@@ -1046,9 +1158,14 @@ class ApiService {
     );
   }
 
-  Future<Map<String, dynamic>> replyToMyTicket(String id, String message) async {
+  Future<Map<String, dynamic>> replyToMyTicket(
+    String id,
+    String message,
+  ) async {
     final ticket = await getMyTicket(id);
-    final messages = (ticket['messages'] as List<dynamic>? ?? []).map((m) => Map<String, dynamic>.from(m as Map)).toList();
+    final messages = (ticket['messages'] as List<dynamic>? ?? [])
+        .map((m) => Map<String, dynamic>.from(m as Map))
+        .toList();
     final newMsg = {
       'id': 'msg_${DateTime.now().millisecondsSinceEpoch}',
       'authorUserId': 'current_user',

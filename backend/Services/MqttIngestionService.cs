@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Text;
 using System.Text.Json;
 using IOTAgriBackend.Data;
+using IOTAgriBackend.Dtos.Lights;
 using IOTAgriBackend.Dtos.Pumps;
 using IOTAgriBackend.Dtos.Sensors;
 using IOTAgriBackend.Models;
@@ -15,6 +16,7 @@ namespace IOTAgriBackend.Services;
 public class MqttIngestionService : BackgroundService
 {
     private const string PumpStatusTopicFilter = "devices/+/pump-status";
+    private const string LightStatusTopicFilter = "devices/+/light-status";
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     private readonly IServiceScopeFactory _scopeFactory;
@@ -77,10 +79,17 @@ public class MqttIngestionService : BackgroundService
                         .CreateSubscribeOptionsBuilder()
                         .WithTopicFilter(readingsTopicFilter)
                         .WithTopicFilter(PumpStatusTopicFilter)
+                        .WithTopicFilter(LightStatusTopicFilter)
                         .Build();
 
                     await _mqttClient.SubscribeAsync(subscribeOptions, stoppingToken);
-                    _logger.LogInformation("MQTT connected to {Host}:{Port} and subscribed to {ReadingsTopic} and {PumpStatusTopic}", host, port, readingsTopicFilter, PumpStatusTopicFilter);
+                    _logger.LogInformation(
+                        "MQTT connected to {Host}:{Port} and subscribed to {ReadingsTopic}, {PumpStatusTopic}, and {LightStatusTopic}",
+                        host,
+                        port,
+                        readingsTopicFilter,
+                        PumpStatusTopicFilter,
+                        LightStatusTopicFilter);
                 }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
@@ -141,6 +150,12 @@ public class MqttIngestionService : BackgroundService
             if (segments[2] == "pump-status")
             {
                 await ProcessPumpStatusAsync(deviceKey, payloadBytes, topic);
+                return;
+            }
+
+            if (segments[2] == "light-status")
+            {
+                await ProcessLightStatusAsync(deviceKey, payloadBytes, topic);
             }
         }
         catch (Exception ex)
@@ -159,6 +174,26 @@ public class MqttIngestionService : BackgroundService
         var message = new MqttApplicationMessageBuilder()
             .WithTopic($"devices/{deviceKey}/commands/pump")
             .WithPayload(JsonSerializer.Serialize(new PumpCommandMessage(command.Id, command.IsOn, command.DurationSeconds), JsonOptions))
+            .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+            .Build();
+
+        await _mqttClient.PublishAsync(message, cancellationToken);
+    }
+
+    public async Task PublishLightCommandAsync(
+        string deviceKey,
+        Guid commandId,
+        bool isOn,
+        CancellationToken cancellationToken)
+    {
+        if (!_mqttClient.IsConnected)
+        {
+            throw new InvalidOperationException("MQTT client is not connected.");
+        }
+
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic($"devices/{deviceKey}/commands/light")
+            .WithPayload(JsonSerializer.Serialize(new LightCommandMessage(commandId, isOn), JsonOptions))
             .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
             .Build();
 
@@ -205,6 +240,11 @@ public class MqttIngestionService : BackgroundService
         await EvaluateAlertsAsync(db, device, reading, thresholds.HighTemperatureC, thresholds.LowWaterLevelPercent);
         device.IsOnline = true;
         device.LastSeenAt = reading.RecordedAt;
+        if (request.LightState is bool lightState)
+        {
+            device.IsLightOn = lightState;
+            device.LightStatusUpdatedAt = reading.RecordedAt;
+        }
         await db.SaveChangesAsync();
     }
 
@@ -299,6 +339,34 @@ public class MqttIngestionService : BackgroundService
             }
         }
 
+        await db.SaveChangesAsync();
+    }
+
+    private async Task ProcessLightStatusAsync(string deviceKey, byte[] payloadBytes, string topic)
+    {
+        if (payloadBytes.Length > 1024)
+        {
+            _logger.LogWarning("Ignored oversized light status on topic {Topic}.", topic);
+            return;
+        }
+
+        var status = JsonSerializer.Deserialize<LightStatusMessage>(Encoding.UTF8.GetString(payloadBytes), JsonOptions);
+        if (status is null)
+        {
+            return;
+        }
+
+        using var scope = _scopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var device = await db.Devices.FirstOrDefaultAsync(candidate => candidate.DeviceKey == deviceKey);
+        if (device is null)
+        {
+            _logger.LogWarning("Received light status for unknown device key on topic {Topic}.", topic);
+            return;
+        }
+
+        device.IsLightOn = status.IsOn;
+        device.LightStatusUpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
     }
 

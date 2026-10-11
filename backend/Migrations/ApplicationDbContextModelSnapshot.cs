@@ -153,10 +153,16 @@ namespace IOTAgriBackend.Migrations
                     b.Property<bool>("IsOnline")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsLightOn")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsPumpOn")
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastSeenAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LightStatusUpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<double?>("LowWaterLevelAlertPercent")

@@ -191,8 +191,11 @@ GitHub Actions runs on pull requests and pushes to `main`. It restores dependenc
 1. Register and sign in through Swagger, then create a device with `POST /api/devices`.
 2. Create its 15-minute, one-use setup code with authenticated `POST /api/devices/{deviceId}/provisioning-code`.
 3. Upload [`firmware/ESP32DeviceSetup/ESP32DeviceSetup.ino`](firmware/ESP32DeviceSetup/ESP32DeviceSetup.ino), join Wi-Fi network `IOTAgri-Setup`, and open the shown setup page.
-4. Install Arduino libraries `PubSubClient`, `DHT sensor library`, and `BH1750`, then wire DHT11 DATA to GPIO4, HC-SR04 TRIG to GPIO5 / ECHO to GPIO18, and BH1750 SDA/SCL to GPIO21/GPIO22. Put a level shifter or voltage divider between the 5 V HC-SR04 ECHO pin and GPIO18.
-5. Set `EMPTY_DISTANCE_CM` and `FULL_DISTANCE_CM` near the top of the sketch to measured empty/full tank distances. Enter Wi-Fi details, `http://<PC-LAN-IP>:8080`, and the setup code. The ESP32 saves its settings and publishes temperature, humidity, water-level percentage, and lux every 10 seconds.
+4. Install Arduino libraries `PubSubClient`, `OneWire`, `DallasTemperature`, and `Adafruit AHTX0`. Select **ESP32S3 Dev Module**, 16 MB flash, and disabled PSRAM.
+5. Wire TDS to GPIO1, ultrasonic TRIG/ECHO to GPIO4/GPIO5, DS18B20 to GPIO6, DHT20 SDA/SCL to GPIO8/GPIO9, and the pump/light transistor bases (through 1 kΩ resistors) to GPIO10/GPIO11. Never connect either ESP32 GPIO directly to a relay input; both outputs are active-HIGH at the ESP after the NPN interface.
+6. Calibrate `TANK_HEIGHT_CM`, `LOW_WATER_THRESHOLD_PERCENT`, and `TDS_CALIBRATION_FACTOR` near the top of the sketch. Enter Wi-Fi details, `http://<PC-LAN-IP>:8080`, and the setup code. The ESP32 stores provisioning data in `Preferences`, publishes telemetry every 10 seconds, and enforces low-water pump safety locally even when MQTT is offline.
+
+The firmware and backend use the MQTT contract under `devices/{deviceKey}`: `readings`, `commands/pump`, `pump-status`, `commands/light`, and `light-status`. The device-detail screen exposes manual pump and light controls; GPIO10/GPIO11 remain active-HIGH at the ESP side of the NPN interfaces.
 
 The local Mosquitto broker is anonymous and plaintext for trusted LAN development only. Do not expose port 1883 to the internet. A future production broker must use per-device credentials and TLS.
 
@@ -213,7 +216,7 @@ A Flutter frontend application is included in the `frontend/` directory with the
 - **Dashboard**: Overview of all devices with sensor readings and status
 - **Device Management**: Add, edit, delete devices, view device details
 - **Sensor Monitoring**: Real-time temperature, humidity, pH, TDS, and water level readings
-- **Pump Control**: Manual pump control and scheduling
+- **Actuator Control**: Manual pump control, pump scheduling, and manual light control
 - **Alerts**: Threshold-based notifications for temperature and water level
 
 ### Frontend Tech Stack

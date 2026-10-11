@@ -17,6 +17,8 @@ public class Device
     public DateTime? LastSeenAt { get; set; }
     public bool IsPumpOn { get; set; }
     public DateTime? PumpStatusUpdatedAt { get; set; }
+    public bool IsLightOn { get; set; }
+    public DateTime? LightStatusUpdatedAt { get; set; }
     public double? HighTemperatureAlertC { get; set; }
     public double? LowWaterLevelAlertPercent { get; set; }
 

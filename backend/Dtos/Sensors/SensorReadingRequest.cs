@@ -7,5 +7,6 @@ public record SensorReadingRequest(
     double? Ph,
     double? Tds,
     double? WaterLevel,
-    double? Lux
+    double? Lux,
+    bool? LightState = null
 );
