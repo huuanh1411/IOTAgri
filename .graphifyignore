@@ -1,0 +1,9 @@
+# Installed tools, SDKs and generated QA artifacts are not project source.
+.runtime/
+.run/
+.codex/
+.agents/
+testing/reports/
+**/bin/
+**/obj/
+**/build/
