@@ -37,7 +37,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return Scaffold(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            backgroundColor: Colors.transparent,
             body: navigationShell,
             bottomNavigationBar: FloatingPillNavBar(
               currentIndex: navigationShell.currentIndex,

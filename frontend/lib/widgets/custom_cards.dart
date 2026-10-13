@@ -1,4 +1,7 @@
+// lib/widgets/custom_cards.dart
 import 'package:flutter/material.dart';
+import '../core/widgets/glass_container.dart';
+import '../theme/app_colors.dart';
 
 class InfoCard extends StatelessWidget {
   final String title;
@@ -18,12 +21,8 @@ class InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      color: backgroundColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return GlassContainer(
+      variant: GlassVariant.large,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -31,14 +30,14 @@ class InfoCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, color: iconColor ?? Colors.green, size: 24),
+                Icon(icon, color: iconColor ?? AppColors.forestGreen, size: 24),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: Colors.grey,
                     ),
                   ),
                 ),
@@ -79,13 +78,8 @@ class SensorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      color: isWarning ? Colors.red[50] : null,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: isWarning ? BorderSide(color: Colors.red.withValues(alpha: 0.3)) : BorderSide.none,
-      ),
+    return GlassContainer(
+      variant: GlassVariant.large,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -94,9 +88,9 @@ class SensorCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
-                color: Colors.grey[600],
+                color: Colors.grey,
               ),
             ),
             const SizedBox(height: 4),
@@ -117,9 +111,9 @@ class SensorCard extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text(
                     unit,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: Colors.grey,
                     ),
                   ),
                 ),
@@ -150,12 +144,8 @@ class StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      color: isActive ? Colors.green[50] : Colors.red[50],
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return GlassContainer(
+      variant: GlassVariant.large,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -190,9 +180,9 @@ class StatusCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       subtitle!,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: Colors.grey,
                       ),
                     ),
                   ],
@@ -222,40 +212,35 @@ class AlertCard extends StatelessWidget {
     this.onTap,
   });
 
+  Color getColor() {
+    switch (severity) {
+      case AlertSeverity.critical:
+        return Colors.red;
+      case AlertSeverity.warning:
+        return Colors.orange;
+      case AlertSeverity.info:
+        return Colors.blue;
+    }
+  }
+
+  IconData getIcon() {
+    switch (severity) {
+      case AlertSeverity.critical:
+        return Icons.error;
+      case AlertSeverity.warning:
+        return Icons.warning;
+      case AlertSeverity.info:
+        return Icons.info;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Color getColor() {
-      switch (severity) {
-        case AlertSeverity.critical:
-          return Colors.red;
-        case AlertSeverity.warning:
-          return Colors.orange;
-        case AlertSeverity.info:
-          return Colors.blue;
-      }
-    }
-
-    IconData getIcon() {
-      switch (severity) {
-        case AlertSeverity.critical:
-          return Icons.error;
-        case AlertSeverity.warning:
-          return Icons.warning;
-        case AlertSeverity.info:
-          return Icons.info;
-      }
-    }
-
-    return Card(
-      elevation: 2,
-      color: getColor().withValues(alpha: 0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: getColor().withValues(alpha: 0.3)),
-      ),
+    return GlassContainer(
+      variant: GlassVariant.light,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(24),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -282,10 +267,7 @@ class AlertCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       timestamp,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),

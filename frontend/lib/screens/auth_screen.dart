@@ -71,15 +71,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: Container(
+        child: SizedBox(
           width: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [AppColors.background, AppColors.mintChip],
-            ),
-          ),
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
             child: Column(
@@ -180,15 +173,19 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       const SizedBox(height: 16),
                       // Social buttons (simulated, outlined)
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: const [
-                          OutlineDangerButton(
-                            label: 'Google',
-                            onPressed: null, // simulate only
+                          Expanded(
+                            child: OutlineDangerButton(
+                              label: 'Google',
+                              onPressed: null, // simulate only
+                            ),
                           ),
-                          OutlineDangerButton(
-                            label: 'Apple',
-                            onPressed: null,
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: OutlineDangerButton(
+                              label: 'Apple',
+                              onPressed: null,
+                            ),
                           ),
                         ],
                       ),

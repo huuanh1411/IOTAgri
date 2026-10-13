@@ -28,7 +28,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
-        backgroundColor: const Color(0xFF2CBF6B),
+        backgroundColor: Colors.transparent,
         title: const Text(
           'Hệ Thống Giám Sát Nông Nghiệp',
           style: TextStyle(

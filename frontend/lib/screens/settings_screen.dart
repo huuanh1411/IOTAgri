@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../core/widgets/page_header.dart';
 import '../core/widgets/section_chip.dart';
-import '../core/theme/app_colors.dart';
 
 /// Settings screen – unit/language selection and alert toggles.
 class SettingsScreen extends ConsumerWidget {
@@ -21,7 +20,7 @@ class SettingsScreen extends ConsumerWidget {
         elevation: 0,
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
       ),
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),

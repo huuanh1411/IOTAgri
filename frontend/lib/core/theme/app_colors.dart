@@ -15,8 +15,11 @@ class AppColors {
   static const Color gradientEnd = forestGreen;
 
   // Text
-  static const Color primaryText = Color(0xFF1F2A22);
-  static const Color secondaryText = Color(0xFF6B7280);
+  static const Color primaryText = Color(0xFF102F20);
+  static const Color secondaryText = Color(0xFF3C654D);
+  static const Color lightGreetingText = Color(0xFFF7FFF9);
+  static const Color photoTextGlow = Color(0xB3FFFFFF);
+  static const Color photoTextShadow = Color(0x660A2417);
 
   // Gauges
   static const Color nutrient = Color(0xFFF2A93B);

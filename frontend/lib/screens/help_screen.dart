@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../core/widgets/page_header.dart';
 import '../core/widgets/section_chip.dart';
-import '../core/theme/app_colors.dart';
 
 /// Help & Support screen – FAQ accordion and a placeholder chat button.
 class HelpScreen extends ConsumerWidget {
@@ -23,7 +22,7 @@ class HelpScreen extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
