@@ -33,17 +33,13 @@ class FloatingPillNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        padding: const EdgeInsets.fromLTRB(18, 8, 18, 12),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.white.withValues(alpha: .96),
             borderRadius: BorderRadius.circular(30),
             boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
+              BoxShadow(color: Color(0x182F5D3F), blurRadius: 18, offset: Offset(0, 8)),
             ],
           ),
           child: Row(
@@ -54,21 +50,27 @@ class FloatingPillNavBar extends StatelessWidget {
                 child: InkWell(
                   onTap: () => onTap(index),
                   borderRadius: BorderRadius.circular(30),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    margin: const EdgeInsets.all(5),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: selected ? AppColors.mintChip : Colors.transparent,
+                      borderRadius: BorderRadius.circular(21),
+                    ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           _icons[index],
                           color: selected ? AppColors.forestGreen : AppColors.primaryText,
-                          size: 24,
+                          size: 20,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           _labels[index],
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 10,
                             color: selected ? AppColors.forestGreen : AppColors.primaryText,
                           ),
                         ),

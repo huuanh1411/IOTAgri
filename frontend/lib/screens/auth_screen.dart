@@ -1,247 +1,173 @@
-// lib/screens/auth_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text.dart';
 import '../core/widgets/gradient_button.dart';
-import '../core/widgets/outline_danger_button.dart';
 import '../providers/auth_controller.dart';
 
-/// Authentication screen with two tabs: Đăng nhập & Đăng ký.
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
-
   @override
   ConsumerState<AuthScreen> createState() => _AuthScreenState();
 }
 
 class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-  final _fullNameCtrl = TextEditingController();
-  final _confirmPwdCtrl = TextEditingController();
-  bool _obscurePassword = true;
-  bool _obscureConfirm = true;
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _name = TextEditingController();
+  final _confirmPassword = TextEditingController();
+  bool _hidePassword = true;
+  bool _hideConfirmPassword = true;
 
   @override
   void dispose() {
-    _emailCtrl.dispose();
-    _passwordCtrl.dispose();
-    _fullNameCtrl.dispose();
-    _confirmPwdCtrl.dispose();
+    _email.dispose(); _password.dispose(); _name.dispose(); _confirmPassword.dispose();
     super.dispose();
   }
 
-  // Simple email regex.
-  bool _isValidEmail(String email) => RegExp(r"^[^@\s]+@[^@\s]+\.[^@\s]+").hasMatch(email);
-
-  void _submit() async {
-    final isLogin = ref.read(authTabProvider) == 0;
-    if (!_formKey.currentState!.validate()) return;
-    final authCtrl = ref.read(authControllerProvider.notifier);
-    if (isLogin) {
-      await authCtrl.login(email: _emailCtrl.text.trim(), password: _passwordCtrl.text);
-    } else {
-      await authCtrl.signUp(
-        fullName: _fullNameCtrl.text.trim(),
-        email: _emailCtrl.text.trim(),
-        password: _passwordCtrl.text,
+  Future<void> _submit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu.'),
+        ),
       );
+      return;
     }
-    // Errors are handled via state.error -> SnackBar.
+    final controller = ref.read(authControllerProvider.notifier);
+    if (ref.read(authTabProvider) == 0) {
+      await controller.login(email: _email.text.trim(), password: _password.text);
+    } else {
+      await controller.signUp(fullName: _name.text.trim(), email: _email.text.trim(), password: _password.text);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authControllerProvider);
+    final auth = ref.watch(authControllerProvider);
     final isLogin = ref.watch(authTabProvider) == 0;
-
-    // Show any auth error as a SnackBar.
-    if (authState.error != null) {
+    ref.listen<AuthState>(authControllerProvider, (previous, next) {
+      if (next.user != null && previous?.user?.id != next.user!.id && mounted) {
+        context.go('/home');
+      }
+    });
+    if (auth.error != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authState.error!)),
-        );
-        // Clear error after showing.
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(auth.error!)));
         ref.read(authControllerProvider.notifier).clearError();
       });
     }
-
     return Scaffold(
       body: SafeArea(
-        child: SizedBox(
-          width: double.infinity,
+        child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Logo placeholder (you can replace with an asset later).
-                const Icon(Icons.local_florist, size: 80, color: AppColors.forestGreen),
-                const SizedBox(height: 12),
-                Text('Trồng Rau Đô Thị Nhàn Tênh',
-                    style: AppText.heading(context, fontSize: 24)),
-                const SizedBox(height: 4),
-                Text('Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.',
-                    textAlign: TextAlign.center,
-                    style: AppText.label(context).copyWith(color: AppColors.secondaryText)),
-                const SizedBox(height: 32),
-                // Segmented tab
-                _buildTabBar(isLogin),
-                const SizedBox(height: 24),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      if (!isLogin) ...[
-                        TextFormField(
-                          controller: _fullNameCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Họ và tên',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập họ và tên' : null,
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                      TextFormField(
-                        controller: _emailCtrl,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (v) => v == null || !_isValidEmail(v) ? 'Email không hợp lệ' : null,
-                      ),
+            padding: const EdgeInsets.fromLTRB(24, 34, 24, 28),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(children: [
+                const _Brand(),
+                const SizedBox(height: 26),
+                Text('Trồng Rau Đô Thị Nhàn Tênh', style: AppText.heading(context, fontSize: 26)),
+                const SizedBox(height: 10),
+                Text('Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.', textAlign: TextAlign.center, style: AppText.body(context, fontSize: 13).copyWith(color: AppColors.secondaryText)),
+                const SizedBox(height: 38),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), border: Border.all(color: const Color(0xFFE3EADF)), boxShadow: const [BoxShadow(color: Color(0x142F5D3F), blurRadius: 28, offset: Offset(0, 12))]),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(children: [
+                      _Tabs(isLogin: isLogin),
+                      const SizedBox(height: 18),
+                      if (!isLogin) ...[_Field(controller: _name, icon: Icons.person_outline, hint: 'Họ và tên'), const SizedBox(height: 12)],
+                      _Field(controller: _email, icon: Icons.mail_outline, hint: 'ban@vidu.com', keyboardType: TextInputType.emailAddress, validator: (value) => value == null || !value.contains('@') ? 'Email không hợp lệ' : null),
                       const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _passwordCtrl,
-                        obscureText: _obscurePassword,
-                        decoration: InputDecoration(
-                          labelText: 'Mật khẩu',
-                          border: const OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
-                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                          ),
-                        ),
-                        validator: (v) => v == null || v.length < 8 ? 'Mật khẩu ít nhất 8 ký tự' : null,
-                      ),
+                      _Field(controller: _password, icon: Icons.lock_outline, hint: 'Mật khẩu', obscure: _hidePassword, suffix: IconButton(icon: Icon(_hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined), onPressed: () => setState(() => _hidePassword = !_hidePassword)), validator: (value) => value == null || value.length < 8 ? 'Mật khẩu ít nhất 8 ký tự' : null),
                       if (!isLogin) ...[
                         const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _confirmPwdCtrl,
-                          obscureText: _obscureConfirm,
-                          decoration: InputDecoration(
-                            labelText: 'Xác nhận mật khẩu',
-                            border: const OutlineInputBorder(),
-                            suffixIcon: IconButton(
-                              icon: Icon(_obscureConfirm ? Icons.visibility : Icons.visibility_off),
-                              onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
-                            ),
+                        _Field(
+                          controller: _confirmPassword,
+                          icon: Icons.lock_outline,
+                          hint: 'Xác nhận mật khẩu',
+                          obscure: _hideConfirmPassword,
+                          suffix: IconButton(
+                            icon: Icon(_hideConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                            onPressed: () => setState(() => _hideConfirmPassword = !_hideConfirmPassword),
                           ),
-                          validator: (v) => v != _passwordCtrl.text ? 'Mật khẩu không khớp' : null,
+                          validator: (value) => value != _password.text ? 'Mật khẩu không khớp' : null,
                         ),
                       ],
-                      const SizedBox(height: 24),
-                      // Action button
-                      isLogin
-                          ? GradientButton(
-                              label: 'Đăng nhập',
-                              isLoading: authState.isLoading,
-                              onPressed: authState.isLoading ? null : _submit,
-                            )
-                          : GradientButton(
-                              label: 'Đăng ký',
-                              isLoading: authState.isLoading,
-                              onPressed: authState.isLoading ? null : _submit,
-                            ),
-                      const SizedBox(height: 16),
-                      // Divider with text
-                      Row(
-                        children: const [
-                          Expanded(child: Divider()),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: Text('hoặc tiếp tục với'),
-                          ),
-                          Expanded(child: Divider()),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      // Social buttons (simulated, outlined)
-                      Row(
-                        children: const [
-                          Expanded(
-                            child: OutlineDangerButton(
-                              label: 'Google',
-                              onPressed: null, // simulate only
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: OutlineDangerButton(
-                              label: 'Apple',
-                              onPressed: null,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      // Footnote with links
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        children: [
-                          Text('Tiếp tục đồng nghĩa bạn đồng ý với ', style: AppText.body(context)),
-                          GestureDetector(
-                            onTap: () {
-                              // In a real app you would navigate to the terms.
-                            },
-                            child: Text('Điều khoản', style: AppText.body(context).copyWith(color: AppColors.forestGreen, decoration: TextDecoration.underline)),
-                          ),
-                          Text(' & ', style: AppText.body(context)),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Text('Quyền riêng tư', style: AppText.body(context).copyWith(color: AppColors.forestGreen, decoration: TextDecoration.underline)),
-                          ),
-                          Text('.', style: AppText.body(context)),
-                        ],
-                      ),
-                    ],
+                      const SizedBox(height: 18),
+                      SizedBox(width: double.infinity, child: GradientButton(label: isLogin ? 'Đăng nhập  →' : 'Tạo tài khoản  →', isLoading: auth.isLoading, onPressed: _submit)),
+                      const SizedBox(height: 18),
+                      const Row(children: [Expanded(child: Divider()), Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text('hoặc tiếp tục với', style: TextStyle(fontSize: 11, color: AppColors.secondaryText))), Expanded(child: Divider())]),
+                      const SizedBox(height: 18),
+                      const Row(children: [Expanded(child: _SocialButton(label: 'Google', letter: 'G')), SizedBox(width: 12), Expanded(child: _SocialButton(label: 'Apple', letter: 'A'))]),
+                    ]),
                   ),
                 ),
-              ],
+                const SizedBox(height: 22),
+                Text('Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản & Quyền riêng tư.', textAlign: TextAlign.center, style: AppText.body(context, fontSize: 10).copyWith(color: AppColors.secondaryText)),
+              ]),
             ),
           ),
         ),
       ),
     );
   }
+}
 
-  /// Simple segmented control built with ToggleButtons.
-  Widget _buildTabBar(bool isLogin) {
-    final selected = ref.watch(authTabProvider);
-    return ToggleButtons(
-      isSelected: [selected == 0, selected == 1],
-      borderRadius: BorderRadius.circular(30),
-      fillColor: AppColors.forestGreen,
-      selectedColor: Colors.white,
-      color: AppColors.forestGreen,
-      borderColor: AppColors.forestGreen,
-      borderWidth: 2,
-      onPressed: (index) => ref.read(authTabProvider.notifier).state = index,
-      children: const [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-          child: Text('Đăng nhập'),
+class _Brand extends StatelessWidget {
+  const _Brand();
+  @override
+  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
+    Container(width: 48, height: 48, decoration: const BoxDecoration(shape: BoxShape.circle, gradient: LinearGradient(colors: [AppColors.sage, AppColors.forestGreen])), child: const Icon(Icons.eco_outlined, color: Colors.white, size: 27)),
+    const SizedBox(width: 10), Text('Aerogreen', style: AppText.heading(context, fontSize: 19)),
+  ]);
+}
+
+class _Tabs extends ConsumerWidget {
+  const _Tabs({required this.isLogin});
+  final bool isLogin;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => Container(
+    padding: const EdgeInsets.all(4), decoration: BoxDecoration(color: AppColors.rowBackground, borderRadius: BorderRadius.circular(24)),
+    child: Row(children: [_tab(context, ref, 'Đăng Nhập', 0, isLogin), _tab(context, ref, 'Đăng Ký', 1, !isLogin)]),
+  );
+  Widget _tab(BuildContext context, WidgetRef ref, String label, int index, bool selected) {
+    return Expanded(
+      child: InkWell(
+        onTap: () => ref.read(authTabProvider.notifier).state = index,
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 9),
+          decoration: BoxDecoration(
+            color: selected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: selected ? const [BoxShadow(color: Color(0x182F5D3F), blurRadius: 7, offset: Offset(0, 2))] : null,
+          ),
+          child: Text(label, textAlign: TextAlign.center, style: AppText.body(context, fontSize: 13, fontWeight: FontWeight.w600).copyWith(color: AppColors.forestGreen)),
         ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-          child: Text('Đăng ký'),
-        ),
-      ],
+      ),
     );
   }
+}
+
+class _Field extends StatelessWidget {
+  const _Field({required this.controller, required this.icon, required this.hint, this.keyboardType, this.obscure = false, this.suffix, this.validator});
+  final TextEditingController controller; final IconData icon; final String hint; final TextInputType? keyboardType; final bool obscure; final Widget? suffix; final String? Function(String?)? validator;
+  @override
+  Widget build(BuildContext context) => TextFormField(controller: controller, keyboardType: keyboardType, obscureText: obscure, validator: validator, decoration: InputDecoration(prefixIcon: Icon(icon, size: 19, color: AppColors.secondaryText), suffixIcon: suffix, hintText: hint, hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF859486)), filled: true, fillColor: AppColors.rowBackground, contentPadding: const EdgeInsets.symmetric(vertical: 4), border: _border(const Color(0xFFDCE6D8)), enabledBorder: _border(const Color(0xFFDCE6D8)), focusedBorder: _border(AppColors.forestGreen, 1.5)));
+  OutlineInputBorder _border(Color color, [double width = 1]) => OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide(color: color, width: width));
+}
+
+class _SocialButton extends StatelessWidget {
+  const _SocialButton({required this.label, required this.letter});
+  final String label; final String letter;
+  @override
+  Widget build(BuildContext context) => OutlinedButton(onPressed: null, style: OutlinedButton.styleFrom(disabledForegroundColor: AppColors.primaryText, side: const BorderSide(color: Color(0xFFE3EADF)), padding: const EdgeInsets.symmetric(vertical: 11), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [CircleAvatar(radius: 9, backgroundColor: AppColors.mintChip, child: Text(letter, style: const TextStyle(fontSize: 10, color: AppColors.forestGreen, fontWeight: FontWeight.bold))), const SizedBox(width: 8), Text(label)]));
 }

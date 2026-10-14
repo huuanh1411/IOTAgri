@@ -5,12 +5,13 @@ import 'app_colors.dart';
 import 'app_text.dart';
 
 class AppTheme {
+  static const Color canvas = AppColors.background;
   static const Color cupertinoPrimary = AppColors.forestGreen;
 
   static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
-    scaffoldBackgroundColor: Colors.transparent,
+    scaffoldBackgroundColor: canvas,
     primaryColor: AppColors.forestGreen,
     colorScheme: const ColorScheme.light(
       primary: AppColors.forestGreen,
@@ -27,8 +28,9 @@ class AppTheme {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
       ),
-      color: Colors.white.withValues(alpha: 0.42),
+      color: Colors.white,
       surfaceTintColor: Colors.transparent,
+      elevation: 0,
     ),
     textTheme: GoogleFonts.interTextTheme().copyWith(
       // Heading – 24px, weight 600

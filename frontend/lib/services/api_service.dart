@@ -222,7 +222,9 @@ class ApiService {
       }),
     );
 
-    if (response.statusCode == 200) {
+    // The API returns 201 Created after a successful registration. Accept it
+    // so the repository can continue with its automatic login.
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body);
     } else if (response.statusCode == 409) {
       throw Exception('Email này đã được đăng ký.');

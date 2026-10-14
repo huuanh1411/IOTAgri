@@ -53,11 +53,13 @@ class SensorReading {
   final double waterLevel; // percentage 0‑100
   final double nutrientLevel; // percentage 0‑100
   final double temperature; // °C
+  final double lightLevel; // percentage 0-100
 
   const SensorReading({
     required this.waterLevel,
     required this.nutrientLevel,
     required this.temperature,
+    this.lightLevel = 76,
   });
 
   factory SensorReading.fromJson(Map<String, dynamic> json) {
@@ -65,6 +67,7 @@ class SensorReading {
       waterLevel: (json['waterLevel'] as num).toDouble(),
       nutrientLevel: (json['nutrientLevel'] as num).toDouble(),
       temperature: (json['temperature'] as num).toDouble(),
+      lightLevel: (json['lightLevel'] as num?)?.toDouble() ?? 76,
     );
   }
 }

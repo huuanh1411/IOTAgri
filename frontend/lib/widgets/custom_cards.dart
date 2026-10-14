@@ -1,7 +1,7 @@
 // lib/widgets/custom_cards.dart
 import 'package:flutter/material.dart';
 import '../core/widgets/glass_container.dart';
-import '../theme/app_colors.dart';
+import '../core/theme/app_colors.dart';
 
 class InfoCard extends StatelessWidget {
   final String title;
@@ -35,10 +35,7 @@ class InfoCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                 ),
               ],
@@ -46,10 +43,7 @@ class InfoCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -88,10 +82,7 @@ class SensorCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             const SizedBox(height: 4),
             Row(
@@ -111,10 +102,7 @@ class SensorCard extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text(
                     unit,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ),
               ],
@@ -180,10 +168,7 @@ class StatusCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       subtitle!,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ],
@@ -260,10 +245,7 @@ class AlertCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      message,
-                      style: const TextStyle(fontSize: 14),
-                    ),
+                    Text(message, style: const TextStyle(fontSize: 14)),
                     const SizedBox(height: 4),
                     Text(
                       timestamp,

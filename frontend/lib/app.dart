@@ -18,25 +18,14 @@ class AerogreenApp extends ConsumerWidget {
       title: 'Aerogreen',
       theme: AppTheme.lightTheme,
       routerConfig: router,
-      builder: (context, child) => Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            'assets/images/foliage_background.png',
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.high,
-          ),
-          if (child != null)
-            CupertinoTheme(
-              data: const CupertinoThemeData(
-                brightness: Brightness.light,
-                primaryColor: AppTheme.cupertinoPrimary,
-                scaffoldBackgroundColor: Colors.transparent,
-                barBackgroundColor: Colors.transparent,
-              ),
-              child: child,
-            ),
-        ],
+      builder: (context, child) => CupertinoTheme(
+        data: const CupertinoThemeData(
+          brightness: Brightness.light,
+          primaryColor: AppTheme.cupertinoPrimary,
+          scaffoldBackgroundColor: AppTheme.canvas,
+          barBackgroundColor: AppTheme.canvas,
+        ),
+        child: child ?? const SizedBox.shrink(),
       ),
     );
   }

@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import '../constants/api_constants.dart';
 
 /// Simple wrapper that adds the base URL and optional JWT auth header.
 class ApiClient {
-  final String _baseUrl = dotenv.get('BACKEND_BASE_URL');
+  final String _baseUrl = ApiConstants.baseUrl;
 
   String? _jwtToken;
 
@@ -26,9 +26,17 @@ class ApiClient {
       case 'GET':
         return http.get(uri, headers: headers);
       case 'POST':
-        return http.post(uri, headers: headers, body: jsonEncode(jsonBody ?? {}));
+        return http.post(
+          uri,
+          headers: headers,
+          body: jsonEncode(jsonBody ?? {}),
+        );
       case 'PUT':
-        return http.put(uri, headers: headers, body: jsonEncode(jsonBody ?? {}));
+        return http.put(
+          uri,
+          headers: headers,
+          body: jsonEncode(jsonBody ?? {}),
+        );
       case 'DELETE':
         return http.delete(uri, headers: headers);
       default:

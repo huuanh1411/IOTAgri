@@ -14,7 +14,7 @@ class AppText {
 
   /// Use for headings that sit directly over the foliage background.
   static TextStyle photoTitle({double fontSize = 24, FontWeight fontWeight = FontWeight.w600}) =>
-      GoogleFonts.inter(
+      GoogleFonts.playfairDisplay(
         fontSize: fontSize,
         fontWeight: fontWeight,
         color: AppColors.primaryText,

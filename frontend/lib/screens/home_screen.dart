@@ -238,9 +238,9 @@ class _SensorCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final gauges = [
                 GaugeRing(
                   label: 'MỨC NƯỚC',
                   value: sensor.waterLevel,
@@ -262,7 +262,27 @@ class _SensorCard extends StatelessWidget {
                   color: const Color(0xFFCDB59A), // temp gauge tan
                   icon: Icons.thermostat,
                 ),
-              ],
+                GaugeRing(
+                  label: 'ÁNH SÁNG',
+                  value: sensor.lightLevel,
+                  unit: '%',
+                  color: const Color(0xFFE3A72F),
+                  icon: Icons.wb_sunny_outlined,
+                ),
+                ];
+                if (constraints.maxWidth < 340) {
+                  return Wrap(
+                    alignment: WrapAlignment.spaceEvenly,
+                    spacing: 20,
+                    runSpacing: 14,
+                    children: gauges,
+                  );
+                }
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: gauges,
+                );
+              },
             ),
           ],
         ),
