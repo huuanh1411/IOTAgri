@@ -63,6 +63,10 @@ class _PumpSchedulesScreenState extends State<PumpSchedulesScreen> {
           result['startTime'] as String,
           result['durationSeconds'] as int,
           result['daysOfWeek'] as List<int>,
+          endTime: result['endTime'] as String?,
+          intervalMinutes: result['intervalMinutes'] as int?,
+          activeFromDate: result['activeFromDate'] as DateTime?,
+          activeUntilDate: result['activeUntilDate'] as DateTime?,
         );
         await _loadSchedules();
         if (mounted) {
@@ -210,15 +214,7 @@ class _PumpSchedulesScreenState extends State<PumpSchedulesScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            schedule.isEnabled
-                                ? Icons.toggle_on
-                                : Icons.toggle_off,
-                            color: schedule.isEnabled
-                                ? Colors.green
-                                : Colors.grey,
-                            size: 32,
-                          ),
+                          Switch(value: schedule.isEnabled, onChanged: (enabled) async { await _apiService.updatePumpSchedule(widget.device.id, schedule, isEnabled: enabled); await _loadSchedules(); }),
                           const SizedBox(width: 12),
                           Text(
                             _formatTime(schedule.startTime),
@@ -245,6 +241,8 @@ class _PumpSchedulesScreenState extends State<PumpSchedulesScreen> {
                     'Lặp lại: ${_formatDays(schedule.daysOfWeek)}',
                     style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
+                  if (schedule.activeFromDate != null || schedule.activeUntilDate != null)
+                    Text('Hiệu lực: ${schedule.activeFromDate ?? 'ngay'} đến ${schedule.activeUntilDate ?? 'vô thời hạn'}'),
                   if (schedule.isActive) ...[
                     const SizedBox(height: 8),
                     Container(
@@ -286,6 +284,9 @@ class AddScheduleDialog extends StatefulWidget {
 class _AddScheduleDialogState extends State<AddScheduleDialog> {
   final _formKey = GlobalKey<FormState>();
   TimeOfDay _selectedTime = TimeOfDay.now();
+  TimeOfDay _endTime = const TimeOfDay(hour: 18, minute: 0);
+  DateTime? _activeFromDate;
+  DateTime? _activeUntilDate;
   final _durationController = TextEditingController(text: '60');
   final List<int> _selectedDays = [1, 2, 3, 4, 5]; // T2-T6 mặc định
 
@@ -315,6 +316,11 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
         _selectedDays.add(day);
       }
     });
+  }
+
+  Future<void> _selectDate({required bool isStart}) async {
+    final picked = await showDatePicker(context: context, initialDate: isStart ? (_activeFromDate ?? DateTime.now()) : (_activeUntilDate ?? _activeFromDate ?? DateTime.now()), firstDate: DateTime.now(), lastDate: DateTime(2100));
+    if (picked != null) setState(() { if (isStart) { _activeFromDate = picked; } else { _activeUntilDate = picked; } });
   }
 
   @override
@@ -350,6 +356,14 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+
+              InkWell(
+                onTap: () async { final picked = await showTimePicker(context: context, initialTime: _endTime); if (picked != null) setState(() => _endTime = picked); },
+                child: InputDecorator(decoration: const InputDecoration(labelText: 'Giờ kết thúc khung tự động', border: OutlineInputBorder()), child: Text('${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}')),
+              ),
+              const SizedBox(height: 16),
+              Row(children: [Expanded(child: OutlinedButton(onPressed: () => _selectDate(isStart: true), child: Text(_activeFromDate == null ? 'Từ ngày' : '${_activeFromDate!.day}/${_activeFromDate!.month}/${_activeFromDate!.year}'))), const SizedBox(width: 8), Expanded(child: OutlinedButton(onPressed: () => _selectDate(isStart: false), child: Text(_activeUntilDate == null ? 'Đến ngày' : '${_activeUntilDate!.day}/${_activeUntilDate!.month}/${_activeUntilDate!.year}')))]),
               const SizedBox(height: 16),
 
               // Duration
@@ -414,6 +428,10 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                 'startTime': startTime,
                 'durationSeconds': int.parse(_durationController.text),
                 'daysOfWeek': _selectedDays,
+                'endTime': DateTime(now.year, now.month, now.day, _endTime.hour, _endTime.minute).toIso8601String(),
+                'intervalMinutes': 60,
+                'activeFromDate': _activeFromDate,
+                'activeUntilDate': _activeUntilDate,
               });
             } else if (_selectedDays.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(

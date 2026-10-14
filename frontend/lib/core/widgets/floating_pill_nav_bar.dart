@@ -18,16 +18,10 @@ class FloatingPillNavBar extends StatelessWidget {
   static const _icons = [
     Icons.home_outlined,
     Icons.spa_outlined,
-    Icons.tune_outlined,
     Icons.grid_view_outlined,
   ];
 
-  static const _labels = [
-    'Trang chủ',
-    'Chọn Giống',
-    'Điều khiển',
-    'Khác',
-  ];
+  static const _labels = ['Trang chủ', 'Chọn Giống', 'Điều khiển', 'Khác'];
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +33,11 @@ class FloatingPillNavBar extends StatelessWidget {
             color: Colors.white.withValues(alpha: .96),
             borderRadius: BorderRadius.circular(30),
             boxShadow: const [
-              BoxShadow(color: Color(0x182F5D3F), blurRadius: 18, offset: Offset(0, 8)),
+              BoxShadow(
+                color: Color(0x182F5D3F),
+                blurRadius: 18,
+                offset: Offset(0, 8),
+              ),
             ],
           ),
           child: Row(
@@ -63,15 +61,19 @@ class FloatingPillNavBar extends StatelessWidget {
                       children: [
                         Icon(
                           _icons[index],
-                          color: selected ? AppColors.forestGreen : AppColors.primaryText,
+                          color: selected
+                              ? AppColors.forestGreen
+                              : AppColors.primaryText,
                           size: 20,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _labels[index],
+                          _labels[index == 2 ? 3 : index],
                           style: TextStyle(
                             fontSize: 10,
-                            color: selected ? AppColors.forestGreen : AppColors.primaryText,
+                            color: selected
+                                ? AppColors.forestGreen
+                                : AppColors.primaryText,
                           ),
                         ),
                       ],

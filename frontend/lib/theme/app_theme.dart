@@ -31,69 +31,69 @@ class AppTheme {
       ),
       
       // Typography
-      fontFamily: 'Arial',
+      fontFamily: 'Inter',
       textTheme: const TextTheme(
         displayLarge: TextStyle(
           fontSize: 32,
           fontWeight: FontWeight.bold,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
           color: textPrimary,
         ),
         displayMedium: TextStyle(
           fontSize: 28,
           fontWeight: FontWeight.bold,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
           color: textPrimary,
         ),
         displaySmall: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.bold,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
           color: textPrimary,
         ),
         headlineMedium: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
           color: textPrimary,
         ),
         headlineSmall: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
           color: textPrimary,
         ),
         titleLarge: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
           color: textPrimary,
         ),
         titleMedium: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
           color: textPrimary,
         ),
         bodyLarge: TextStyle(
           fontSize: 16,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
           color: textPrimary,
         ),
         bodyMedium: TextStyle(
           fontSize: 14,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
           color: textPrimary,
         ),
         bodySmall: TextStyle(
           fontSize: 12,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
           color: textSecondary,
         ),
         labelLarge: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w500,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
           color: textPrimary,
         ),
       ),
@@ -108,7 +108,7 @@ class AppTheme {
           color: Colors.white,
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
         ),
         iconTheme: IconThemeData(color: Colors.white),
       ),
@@ -135,7 +135,7 @@ class AppTheme {
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            fontFamily: 'Arial',
+            fontFamily: 'Inter',
           ),
         ),
       ),
@@ -152,7 +152,7 @@ class AppTheme {
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            fontFamily: 'Arial',
+            fontFamily: 'Inter',
           ),
         ),
       ),
@@ -165,7 +165,7 @@ class AppTheme {
           textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            fontFamily: 'Arial',
+            fontFamily: 'Inter',
           ),
         ),
       ),
@@ -251,7 +251,7 @@ class AppTheme {
         contentTextStyle: const TextStyle(
           color: Colors.white,
           fontSize: 14,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -277,7 +277,7 @@ class AppTheme {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         labelStyle: const TextStyle(
           fontSize: 14,
-          fontFamily: 'Arial',
+          fontFamily: 'Inter',
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -294,7 +294,7 @@ class AppTheme {
         seedColor: primaryGreen,
         brightness: Brightness.dark,
       ),
-      fontFamily: 'Arial',
+      fontFamily: 'Inter',
       // Add dark theme specific configurations
     );
   }

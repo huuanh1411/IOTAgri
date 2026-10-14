@@ -309,7 +309,7 @@ public static class DeviceEndpoints
         var maximumDurationSeconds = configuration.GetValue<int?>("PumpControl:MaximumDurationSeconds") ?? 600;
         if (maximumDurationSeconds <= 0) return Results.Problem("PumpControl:MaximumDurationSeconds must be positive.", statusCode: StatusCodes.Status503ServiceUnavailable);
 
-        var error = PumpScheduleRules.Validate(request.IsEnabled, request.WeekdayMask, request.StartTime, request.DurationSeconds, request.TimeZone, maximumDurationSeconds, request.EndTime, request.IntervalMinutes);
+        var error = PumpScheduleRules.Validate(request.IsEnabled, request.WeekdayMask, request.StartTime, request.DurationSeconds, request.TimeZone, maximumDurationSeconds, request.EndTime, request.IntervalMinutes, request.ActiveFromDate, request.ActiveUntilDate);
         if (error is not null) return Results.BadRequest(new { error });
 
         var schedule = new PumpSchedule
@@ -320,6 +320,8 @@ public static class DeviceEndpoints
             StartTime = request.StartTime!.Value,
             EndTime = request.EndTime,
             IntervalMinutes = request.IntervalMinutes,
+            ActiveFromDate = request.ActiveFromDate,
+            ActiveUntilDate = request.ActiveUntilDate,
             DurationSeconds = request.DurationSeconds,
             TimeZone = request.TimeZone!,
         };
@@ -351,7 +353,7 @@ public static class DeviceEndpoints
         var maximumDurationSeconds = configuration.GetValue<int?>("PumpControl:MaximumDurationSeconds") ?? 600;
         if (maximumDurationSeconds <= 0) return Results.Problem("PumpControl:MaximumDurationSeconds must be positive.", statusCode: StatusCodes.Status503ServiceUnavailable);
 
-        var error = PumpScheduleRules.Validate(request.IsEnabled, request.WeekdayMask, request.StartTime, request.DurationSeconds, request.TimeZone, maximumDurationSeconds, request.EndTime, request.IntervalMinutes);
+        var error = PumpScheduleRules.Validate(request.IsEnabled, request.WeekdayMask, request.StartTime, request.DurationSeconds, request.TimeZone, maximumDurationSeconds, request.EndTime, request.IntervalMinutes, request.ActiveFromDate, request.ActiveUntilDate);
         if (error is not null) return Results.BadRequest(new { error });
 
         schedule.IsEnabled = request.IsEnabled!.Value;
@@ -359,6 +361,8 @@ public static class DeviceEndpoints
         schedule.StartTime = request.StartTime!.Value;
         schedule.EndTime = request.EndTime;
         schedule.IntervalMinutes = request.IntervalMinutes;
+        schedule.ActiveFromDate = request.ActiveFromDate;
+        schedule.ActiveUntilDate = request.ActiveUntilDate;
         schedule.DurationSeconds = request.DurationSeconds;
         schedule.TimeZone = request.TimeZone!;
 
@@ -395,7 +399,9 @@ public static class DeviceEndpoints
         schedule.DurationSeconds,
         schedule.TimeZone,
         schedule.LastDispatchedOccurrenceUtc,
-        schedule.CreatedAt);
+        schedule.CreatedAt,
+        schedule.ActiveFromDate,
+        schedule.ActiveUntilDate);
 
     private static async Task<IResult?> SavePumpScheduleAsync(
         ApplicationDbContext db,

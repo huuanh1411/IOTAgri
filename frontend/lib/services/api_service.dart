@@ -556,6 +556,8 @@ class ApiService {
           'startTime': schedule.startTime,
           'endTime': schedule.endTime,
           'intervalMinutes': schedule.intervalMinutes,
+          'activeFromDate': schedule.activeFromDate,
+          'activeUntilDate': schedule.activeUntilDate,
           'durationSeconds': schedule.durationSeconds,
           'timeZone': schedule.timeZone,
         }),
@@ -575,6 +577,8 @@ class ApiService {
     List<int> daysOfWeek, {
     int? intervalMinutes,
     String? endTime,
+    DateTime? activeFromDate,
+    DateTime? activeUntilDate,
   }) async {
     final localStart = DateTime.parse(startTime);
     final localEnd = endTime == null ? null : DateTime.parse(endTime);
@@ -600,6 +604,8 @@ class ApiService {
             'endTime': '${localEnd.hour.toString().padLeft(2, '0')}:'
                 '${localEnd.minute.toString().padLeft(2, '0')}:00',
           'intervalMinutes': ?intervalMinutes,
+          if (activeFromDate != null) 'activeFromDate': activeFromDate.toIso8601String().substring(0, 10),
+          if (activeUntilDate != null) 'activeUntilDate': activeUntilDate.toIso8601String().substring(0, 10),
           'timeZone': 'Asia/Ho_Chi_Minh',
         }),
       ),

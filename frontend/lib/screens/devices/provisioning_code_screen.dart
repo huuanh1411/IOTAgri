@@ -182,7 +182,7 @@ class _ProvisioningCodeScreenState extends State<ProvisioningCodeScreen> {
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 2,
-                            fontFamily: 'Courier',
+                            fontFamily: 'Inter',
                           ),
                           textAlign: TextAlign.center,
                         ),

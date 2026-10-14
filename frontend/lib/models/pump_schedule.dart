@@ -7,6 +7,8 @@ class PumpSchedule {
   final String? endTime;
   final int durationSeconds;
   final int? intervalMinutes;
+  final String? activeFromDate;
+  final String? activeUntilDate;
   final String timeZone;
   final String? lastDispatchedOccurrenceUtc;
   final String createdAt;
@@ -20,6 +22,8 @@ class PumpSchedule {
     this.endTime,
     required this.durationSeconds,
     this.intervalMinutes,
+    this.activeFromDate,
+    this.activeUntilDate,
     required this.timeZone,
     this.lastDispatchedOccurrenceUtc,
     required this.createdAt,
@@ -35,6 +39,8 @@ class PumpSchedule {
       endTime: json['endTime'],
       durationSeconds: json['durationSeconds'] ?? 0,
       intervalMinutes: json['intervalMinutes'],
+      activeFromDate: json['activeFromDate'],
+      activeUntilDate: json['activeUntilDate'],
       timeZone: json['timeZone'] ?? '',
       lastDispatchedOccurrenceUtc: json['lastDispatchedOccurrenceUtc'],
       createdAt: json['createdAt'] ?? '',
@@ -51,6 +57,8 @@ class PumpSchedule {
       'endTime': endTime,
       'durationSeconds': durationSeconds,
       'intervalMinutes': intervalMinutes,
+      'activeFromDate': activeFromDate,
+      'activeUntilDate': activeUntilDate,
       'timeZone': timeZone,
       'lastDispatchedOccurrenceUtc': lastDispatchedOccurrenceUtc,
       'createdAt': createdAt,

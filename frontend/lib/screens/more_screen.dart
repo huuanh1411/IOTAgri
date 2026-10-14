@@ -36,7 +36,9 @@ class MoreScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               // Profile card
               Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
                 elevation: 4,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -47,31 +49,57 @@ class MoreScreen extends ConsumerWidget {
                         width: 56,
                         height: 56,
                         decoration: const BoxDecoration(
-                          gradient: LinearGradient(colors: [AppColors.forestGreen, AppColors.sage]),
+                          gradient: LinearGradient(
+                            colors: [AppColors.forestGreen, AppColors.sage],
+                          ),
                           borderRadius: BorderRadius.all(Radius.circular(12)),
                         ),
                         alignment: Alignment.center,
-                        child: const Text('M', style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
+                        child: const Text(
+                          'M',
+                          style: TextStyle(
+                            fontSize: 24,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(user.fullName, style: AppText.heading(context, fontSize: 20)),
+                            Text(
+                              user.fullName,
+                              style: AppText.heading(context, fontSize: 20),
+                            ),
                             const SizedBox(height: 4),
-                            Text(user.email, style: const TextStyle(color: AppColors.forestGreen)),
+                            Text(
+                              user.email,
+                              style: const TextStyle(
+                                color: AppColors.forestGreen,
+                              ),
+                            ),
                           ],
                         ),
                       ),
                       // Plan pill "Pro"
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.mint.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text('Pro', style: TextStyle(color: AppColors.mint, fontWeight: FontWeight.w600)),
+                        child: const Text(
+                          'Pro',
+                          style: TextStyle(
+                            color: AppColors.mint,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -80,7 +108,9 @@ class MoreScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               // List of rows
               Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
                 elevation: 2,
                 child: Column(
                   children: [
@@ -88,28 +118,28 @@ class MoreScreen extends ConsumerWidget {
                       icon: Icons.notifications, // bell
                       title: 'Thông báo',
                       subtitle: 'Quản lý cảnh báo',
-                      onTap: () => context.go('/more/alerts'),
+                      onTap: () => context.push('/other/alerts'),
                     ),
                     const Divider(height: 1),
                     _ListRow(
                       icon: Icons.settings, // gear
                       title: 'Tùy chỉnh',
                       subtitle: 'Đơn vị, ngôn ngữ',
-                      onTap: () => context.go('/more/settings'),
+                      onTap: () => context.push('/other/settings'),
                     ),
                     const Divider(height: 1),
                     _ListRow(
                       icon: Icons.eco, // leaf
                       title: 'Lịch sử thu hoạch',
                       subtitle: 'Đã trồng 32 cây',
-                      onTap: () => context.go('/more/harvest'),
+                      onTap: () => context.push('/other/harvest'),
                     ),
                     const Divider(height: 1),
                     _ListRow(
                       icon: Icons.help_center, // help circle
                       title: 'Trợ giúp & Hỗ trợ',
                       subtitle: 'Câu hỏi thường gặp và chat',
-                      onTap: () => context.go('/more/help'),
+                      onTap: () => context.push('/other/help'),
                     ),
                   ],
                 ),
@@ -126,8 +156,14 @@ class MoreScreen extends ConsumerWidget {
                       title: const Text('Xác nhận'),
                       content: const Text('Bạn có chắc muốn đăng xuất?'),
                       actions: [
-                        TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Hủy')),
-                        TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Đăng xuất')),
+                        TextButton(
+                          onPressed: () => Navigator.pop(c, false),
+                          child: const Text('Hủy'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(c, true),
+                          child: const Text('Đăng xuất'),
+                        ),
                       ],
                     ),
                   );
@@ -147,7 +183,12 @@ class MoreScreen extends ConsumerWidget {
 }
 
 class _ListRow extends StatelessWidget {
-  const _ListRow({required this.icon, required this.title, required this.subtitle, required this.onTap});
+  const _ListRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
   final IconData icon;
   final String title;
   final String subtitle;
@@ -163,7 +204,10 @@ class _ListRow extends StatelessWidget {
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(subtitle, style: const TextStyle(color: Colors.grey)),
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16.0,
+        vertical: 4.0,
+      ),
     );
   }
 }
