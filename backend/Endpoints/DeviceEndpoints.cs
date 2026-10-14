@@ -49,9 +49,14 @@ public static class DeviceEndpoints
             return Results.Unauthorized();
         }
 
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            return Results.BadRequest(new { error = "name is required." });
+        }
+
         var device = new Device
         {
-            Name = request.Name,
+            Name = request.Name.Trim(),
             // URL-safe (no '+' or '/') so the key can be used as an MQTT topic segment.
             DeviceKey = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32))
                 .Replace('+', '-').Replace('/', '_').TrimEnd('='),
@@ -118,7 +123,12 @@ public static class DeviceEndpoints
             return Results.NotFound();
         }
 
-        device.Name = request.Name;
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            return Results.BadRequest(new { error = "name is required." });
+        }
+
+        device.Name = request.Name.Trim();
         await db.SaveChangesAsync();
 
         return Results.Ok(new DeviceResponse(device.Id, device.Name, device.IsOnline, device.LastSeenAt, device.CreatedAt));

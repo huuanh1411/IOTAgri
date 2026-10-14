@@ -156,10 +156,12 @@ public static class TicketEndpoints
         var actor = await userManager.FindByIdAsync(actorUserId);
         if (actor is null) return Results.Unauthorized();
 
-        ticket.Messages.Add(new SupportTicketMessage { AuthorUserId = actorUserId, Author = actor, Body = request.Message!.Trim() });
+        var message = new SupportTicketMessage { Ticket = ticket, AuthorUserId = actorUserId, Body = request.Message!.Trim() };
+        db.SupportTicketMessages.Add(message);
         ticket.UpdatedAt = DateTime.UtcNow;
         AddAudit(db, actorUserId, "ticket.message.added", ticket.Id, null, "admin reply");
         await db.SaveChangesAsync();
+        message.Author = actor;
         return Results.Ok(ToDetail(ticket));
     }
 

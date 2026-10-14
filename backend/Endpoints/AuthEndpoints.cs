@@ -77,6 +77,11 @@ public static class AuthEndpoints
             return Results.Unauthorized();
         }
 
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            return Results.Unauthorized();
+        }
+
         var roles = await userManager.GetRolesAsync(user);
         var response = await IssueTokensAsync(user, roles, db, tokenService, configuration);
         return Results.Ok(response);
@@ -94,6 +99,11 @@ public static class AuthEndpoints
             .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken);
 
         if (existingToken is null || !existingToken.IsActive || existingToken.User is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        if (await userManager.IsLockedOutAsync(existingToken.User))
         {
             return Results.Unauthorized();
         }
