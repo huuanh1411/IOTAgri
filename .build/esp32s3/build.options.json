@@ -1,0 +1,9 @@
+{
+  "additionalFiles": "",
+  "compiler.optimization_flags": "-Os",
+  "customBuildProperties": "build.warn_data_percentage=75",
+  "fqbn": "esp32:esp32:esp32s3:FlashSize=16M,PartitionScheme=app3M_fat9M_16MB,PSRAM=disabled,USBMode=hwcdc,CDCOnBoot=default,UploadMode=default,EraseFlash=all",
+  "hardwareFolders": "C:\\Users\\ACER\\AppData\\Local\\Arduino15\\packages",
+  "otherLibrariesFolders": "C:\\Users\\ACER\\Documents\\Arduino\\libraries",
+  "sketchLocation": "D:\\AndroidDev\\IOTAgri\\firmware\\ESP32DeviceSetup"
+}
