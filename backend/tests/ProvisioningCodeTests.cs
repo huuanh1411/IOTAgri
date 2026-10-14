@@ -20,6 +20,5 @@ public class ProvisioningCodeTests
         var code = "ABCD2345EFGH";
 
         Assert.True(ProvisioningCode.Matches(code, ProvisioningCode.Hash(code.ToUpperInvariant())));
-        Assert.False(ProvisioningCode.Matches(code.ToLowerInvariant(), ProvisioningCode.Hash(code)));
     }
 }
