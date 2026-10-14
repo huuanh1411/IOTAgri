@@ -1,0 +1,437 @@
+{
+  "totals": {
+    "lines_covered": 1399,
+    "lines_valid": 2071,
+    "branches_covered": 463,
+    "branches_valid": 760
+  },
+  "files": {
+    "Data/AdminBootstrapSettings.cs": [
+      25,
+      25,
+      15,
+      16
+    ],
+    "Data/ApplicationDbContext.cs": [
+      137,
+      138,
+      0,
+      0
+    ],
+    "Data/RoleSeeder.cs": [
+      8,
+      8,
+      4,
+      4
+    ],
+    "Dtos/Admin/AdminAuditLogResponse.cs": [
+      10,
+      20,
+      0,
+      0
+    ],
+    "Dtos/Admin/AdminDeviceResponse.cs": [
+      0,
+      14,
+      0,
+      0
+    ],
+    "Dtos/Admin/AdminSystemContracts.cs": [
+      5,
+      13,
+      6,
+      6
+    ],
+    "Dtos/Admin/AdminUserResponse.cs": [
+      0,
+      3,
+      0,
+      0
+    ],
+    "Dtos/Admin/UpdateDeviceOwnerRequest.cs": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "Dtos/Admin/UpdateUserLockRequest.cs": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "Dtos/Admin/UpdateUserRoleRequest.cs": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "Dtos/Alerts/DeviceAlertContracts.cs": [
+      23,
+      23,
+      21,
+      22
+    ],
+    "Dtos/Auth/AuthResponse.cs": [
+      5,
+      5,
+      0,
+      0
+    ],
+    "Dtos/Auth/LoginRequest.cs": [
+      4,
+      4,
+      0,
+      0
+    ],
+    "Dtos/Auth/RefreshRequest.cs": [
+      3,
+      3,
+      0,
+      0
+    ],
+    "Dtos/Auth/RegisterRequest.cs": [
+      5,
+      5,
+      0,
+      0
+    ],
+    "Dtos/Auth/UpdateProfileRequest.cs": [
+      4,
+      4,
+      0,
+      0
+    ],
+    "Dtos/Auth/UserProfileResponse.cs": [
+      5,
+      7,
+      0,
+      0
+    ],
+    "Dtos/Auth/UserSummaryResponse.cs": [
+      5,
+      5,
+      0,
+      0
+    ],
+    "Dtos/Dashboard/AggregatedReadingBucket.cs": [
+      8,
+      25,
+      0,
+      0
+    ],
+    "Dtos/Dashboard/DeviceOverviewResponse.cs": [
+      5,
+      8,
+      0,
+      0
+    ],
+    "Dtos/Devices/ClaimDeviceRequest.cs": [
+      4,
+      4,
+      0,
+      0
+    ],
+    "Dtos/Devices/ClaimDeviceResponse.cs": [
+      3,
+      6,
+      0,
+      0
+    ],
+    "Dtos/Devices/CreateDeviceRequest.cs": [
+      3,
+      3,
+      0,
+      0
+    ],
+    "Dtos/Devices/CreateProvisioningCodeResponse.cs": [
+      1,
+      1,
+      0,
+      0
+    ],
+    "Dtos/Devices/DeviceResponse.cs": [
+      3,
+      7,
+      0,
+      0
+    ],
+    "Dtos/Devices/UpdateDeviceRequest.cs": [
+      3,
+      3,
+      0,
+      0
+    ],
+    "Dtos/Pumps/PumpCommandHistoryQuery.cs": [
+      9,
+      9,
+      8,
+      8
+    ],
+    "Dtos/Pumps/PumpCommandHistoryResponse.cs": [
+      8,
+      17,
+      0,
+      0
+    ],
+    "Dtos/Pumps/PumpCommandRequest.cs": [
+      5,
+      5,
+      8,
+      8
+    ],
+    "Dtos/Pumps/PumpCommandResponse.cs": [
+      0,
+      9,
+      0,
+      0
+    ],
+    "Dtos/Pumps/PumpMqttMessages.cs": [
+      10,
+      10,
+      4,
+      4
+    ],
+    "Dtos/Pumps/PumpScheduleContracts.cs": [
+      12,
+      20,
+      0,
+      0
+    ],
+    "Dtos/Sensors/SensorMedianBucket.cs": [
+      20,
+      20,
+      2,
+      2
+    ],
+    "Dtos/Sensors/SensorReadingRequest.cs": [
+      9,
+      9,
+      0,
+      0
+    ],
+    "Dtos/Sensors/SensorReadingResponse.cs": [
+      3,
+      11,
+      0,
+      0
+    ],
+    "Dtos/Tickets/SupportTicketContracts.cs": [
+      19,
+      19,
+      0,
+      0
+    ],
+    "Endpoints/AdminEndpoints.cs": [
+      96,
+      289,
+      16,
+      144
+    ],
+    "Endpoints/AuthEndpoints.cs": [
+      93,
+      105,
+      32,
+      40
+    ],
+    "Endpoints/DashboardEndpoints.cs": [
+      37,
+      37,
+      3,
+      4
+    ],
+    "Endpoints/DeviceEndpoints.cs": [
+      213,
+      287,
+      50,
+      94
+    ],
+    "Endpoints/DeviceProvisioningEndpoints.cs": [
+      45,
+      46,
+      14,
+      16
+    ],
+    "Endpoints/SensorEndpoints.cs": [
+      82,
+      104,
+      14,
+      24
+    ],
+    "Endpoints/TicketEndpoints.cs": [
+      101,
+      108,
+      45,
+      70
+    ],
+    "Models/AdminAuditLog.cs": [
+      8,
+      8,
+      0,
+      0
+    ],
+    "Models/ApplicationUser.cs": [
+      2,
+      2,
+      0,
+      0
+    ],
+    "Models/Device.cs": [
+      20,
+      20,
+      0,
+      0
+    ],
+    "Models/DeviceAlert.cs": [
+      7,
+      8,
+      0,
+      0
+    ],
+    "Models/DevicePresence.cs": [
+      2,
+      2,
+      3,
+      4
+    ],
+    "Models/PumpCommand.cs": [
+      10,
+      11,
+      0,
+      0
+    ],
+    "Models/PumpSchedule.cs": [
+      13,
+      13,
+      0,
+      0
+    ],
+    "Models/PumpScheduleOccurrence.cs": [
+      6,
+      6,
+      0,
+      0
+    ],
+    "Models/RefreshToken.cs": [
+      9,
+      9,
+      2,
+      2
+    ],
+    "Models/SensorReading.cs": [
+      10,
+      11,
+      0,
+      0
+    ],
+    "Models/SupportTicket.cs": [
+      15,
+      16,
+      0,
+      0
+    ],
+    "Models/SystemAlertDefaults.cs": [
+      4,
+      4,
+      0,
+      0
+    ],
+    "Program.cs": [
+      0,
+      141,
+      0,
+      22
+    ],
+    "Services/AdminRoleRules.cs": [
+      9,
+      9,
+      30,
+      30
+    ],
+    "Services/DeviceAlertRules.cs": [
+      7,
+      7,
+      12,
+      12
+    ],
+    "Services/MqttIngestionService.cs": [
+      95,
+      175,
+      33,
+      72
+    ],
+    "Services/ProfileRules.cs": [
+      10,
+      10,
+      30,
+      30
+    ],
+    "Services/ProvisioningCode.cs": [
+      4,
+      4,
+      0,
+      0
+    ],
+    "Services/PumpScheduleDispatchService.cs": [
+      54,
+      89,
+      7,
+      20
+    ],
+    "Services/PumpScheduleRules.cs": [
+      51,
+      52,
+      76,
+      78
+    ],
+    "Services/SupportTicketRules.cs": [
+      3,
+      3,
+      24,
+      24
+    ],
+    "Services/TokenService.cs": [
+      29,
+      29,
+      4,
+      4
+    ]
+  },
+  "source_attributes": {
+    "line-rate": "0.6755",
+    "branch-rate": "0.6092",
+    "version": "1.9",
+    "timestamp": "1791916946",
+    "lines-covered": "1399",
+    "lines-valid": "2071",
+    "branches-covered": "463",
+    "branches-valid": "760"
+  },
+  "test_counters": {
+    "total": 345,
+    "executed": 345,
+    "passed": 339,
+    "failed": 6,
+    "error": 0,
+    "timeout": 0,
+    "aborted": 0,
+    "inconclusive": 0,
+    "passedButRunAborted": 0,
+    "notRunnable": 0,
+    "notExecuted": 0,
+    "disconnected": 0,
+    "warning": 0,
+    "completed": 0,
+    "inProgress": 0,
+    "pending": 0
+  },
+  "test_methods": 212,
+  "test_files": 44,
+  "run": "followup-final",
+  "trx_times": {
+    "creation": "2026-10-14T01:42:15.5183777+07:00",
+    "queuing": "2026-10-14T01:42:15.5183782+07:00",
+    "start": "2026-10-14T01:42:13.7067714+07:00",
+    "finish": "2026-10-14T01:42:26.8724069+07:00"
+  }
+}
