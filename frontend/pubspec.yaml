@@ -67,6 +67,7 @@ dev_dependencies:
 flutter:
 
   assets:
+    - assets/images/aerogreen_app_icon.png
     - assets/images/foliage_background.png
 
   # The following line ensures that the Material Icons font is

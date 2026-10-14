@@ -30,7 +30,7 @@ class FloatingPillNavBar extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(18, 8, 18, 12),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: .96),
+            color: AppColors.surface.withValues(alpha: .96),
             borderRadius: BorderRadius.circular(30),
             boxShadow: const [
               BoxShadow(

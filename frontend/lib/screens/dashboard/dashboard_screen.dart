@@ -60,18 +60,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           });
         },
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Trang chủ',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.devices),
-            label: 'Thiết bị',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Cài đặt',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Trang chủ'),
+          BottomNavigationBarItem(icon: Icon(Icons.devices), label: 'Thiết bị'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Cài đặt'),
         ],
       ),
     );
@@ -124,10 +115,7 @@ class _HomeTabState extends State<HomeTab> {
     }
 
     if (_errorMessage != null) {
-      return ErrorState(
-        message: _errorMessage!,
-        onRetry: _loadDashboardData,
-      );
+      return ErrorState(message: _errorMessage!, onRetry: _loadDashboardData);
     }
 
     if (_devices.isEmpty) {
@@ -192,9 +180,7 @@ class _HomeTabState extends State<HomeTab> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => DevicesScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => DevicesScreen()),
           );
         },
         borderRadius: BorderRadius.circular(12),
@@ -244,18 +230,23 @@ class _HomeTabState extends State<HomeTab> {
                     Expanded(
                       child: SensorCard(
                         label: 'Nhiệt độ',
-                        value: latestReading.temperature?.toStringAsFixed(1) ?? 'N/A',
+                        value:
+                            latestReading.temperature?.toStringAsFixed(1) ??
+                            'N/A',
                         unit: '°C',
                         icon: Icons.thermostat,
                         color: _getTemperatureColor(latestReading.temperature),
-                        isWarning: (latestReading.temperature ?? 0) > 30 || (latestReading.temperature ?? 0) < 15,
+                        isWarning:
+                            (latestReading.temperature ?? 0) > 30 ||
+                            (latestReading.temperature ?? 0) < 15,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: SensorCard(
                         label: 'Độ ẩm',
-                        value: latestReading.humidity?.toStringAsFixed(1) ?? 'N/A',
+                        value:
+                            latestReading.humidity?.toStringAsFixed(1) ?? 'N/A',
                         unit: '%',
                         icon: Icons.water_drop,
                         color: Colors.blue,
@@ -279,7 +270,9 @@ class _HomeTabState extends State<HomeTab> {
                     Expanded(
                       child: SensorCard(
                         label: 'Mực nước',
-                        value: latestReading.waterLevel?.toStringAsFixed(1) ?? 'N/A',
+                        value:
+                            latestReading.waterLevel?.toStringAsFixed(1) ??
+                            'N/A',
                         unit: '%',
                         icon: Icons.opacity,
                         color: _getWaterLevelColor(latestReading.waterLevel),
@@ -331,7 +324,7 @@ class GatewayStatusCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFFFFFEF9),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: const Color(0xFFDBEAE0), width: 1.5),
         boxShadow: [
@@ -438,18 +431,11 @@ class SettingsTab extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.settings,
-              size: 80,
-              color: Colors.grey,
-            ),
+            const Icon(Icons.settings, size: 80, color: Colors.grey),
             const SizedBox(height: 24),
             const Text(
               'Cài đặt',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             const Text(

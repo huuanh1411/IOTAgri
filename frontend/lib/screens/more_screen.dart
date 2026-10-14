@@ -21,7 +21,7 @@ class MoreScreen extends ConsumerWidget {
     final user = ref.watch(userProfileProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),

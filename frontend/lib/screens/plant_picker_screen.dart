@@ -21,7 +21,7 @@ class PlantPickerScreen extends ConsumerWidget {
     final activePlant = ref.watch(currentPlantProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
@@ -32,7 +32,8 @@ class PlantPickerScreen extends ConsumerWidget {
               const PageHeader(
                 chip: SectionChip(label: 'Chọn Giống Cây'),
                 title: 'Chọn Giống Cây',
-                subtitle: 'Chọn cây — hệ thống sẽ tự động điều chỉnh ánh sáng, nước và dinh dưỡng.',
+                subtitle:
+                    'Chọn cây — hệ thống sẽ tự động điều chỉnh ánh sáng, nước và dinh dưỡng.',
               ),
               const SizedBox(height: 24),
               // 2‑column grid of plant cards
@@ -58,14 +59,18 @@ class PlantPickerScreen extends ConsumerWidget {
                                 context: context,
                                 builder: (_) => AlertDialog(
                                   title: const Text('Xác nhận'),
-                                  content: Text('Bạn sẽ thay thế "${activePlant.plant.name}" bằng "${plant.name}". Tiếp tục?'),
+                                  content: Text(
+                                    'Bạn sẽ thay thế "${activePlant.plant.name}" bằng "${plant.name}". Tiếp tục?',
+                                  ),
                                   actions: [
                                     TextButton(
-                                      onPressed: () => Navigator.pop(context, false),
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
                                       child: const Text('Hủy'),
                                     ),
                                     ElevatedButton(
-                                      onPressed: () => Navigator.pop(context, true),
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
                                       child: const Text('Đồng ý'),
                                     ),
                                   ],
@@ -73,7 +78,9 @@ class PlantPickerScreen extends ConsumerWidget {
                               );
                               if (confirm == true) {
                                 // Reset active plant state.
-                                ref.read(currentPlantProvider.notifier).state = ActivePlant(
+                                ref
+                                    .read(currentPlantProvider.notifier)
+                                    .state = ActivePlant(
                                   plant: plant,
                                   startDate: DateTime.now(),
                                   currentDay: 1,
@@ -81,7 +88,11 @@ class PlantPickerScreen extends ConsumerWidget {
                                 // Show feedback.
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Bắt đầu trồng ${plant.name}')), // Vietnamese message
+                                    SnackBar(
+                                      content: Text(
+                                        'Bắt đầu trồng ${plant.name}',
+                                      ),
+                                    ), // Vietnamese message
                                   );
                                 }
                               }
@@ -137,13 +148,12 @@ class _PlantCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             // Plant name and variety.
-            Text(
-              plant.name,
-              style: AppText.heading(context, fontSize: 18),
-            ),
+            Text(plant.name, style: AppText.heading(context, fontSize: 18)),
             Text(
               plant.variety,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey),
             ),
             const SizedBox(height: 8),
             // Meta row – duration & difficulty.
@@ -151,21 +161,34 @@ class _PlantCard extends StatelessWidget {
               children: [
                 const Icon(Icons.access_time, size: 16, color: Colors.grey),
                 const SizedBox(width: 4),
-                Text('${plant.durationWeeks} tuần', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(
+                  '${plant.durationWeeks} tuần',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
                 const SizedBox(width: 12),
                 const Icon(Icons.emoji_nature, size: 16, color: Colors.grey),
                 const SizedBox(width: 4),
-                Text(plant.difficulty, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(
+                  plant.difficulty,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
               ],
             ),
             const SizedBox(height: 12),
             // Scheduling lines.
             Row(
               children: [
-                const Icon(Icons.opacity, size: 16, color: AppColors.forestGreen),
+                const Icon(
+                  Icons.opacity,
+                  size: 16,
+                  color: AppColors.forestGreen,
+                ),
                 const SizedBox(width: 4),
                 Expanded(
-                  child: Text('Bơm ${plant.pumpMinutes} phút mỗi ${plant.pumpEveryMinutes} phút', style: const TextStyle(fontSize: 12)),
+                  child: Text(
+                    'Bơm ${plant.pumpMinutes} phút mỗi ${plant.pumpEveryMinutes} phút',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ),
               ],
             ),
@@ -175,17 +198,27 @@ class _PlantCard extends StatelessWidget {
                 const Icon(Icons.science, size: 16, color: Color(0xFFF2A93B)),
                 const SizedBox(width: 4),
                 Expanded(
-                  child: Text('Bổ sung ${plant.nutrientMl}ml mỗi ${plant.nutrientEveryDays} ngày', style: const TextStyle(fontSize: 12)),
+                  child: Text(
+                    'Bổ sung ${plant.nutrientMl}ml mỗi ${plant.nutrientEveryDays} ngày',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 4),
             Row(
               children: [
-                const Icon(Icons.thermostat, size: 16, color: Color(0xFFCDB59A)),
+                const Icon(
+                  Icons.thermostat,
+                  size: 16,
+                  color: Color(0xFFCDB59A),
+                ),
                 const SizedBox(width: 4),
                 Expanded(
-                  child: Text('${plant.tempMin}–${plant.tempMax}°C', style: const TextStyle(fontSize: 12)),
+                  child: Text(
+                    '${plant.tempMin}–${plant.tempMax}°C',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ),
               ],
             ),
@@ -200,13 +233,12 @@ class _PlantCard extends StatelessWidget {
                       label: const Text('✓ Đang trồng'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.forestGreen,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                       ),
                     )
-                  : GradientButton(
-                      label: 'Bắt Đầu Trồng',
-                      onPressed: onStart,
-                    ),
+                  : GradientButton(label: 'Bắt Đầu Trồng', onPressed: onStart),
             ),
           ],
         ),

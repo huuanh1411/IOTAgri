@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Backgrounds
-  static const Color background = Color(0xFFFAF8F2);
+  static const Color background = Color(0xFFF6EEDE);
+  static const Color surface = Color(0xFFFFFEF9);
   static const Color mintChip = Color(0xFFDDEFE0);
   static const Color rowBackground = Color(0xFFF1F2E8);
 

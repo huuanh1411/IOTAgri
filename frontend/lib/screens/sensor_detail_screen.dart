@@ -4,11 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/widgets/gauge_ring.dart';
 import '../data/models.dart';
-import '../models/device.dart';
-import '../models/pump_schedule.dart';
 import '../providers/data_providers.dart';
-import '../services/api_service.dart';
-import 'pumps/pump_schedules_screen.dart' show AddScheduleDialog;
 
 class SensorDetailScreen extends ConsumerWidget {
   const SensorDetailScreen({required this.metric, super.key});
@@ -28,7 +24,7 @@ class SensorDetailScreen extends ConsumerWidget {
         elevation: 0,
         title: Text(detail.title),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Card(
           child: Padding(
@@ -64,7 +60,7 @@ class SensorDetailScreen extends ConsumerWidget {
                 ),
                 if (metric == 'water') ...[
                   const SizedBox(height: 24),
-                  const WaterPumpControlPanel(),
+                  WaterPumpControlPanel(waterLevel: value),
                 ],
               ],
             ),
@@ -76,101 +72,39 @@ class SensorDetailScreen extends ConsumerWidget {
 }
 
 class WaterPumpControlPanel extends StatefulWidget {
-  const WaterPumpControlPanel({super.key});
+  const WaterPumpControlPanel({required this.waterLevel, super.key});
+
+  final double waterLevel;
+
   @override
   State<WaterPumpControlPanel> createState() => _WaterPumpControlPanelState();
 }
 
 class _WaterPumpControlPanelState extends State<WaterPumpControlPanel> {
-  final _api = ApiService();
-  Device? _device;
-  List<dynamic> _schedules = [];
-  bool _loading = true;
   bool _running = false;
+  final List<Map<String, dynamic>> _schedules = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    try {
-      final devices = await _api.getDevices();
-      if (devices.isNotEmpty) {
-        final device = Device.fromJson(devices.first as Map<String, dynamic>);
-        final schedules = await _api.getPumpSchedules(device.id);
-        if (mounted)
-          setState(() {
-            _device = device;
-            _schedules = schedules;
-          });
-      }
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _togglePump(bool enabled) async {
-    final device = _device;
-    if (device == null || !device.isOnline) return;
-    if (enabled) {
-      final readings = await _api.getDeviceReadings(device.id, limit: 1);
-      final water = readings.isEmpty
-          ? null
-          : (readings.first as Map<String, dynamic>)['waterLevel'] as num?;
-      final settings = await _api.getAlertSettings(device.id);
-      final threshold =
-          (settings['lowWaterLevelPercent'] as num?)?.toDouble() ?? 30;
-      if (water != null && water.toDouble() < threshold) {
-        if (mounted)
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Không thể bật bơm khi mực nước thấp.'),
-            ),
-          );
-        return;
-      }
+  void _togglePump(bool enabled) {
+    if (enabled && widget.waterLevel < 30) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Không thể bật bơm khi mực nước thấp.')),
+      );
+      return;
     }
     setState(() => _running = enabled);
-    await _api.sendPumpCommand(
-      device.id,
-      ApiService.generatePumpCommandId(),
-      enabled,
-      60,
-    );
   }
 
   Future<void> _addSchedule() async {
-    final device = _device;
-    if (device == null) return;
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (_) => const AddScheduleDialog(),
+      builder: (_) => const _LocalScheduleDialog(),
     );
     if (result == null) return;
-    await _api.createPumpSchedule(
-      device.id,
-      result['startTime'] as String,
-      result['durationSeconds'] as int,
-      result['daysOfWeek'] as List<int>,
-      endTime: result['endTime'] as String?,
-      intervalMinutes: result['intervalMinutes'] as int?,
-      activeFromDate: result['activeFromDate'] as DateTime?,
-      activeUntilDate: result['activeUntilDate'] as DateTime?,
-    );
-    await _load();
+    setState(() => _schedules.add({...result, 'isEnabled': true}));
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading)
-      return const Padding(
-        padding: EdgeInsets.all(16),
-        child: CircularProgressIndicator(),
-      );
-    if (_device == null)
-      return const Text('Chưa có thiết bị bơm để điều khiển.');
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -178,21 +112,29 @@ class _WaterPumpControlPanelState extends State<WaterPumpControlPanel> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Điều khiển bơm & lịch tưới',
+              'Điều khiển bơm thủ công',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Bật bơm ngay'),
-              subtitle: const Text('Tự dừng sau tối đa 60 giây'),
+              title: Text(_running ? 'Bơm đang bật' : 'Bơm đang tắt'),
+              subtitle: const Text('Chỉ mô phỏng trên giao diện frontend'),
               value: _running,
-              onChanged: _device!.isOnline ? _togglePump : null,
+              onChanged: _togglePump,
             ),
+            if (widget.waterLevel < 30)
+              const Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'Mức nước dưới 30%: chỉ có thể tắt bơm.',
+                  style: TextStyle(color: Colors.redAccent),
+                ),
+              ),
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Lịch tự động'),
+                const Text('Lịch tự động (mô phỏng)'),
                 TextButton.icon(
                   onPressed: _addSchedule,
                   icon: const Icon(Icons.add),
@@ -202,30 +144,21 @@ class _WaterPumpControlPanelState extends State<WaterPumpControlPanel> {
             ),
             if (_schedules.isEmpty)
               const Text(
-                'Chưa có lịch. Chọn “Thêm lịch” để đặt ngày và khung giờ.',
+                'Chưa có lịch. Chọn “Thêm lịch” để xem lịch trên giao diện.',
               )
             else
-              ..._schedules.map((raw) {
-                final schedule = PumpSchedule.fromJson(
-                  raw as Map<String, dynamic>,
-                );
+              ..._schedules.map((schedule) {
                 return SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(
-                    '${schedule.startTime} – ${schedule.endTime ?? schedule.startTime}',
+                    '${schedule['startTime']} – ${schedule['endTime']}',
                   ),
                   subtitle: Text(
-                    'Hiệu lực: ${schedule.activeFromDate ?? 'ngay'} đến ${schedule.activeUntilDate ?? 'vô thời hạn'}',
+                    'Phun ${schedule['durationSeconds']} giây mỗi ${schedule['intervalMinutes']} phút · ${schedule['daysLabel']}\n${schedule['timeZone']} · chỉ hiển thị',
                   ),
-                  value: schedule.isEnabled,
-                  onChanged: (enabled) async {
-                    await _api.updatePumpSchedule(
-                      _device!.id,
-                      schedule,
-                      isEnabled: enabled,
-                    );
-                    await _load();
-                  },
+                  value: schedule['isEnabled'] as bool,
+                  onChanged: (enabled) =>
+                      setState(() => schedule['isEnabled'] = enabled),
                 );
               }),
           ],
@@ -233,6 +166,245 @@ class _WaterPumpControlPanelState extends State<WaterPumpControlPanel> {
       ),
     );
   }
+}
+
+class _LocalScheduleDialog extends StatefulWidget {
+  const _LocalScheduleDialog();
+
+  @override
+  State<_LocalScheduleDialog> createState() => _LocalScheduleDialogState();
+}
+
+class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
+  static const _timeZone = 'Asia/Ho_Chi_Minh · GMT+07:00';
+  static const _dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+
+  final _durationController = TextEditingController(text: '30');
+  final _intervalController = TextEditingController(text: '30');
+  final _selectedDays = <int>{1, 2, 3, 4, 5, 6};
+  var _startTime = const TimeOfDay(hour: 7, minute: 0);
+  var _endTime = const TimeOfDay(hour: 19, minute: 0);
+  var _preset = 'Tùy chỉnh';
+
+  @override
+  void dispose() {
+    _durationController.dispose();
+    _intervalController.dispose();
+    super.dispose();
+  }
+
+  void _applyPreset(String preset) {
+    const settings = {
+      'Cây giống': (duration: '30', interval: '30'),
+      'Rau lá': (duration: '45', interval: '60'),
+      'Thảo mộc': (duration: '20', interval: '45'),
+    };
+    setState(() {
+      _preset = preset;
+      final values = settings[preset];
+      if (values != null) {
+        _durationController.text = values.duration;
+        _intervalController.text = values.interval;
+      }
+    });
+  }
+
+  Future<void> _pickTime(bool isStart) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: isStart ? _startTime : _endTime,
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _startTime = picked;
+        } else {
+          _endTime = picked;
+        }
+      });
+    }
+  }
+
+  void _save() {
+    final duration = int.tryParse(_durationController.text);
+    final interval = int.tryParse(_intervalController.text);
+    if (duration == null ||
+        duration <= 0 ||
+        interval == null ||
+        interval <= 0 ||
+        _selectedDays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nhập thời gian hợp lệ và chọn ít nhất một ngày.'),
+        ),
+      );
+      return;
+    }
+    Navigator.pop(context, {
+      'durationSeconds': duration,
+      'intervalMinutes': interval,
+      'startTime': _formatTime(_startTime),
+      'endTime': _formatTime(_endTime),
+      'daysLabel': _selectedDays.map((day) => _dayNames[day]).join(', '),
+      'timeZone': _timeZone,
+    });
+  }
+
+  String _formatTime(TimeOfDay time) =>
+      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Thêm lịch trình'),
+      content: SizedBox(
+        width: 620,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Mẫu cài đặt',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: ['Cây giống', 'Rau lá', 'Thảo mộc', 'Tùy chỉnh']
+                    .map(
+                      (preset) => ChoiceChip(
+                        label: Text(preset),
+                        selected: _preset == preset,
+                        onSelected: (_) => _applyPreset(preset),
+                      ),
+                    )
+                    .toList(),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _durationController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Thời gian phun (giây)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _intervalController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Khoảng cách (phút)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Khung giờ hoạt động',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _TimeField(
+                      label: 'Bắt đầu',
+                      value: _formatTime(_startTime),
+                      onTap: () => _pickTime(true),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _TimeField(
+                      label: 'Kết thúc',
+                      value: _formatTime(_endTime),
+                      onTap: () => _pickTime(false),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Ngày lặp lại',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: List.generate(
+                  7,
+                  (day) => FilterChip(
+                    label: Text(_dayNames[day]),
+                    selected: _selectedDays.contains(day),
+                    onSelected: (selected) => setState(
+                      () => selected
+                          ? _selectedDays.add(day)
+                          : _selectedDays.remove(day),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              DropdownButtonFormField<String>(
+                initialValue: _timeZone,
+                decoration: const InputDecoration(
+                  labelText: 'Múi giờ',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: _timeZone,
+                    child: Text('Việt Nam · GMT+07:00'),
+                  ),
+                ],
+                onChanged: null,
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Lịch này chỉ hiển thị trên frontend, chưa gửi tới thiết bị hoặc backend.',
+                style: TextStyle(color: AppColors.secondaryText, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Hủy'),
+        ),
+        FilledButton(onPressed: _save, child: const Text('Lưu')),
+      ],
+    );
+  }
+}
+
+class _TimeField extends StatelessWidget {
+  const _TimeField({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    child: InputDecorator(
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      child: Text(
+        value,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+      ),
+    ),
+  );
 }
 
 class _DetailRow extends StatelessWidget {

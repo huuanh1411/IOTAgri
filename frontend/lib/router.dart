@@ -14,6 +14,7 @@ import 'screens/more_screen.dart';
 import 'screens/sensor_detail_screen.dart';
 import 'screens/settings_screen.dart';
 import 'providers/auth_controller.dart';
+import 'core/theme/app_colors.dart';
 import 'core/widgets/floating_pill_nav_bar.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -35,7 +36,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return Scaffold(
-            backgroundColor: Colors.transparent,
+            backgroundColor: AppColors.background,
             body: navigationShell,
             bottomNavigationBar: FloatingPillNavBar(
               currentIndex: navigationShell.currentIndex,

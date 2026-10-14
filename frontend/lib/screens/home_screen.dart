@@ -44,100 +44,103 @@ class HomeScreen extends ConsumerWidget {
     final sensorAsync = ref.watch(sensorStreamProvider);
     final alerts = ref.watch(alertsProvider);
 
-    return RefreshIndicator(
-      onRefresh: () async => await Future.delayed(const Duration(seconds: 1)),
-      child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20.0,
-                vertical: 24.0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header with greeting and avatar
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _greeting(),
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: AppColors.secondaryText),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Vườn của ${user.fullName.split(' ')[0]}',
-                            style: AppText.heading(context, fontSize: 24),
-                          ),
-                        ],
-                      ),
-                      // Avatar with gradient and initial
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.transparent,
-                        child: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [AppColors.sage, AppColors.forestGreen],
+    return ColoredBox(
+      color: AppColors.background,
+      child: RefreshIndicator(
+        onRefresh: () async => await Future.delayed(const Duration(seconds: 1)),
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 24.0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header with greeting and avatar
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _greeting(),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppColors.secondaryText),
                             ),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            user.fullName[0].toUpperCase(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                            const SizedBox(height: 4),
+                            Text(
+                              'Vườn của ${user.fullName.split(' ')[0]}',
+                              style: AppText.heading(context, fontSize: 24),
+                            ),
+                          ],
+                        ),
+                        // Avatar with gradient and initial
+                        CircleAvatar(
+                          radius: 24,
+                          backgroundColor: Colors.transparent,
+                          child: Container(
+                            width: 48,
+                            height: 48,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [AppColors.sage, AppColors.forestGreen],
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              user.fullName[0].toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  // Hero card – loading skeleton while sensor data resolves
-                  sensorAsync.when(
-                    data: (sensor) {
-                      final health = _healthPercent(
-                        sensor,
-                        activePlant.plant,
-                      ).round();
-                      return _HeroCard(
-                        activePlant: activePlant,
-                        sensor: sensor,
-                        healthPercent: health,
-                      );
-                    },
-                    loading: () => Skeleton(height: 180, borderRadius: 28),
-                    error: (_, _) => const Text('Lỗi tải cảm biến'),
-                  ),
-                  const SizedBox(height: 24),
-                  // Sensor card
-                  sensorAsync.when(
-                    data: (sensor) =>
-                        _SensorCard(activePlant: activePlant, sensor: sensor),
-                    loading: () => Skeleton(height: 140, borderRadius: 24),
-                    error: (_, _) => const Text('Lỗi cảm biến'),
-                  ),
-                  const SizedBox(height: 24),
-                  // Care schedule card
-                  _CareScheduleCard(activePlant: activePlant),
-                  const SizedBox(height: 24),
-                  // Alerts card
-                  _AlertsCard(alerts: alerts),
-                ],
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    // Hero card – loading skeleton while sensor data resolves
+                    sensorAsync.when(
+                      data: (sensor) {
+                        final health = _healthPercent(
+                          sensor,
+                          activePlant.plant,
+                        ).round();
+                        return _HeroCard(
+                          activePlant: activePlant,
+                          sensor: sensor,
+                          healthPercent: health,
+                        );
+                      },
+                      loading: () => Skeleton(height: 180, borderRadius: 28),
+                      error: (_, _) => const Text('Lỗi tải cảm biến'),
+                    ),
+                    const SizedBox(height: 24),
+                    // Sensor card
+                    sensorAsync.when(
+                      data: (sensor) =>
+                          _SensorCard(activePlant: activePlant, sensor: sensor),
+                      loading: () => Skeleton(height: 140, borderRadius: 24),
+                      error: (_, _) => const Text('Lỗi cảm biến'),
+                    ),
+                    const SizedBox(height: 24),
+                    // Care schedule card
+                    _CareScheduleCard(activePlant: activePlant),
+                    const SizedBox(height: 24),
+                    // Alerts card
+                    _AlertsCard(alerts: alerts),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
