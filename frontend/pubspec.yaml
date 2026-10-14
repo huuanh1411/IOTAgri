@@ -47,7 +47,6 @@ dependencies:
   flutter_riverpod: ^2.4.0
   go_router: ^14.2.0
   google_fonts: ^6.2.1
-  flutter_dotenv: ^5.0.2
 
   equatable: any
 dev_dependencies:
@@ -68,7 +67,6 @@ dev_dependencies:
 flutter:
 
   assets:
-    - .env
     - assets/images/foliage_background.png
 
   # The following line ensures that the Material Icons font is

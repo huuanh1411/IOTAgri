@@ -222,7 +222,9 @@ class ApiService {
       }),
     );
 
-    if (response.statusCode == 200) {
+    // The API returns 201 Created after a successful registration. Accept it
+    // so the repository can continue with its automatic login.
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body);
     } else if (response.statusCode == 409) {
       throw Exception('Email này đã được đăng ký.');
@@ -554,6 +556,8 @@ class ApiService {
           'startTime': schedule.startTime,
           'endTime': schedule.endTime,
           'intervalMinutes': schedule.intervalMinutes,
+          'activeFromDate': schedule.activeFromDate,
+          'activeUntilDate': schedule.activeUntilDate,
           'durationSeconds': schedule.durationSeconds,
           'timeZone': schedule.timeZone,
         }),
@@ -573,6 +577,8 @@ class ApiService {
     List<int> daysOfWeek, {
     int? intervalMinutes,
     String? endTime,
+    DateTime? activeFromDate,
+    DateTime? activeUntilDate,
   }) async {
     final localStart = DateTime.parse(startTime);
     final localEnd = endTime == null ? null : DateTime.parse(endTime);
@@ -598,6 +604,8 @@ class ApiService {
             'endTime': '${localEnd.hour.toString().padLeft(2, '0')}:'
                 '${localEnd.minute.toString().padLeft(2, '0')}:00',
           'intervalMinutes': ?intervalMinutes,
+          if (activeFromDate != null) 'activeFromDate': activeFromDate.toIso8601String().substring(0, 10),
+          if (activeUntilDate != null) 'activeUntilDate': activeUntilDate.toIso8601String().substring(0, 10),
           'timeZone': 'Asia/Ho_Chi_Minh',
         }),
       ),

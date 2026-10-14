@@ -41,19 +41,19 @@ class GlassContainer extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.white.withOpacity(0.30),
-              Colors.white.withOpacity(0.08),
+              Colors.white.withValues(alpha: 0.30),
+              Colors.white.withValues(alpha: 0.08),
             ],
           ),
           border: Border.all(
-            color: Colors.white.withOpacity(0.46),
+            color: Colors.white.withValues(alpha: 0.46),
             width: 1.5,
           ),
           borderRadius: BorderRadius.circular(radius),
         );
         shadows = [
           BoxShadow(
-            color: AppColors.forestGreen.withOpacity(0.20),
+            color: AppColors.forestGreen.withValues(alpha: 0.20),
             blurRadius: 30,
             offset: const Offset(0, 14),
           ),
@@ -63,7 +63,7 @@ class GlassContainer extends StatelessWidget {
         radius = 24;
         // No blur for performance‑critical lists.
         decoration = BoxDecoration(
-          color: Colors.white.withOpacity(0.42),
+          color: Colors.white.withValues(alpha: 0.42),
           borderRadius: BorderRadius.circular(radius),
         );
         break;
@@ -73,10 +73,7 @@ class GlassContainer extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.sage,
-              AppColors.forestGreen,
-            ],
+            colors: [AppColors.sage, AppColors.forestGreen],
           ),
           borderRadius: BorderRadius.circular(radius),
         );

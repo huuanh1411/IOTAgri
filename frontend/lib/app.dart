@@ -2,6 +2,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'router.dart';
 import 'core/theme/app_theme.dart';
 
@@ -18,25 +19,17 @@ class AerogreenApp extends ConsumerWidget {
       title: 'Aerogreen',
       theme: AppTheme.lightTheme,
       routerConfig: router,
-      builder: (context, child) => Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            'assets/images/foliage_background.png',
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.high,
+      builder: (context, child) => CupertinoTheme(
+        data: CupertinoThemeData(
+          brightness: Brightness.light,
+          primaryColor: AppTheme.cupertinoPrimary,
+          scaffoldBackgroundColor: AppTheme.canvas,
+          barBackgroundColor: AppTheme.canvas,
+          textTheme: CupertinoTextThemeData(
+            textStyle: GoogleFonts.inter(),
           ),
-          if (child != null)
-            CupertinoTheme(
-              data: const CupertinoThemeData(
-                brightness: Brightness.light,
-                primaryColor: AppTheme.cupertinoPrimary,
-                scaffoldBackgroundColor: Colors.transparent,
-                barBackgroundColor: Colors.transparent,
-              ),
-              child: child,
-            ),
-        ],
+        ),
+        child: child ?? const SizedBox.shrink(),
       ),
     );
   }

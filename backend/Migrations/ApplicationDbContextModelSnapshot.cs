@@ -280,6 +280,12 @@ namespace IOTAgriBackend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateOnly?>("ActiveFromDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("ActiveUntilDate")
+                        .HasColumnType("date");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 

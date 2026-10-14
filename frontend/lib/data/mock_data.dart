@@ -109,4 +109,5 @@ final SensorReading defaultSensorReading = const SensorReading(
   waterLevel: 68,
   nutrientLevel: 42,
   temperature: 23,
+  lightLevel: 76,
 );
