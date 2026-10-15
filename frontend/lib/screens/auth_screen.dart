@@ -76,7 +76,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
     return Scaffold(
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(24, 34, 24, 28),
             child: ConstrainedBox(

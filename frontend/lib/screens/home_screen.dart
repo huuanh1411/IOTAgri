@@ -42,7 +42,6 @@ class HomeScreen extends ConsumerWidget {
     final user = ref.watch(userProfileProvider);
     final activePlant = ref.watch(currentPlantProvider);
     final sensorAsync = ref.watch(sensorStreamProvider);
-    final alerts = ref.watch(alertsProvider);
 
     return ColoredBox(
       color: AppColors.background,
@@ -132,9 +131,6 @@ class HomeScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
                     // Care schedule card
                     _CareScheduleCard(activePlant: activePlant),
-                    const SizedBox(height: 24),
-                    // Alerts card
-                    _AlertsCard(alerts: alerts),
                   ],
                 ),
               ),
@@ -145,7 +141,6 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 }
-
 // -----------------------------------------------------------------------------
 // Hero card widget – shows plant progress & health.
 class _HeroCard extends StatelessWidget {
@@ -427,140 +422,6 @@ class _CareScheduleCard extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// -----------------------------------------------------------------------------
-// Alerts card.
-class _AlertsCard extends ConsumerWidget {
-  const _AlertsCard({required this.alerts});
-
-  final List<AppAlert> alerts;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Cảnh Báo / Thông Báo',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-                Text(
-                  '\${alerts.length} đang hoạt động',
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            if (alerts.isEmpty)
-              const Center(child: Text('Mọi thứ đều ổn 🌿'))
-            else
-              ...alerts.map(
-                (a) => AlertRow(
-                  alert: a,
-                  onResolve: () async {
-                    final confirmed = await showModalBottomSheet<bool>(
-                      context: context,
-                      builder: (_) => Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Xác nhận xử lý "${a.title}"?'),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
-                              onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Xác nhận'),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Hủy'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                    if (confirmed == true) {
-                      // In a real app we would update the sensor values; omitted here.
-                    }
-                  },
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// -----------------------------------------------------------------------------
-// Simple placeholder AlertRow (replace with real implementation if exists).
-class AlertRow extends StatelessWidget {
-  const AlertRow({required this.alert, required this.onResolve, super.key});
-
-  final AppAlert alert;
-  final VoidCallback onResolve;
-
-  @override
-  Widget build(BuildContext context) {
-    final urgent = alert.type == 'warning';
-    final bg = urgent ? const Color(0xFFFDE7DC) : const Color(0xFFDDEFE0);
-    final pill = urgent ? const Color(0xFFF2A93B) : const Color(0xFF8FAF94);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 12,
-            backgroundColor: bg,
-            child: const Icon(
-              Icons.notifications,
-              size: 16,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  alert.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  alert.message,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          OutlinedButton(
-            onPressed: onResolve,
-            style: OutlinedButton.styleFrom(
-              backgroundColor: pill,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            child: const Text(
-              'Xử lý ngay',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
       ),
     );
   }

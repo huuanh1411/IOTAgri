@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -54,13 +55,21 @@ class SensorDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 20),
                 _DetailRow(label: 'Khoảng phù hợp', value: detail.idealRange),
                 const Divider(height: 28),
-                const _DetailRow(
-                  label: 'Cập nhật',
-                  value: 'Tự động mỗi 3 giây',
+                _SensorHistoryCard(
+                  title: detail.historyTitle,
+                  currentValue: value,
+                  color: detail.color,
+                  minY: detail.historyMin,
+                  maxY: detail.historyMax,
+                  variation: detail.historyVariation,
                 ),
                 if (metric == 'water') ...[
                   const SizedBox(height: 24),
                   WaterPumpControlPanel(waterLevel: value),
+                ],
+                if (metric == 'light') ...[
+                  const SizedBox(height: 24),
+                  const LightControlPanel(),
                 ],
               ],
             ),
@@ -71,21 +80,204 @@ class SensorDetailScreen extends ConsumerWidget {
   }
 }
 
-class WaterPumpControlPanel extends StatefulWidget {
+class _SensorHistoryCard extends StatelessWidget {
+  const _SensorHistoryCard({
+    required this.title,
+    required this.currentValue,
+    required this.color,
+    required this.minY,
+    required this.maxY,
+    required this.variation,
+  });
+
+  final String title;
+  final double currentValue;
+  final Color color;
+  final double minY;
+  final double maxY;
+  final double variation;
+
+  @override
+  Widget build(BuildContext context) {
+    final level = currentValue.clamp(minY, maxY).toDouble();
+    final values = <double>[
+      level + variation * 0.5,
+      level - variation,
+      level - variation * 0.4,
+      level - variation * 1.5,
+      level + variation * 0.25,
+      level - variation * 0.75,
+      level - variation * 1.75,
+      level + variation * 0.75,
+      level - variation,
+      level,
+    ].map((value) => value.clamp(minY, maxY).toDouble()).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+            ),
+            Text(
+              '24 giờ',
+              style: TextStyle(
+                fontSize: 12,
+                color: color.withValues(alpha: 0.9),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Icon(Icons.trending_up, size: 17, color: color),
+            SizedBox(width: 6),
+            Text(
+              'Theo dõi xu hướng thay đổi',
+              style: TextStyle(color: AppColors.secondaryText),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 220,
+          child: LineChart(
+            LineChartData(
+              minX: 0,
+              maxX: 9,
+              minY: minY,
+              maxY: maxY,
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                horizontalInterval: 25,
+                getDrawingHorizontalLine: (_) => const FlLine(
+                  color: Color(0xFFD9E7DD),
+                  strokeWidth: 1,
+                  dashArray: [7, 7],
+                ),
+              ),
+              borderData: FlBorderData(show: false),
+              titlesData: FlTitlesData(
+                topTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                rightTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                leftTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 30,
+                    interval: 4.5,
+                    getTitlesWidget: (value, _) {
+                      final label = switch (value.round()) {
+                        0 => '00:00',
+                        5 => '12:00',
+                        9 => 'Hiện tại',
+                        _ => '',
+                      };
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Text(
+                          label,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.secondaryText,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              lineTouchData: const LineTouchData(enabled: false),
+              lineBarsData: [
+                LineChartBarData(
+                  spots: [
+                    for (var index = 0; index < values.length; index++)
+                      FlSpot(index.toDouble(), values[index]),
+                  ],
+                  isCurved: true,
+                  color: color,
+                  barWidth: 4,
+                  isStrokeCapRound: true,
+                  dotData: FlDotData(
+                    show: true,
+                    checkToShowDot: (spot, _) => spot.x == 9,
+                    getDotPainter: (_, _, _, _) => FlDotCirclePainter(
+                      radius: 6,
+                      color: color,
+                      strokeWidth: 0,
+                    ),
+                  ),
+                  belowBarData: BarAreaData(
+                    show: true,
+                    color: color.withValues(alpha: 0.10),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class WaterPumpControlPanel extends StatelessWidget {
   const WaterPumpControlPanel({required this.waterLevel, super.key});
 
   final double waterLevel;
 
   @override
-  State<WaterPumpControlPanel> createState() => _WaterPumpControlPanelState();
+  Widget build(BuildContext context) => _ActuatorControlPanel(
+    deviceLabel: 'Bơm',
+    scheduleActionLabel: 'Phun',
+    waterLevel: waterLevel,
+  );
 }
 
-class _WaterPumpControlPanelState extends State<WaterPumpControlPanel> {
+class LightControlPanel extends StatelessWidget {
+  const LightControlPanel({super.key});
+
+  @override
+  Widget build(BuildContext context) => const _ActuatorControlPanel(
+    deviceLabel: 'Đèn',
+    scheduleActionLabel: 'Bật đèn',
+  );
+}
+
+class _ActuatorControlPanel extends StatefulWidget {
+  const _ActuatorControlPanel({
+    required this.deviceLabel,
+    required this.scheduleActionLabel,
+    this.waterLevel,
+  });
+
+  final String deviceLabel;
+  final String scheduleActionLabel;
+  final double? waterLevel;
+
+  @override
+  State<_ActuatorControlPanel> createState() => _ActuatorControlPanelState();
+}
+
+class _ActuatorControlPanelState extends State<_ActuatorControlPanel> {
   bool _running = false;
   final List<Map<String, dynamic>> _schedules = [];
 
-  void _togglePump(bool enabled) {
-    if (enabled && widget.waterLevel < 30) {
+  void _toggleActuator(bool enabled) {
+    if (enabled && (widget.waterLevel ?? 100) < 30) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Không thể bật bơm khi mực nước thấp.')),
       );
@@ -97,7 +289,8 @@ class _WaterPumpControlPanelState extends State<WaterPumpControlPanel> {
   Future<void> _addSchedule() async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (_) => const _LocalScheduleDialog(),
+      builder: (_) =>
+          _LocalScheduleDialog(actionLabel: widget.scheduleActionLabel),
     );
     if (result == null) return;
     setState(() => _schedules.add({...result, 'isEnabled': true}));
@@ -113,18 +306,22 @@ class _WaterPumpControlPanelState extends State<WaterPumpControlPanel> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Điều khiển bơm thủ công',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            Text(
+              'Điều khiển ${widget.deviceLabel.toLowerCase()} thủ công',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(_running ? 'Bơm đang bật' : 'Bơm đang tắt'),
+              title: Text(
+                _running
+                    ? '${widget.deviceLabel} đang bật'
+                    : '${widget.deviceLabel} đang tắt',
+              ),
               subtitle: const Text('Chỉ mô phỏng trên giao diện frontend'),
               value: _running,
-              onChanged: _togglePump,
+              onChanged: _toggleActuator,
             ),
-            if (widget.waterLevel < 30)
+            if ((widget.waterLevel ?? 100) < 30)
               const Padding(
                 padding: EdgeInsets.only(bottom: 12),
                 child: Text(
@@ -156,7 +353,7 @@ class _WaterPumpControlPanelState extends State<WaterPumpControlPanel> {
                     '${schedule['startTime']} – ${schedule['endTime']}',
                   ),
                   subtitle: Text(
-                    'Phun ${schedule['durationSeconds']} giây mỗi ${schedule['intervalMinutes']} phút · ${schedule['daysLabel']}\n${schedule['timeZone']} · chỉ hiển thị',
+                    '${widget.scheduleActionLabel} ${schedule['durationSeconds']} giây mỗi ${schedule['intervalMinutes']} phút · ${schedule['daysLabel']}\n${schedule['timeZone']} · chỉ hiển thị',
                   ),
                   value: schedule['isEnabled'] as bool,
                   onChanged: (enabled) =>
@@ -171,7 +368,9 @@ class _WaterPumpControlPanelState extends State<WaterPumpControlPanel> {
 }
 
 class _LocalScheduleDialog extends StatefulWidget {
-  const _LocalScheduleDialog();
+  const _LocalScheduleDialog({required this.actionLabel});
+
+  final String actionLabel;
 
   @override
   State<_LocalScheduleDialog> createState() => _LocalScheduleDialogState();
@@ -287,8 +486,9 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
               TextField(
                 controller: _durationController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Thời gian phun (giây)',
+                decoration: InputDecoration(
+                  labelText:
+                      'Thời gian ${widget.actionLabel.toLowerCase()} (giây)',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -433,6 +633,10 @@ class _SensorDetail {
     required this.icon,
     required this.idealRange,
     required this.description,
+    required this.historyTitle,
+    required this.historyMin,
+    required this.historyMax,
+    required this.historyVariation,
     required this.valueFrom,
     required this.status,
   });
@@ -444,6 +648,10 @@ class _SensorDetail {
   final IconData icon;
   final String idealRange;
   final String description;
+  final String historyTitle;
+  final double historyMin;
+  final double historyMax;
+  final double historyVariation;
   final double Function(SensorReading? reading) valueFrom;
   final String Function(double value) status;
 
@@ -459,6 +667,10 @@ class _SensorDetail {
           idealRange: '60–80%',
           description:
               'Theo dõi lượng nước trong hệ thống để cây luôn được tưới phù hợp.',
+          historyTitle: 'Lịch sử mức nước',
+          historyMin: 0,
+          historyMax: 100,
+          historyVariation: 4,
           valueFrom: (reading) => reading?.waterLevel ?? 0,
           status: (value) => value < 30 ? 'Mức nước thấp' : 'Mức nước ổn định',
         );
@@ -472,6 +684,10 @@ class _SensorDetail {
           idealRange: '45–70%',
           description:
               'Theo dõi nồng độ dinh dưỡng để hỗ trợ cây phát triển đồng đều.',
+          historyTitle: 'Lịch sử mức dinh dưỡng',
+          historyMin: 0,
+          historyMax: 100,
+          historyVariation: 4,
           valueFrom: (reading) => reading?.nutrientLevel ?? 0,
           status: (value) =>
               value < 45 ? 'Dinh dưỡng cần bổ sung' : 'Dinh dưỡng ổn định',
@@ -485,6 +701,10 @@ class _SensorDetail {
           icon: Icons.thermostat,
           idealRange: '20–28°C',
           description: 'Theo dõi nhiệt độ môi trường quanh khu vực trồng cây.',
+          historyTitle: 'Lịch sử nhiệt độ',
+          historyMin: 10,
+          historyMax: 40,
+          historyVariation: 1.2,
           valueFrom: (reading) => reading?.temperature ?? 0,
           status: (value) => value < 20 || value > 28
               ? 'Nhiệt độ cần chú ý'
@@ -500,6 +720,10 @@ class _SensorDetail {
           idealRange: '60–85%',
           description:
               'Theo dõi cường độ ánh sáng để cây nhận đủ năng lượng quang hợp.',
+          historyTitle: 'Lịch sử ánh sáng',
+          historyMin: 0,
+          historyMax: 100,
+          historyVariation: 5,
           valueFrom: (reading) => reading?.lightLevel ?? 0,
           status: (value) => value < 60 ? 'Ánh sáng thấp' : 'Ánh sáng phù hợp',
         );

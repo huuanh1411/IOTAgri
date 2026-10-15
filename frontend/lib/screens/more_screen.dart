@@ -115,16 +115,9 @@ class MoreScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     _ListRow(
-                      icon: Icons.notifications, // bell
-                      title: 'Thông báo',
-                      subtitle: 'Quản lý cảnh báo',
-                      onTap: () => context.push('/other/alerts'),
-                    ),
-                    const Divider(height: 1),
-                    _ListRow(
                       icon: Icons.settings, // gear
                       title: 'Tùy chỉnh',
-                      subtitle: 'Đơn vị, ngôn ngữ',
+                      subtitle: 'Ngôn ngữ và thông báo',
                       onTap: () => context.push('/other/settings'),
                     ),
                     const Divider(height: 1),

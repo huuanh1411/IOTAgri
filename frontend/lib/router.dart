@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import 'screens/alert_center_tab_screen.dart';
 import 'screens/auth_screen.dart';
-import 'screens/alerts_screen.dart';
 import 'screens/harvest_screen.dart';
 import 'screens/help_screen.dart';
 import 'screens/home_screen.dart';
@@ -89,10 +88,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 name: 'other',
                 builder: (context, state) => const MoreScreen(),
                 routes: [
-                  GoRoute(
-                    path: 'alerts',
-                    builder: (context, state) => const AlertsScreen(),
-                  ),
                   GoRoute(
                     path: 'settings',
                     builder: (context, state) => const SettingsScreen(),
