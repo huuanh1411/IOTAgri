@@ -17,11 +17,12 @@ class FloatingPillNavBar extends StatelessWidget {
 
   static const _icons = [
     Icons.home_outlined,
+    Icons.notifications_none_outlined,
     Icons.spa_outlined,
-    Icons.grid_view_outlined,
+    Icons.more_horiz_outlined,
   ];
 
-  static const _labels = ['Trang chủ', 'Chọn Giống', 'Điều khiển', 'Khác'];
+  static const _labels = ['Trang chủ', 'Cảnh báo', 'Chọn giống', 'Khác'];
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +69,7 @@ class FloatingPillNavBar extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _labels[index == 2 ? 3 : index],
+                          _labels[index],
                           style: TextStyle(
                             fontSize: 10,
                             color: selected

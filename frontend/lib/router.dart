@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'screens/alert_center_tab_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/alerts_screen.dart';
 import 'screens/harvest_screen.dart';
@@ -60,6 +61,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     ),
                   ),
                 ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/alerts',
+                name: 'alerts',
+                builder: (context, state) => const AlertCenterTabScreen(),
               ),
             ],
           ),

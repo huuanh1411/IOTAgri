@@ -106,6 +106,8 @@ class _WaterPumpControlPanelState extends State<WaterPumpControlPanel> {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 4,
+      shadowColor: Colors.black12,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
