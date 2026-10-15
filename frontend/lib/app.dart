@@ -29,9 +29,7 @@ class AerogreenApp extends ConsumerWidget {
           primaryColor: AppTheme.cupertinoPrimary,
           scaffoldBackgroundColor: AppTheme.canvas,
           barBackgroundColor: AppTheme.canvas,
-          textTheme: CupertinoTextThemeData(
-            textStyle: GoogleFonts.inter(),
-          ),
+          textTheme: CupertinoTextThemeData(textStyle: GoogleFonts.inter()),
         ),
         child: child ?? const SizedBox.shrink(),
       ),

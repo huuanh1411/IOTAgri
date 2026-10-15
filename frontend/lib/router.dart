@@ -13,6 +13,7 @@ import 'screens/plant_picker_screen.dart';
 import 'screens/more_screen.dart';
 import 'screens/sensor_detail_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/splash_screen.dart';
 import 'providers/auth_controller.dart';
 import 'core/animation/app_motion.dart';
 import 'core/theme/app_colors.dart';
@@ -22,8 +23,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authControllerProvider);
 
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/splash',
+    // On the web, refresh normally preserves the current hash (such as /auth).
+    // The startup flow must begin with the Flutter animated splash instead.
+    overridePlatformDefaultLocation: true,
     redirect: (BuildContext context, GoRouterState state) {
+      if (state.matchedLocation == '/splash') return null;
       final isLoggedIn = authState.user != null;
       final isOnAuth = state.matchedLocation == '/auth';
       if (!isLoggedIn && !isOnAuth) return '/auth';
@@ -31,7 +36,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(path: '/', redirect: (context, state) => '/auth'),
+      GoRoute(path: '/', redirect: (context, state) => '/splash'),
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
       // Shell route that holds the bottom navigation and preserves tab state.
       StatefulShellRoute.indexedStack(

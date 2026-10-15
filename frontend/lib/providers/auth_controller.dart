@@ -7,15 +7,27 @@ import '../data/models/user.dart';
 class AuthState {
   final User? user;
   final bool isLoading;
+  final bool isInitializing;
   final String? error;
 
-  const AuthState({this.user, this.isLoading = false, this.error});
+  const AuthState({
+    this.user,
+    this.isLoading = false,
+    this.isInitializing = true,
+    this.error,
+  });
 
-  AuthState copyWith({User? user, bool? isLoading, String? error}) => AuthState(
-        user: user ?? this.user,
-        isLoading: isLoading ?? this.isLoading,
-        error: error,
-      );
+  AuthState copyWith({
+    User? user,
+    bool? isLoading,
+    bool? isInitializing,
+    String? error,
+  }) => AuthState(
+    user: user ?? this.user,
+    isLoading: isLoading ?? this.isLoading,
+    isInitializing: isInitializing ?? this.isInitializing,
+    error: error,
+  );
 }
 
 class AuthController extends StateNotifier<AuthState> {
@@ -25,9 +37,13 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<void> _init() async {
-    final current = await _repo.getCurrentUser();
-    if (current != null) {
-      state = state.copyWith(user: current);
+    try {
+      final current = await _repo.getCurrentUser();
+      if (current != null) {
+        state = state.copyWith(user: current);
+      }
+    } finally {
+      state = state.copyWith(isInitializing: false);
     }
   }
 
@@ -43,10 +59,18 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> signUp({required String fullName, required String email, required String password}) async {
+  Future<void> signUp({
+    required String fullName,
+    required String email,
+    required String password,
+  }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final user = await _repo.signUp(fullName: fullName, email: email, password: password);
+      final user = await _repo.signUp(
+        fullName: fullName,
+        email: email,
+        password: password,
+      );
       state = state.copyWith(user: user);
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -58,7 +82,7 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> logout() async {
     state = state.copyWith(isLoading: true);
     await _repo.logout();
-    state = const AuthState();
+    state = const AuthState(isInitializing: false);
   }
 
   void clearError() {
@@ -67,11 +91,15 @@ class AuthController extends StateNotifier<AuthState> {
 }
 
 // Providers
-final authRepositoryProvider = Provider<AuthRepository>((ref) => AuthRepository());
+final authRepositoryProvider = Provider<AuthRepository>(
+  (ref) => AuthRepository(),
+);
 
-final authControllerProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
-  return AuthController(ref.read(authRepositoryProvider));
-});
+final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
+  (ref) {
+    return AuthController(ref.read(authRepositoryProvider));
+  },
+);
 
 // UI helper provider for the selected tab (0 = login, 1 = sign‑up)
 final authTabProvider = StateProvider<int>((ref) => 0);
