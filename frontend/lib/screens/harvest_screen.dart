@@ -52,31 +52,32 @@ class HarvestScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              PageHeader(
+            children: [
+              const PageHeader(
                 chip: SectionChip(label: 'Lịch sử thu hoạch'),
                 title: 'Nhật ký thu hoạch',
                 subtitle: '',
               ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: mockHarvests.length,
+                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final h = mockHarvests[index];
+                    return ListTile(
+                      leading: const Icon(Icons.eco, color: AppColors.mint),
+                      title: Text('${h.plantName} – ${h.yield}'),
+                      subtitle: Text(
+                        'Bắt đầu: ${h.startDate.day}/${h.startDate.month}/${h.startDate.year}\n'
+                        'Thu hoạch: ${h.harvestDate.day}/${h.harvestDate.month}/${h.harvestDate.year}',
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
-        ),
-      ),
-      // List of records
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(bottom: 16.0, left: 20, right: 20),
-        child: ListView.separated(
-          shrinkWrap: true,
-          itemCount: mockHarvests.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final h = mockHarvests[index];
-            return ListTile(
-              leading: const Icon(Icons.eco, color: AppColors.mint),
-              title: Text('${h.plantName} – ${h.yield}'),
-              subtitle: Text('Bắt đầu: ${h.startDate.day}/${h.startDate.month}/${h.startDate.year}\nThu hoạch: ${h.harvestDate.day}/${h.harvestDate.month}/${h.harvestDate.year}'),
-            );
-          },
         ),
       ),
     );

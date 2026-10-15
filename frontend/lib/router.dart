@@ -14,6 +14,7 @@ import 'screens/more_screen.dart';
 import 'screens/sensor_detail_screen.dart';
 import 'screens/settings_screen.dart';
 import 'providers/auth_controller.dart';
+import 'core/animation/app_motion.dart';
 import 'core/theme/app_colors.dart';
 import 'core/widgets/floating_pill_nav_bar.dart';
 
@@ -37,7 +38,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state, navigationShell) {
           return Scaffold(
             backgroundColor: AppColors.background,
-            body: navigationShell,
+            body: AppMotionTabTransition(
+              index: navigationShell.currentIndex,
+              child: navigationShell,
+            ),
             bottomNavigationBar: FloatingPillNavBar(
               currentIndex: navigationShell.currentIndex,
               onTap: navigationShell.goBranch,
@@ -55,8 +59,35 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'sensor/:metric',
                     name: 'sensor-detail',
-                    builder: (context, state) => SensorDetailScreen(
-                      metric: state.pathParameters['metric'] ?? 'light',
+                    pageBuilder: (context, state) => CustomTransitionPage<void>(
+                      transitionDuration: AppMotion.duration(
+                        context,
+                        AppMotion.detailOpen,
+                      ),
+                      reverseTransitionDuration: AppMotion.duration(
+                        context,
+                        AppMotion.detailOpen,
+                      ),
+                      child: SensorDetailScreen(
+                        metric: state.pathParameters['metric'] ?? 'light',
+                      ),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                            final curved = CurvedAnimation(
+                              parent: animation,
+                              curve: AppMotion.easeOut,
+                            );
+                            return FadeTransition(
+                              opacity: curved,
+                              child: SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: const Offset(0.045, 0),
+                                  end: Offset.zero,
+                                ).animate(curved),
+                                child: child,
+                              ),
+                            );
+                          },
                     ),
                   ),
                 ],

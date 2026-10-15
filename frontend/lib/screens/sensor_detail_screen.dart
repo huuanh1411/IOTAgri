@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/animation/app_motion.dart';
 import '../core/theme/app_colors.dart';
 import '../core/widgets/gauge_ring.dart';
 import '../data/models.dart';
@@ -147,8 +148,9 @@ class _SensorHistoryCard extends StatelessWidget {
         const SizedBox(height: 14),
         SizedBox(
           height: 220,
-          child: LineChart(
-            LineChartData(
+          child: RepaintBoundary(
+            child: LineChart(
+              LineChartData(
               minX: 0,
               maxX: 9,
               minY: minY,
@@ -226,6 +228,9 @@ class _SensorHistoryCard extends StatelessWidget {
                   ),
                 ),
               ],
+              ),
+              duration: AppMotion.duration(context, AppMotion.chart),
+              curve: AppMotion.easeInOut,
             ),
           ),
         ),
@@ -310,7 +315,20 @@ class _ActuatorControlPanelState extends State<_ActuatorControlPanel> {
               'Điều khiển ${widget.deviceLabel.toLowerCase()} thủ công',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
-            SwitchListTile(
+            AnimatedScale(
+              scale: _running ? 1.015 : 1,
+              duration: AppMotion.duration(context, AppMotion.toggle),
+              curve: AppMotion.easeOut,
+              child: AnimatedContainer(
+                duration: AppMotion.duration(context, AppMotion.toggle),
+                curve: AppMotion.easeInOut,
+                decoration: BoxDecoration(
+                  color: _running
+                      ? AppColors.mintChip.withValues(alpha: 0.7)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(
                 _running
@@ -320,6 +338,8 @@ class _ActuatorControlPanelState extends State<_ActuatorControlPanel> {
               subtitle: const Text('Chỉ mô phỏng trên giao diện frontend'),
               value: _running,
               onChanged: _toggleActuator,
+                ),
+              ),
             ),
             if ((widget.waterLevel ?? 100) < 30)
               const Padding(

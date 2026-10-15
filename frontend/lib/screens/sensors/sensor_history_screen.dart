@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/animation/app_motion.dart';
 import '../../cupertino/theme/cupertino_theme.dart';
 import '../../models/device.dart';
 import '../../models/history_data.dart';
@@ -595,8 +596,9 @@ class _HistoryChart extends StatelessWidget {
     return _Surface(
       child: SizedBox(
         height: 330,
-        child: LineChart(
-          LineChartData(
+        child: RepaintBoundary(
+          child: LineChart(
+            LineChartData(
             minX: minX,
             maxX: maxX,
             minY: minY,
@@ -708,6 +710,9 @@ class _HistoryChart extends StatelessWidget {
                   ),
                 ),
             ],
+            ),
+            duration: AppMotion.duration(context, AppMotion.chart),
+            curve: AppMotion.easeInOut,
           ),
         ),
       ),

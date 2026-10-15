@@ -6,6 +6,7 @@
   import 'package:flutter/services.dart';
   import 'package:intl/intl.dart';
 
+  import '../../core/animation/app_motion.dart';
   import '../../models/device.dart';
   import '../../models/device_alert.dart';
   import '../../models/pump_command.dart';
@@ -728,7 +729,9 @@
       final color = isOnline
           ? AerogreenCupertinoTheme.aerogreenPrimary
           : CupertinoColors.systemGrey;
-      return Container(
+      return AnimatedContainer(
+        duration: AppMotion.duration(context, AppMotion.status),
+        curve: AppMotion.easeInOut,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.13),
@@ -828,10 +831,13 @@
               mainAxisSpacing: 12,
               mainAxisExtent: 112,
             ),
-            itemBuilder: (context, index) => _SensorCard(
-              spec: specs[index],
-              isOffline: isOffline,
-              onTap: () => onSensorTap(specs[index].keyName),
+            itemBuilder: (context, index) => AppMotionEntrance(
+              index: index,
+              child: _SensorCard(
+                spec: specs[index],
+                isOffline: isOffline,
+                onTap: () => onSensorTap(specs[index].keyName),
+              ),
             ),
           );
         },
@@ -970,14 +976,30 @@
         children: [
           Row(
             children: [
-              Icon(
-                isRunning ? CupertinoIcons.power : CupertinoIcons.power,
-                color: isOnline
-                    ? (isRunning
-                          ? CupertinoColors.systemOrange
-                          : AerogreenCupertinoTheme.aerogreenPrimary)
-                    : CupertinoColors.systemGrey,
-                size: 22,
+              AnimatedScale(
+                scale: isRunning ? 1.05 : 0.95,
+                duration: AppMotion.duration(context, AppMotion.toggle),
+                curve: AppMotion.easeOut,
+                child: AnimatedContainer(
+                  duration: AppMotion.duration(context, AppMotion.toggle),
+                  curve: AppMotion.easeInOut,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: isRunning
+                        ? CupertinoColors.systemOrange.withValues(alpha: 0.12)
+                        : CupertinoColors.systemGreen.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    CupertinoIcons.power,
+                    color: isOnline
+                        ? (isRunning
+                              ? CupertinoColors.systemOrange
+                              : AerogreenCupertinoTheme.aerogreenPrimary)
+                        : CupertinoColors.systemGrey,
+                    size: 22,
+                  ),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1240,8 +1262,9 @@
               else
                 SizedBox(
                   height: 76,
-                  child: LineChart(
-                    LineChartData(
+                  child: RepaintBoundary(
+                    child: LineChart(
+                      LineChartData(
                       minX: 0,
                       maxX: (points.length - 1).toDouble(),
                       minY:
@@ -1277,6 +1300,9 @@
                           ),
                         ),
                       ],
+                      ),
+                      duration: AppMotion.duration(context, AppMotion.chart),
+                      curve: AppMotion.easeInOut,
                     ),
                   ),
                 ),

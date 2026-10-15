@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/animation/app_motion.dart';
 import '../../models/device.dart';
 import '../../services/api_service.dart';
 import 'add_device_screen.dart';
@@ -59,11 +60,9 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
   }
 
   Future<void> _createAndProvisionDevice() async {
-    final result = await Navigator.of(context).push<Device>(
-      CupertinoPageRoute(
-        builder: (_) => const AddDeviceScreen(),
-      ),
-    );
+    final result = await Navigator.of(
+      context,
+    ).push<Device>(CupertinoPageRoute(builder: (_) => const AddDeviceScreen()));
     if (result != null && mounted) {
       await _loadDevices(showLoading: false);
     }
@@ -108,7 +107,8 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
 
   Future<void> _openDevice(Device device) async {
     await Navigator.of(context).push<void>(
-      CupertinoPageRoute<void>(
+      AppMotion.detailRoute<void>(
+        context: context,
         builder: (_) => CupertinoDeviceDetailScreen(
           device: device,
           apiService: _apiService,

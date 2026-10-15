@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../core/animation/app_motion.dart';
 import '../../models/device.dart';
 import '../../models/device_overview.dart';
 import '../../models/pump_command.dart';
@@ -544,7 +545,8 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
 
   Future<void> _openDevice(DeviceOverview overview) async {
     await Navigator.of(context).push<void>(
-      CupertinoPageRoute<void>(
+      AppMotion.detailRoute<void>(
+        context: context,
         builder: (_) => CupertinoDeviceDetailScreen(
           device: Device(
             id: overview.id,

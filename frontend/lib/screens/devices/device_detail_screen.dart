@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/animation/app_motion.dart';
 import 'package:intl/intl.dart';
 import '../../models/device.dart';
 import '../../models/sensor_reading.dart';
@@ -201,7 +202,9 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   }
 
   Widget _buildDeviceStatus() {
-    return Container(
+    return AnimatedContainer(
+      duration: AppMotion.duration(context, AppMotion.status),
+      curve: AppMotion.easeInOut,
       padding: const EdgeInsets.all(16),
       color: widget.device.isOnline ? Colors.green[50] : Colors.red[50],
       child: Row(

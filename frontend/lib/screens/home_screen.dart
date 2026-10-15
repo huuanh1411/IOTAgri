@@ -13,6 +13,7 @@ import '../providers/user_provider.dart';
 import '../data/models.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text.dart';
+import '../core/animation/app_motion.dart';
 
 /// Home tab UI that matches the design (Phase 4).
 class HomeScreen extends ConsumerWidget {
@@ -123,8 +124,12 @@ class HomeScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
                     // Sensor card
                     sensorAsync.when(
-                      data: (sensor) =>
-                          _SensorCard(activePlant: activePlant, sensor: sensor),
+                      data: (sensor) => AppMotionEntrance(
+                        child: _SensorCard(
+                          activePlant: activePlant,
+                          sensor: sensor,
+                        ),
+                      ),
                       loading: () => Skeleton(height: 140, borderRadius: 24),
                       error: (_, _) => const Text('Lỗi cảm biến'),
                     ),
@@ -141,6 +146,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 }
+
 // -----------------------------------------------------------------------------
 // Hero card widget – shows plant progress & health.
 class _HeroCard extends StatelessWidget {
