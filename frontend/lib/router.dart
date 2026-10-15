@@ -20,16 +20,25 @@ import 'core/theme/app_colors.dart';
 import 'core/widgets/floating_pill_nav_bar.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authControllerProvider);
+  // Keep the router instance stable. Recreating it after every auth update
+  // restarts `initialLocation` at /splash instead of applying the redirect.
+  final authRefresh = ValueNotifier<AuthState>(
+    ref.read(authControllerProvider),
+  );
+  ref.listen<AuthState>(authControllerProvider, (_, next) {
+    authRefresh.value = next;
+  });
+  ref.onDispose(authRefresh.dispose);
 
   return GoRouter(
     initialLocation: '/splash',
+    refreshListenable: authRefresh,
     // On the web, refresh normally preserves the current hash (such as /auth).
     // The startup flow must begin with the Flutter animated splash instead.
     overridePlatformDefaultLocation: true,
     redirect: (BuildContext context, GoRouterState state) {
       if (state.matchedLocation == '/splash') return null;
-      final isLoggedIn = authState.user != null;
+      final isLoggedIn = ref.read(authControllerProvider).user != null;
       final isOnAuth = state.matchedLocation == '/auth';
       if (!isLoggedIn && !isOnAuth) return '/auth';
       if (isLoggedIn && isOnAuth) return '/home';
