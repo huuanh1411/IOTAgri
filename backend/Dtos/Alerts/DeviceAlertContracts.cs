@@ -14,6 +14,7 @@ public record DeviceAlertSettingsResponse(double? HighTemperatureC, double? LowW
 
 public record DeviceAlertResponse(
     Guid Id,
+    Guid DeviceId,
     string Type,
     double MeasuredValue,
     double Threshold,
@@ -22,6 +23,7 @@ public record DeviceAlertResponse(
 {
     public static DeviceAlertResponse From(DeviceAlert alert) => new(
         alert.Id,
+        alert.DeviceId,
         alert.Type == DeviceAlertType.HighTemperature ? "HIGH_TEMPERATURE" : "LOW_WATER_LEVEL",
         alert.MeasuredValue,
         alert.Threshold,

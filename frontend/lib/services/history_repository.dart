@@ -37,6 +37,14 @@ class ApiHistoryRepository implements HistoryRepository {
         interval: window.rangeHours > 24 * 7 ? 'day' : 'hour',
       );
       return data
+          .where(
+            (item) =>
+                DateTime.tryParse(
+                  (item as Map<String, dynamic>)['bucketStart']?.toString() ??
+                      '',
+                ) !=
+                null,
+          )
           .map(
             (item) => HistorySample.fromAggregate(item as Map<String, dynamic>),
           )
@@ -47,6 +55,13 @@ class ApiHistoryRepository implements HistoryRepository {
 
     final data = await _apiService.getDeviceReadings(deviceId, limit: 500);
     return data
+        .where(
+          (item) =>
+              DateTime.tryParse(
+                (item as Map<String, dynamic>)['recordedAt']?.toString() ?? '',
+              ) !=
+              null,
+        )
         .map(
           (item) => HistorySample.fromReading(
             SensorReading.fromJson(item as Map<String, dynamic>),

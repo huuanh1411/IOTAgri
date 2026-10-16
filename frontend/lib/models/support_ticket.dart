@@ -59,7 +59,7 @@ class SupportTicket {
       updatedAt: json['updatedAt']?.toString(),
       lastMessage: json['lastMessage']?.toString() ??
           (messages.isNotEmpty ? messages.last.body : null),
-      messagesCount: (json['messagesCount'] as num?)?.toInt() ?? messages.length,
+      messagesCount: ((json['messagesCount'] ?? json['messageCount']) as num?)?.toInt() ?? messages.length,
       messages: messages,
     );
   }

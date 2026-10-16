@@ -28,19 +28,30 @@ void main() {
     expect(stats?.maximum, 30);
   });
 
-  test('maps solution temperature and TDS into history samples', () {
+  test('maps solution temperature, TDS, and lux without unit conversion', () {
     final sample = HistorySample.fromReading(
       SensorReading(
         id: 'reading-1',
         deviceId: 'device-1',
         solutionTemperature: 26.7,
         tds: 520,
+        lux: 14500,
         recordedAt: '2026-10-08T08:00:00Z',
       ),
     );
 
     expect(sample.values[HistorySensor.solutionTemperature], 26.7);
     expect(sample.values[HistorySensor.tds], 520);
+    expect(sample.values[HistorySensor.lux], 14500);
+    expect(HistorySensor.tds.unit, 'ppm');
+    expect(HistorySensor.lux.unit, 'lux');
+  });
+
+  test('maps aggregated lux and TDS values without conversion', () {
+    const aggregate = <String, dynamic>{'avgTds': 610, 'avgLux': 18250};
+
+    expect(HistorySensor.tds.valueFromAggregate(aggregate), 610);
+    expect(HistorySensor.lux.valueFromAggregate(aggregate), 18250);
   });
 
   test('generates a real CSV export with readings and pump events', () async {

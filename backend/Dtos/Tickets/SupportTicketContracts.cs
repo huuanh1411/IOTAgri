@@ -1,6 +1,6 @@
 namespace IOTAgriBackend.Dtos.Tickets;
 
-public record CreateSupportTicketRequest(string? Subject, string? Message);
+public record CreateSupportTicketRequest(string? Subject, string? Message, string? Category = null, Guid? DeviceId = null);
 public record UpdateSupportTicketStatusRequest(string? Status);
 public record UpdateSupportTicketPriorityRequest(string? Priority);
 public record AddSupportTicketMessageRequest(string? Message);
@@ -13,6 +13,9 @@ public record SupportTicketResponse(
     string UserId,
     string UserName,
     string UserEmail,
+    string Category,
+    Guid? DeviceId,
+    string? DeviceName,
     string? LastMessage,
     int MessageCount,
     DateTime CreatedAt,

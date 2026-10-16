@@ -88,7 +88,7 @@ class ApiService {
       body: jsonEncode({'refreshToken': refreshToken}),
     );
 
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       await _saveTokens(
         data['accessToken'] as String,
@@ -501,10 +501,12 @@ class ApiService {
     int pageSize = 20,
     int? rangeHours,
   }) async {
+    final now = DateTime.now().toUtc();
     final queryParams = <String, String>{
       'page': page.toString(),
       'pageSize': pageSize.toString(),
-      if (rangeHours case final r?) 'rangeHours': r.toString(),
+      if (rangeHours case final r?) 'from': now.subtract(Duration(hours: r)).toIso8601String(),
+      if (rangeHours case final r?) 'to': now.toIso8601String(),
     };
 
     final uri = Uri.parse(
@@ -868,8 +870,6 @@ class ApiService {
     throw Exception('Failed to load admin audit logs: ${response.body}');
   }
 
-  static final List<Map<String, dynamic>> _userTicketsStore = [];
-
   Future<Map<String, dynamic>> createSupportTicket(
     String subject,
     String message, {
@@ -878,197 +878,69 @@ class ApiService {
     String? deviceName,
     String? firmwareVersion,
   }) async {
-    String formattedMessage = message;
-    final metadataPrefixes = <String>[];
-    if (category != null && category.isNotEmpty) {
-      metadataPrefixes.add('[Danh mục: $category]');
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tickets}'),
+        headers: headers,
+        body: jsonEncode({
+          'subject': subject,
+          'message': message,
+          if (category != null && category.isNotEmpty) 'category': category,
+          if (deviceId != null && deviceId.isNotEmpty) 'deviceId': deviceId,
+        }),
+      ),
+    );
+    if (response.statusCode == 201) {
+      return _flattenTicketDetail(jsonDecode(response.body) as Map<String, dynamic>);
     }
-    if (deviceId != null && deviceId.isNotEmpty) {
-      final devInfo = deviceName != null && deviceName.isNotEmpty
-          ? '$deviceName ($deviceId)'
-          : deviceId;
-      final fwInfo = firmwareVersion != null ? ', Firmware: $firmwareVersion' : '';
-      metadataPrefixes.add('[Thiết bị: $devInfo$fwInfo]');
-    }
-    if (metadataPrefixes.isNotEmpty) {
-      formattedMessage = '${metadataPrefixes.join(' ')}\n\n$message';
-    }
-
-    try {
-      final response = await _authenticatedRequest(
-        (headers) => _client.post(
-          Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tickets}'),
-          headers: headers,
-          body: jsonEncode({'subject': subject, 'message': formattedMessage}),
-        ),
-      );
-      if (response.statusCode == 201) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        _userTicketsStore.insert(0, data);
-        return data;
-      }
-    } catch (_) {}
-
-    final newId = 'ticket_${DateTime.now().millisecondsSinceEpoch}';
-    final ticketObj = {
-      'id': newId,
-      'subject': subject,
-      'category': category ?? 'Kỹ thuật',
-      'status': 'open',
-      'priority': 'medium',
-      'deviceId': deviceId,
-      'deviceName': deviceName,
-      'firmwareVersion': firmwareVersion,
-      'createdAt': DateTime.now().toUtc().toIso8601String(),
-      'updatedAt': DateTime.now().toUtc().toIso8601String(),
-      'lastMessage': message,
-      'messagesCount': 1,
-      'messages': [
-        {
-          'id': 'msg_1',
-          'authorUserId': 'current_user',
-          'authorName': 'Bạn',
-          'isStaff': false,
-          'body': formattedMessage,
-          'createdAt': DateTime.now().toUtc().toIso8601String(),
-        }
-      ],
-    };
-    _userTicketsStore.insert(0, ticketObj);
-    return ticketObj;
+    throw Exception('Failed to create support ticket: ${response.body}');
   }
 
   Future<List<Map<String, dynamic>>> getMyTickets({String? status}) async {
-    try {
-      final response = await _authenticatedRequest(
-        (headers) => _client.get(
-          Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tickets}'),
-          headers: headers,
-        ),
-      );
-      if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        if (decoded is List) {
-          return decoded.cast<Map<String, dynamic>>();
-        } else if (decoded is Map && decoded['items'] is List) {
-          return (decoded['items'] as List).cast<Map<String, dynamic>>();
-        }
-      }
-    } catch (_) {}
-
-    if (_userTicketsStore.isEmpty) {
-      _userTicketsStore.addAll([
-        {
-          'id': 'ticket_1001',
-          'subject': 'Cảm biến pH dao động thất thường',
-          'category': 'Phần cứng & Thiết bị',
-          'status': 'in_progress',
-          'priority': 'high',
-          'deviceId': 'device-1',
-          'deviceName': 'Tháp 1',
-          'firmwareVersion': 'v1.0.4',
-          'createdAt': DateTime.now().subtract(const Duration(hours: 4)).toUtc().toIso8601String(),
-          'updatedAt': DateTime.now().subtract(const Duration(minutes: 30)).toUtc().toIso8601String(),
-          'lastMessage': 'Kỹ thuật viên đã tiếp nhận và đang hiệu chuẩn lại cảm biến từ xa.',
-          'messagesCount': 2,
-          'messages': [
-            {
-              'id': 'msg_1',
-              'authorUserId': 'user_1',
-              'authorName': 'Bạn',
-              'isStaff': false,
-              'body': 'Chỉ số pH hôm nay dao động từ 4.5 đến 8.0 liên tục dù dung dịch ổn định.',
-              'createdAt': DateTime.now().subtract(const Duration(hours: 4)).toUtc().toIso8601String(),
-            },
-            {
-              'id': 'msg_2',
-              'authorUserId': 'staff_1',
-              'authorName': 'Hỗ trợ Aerogreen',
-              'isStaff': true,
-              'body': 'Kỹ thuật viên đã tiếp nhận và đang hiệu chuẩn lại cảm biến từ xa.',
-              'createdAt': DateTime.now().subtract(const Duration(minutes: 30)).toUtc().toIso8601String(),
-            }
-          ],
-        },
-        {
-          'id': 'ticket_1002',
-          'subject': 'Tư vấn lịch phun cho cây rau xà lách thủy canh',
-          'category': 'Kỹ thuật',
-          'status': 'resolved',
-          'priority': 'medium',
-          'createdAt': DateTime.now().subtract(const Duration(days: 2)).toUtc().toIso8601String(),
-          'updatedAt': DateTime.now().subtract(const Duration(days: 1)).toUtc().toIso8601String(),
-          'lastMessage': 'Đã áp dụng công thức 15s mỗi 10 phút. Cảm ơn đội ngũ hỗ trợ!',
-          'messagesCount': 3,
-          'messages': [
-            {
-              'id': 'msg_1',
-              'authorUserId': 'user_1',
-              'authorName': 'Bạn',
-              'isStaff': false,
-              'body': 'Nên đặt chu kỳ phun như thế nào khi nhiệt độ mùa hè đạt 32 độ C?',
-              'createdAt': DateTime.now().subtract(const Duration(days: 2)).toUtc().toIso8601String(),
-            },
-            {
-              'id': 'msg_2',
-              'authorUserId': 'staff_2',
-              'authorName': 'Chuyên gia Nông nghiệp',
-              'isStaff': true,
-              'body': 'Với xà lách vào ngày nắng gắt, bạn nên dùng preset Rau lá: phun 15s mỗi 10 phút vào ban ngày (06:00-18:00).',
-              'createdAt': DateTime.now().subtract(const Duration(days: 1, hours: 2)).toUtc().toIso8601String(),
-            },
-            {
-              'id': 'msg_3',
-              'authorUserId': 'user_1',
-              'authorName': 'Bạn',
-              'isStaff': false,
-              'body': 'Đã áp dụng công thức 15s mỗi 10 phút. Cảm ơn đội ngũ hỗ trợ!',
-              'createdAt': DateTime.now().subtract(const Duration(days: 1)).toUtc().toIso8601String(),
-            }
-          ],
-        },
-      ]);
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tickets}').replace(
+      queryParameters: {
+        if (status != null && status.isNotEmpty && status != 'all') 'status': status,
+      },
+    );
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(uri, headers: headers),
+    );
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      return (decoded['items'] as List<dynamic>? ?? const [])
+          .map((item) => Map<String, dynamic>.from(item as Map))
+          .toList(growable: false);
     }
-
-    if (status != null && status.isNotEmpty && status != 'all') {
-      return _userTicketsStore.where((t) => (t['status'] as String?).toString().toLowerCase() == status.toLowerCase()).toList();
-    }
-    return List.from(_userTicketsStore);
+    throw Exception('Failed to load support tickets: ${response.body}');
   }
 
   Future<Map<String, dynamic>> getMyTicket(String id) async {
-    final tickets = await getMyTickets();
-    return tickets.firstWhere(
-      (t) => t['id']?.toString() == id,
-      orElse: () => {
-        'id': id,
-        'subject': 'Yêu cầu hỗ trợ #$id',
-        'status': 'open',
-        'priority': 'medium',
-        'category': 'Kỹ thuật',
-        'createdAt': DateTime.now().toUtc().toIso8601String(),
-        'messages': <Map<String, dynamic>>[],
-      },
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tickets}/$id'),
+        headers: headers,
+      ),
     );
+    if (response.statusCode == 200) {
+      return _flattenTicketDetail(jsonDecode(response.body) as Map<String, dynamic>);
+    }
+    throw Exception('Failed to load support ticket: ${response.body}');
   }
 
   Future<Map<String, dynamic>> replyToMyTicket(String id, String message) async {
-    final ticket = await getMyTicket(id);
-    final messages = (ticket['messages'] as List<dynamic>? ?? []).map((m) => Map<String, dynamic>.from(m as Map)).toList();
-    final newMsg = {
-      'id': 'msg_${DateTime.now().millisecondsSinceEpoch}',
-      'authorUserId': 'current_user',
-      'authorName': 'Bạn',
-      'isStaff': false,
-      'body': message,
-      'createdAt': DateTime.now().toUtc().toIso8601String(),
-    };
-    messages.add(newMsg);
-    ticket['messages'] = messages;
-    ticket['lastMessage'] = message;
-    ticket['updatedAt'] = DateTime.now().toUtc().toIso8601String();
-    ticket['messagesCount'] = messages.length;
-    return newMsg;
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tickets}/$id/messages'),
+        headers: headers,
+        body: jsonEncode({'message': message}),
+      ),
+    );
+    if (response.statusCode == 200) {
+      final ticket = _flattenTicketDetail(jsonDecode(response.body) as Map<String, dynamic>);
+      final messages = ticket['messages'] as List<dynamic>? ?? const [];
+      if (messages.isNotEmpty) return Map<String, dynamic>.from(messages.last as Map);
+    }
+    throw Exception('Failed to reply to support ticket: ${response.body}');
   }
 
   Future<bool> changePassword(
@@ -1076,23 +948,37 @@ class ApiService {
     String newPassword, {
     bool logoutOtherDevices = false,
   }) async {
-    try {
-      final response = await _authenticatedRequest(
-        (headers) => _client.post(
-          Uri.parse('${ApiConstants.baseUrl}/api/auth/change-password'),
-          headers: headers,
-          body: jsonEncode({
-            'currentPassword': currentPassword,
-            'newPassword': newPassword,
-            'logoutOtherDevices': logoutOtherDevices,
-          }),
-        ),
-      );
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        return true;
-      }
-    } catch (_) {}
-    return true;
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse('${ApiConstants.baseUrl}/api/auth/change-password'),
+        headers: headers,
+        body: jsonEncode({
+          'currentPassword': currentPassword,
+          'newPassword': newPassword,
+          'logoutOtherDevices': logoutOtherDevices,
+        }),
+      ),
+    );
+    if (response.statusCode == 204) return true;
+    if (response.statusCode == 400) return false;
+    throw Exception('Failed to change password: ${response.body}');
+  }
+
+  Map<String, dynamic> _flattenTicketDetail(Map<String, dynamic> detail) {
+    final ticket = Map<String, dynamic>.from(detail['ticket'] as Map);
+    final messages = (detail['messages'] as List<dynamic>? ?? const [])
+        .map((raw) {
+          final message = Map<String, dynamic>.from(raw as Map);
+          return <String, dynamic>{
+            ...message,
+            'isStaff': message['isAdmin'] == true,
+            'body': message['message'],
+          };
+        })
+        .toList(growable: false);
+    ticket['messages'] = messages;
+    ticket['messagesCount'] = ticket['messageCount'] ?? messages.length;
+    return ticket;
   }
 
   Future<Map<String, dynamic>> getAdminTickets({

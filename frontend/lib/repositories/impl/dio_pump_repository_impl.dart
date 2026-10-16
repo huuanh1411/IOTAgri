@@ -25,7 +25,7 @@ class DioPumpRepositoryImpl implements PumpRepository {
       ApiConstants.pumpCommands(deviceId),
       data: {
         'commandId': commandId,
-        'on': isOn,
+        'isOn': isOn,
         'durationSeconds': ?durationSeconds,
       },
     );
@@ -39,12 +39,15 @@ class DioPumpRepositoryImpl implements PumpRepository {
     int pageSize = 20,
     int? rangeHours,
   }) async {
+    final now = DateTime.now().toUtc();
     final response = await _dio.get(
-      ApiConstants.pumpCommands(deviceId),
+      ApiConstants.pumpCommandHistory(deviceId),
       queryParameters: {
         'page': page,
         'pageSize': pageSize,
-        'rangeHours': ?rangeHours,
+        if (rangeHours != null)
+          'from': now.subtract(Duration(hours: rangeHours)).toIso8601String(),
+        if (rangeHours != null) 'to': now.toIso8601String(),
       },
     );
     final data = response.data as Map<String, dynamic>;

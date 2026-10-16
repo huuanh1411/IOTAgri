@@ -6,6 +6,9 @@ public class SupportTicket
     public string UserId { get; set; } = string.Empty;
     public ApplicationUser? User { get; set; }
     public string Subject { get; set; } = string.Empty;
+    public string Category { get; set; } = "Kỹ thuật";
+    public Guid? DeviceId { get; set; }
+    public string? DeviceName { get; set; }
     public string Status { get; set; } = "open";
     public string Priority { get; set; } = "medium";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

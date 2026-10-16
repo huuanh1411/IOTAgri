@@ -19,6 +19,7 @@ public static class AuthEndpoints
         group.MapPost("/login", LoginAsync);
         group.MapPost("/refresh", RefreshAsync);
         group.MapPost("/logout", LogoutAsync).RequireAuthorization();
+        group.MapPost("/change-password", ChangePasswordAsync).RequireAuthorization();
         group.MapGet("/profile", GetProfileAsync).RequireAuthorization();
         group.MapPut("/profile", UpdateProfileAsync).RequireAuthorization();
 
@@ -134,6 +135,46 @@ public static class AuthEndpoints
 
         token.RevokedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
+
+        return Results.NoContent();
+    }
+
+    private static async Task<IResult> ChangePasswordAsync(
+        ChangePasswordRequest request,
+        ClaimsPrincipal principal,
+        UserManager<ApplicationUser> userManager,
+        ApplicationDbContext db)
+    {
+        var user = await userManager.GetUserAsync(principal);
+        if (user is null) return Results.Unauthorized();
+
+        if (string.IsNullOrWhiteSpace(request.CurrentPassword) ||
+            string.IsNullOrWhiteSpace(request.NewPassword) ||
+            string.Equals(request.CurrentPassword, request.NewPassword, StringComparison.Ordinal))
+        {
+            return Results.BadRequest(new { error = "Current and new passwords are required and must differ." });
+        }
+
+        if (!await userManager.CheckPasswordAsync(user, request.CurrentPassword))
+        {
+            return Results.BadRequest(new { error = "Current password is incorrect." });
+        }
+
+        var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+        if (!result.Succeeded)
+        {
+            return Results.ValidationProblem(result.Errors.ToDictionary(error => error.Code, error => new[] { error.Description }));
+        }
+
+        // Refresh tokens do not carry a device/session identifier, so this safely
+        // revokes every refresh session when the user explicitly requests it.
+        if (request.LogoutOtherDevices)
+        {
+            var now = DateTime.UtcNow;
+            await db.RefreshTokens
+                .Where(token => token.UserId == user.Id && token.RevokedAt == null && token.ExpiresAt > now)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(token => token.RevokedAt, now));
+        }
 
         return Results.NoContent();
     }

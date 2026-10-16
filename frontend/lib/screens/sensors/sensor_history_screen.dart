@@ -102,6 +102,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
     'tds' => HistorySensor.tds,
     'ph' => HistorySensor.ph,
     'waterLevel' || 'water_level' => HistorySensor.waterLevel,
+    'lux' || 'light' => HistorySensor.lux,
     _ => null,
   };
 
@@ -599,117 +600,117 @@ class _HistoryChart extends StatelessWidget {
         child: RepaintBoundary(
           child: LineChart(
             LineChartData(
-            minX: minX,
-            maxX: maxX,
-            minY: minY,
-            maxY: maxY,
-            gridData: FlGridData(
-              drawVerticalLine: false,
-              getDrawingHorizontalLine: (_) => FlLine(
-                color: CupertinoColors.separator.resolveFrom(context),
-                strokeWidth: 0.5,
-              ),
-            ),
-            borderData: FlBorderData(show: false),
-            titlesData: FlTitlesData(
-              topTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
-              rightTitles: const AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 42,
-                  getTitlesWidget: (value, _) => Text(
-                    value.toStringAsFixed(1),
-                    style: const TextStyle(fontSize: 10),
-                  ),
+              minX: minX,
+              maxX: maxX,
+              minY: minY,
+              maxY: maxY,
+              gridData: FlGridData(
+                drawVerticalLine: false,
+                getDrawingHorizontalLine: (_) => FlLine(
+                  color: CupertinoColors.separator.resolveFrom(context),
+                  strokeWidth: 0.5,
                 ),
               ),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 30,
-                  interval: (maxX - minX) / 4,
-                  getTitlesWidget: (value, _) => Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      axisFormat.format(
-                        DateTime.fromMillisecondsSinceEpoch(value.toInt()),
+              borderData: FlBorderData(show: false),
+              titlesData: FlTitlesData(
+                topTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                rightTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 42,
+                    getTitlesWidget: (value, _) => Text(
+                      value.toStringAsFixed(1),
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                  ),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 30,
+                    interval: (maxX - minX) / 4,
+                    getTitlesWidget: (value, _) => Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        axisFormat.format(
+                          DateTime.fromMillisecondsSinceEpoch(value.toInt()),
+                        ),
+                        style: const TextStyle(fontSize: 9),
                       ),
-                      style: const TextStyle(fontSize: 9),
                     ),
                   ),
                 ),
               ),
-            ),
-            rangeAnnotations: threshold == null
-                ? const RangeAnnotations()
-                : RangeAnnotations(
-                    horizontalRangeAnnotations: [
-                      HorizontalRangeAnnotation(
-                        y1: primary == HistorySensor.waterLevel
-                            ? minY
-                            : threshold,
-                        y2: primary == HistorySensor.waterLevel
-                            ? threshold
-                            : maxY,
-                        color: CupertinoColors.systemRed.withValues(
-                          alpha: 0.08,
+              rangeAnnotations: threshold == null
+                  ? const RangeAnnotations()
+                  : RangeAnnotations(
+                      horizontalRangeAnnotations: [
+                        HorizontalRangeAnnotation(
+                          y1: primary == HistorySensor.waterLevel
+                              ? minY
+                              : threshold,
+                          y2: primary == HistorySensor.waterLevel
+                              ? threshold
+                              : maxY,
+                          color: CupertinoColors.systemRed.withValues(
+                            alpha: 0.08,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-            extraLinesData: threshold == null
-                ? const ExtraLinesData()
-                : ExtraLinesData(
-                    horizontalLines: [
-                      HorizontalLine(
-                        y: threshold,
-                        color: CupertinoColors.systemRed,
-                        strokeWidth: 1,
-                        dashArray: [5, 4],
-                      ),
-                    ],
-                  ),
-            lineTouchData: LineTouchData(
-              touchTooltipData: LineTouchTooltipData(
-                getTooltipItems: (spots) => spots
-                    .map(
-                      (spot) => LineTooltipItem(
-                        '${DateFormat('dd/MM HH:mm').format(DateTime.fromMillisecondsSinceEpoch(spot.x.toInt()))}\n${spot.y.toStringAsFixed(2)}',
-                        TextStyle(
-                          color: spot.bar.color ?? CupertinoColors.white,
-                          fontSize: 11,
+                      ],
+                    ),
+              extraLinesData: threshold == null
+                  ? const ExtraLinesData()
+                  : ExtraLinesData(
+                      horizontalLines: [
+                        HorizontalLine(
+                          y: threshold,
+                          color: CupertinoColors.systemRed,
+                          strokeWidth: 1,
+                          dashArray: [5, 4],
                         ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-            lineBarsData: [
-              for (final sensor in sensors)
-                LineChartBarData(
-                  spots: [
-                    for (final sample in samples)
-                      if (sample.values[sensor] case final value?)
-                        FlSpot(
-                          sample.recordedAt.millisecondsSinceEpoch.toDouble(),
-                          value,
+                      ],
+                    ),
+              lineTouchData: LineTouchData(
+                touchTooltipData: LineTouchTooltipData(
+                  getTooltipItems: (spots) => spots
+                      .map(
+                        (spot) => LineTooltipItem(
+                          '${DateFormat('dd/MM HH:mm').format(DateTime.fromMillisecondsSinceEpoch(spot.x.toInt()))}\n${spot.y.toStringAsFixed(2)}',
+                          TextStyle(
+                            color: spot.bar.color ?? CupertinoColors.white,
+                            fontSize: 11,
+                          ),
                         ),
-                  ],
-                  isCurved: true,
-                  color: _sensorColor(sensor),
-                  barWidth: 2.4,
-                  dotData: const FlDotData(show: false),
-                  belowBarData: BarAreaData(
-                    show: sensors.length == 1,
-                    color: _sensorColor(sensor).withValues(alpha: 0.08),
-                  ),
+                      )
+                      .toList(),
                 ),
-            ],
+              ),
+              lineBarsData: [
+                for (final sensor in sensors)
+                  LineChartBarData(
+                    spots: [
+                      for (final sample in samples)
+                        if (sample.values[sensor] case final value?)
+                          FlSpot(
+                            sample.recordedAt.millisecondsSinceEpoch.toDouble(),
+                            value,
+                          ),
+                    ],
+                    isCurved: true,
+                    color: _sensorColor(sensor),
+                    barWidth: 2.4,
+                    dotData: const FlDotData(show: false),
+                    belowBarData: BarAreaData(
+                      show: sensors.length == 1,
+                      color: _sensorColor(sensor).withValues(alpha: 0.08),
+                    ),
+                  ),
+              ],
             ),
             duration: AppMotion.duration(context, AppMotion.chart),
             curve: AppMotion.easeInOut,
@@ -1052,4 +1053,5 @@ Color _sensorColor(HistorySensor sensor) => switch (sensor) {
   HistorySensor.tds => CupertinoColors.systemIndigo,
   HistorySensor.ph => CupertinoColors.systemPurple,
   HistorySensor.waterLevel => CupertinoColors.systemTeal,
+  HistorySensor.lux => CupertinoColors.systemYellow,
 };

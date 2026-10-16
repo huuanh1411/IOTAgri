@@ -19,7 +19,7 @@ class ApiClient {
     final uri = Uri.parse('$_baseUrl$path');
     final headers = <String, String>{
       'Content-Type': 'application/json',
-      if (_jwtToken != null) 'Authorization': 'Bearer $_jwtToken!',
+      if (_jwtToken != null) 'Authorization': 'Bearer ${_jwtToken!}',
     };
 
     switch (method) {

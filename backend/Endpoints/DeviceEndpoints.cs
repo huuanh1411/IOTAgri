@@ -31,6 +31,7 @@ public static class DeviceEndpoints
         group.MapGet("/{id:guid}/alert-settings", GetAlertSettingsAsync);
         group.MapPut("/{id:guid}/alert-settings", UpdateAlertSettingsAsync);
         group.MapGet("/{id:guid}/alerts", GetAlertsAsync);
+        group.MapPut("/{id:guid}/alerts/{alertId:guid}/resolve", ResolveAlertAsync);
 
         return app;
     }
@@ -232,6 +233,7 @@ public static class DeviceEndpoints
 
     private static PumpCommandResponse ToResponse(PumpCommand command) => new(
         command.Id,
+        command.DeviceId,
         command.IsOn,
         command.DurationSeconds,
         command.Status,
@@ -277,6 +279,7 @@ public static class DeviceEndpoints
             .Take(query.PageSize)
             .Select(command => new PumpCommandHistoryResponse(
                 command.Id,
+                command.DeviceId,
                 command.IsOn,
                 command.DurationSeconds,
                 command.Source,
@@ -533,5 +536,26 @@ public static class DeviceEndpoints
             query.Page,
             query.PageSize,
             totalCount));
+    }
+
+    private static async Task<IResult> ResolveAlertAsync(
+        Guid id,
+        Guid alertId,
+        ClaimsPrincipal principal,
+        ApplicationDbContext db)
+    {
+        var userId = GetUserId(principal);
+        if (userId is null) return Results.Unauthorized();
+
+        var alert = await db.DeviceAlerts
+            .Include(candidate => candidate.Device)
+            .FirstOrDefaultAsync(candidate => candidate.Id == alertId && candidate.DeviceId == id && candidate.Device!.OwnerId == userId);
+        if (alert is null) return Results.NotFound();
+
+        // Resolution is idempotent so retrying a user action does not create a
+        // second lifecycle event or alter its original resolution timestamp.
+        alert.ResolvedAt ??= DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return Results.Ok(DeviceAlertResponse.From(alert));
     }
 }

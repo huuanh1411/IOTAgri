@@ -1,12 +1,18 @@
+import 'dart:math' as math;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../core/animation/app_motion.dart';
 import '../core/theme/app_colors.dart';
 import '../core/widgets/gauge_ring.dart';
 import '../data/models.dart';
+import '../models/history_data.dart';
 import '../providers/data_providers.dart';
+import '../services/api_service.dart';
+import '../services/history_repository.dart';
 
 class SensorDetailScreen extends ConsumerWidget {
   const SensorDetailScreen({required this.metric, super.key});
@@ -58,11 +64,8 @@ class SensorDetailScreen extends ConsumerWidget {
                 const Divider(height: 28),
                 _SensorHistoryCard(
                   title: detail.historyTitle,
-                  currentValue: value,
+                  metric: metric,
                   color: detail.color,
-                  minY: detail.historyMin,
-                  maxY: detail.historyMax,
-                  variation: detail.historyVariation,
                 ),
                 if (metric == 'water') ...[
                   const SizedBox(height: 24),
@@ -81,39 +84,82 @@ class SensorDetailScreen extends ConsumerWidget {
   }
 }
 
-class _SensorHistoryCard extends StatelessWidget {
+class _SensorHistoryCard extends StatefulWidget {
   const _SensorHistoryCard({
     required this.title,
-    required this.currentValue,
+    required this.metric,
     required this.color,
-    required this.minY,
-    required this.maxY,
-    required this.variation,
   });
 
   final String title;
-  final double currentValue;
+  final String metric;
   final Color color;
-  final double minY;
-  final double maxY;
-  final double variation;
+
+  @override
+  State<_SensorHistoryCard> createState() => _SensorHistoryCardState();
+}
+
+class _SensorHistoryCardState extends State<_SensorHistoryCard> {
+  final ApiService _apiService = ApiService();
+  late final HistoryRepository _repository = ApiHistoryRepository(_apiService);
+  HistoryRange _range = HistoryRange.day;
+  late Future<_ChartHistory> _history = _loadHistory();
+
+  HistorySensor get _sensor => switch (widget.metric) {
+    'water' => HistorySensor.waterLevel,
+    'nutrient' => HistorySensor.tds,
+    'temperature' => HistorySensor.temperature,
+    'light' => HistorySensor.lux,
+    _ => HistorySensor.temperature,
+  };
+
+  HistoryWindow _windowFor(HistoryRange range) {
+    final now = DateTime.now();
+    if (range == HistoryRange.day) {
+      return HistoryWindow(
+        from: DateTime(now.year, now.month, now.day),
+        to: now,
+      );
+    }
+    return HistoryWindow(from: now.subtract(range.duration!), to: now);
+  }
+
+  Future<_ChartHistory> _loadHistory() async {
+    final devices = await _apiService.getDevices();
+    if (devices.isEmpty) {
+      return _ChartHistory(window: _windowFor(_range), samples: const []);
+    }
+    final device = devices.first as Map<String, dynamic>;
+    final deviceId = device['id']?.toString();
+    if (deviceId == null || deviceId.isEmpty) {
+      return _ChartHistory(window: _windowFor(_range), samples: const []);
+    }
+    final window = _windowFor(_range);
+    final samples = await _repository.loadSamples(
+      deviceId: deviceId,
+      window: window,
+      downsample: _range != HistoryRange.day,
+    );
+    return _ChartHistory(
+      window: window,
+      samples: samples
+          .where((sample) => sample.values[_sensor] != null)
+          .toList(growable: false),
+    );
+  }
+
+  void _selectRange(HistoryRange range) {
+    if (range == _range || range.duration == null) return;
+    setState(() {
+      _range = range;
+      _history = _loadHistory();
+    });
+  }
+
+  void _retry() => setState(() => _history = _loadHistory());
 
   @override
   Widget build(BuildContext context) {
-    final level = currentValue.clamp(minY, maxY).toDouble();
-    final values = <double>[
-      level + variation * 0.5,
-      level - variation,
-      level - variation * 0.4,
-      level - variation * 1.5,
-      level + variation * 0.25,
-      level - variation * 0.75,
-      level - variation * 1.75,
-      level + variation * 0.75,
-      level - variation,
-      level,
-    ].map((value) => value.clamp(minY, maxY).toDouble()).toList();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -121,15 +167,37 @@ class _SensorHistoryCard extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                title,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                widget.title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
-            Text(
-              '24 giờ',
-              style: TextStyle(
-                fontSize: 12,
-                color: color.withValues(alpha: 0.9),
+            PopupMenuButton<HistoryRange>(
+              tooltip: 'Chọn khoảng thời gian',
+              initialValue: _range,
+              onSelected: _selectRange,
+              itemBuilder: (_) => HistoryRange.values
+                  .where((range) => range.duration != null)
+                  .map(
+                    (range) =>
+                        PopupMenuItem(value: range, child: Text(range.label)),
+                  )
+                  .toList(),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _range.label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: widget.color.withValues(alpha: 0.9),
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  Icon(Icons.expand_more, size: 16, color: widget.color),
+                ],
               ),
             ),
           ],
@@ -137,9 +205,9 @@ class _SensorHistoryCard extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           children: [
-            Icon(Icons.trending_up, size: 17, color: color),
-            SizedBox(width: 6),
-            Text(
+            Icon(Icons.trending_up, size: 17, color: widget.color),
+            const SizedBox(width: 6),
+            const Text(
               'Theo dõi xu hướng thay đổi',
               style: TextStyle(color: AppColors.secondaryText),
             ),
@@ -148,17 +216,92 @@ class _SensorHistoryCard extends StatelessWidget {
         const SizedBox(height: 14),
         SizedBox(
           height: 220,
-          child: RepaintBoundary(
-            child: LineChart(
-              LineChartData(
-              minX: 0,
-              maxX: 9,
-              minY: minY,
-              maxY: maxY,
+          child: FutureBuilder<_ChartHistory>(
+            future: _history,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return _HistoryMessage(
+                  icon: Icons.error_outline,
+                  message: 'Không thể tải lịch sử cảm biến.',
+                  actionLabel: 'Thử lại',
+                  onAction: _retry,
+                );
+              }
+              final history = snapshot.data!;
+              if (history.samples.isEmpty) {
+                return const _HistoryMessage(
+                  icon: Icons.show_chart,
+                  message: 'Chưa có dữ liệu trong khoảng thời gian này.',
+                );
+              }
+              return _SensorLineChart(
+                history: history,
+                sensor: _sensor,
+                color: widget.color,
+                range: _range,
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ChartHistory {
+  const _ChartHistory({required this.window, required this.samples});
+
+  final HistoryWindow window;
+  final List<HistorySample> samples;
+}
+
+class _SensorLineChart extends StatelessWidget {
+  const _SensorLineChart({
+    required this.history,
+    required this.sensor,
+    required this.color,
+    required this.range,
+  });
+
+  final _ChartHistory history;
+  final HistorySensor sensor;
+  final Color color;
+  final HistoryRange range;
+
+  @override
+  Widget build(BuildContext context) {
+    final values = history.samples
+        .map((sample) => sample.values[sensor])
+        .whereType<double>()
+        .toList(growable: false);
+    final yScale = _ChartScale.forValues(
+      values,
+      fixedPercent: sensor == HistorySensor.waterLevel,
+    );
+    final latest = history.samples.last.recordedAt;
+    final minX = history.window.from.millisecondsSinceEpoch.toDouble();
+    final maxX = latest.millisecondsSinceEpoch.toDouble();
+    final xInterval = range == HistoryRange.day
+        ? const Duration(hours: 6).inMilliseconds.toDouble()
+        : math.max(1, (maxX - minX) / 4).toDouble();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        return RepaintBoundary(
+          child: LineChart(
+            LineChartData(
+              minX: minX,
+              maxX: math.max(minX + 1, maxX).toDouble(),
+              minY: yScale.min,
+              maxY: yScale.max,
               gridData: FlGridData(
                 show: true,
                 drawVerticalLine: false,
-                horizontalInterval: 25,
+                horizontalInterval: yScale.interval,
                 getDrawingHorizontalLine: (_) => const FlLine(
                   color: Color(0xFFD9E7DD),
                   strokeWidth: 1,
@@ -173,27 +316,51 @@ class _SensorHistoryCard extends StatelessWidget {
                 rightTitles: const AxisTitles(
                   sideTitles: SideTitles(showTitles: false),
                 ),
-                leftTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: compact ? 48 : 60,
+                    interval: yScale.interval,
+                    getTitlesWidget: (value, meta) => SideTitleWidget(
+                      axisSide: meta.axisSide,
+                      space: 8,
+                      child: Text(
+                        _formatAxisValue(value, sensor),
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontSize: 9,
+                          color: AppColors.secondaryText,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    reservedSize: 30,
-                    interval: 4.5,
-                    getTitlesWidget: (value, _) {
-                      final label = switch (value.round()) {
-                        0 => '00:00',
-                        5 => '12:00',
-                        9 => 'Hiện tại',
-                        _ => '',
-                      };
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 12),
+                    reservedSize: 34,
+                    interval: xInterval,
+                    getTitlesWidget: (value, meta) {
+                      final timestamp = DateTime.fromMillisecondsSinceEpoch(
+                        value.round(),
+                      );
+                      final isLatest = (value - maxX).abs() < 1000;
+                      final overlapsLatest =
+                          !isLatest && (maxX - value).abs() < xInterval * 0.35;
+                      if (overlapsLatest) return const SizedBox.shrink();
+                      final format = range == HistoryRange.day
+                          ? DateFormat('HH:mm')
+                          : compact
+                          ? DateFormat('dd/MM')
+                          : DateFormat('dd/MM HH:mm');
+                      return SideTitleWidget(
+                        axisSide: meta.axisSide,
+                        space: 9,
                         child: Text(
-                          label,
+                          format.format(isLatest ? latest : timestamp),
+                          maxLines: 1,
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 9,
                             color: AppColors.secondaryText,
                           ),
                         ),
@@ -202,12 +369,32 @@ class _SensorHistoryCard extends StatelessWidget {
                   ),
                 ),
               ),
-              lineTouchData: const LineTouchData(enabled: false),
+              lineTouchData: LineTouchData(
+                enabled: true,
+                touchTooltipData: LineTouchTooltipData(
+                  getTooltipItems: (spots) => spots
+                      .map(
+                        (spot) => LineTooltipItem(
+                          '${DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.fromMillisecondsSinceEpoch(spot.x.round()))}\n'
+                          '${_formatTooltipValue(spot.y, sensor)} ${sensor.unit}',
+                          const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
               lineBarsData: [
                 LineChartBarData(
                   spots: [
-                    for (var index = 0; index < values.length; index++)
-                      FlSpot(index.toDouble(), values[index]),
+                    for (final sample in history.samples)
+                      FlSpot(
+                        sample.recordedAt.millisecondsSinceEpoch.toDouble(),
+                        sample.values[sensor]!,
+                      ),
                   ],
                   isCurved: true,
                   color: color,
@@ -215,9 +402,9 @@ class _SensorHistoryCard extends StatelessWidget {
                   isStrokeCapRound: true,
                   dotData: FlDotData(
                     show: true,
-                    checkToShowDot: (spot, _) => spot.x == 9,
+                    checkToShowDot: (spot, _) => spot.x == maxX,
                     getDotPainter: (_, _, _, _) => FlDotCirclePainter(
-                      radius: 6,
+                      radius: 5,
                       color: color,
                       strokeWidth: 0,
                     ),
@@ -228,16 +415,103 @@ class _SensorHistoryCard extends StatelessWidget {
                   ),
                 ),
               ],
-              ),
-              duration: AppMotion.duration(context, AppMotion.chart),
-              curve: AppMotion.easeInOut,
             ),
+            duration: AppMotion.duration(context, AppMotion.chart),
+            curve: AppMotion.easeInOut,
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
+
+class _ChartScale {
+  const _ChartScale(this.min, this.max, this.interval);
+
+  final double min;
+  final double max;
+  final double interval;
+
+  factory _ChartScale.forValues(
+    List<double> values, {
+    required bool fixedPercent,
+  }) {
+    if (fixedPercent) return const _ChartScale(0, 100, 20);
+    final dataMin = values.reduce(math.min);
+    final dataMax = values.reduce(math.max);
+    final span = math.max(dataMax - dataMin, dataMax.abs() * 0.1);
+    final rawInterval = math.max(span / 4, 0.01);
+    final magnitude = math
+        .pow(10, (math.log(rawInterval) / math.ln10).floor())
+        .toDouble();
+    final normalized = rawInterval / magnitude;
+    final nice = normalized <= 1
+        ? 1.0
+        : normalized <= 2
+        ? 2.0
+        : normalized <= 5
+        ? 5.0
+        : 10.0;
+    final interval = nice * magnitude;
+    final min = (dataMin / interval).floor() * interval;
+    var max = (dataMax / interval).ceil() * interval;
+    if (max <= min) max = min + interval * 4;
+    return _ChartScale(min, max, interval);
+  }
+}
+
+class _HistoryMessage extends StatelessWidget {
+  const _HistoryMessage({
+    required this.icon,
+    required this.message,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  final IconData icon;
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 8),
+        Icon(icon, color: AppColors.secondaryText),
+        const SizedBox(height: 8),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppColors.secondaryText),
+        ),
+        if (onAction != null) ...[
+          const SizedBox(height: 8),
+          TextButton(onPressed: onAction, child: Text(actionLabel!)),
+        ],
+      ],
+    ),
+  );
+}
+
+String _formatAxisValue(double value, HistorySensor sensor) {
+  final formatted = switch (sensor) {
+    HistorySensor.lux when value.abs() >= 1000 =>
+      '${(value / 1000).toStringAsFixed(1)}k',
+    HistorySensor.tds || HistorySensor.lux => value.toStringAsFixed(0),
+    _ => value.toStringAsFixed(value.abs() < 10 ? 1 : 0),
+  };
+  return sensor.unit.isEmpty ? formatted : '$formatted ${sensor.unit}';
+}
+
+String _formatTooltipValue(double value, HistorySensor sensor) =>
+    switch (sensor) {
+      HistorySensor.tds ||
+      HistorySensor.lux ||
+      HistorySensor.waterLevel => value.toStringAsFixed(0),
+      _ => value.toStringAsFixed(1),
+    };
 
 class WaterPumpControlPanel extends StatelessWidget {
   const WaterPumpControlPanel({required this.waterLevel, super.key});
@@ -329,15 +603,15 @@ class _ActuatorControlPanelState extends State<_ActuatorControlPanel> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                _running
-                    ? '${widget.deviceLabel} đang bật'
-                    : '${widget.deviceLabel} đang tắt',
-              ),
-              subtitle: const Text('Chỉ mô phỏng trên giao diện frontend'),
-              value: _running,
-              onChanged: _toggleActuator,
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    _running
+                        ? '${widget.deviceLabel} đang bật'
+                        : '${widget.deviceLabel} đang tắt',
+                  ),
+                  subtitle: const Text('Chỉ mô phỏng trên giao diện frontend'),
+                  value: _running,
+                  onChanged: _toggleActuator,
                 ),
               ),
             ),
@@ -654,9 +928,6 @@ class _SensorDetail {
     required this.idealRange,
     required this.description,
     required this.historyTitle,
-    required this.historyMin,
-    required this.historyMax,
-    required this.historyVariation,
     required this.valueFrom,
     required this.status,
   });
@@ -669,9 +940,6 @@ class _SensorDetail {
   final String idealRange;
   final String description;
   final String historyTitle;
-  final double historyMin;
-  final double historyMax;
-  final double historyVariation;
   final double Function(SensorReading? reading) valueFrom;
   final String Function(double value) status;
 
@@ -688,9 +956,6 @@ class _SensorDetail {
           description:
               'Theo dõi lượng nước trong hệ thống để cây luôn được tưới phù hợp.',
           historyTitle: 'Lịch sử mức nước',
-          historyMin: 0,
-          historyMax: 100,
-          historyVariation: 4,
           valueFrom: (reading) => reading?.waterLevel ?? 0,
           status: (value) => value < 30 ? 'Mức nước thấp' : 'Mức nước ổn định',
         );
@@ -705,9 +970,6 @@ class _SensorDetail {
           description:
               'Theo dõi nồng độ dinh dưỡng để hỗ trợ cây phát triển đồng đều.',
           historyTitle: 'Lịch sử mức dinh dưỡng',
-          historyMin: 0,
-          historyMax: 100,
-          historyVariation: 4,
           valueFrom: (reading) => reading?.nutrientLevel ?? 0,
           status: (value) =>
               value < 45 ? 'Dinh dưỡng cần bổ sung' : 'Dinh dưỡng ổn định',
@@ -722,9 +984,6 @@ class _SensorDetail {
           idealRange: '20–28°C',
           description: 'Theo dõi nhiệt độ môi trường quanh khu vực trồng cây.',
           historyTitle: 'Lịch sử nhiệt độ',
-          historyMin: 10,
-          historyMax: 40,
-          historyVariation: 1.2,
           valueFrom: (reading) => reading?.temperature ?? 0,
           status: (value) => value < 20 || value > 28
               ? 'Nhiệt độ cần chú ý'
@@ -741,9 +1000,6 @@ class _SensorDetail {
           description:
               'Theo dõi cường độ ánh sáng để cây nhận đủ năng lượng quang hợp.',
           historyTitle: 'Lịch sử ánh sáng',
-          historyMin: 0,
-          historyMax: 100,
-          historyVariation: 5,
           valueFrom: (reading) => reading?.lightLevel ?? 0,
           status: (value) => value < 60 ? 'Ánh sáng thấp' : 'Ánh sáng phù hợp',
         );

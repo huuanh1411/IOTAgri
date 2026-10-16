@@ -20,14 +20,14 @@ class DeviceOverview {
 
   factory DeviceOverview.fromJson(Map<String, dynamic> json) {
     return DeviceOverview(
-      id: json['id'] ?? '',
+      id: json['deviceId'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
       isOnline: json['isOnline'] ?? false,
       lastSeenAt: json['lastSeenAt'],
       latestReading: json['latestReading'] != null 
           ? SensorReading.fromJson(json['latestReading']) 
           : null,
-      alerts: (json['alerts'] as List<dynamic>?)
+      alerts: ((json['activeAlerts'] ?? json['alerts']) as List<dynamic>?)
           ?.map((alert) => DeviceAlert.fromJson(alert))
           .toList() ?? [],
     );
