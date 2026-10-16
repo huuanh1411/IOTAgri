@@ -32,6 +32,8 @@ constexpr uint16_t MAX_PUMP_DURATION_SECONDS = 600;
 constexpr unsigned long ULTRASONIC_TIMEOUT_US = 30000;
 constexpr unsigned long WATER_LEVEL_INTERVAL_MS = 500;
 constexpr unsigned long AIR_SENSOR_INTERVAL_MS = 2000;
+constexpr unsigned long LIGHT_SENSOR_INTERVAL_MS = 2000;
+constexpr unsigned long BH1750_CONVERSION_MS = 180;
 constexpr unsigned long DS18B20_CONVERSION_MS = 750;
 constexpr unsigned long TDS_SAMPLE_INTERVAL_MS = 40;
 constexpr unsigned long TELEMETRY_INTERVAL_MS = 10000;
@@ -40,6 +42,10 @@ constexpr unsigned long MQTT_RECONNECT_INTERVAL_MS = 5000;
 constexpr size_t MQTT_BUFFER_BYTES = 768;
 constexpr size_t MAX_COMMAND_PAYLOAD_BYTES = 512;
 constexpr uint8_t TDS_SAMPLE_COUNT = 30;
+constexpr uint8_t BH1750_LOW_ADDRESS = 0x23;
+constexpr uint8_t BH1750_HIGH_ADDRESS = 0x5C;
+constexpr uint8_t BH1750_POWER_ON = 0x01;
+constexpr uint8_t BH1750_CONTINUOUS_HIGH_RES_MODE = 0x10;
 
 struct SensorSnapshot {
   float airTemperatureC = NAN;
@@ -49,10 +55,12 @@ struct SensorSnapshot {
   float waterDistanceCm = NAN;
   float waterLevelCm = NAN;
   float waterLevelPercent = NAN;
+  float lightLux = NAN;
   bool airValid = false;
   bool solutionTemperatureValid = false;
   bool tdsValid = false;
   bool waterLevelValid = false;
+  bool lightValid = false;
   bool lowWater = true;
 };
 
@@ -90,6 +98,7 @@ String lightStatusTopic;
 int mqttPort = 0;
 bool setupMode = false;
 bool dht20Available = false;
+bool bh1750Available = false;
 bool pumpOn = false;
 bool lightOn = false;
 bool pumpTimerActive = false;
@@ -98,6 +107,8 @@ uint32_t pumpOffAtMs = 0;
 uint32_t ds18b20RequestedAtMs = 0;
 uint32_t lastWaterLevelReadMs = 0;
 uint32_t lastAirReadMs = 0;
+uint32_t lastLightReadMs = 0;
+uint32_t bh1750ReadyAtMs = 0;
 uint32_t lastTdsSampleMs = 0;
 uint32_t lastTelemetryMs = 0;
 uint32_t lastWifiReconnectMs = 0;
@@ -105,6 +116,7 @@ uint32_t lastMqttReconnectMs = 0;
 uint16_t tdsSamples[TDS_SAMPLE_COUNT] = {};
 uint8_t tdsSampleIndex = 0;
 uint8_t tdsSamplesCollected = 0;
+uint8_t bh1750Address = 0;
 
 bool elapsed(uint32_t now, uint32_t since, uint32_t interval) {
   return static_cast<uint32_t>(now - since) >= interval;
@@ -557,6 +569,65 @@ void serviceWaterTemperature(uint32_t now) {
   requestWaterTemperature(now);
 }
 
+bool writeBh1750Command(uint8_t address, uint8_t command) {
+  Wire.beginTransmission(address);
+  Wire.write(command);
+  return Wire.endTransmission() == 0;
+}
+
+bool initializeBh1750(uint32_t now) {
+  const uint8_t addresses[] = {BH1750_LOW_ADDRESS, BH1750_HIGH_ADDRESS};
+  for (const uint8_t address : addresses) {
+    if (!writeBh1750Command(address, BH1750_POWER_ON) ||
+        !writeBh1750Command(address, BH1750_CONTINUOUS_HIGH_RES_MODE)) {
+      continue;
+    }
+
+    bh1750Address = address;
+    bh1750Available = true;
+    bh1750ReadyAtMs = now + BH1750_CONVERSION_MS;
+    Serial.printf("BH1750 found at I2C address 0x%02X\n", address);
+    return true;
+  }
+
+  bh1750Address = 0;
+  bh1750Available = false;
+  sensors.lightValid = false;
+  sensors.lightLux = NAN;
+  return false;
+}
+
+void serviceLightSensor(uint32_t now) {
+  if (!elapsed(now, lastLightReadMs, LIGHT_SENSOR_INTERVAL_MS)) return;
+  lastLightReadMs = now;
+
+  if (!bh1750Available) {
+    initializeBh1750(now);
+    return;
+  }
+  if (!deadlineReached(now, bh1750ReadyAtMs)) return;
+
+  const uint8_t received = Wire.requestFrom(bh1750Address, static_cast<uint8_t>(2));
+  if (received != 2) {
+    while (Wire.available()) Wire.read();
+    sensors.lightValid = false;
+    sensors.lightLux = NAN;
+    bh1750Available = false;
+    Serial.println("BH1750 read failed; lux will be null until the sensor reconnects");
+    return;
+  }
+
+  const uint16_t raw = (static_cast<uint16_t>(Wire.read()) << 8) | Wire.read();
+  const float lux = raw / 1.2f;
+  sensors.lightValid = raw != 0xFFFF && isfinite(lux) && lux >= 0.0f;
+  sensors.lightLux = sensors.lightValid ? lux : NAN;
+  if (sensors.lightValid) {
+    Serial.printf("BH1750: %.1f lux\n", static_cast<double>(lux));
+  } else {
+    Serial.println("BH1750 reading invalid or saturated; lux will be null");
+  }
+}
+
 void serviceAirSensor(uint32_t now) {
   if (!elapsed(now, lastAirReadMs, AIR_SENSOR_INTERVAL_MS)) return;
   lastAirReadMs = now;
@@ -669,7 +740,7 @@ void publishTelemetry(uint32_t now) {
   payload += ",\"ph\":null";
   payload += ",\"tds\":" + jsonNumber(sensors.tdsPpm, 0);
   payload += ",\"waterLevel\":" + jsonNumber(sensors.waterLevelPercent);
-  payload += ",\"lux\":null";
+  payload += ",\"lux\":" + (sensors.lightValid ? jsonNumber(sensors.lightLux) : "null");
   payload += ",\"waterDistanceCm\":" + jsonNumber(sensors.waterDistanceCm);
   payload += ",\"waterLevelCm\":" + jsonNumber(sensors.waterLevelCm);
   payload += ",\"waterLevelValid\":";
@@ -703,8 +774,12 @@ void setup() {
   analogReadResolution(12);
   analogSetPinAttenuation(TDS_PIN, ADC_11db);
   Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
+  Wire.setClock(100000);
   dht20Available = dht20.begin(&Wire);
   if (!dht20Available) Serial.println("DHT20/AHT20 not found; air readings will be null");
+  if (!initializeBh1750(millis())) {
+    Serial.println("BH1750 not found at 0x23 or 0x5C; lux readings will be null");
+  }
 
   ds18b20.begin();
   ds18b20.setWaitForConversion(false);
@@ -741,6 +816,7 @@ void loop() {
   // Local sensing and pump protection always run, even with no Wi-Fi/backend.
   serviceWaterTemperature(now);
   serviceAirSensor(now);
+  serviceLightSensor(now);
   serviceWaterLevel(now);
   serviceTds(now);
   servicePumpTimer(now);
