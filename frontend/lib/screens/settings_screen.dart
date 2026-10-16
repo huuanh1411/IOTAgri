@@ -38,8 +38,8 @@ class SettingsScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               PageHeader(
-                chip: const SectionChip(label: 'Tùy chỉnh'),
-                title: settings.isVietnamese ? 'Cài đặt' : 'Settings',
+                chip: SectionChip(label: context.tr('customize')),
+                title: context.tr('settings'),
                 subtitle: '',
               ),
               const SizedBox(height: 24),
@@ -70,34 +70,37 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              Text('Thông báo', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                context.tr('notifications'),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               Card(
                 child: Column(
                   children: [
                     SwitchListTile(
-                      title: const Text('Cảnh báo nước thấp'),
+                      title: Text(context.tr('low_water_alert')),
                       value: alertSettings.lowWaterAlert,
                       onChanged: (value) =>
                           alertNotifier.update(lowWaterAlert: value),
                     ),
                     const Divider(height: 1),
                     SwitchListTile(
-                      title: const Text('Cảnh báo dinh dưỡng thấp'),
+                      title: Text(context.tr('low_nutrient_alert')),
                       value: alertSettings.lowNutrientAlert,
                       onChanged: (value) =>
                           alertNotifier.update(lowNutrientAlert: value),
                     ),
                     const Divider(height: 1),
                     SwitchListTile(
-                      title: const Text('Cảnh báo nhiệt độ'),
+                      title: Text(context.tr('temperature_alert')),
                       value: alertSettings.temperatureAlert,
                       onChanged: (value) =>
                           alertNotifier.update(temperatureAlert: value),
                     ),
                     const Divider(height: 1),
                     SwitchListTile(
-                      title: const Text('Nhắc nhở thu hoạch'),
+                      title: Text(context.tr('harvest_reminder')),
                       value: alertSettings.harvestReminder,
                       onChanged: (value) =>
                           alertNotifier.update(harvestReminder: value),

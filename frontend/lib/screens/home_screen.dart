@@ -11,6 +11,7 @@ import '../core/widgets/skeleton.dart'; // placeholder skeleton widget
 import '../providers/data_providers.dart';
 import '../providers/user_provider.dart';
 import '../data/models.dart';
+import '../models/device_overview.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text.dart';
 import '../core/animation/app_motion.dart';
@@ -20,11 +21,12 @@ class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   // Greeting based on hour of day.
-  String _greeting() {
+  String _greeting(BuildContext context) {
     final hour = TimeOfDay.now().hour;
-    if (hour < 12) return 'Chào buổi sáng';
-    if (hour < 18) return 'Chào buổi chiều';
-    return 'Chào buổi tối';
+    final isVietnamese = Localizations.localeOf(context).languageCode == 'vi';
+    if (hour < 12) return isVietnamese ? 'Chào buổi sáng' : 'Good morning';
+    if (hour < 18) return isVietnamese ? 'Chào buổi chiều' : 'Good afternoon';
+    return isVietnamese ? 'Chào buổi tối' : 'Good evening';
   }
 
   // Compute health percent from sensor vs. plant ideal ranges.
@@ -67,13 +69,15 @@ class HomeScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _greeting(),
+                              _greeting(context),
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: AppColors.secondaryText),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Vườn của ${user.fullName.split(' ')[0]}',
+                              Localizations.localeOf(context).languageCode == 'vi'
+                                  ? 'Vườn của ${user.fullName.split(' ')[0]}'
+                                  : "${user.fullName.split(' ')[0]}'s Garden",
                               style: AppText.heading(context, fontSize: 24),
                             ),
                           ],
@@ -122,16 +126,15 @@ class HomeScreen extends ConsumerWidget {
                       error: (_, _) => const Text('Lỗi tải cảm biến'),
                     ),
                     const SizedBox(height: 24),
-                    // Sensor card
-                    sensorAsync.when(
-                      data: (sensor) => AppMotionEntrance(
-                        child: _SensorCard(
-                          activePlant: activePlant,
-                          sensor: sensor,
+                    // These gauges intentionally use persisted backend readings.
+                    ref.watch(dashboardDevicesProvider).when(
+                      data: (devices) => AppMotionEntrance(
+                        child: _LiveSensorCard(
+                          device: devices.isEmpty ? null : devices.first,
                         ),
                       ),
-                      loading: () => Skeleton(height: 140, borderRadius: 24),
-                      error: (_, _) => const Text('Lỗi cảm biến'),
+                      loading: () => Skeleton(height: 180, borderRadius: 24),
+                      error: (_, _) => const Text('Không thể tải cảm biến'),
                     ),
                     const SizedBox(height: 24),
                     // Care schedule card
@@ -288,11 +291,10 @@ class _HeroCard extends StatelessWidget {
 
 // -----------------------------------------------------------------------------
 // Sensor card widget with three gauge rings.
-class _SensorCard extends StatelessWidget {
-  const _SensorCard({required this.activePlant, required this.sensor});
+class _LiveSensorCard extends StatelessWidget {
+  const _LiveSensorCard({required this.device});
 
-  final ActivePlant activePlant;
-  final SensorReading sensor;
+  final DeviceOverview? device;
 
   @override
   Widget build(BuildContext context) {
@@ -320,26 +322,27 @@ class _SensorCard extends StatelessWidget {
             const SizedBox(height: 12),
             LayoutBuilder(
               builder: (context, constraints) {
+                final reading = device?.latestReading;
                 final gauges = [
                   GaugeRing(
                     label: 'MỨC NƯỚC',
-                    value: sensor.waterLevel,
+                    value: reading?.waterLevel,
                     unit: '%',
                     color: AppColors.forestGreen,
                     icon: Icons.opacity,
                     onTap: () => context.push('/home/sensor/water'),
                   ),
                   GaugeRing(
-                    label: 'MỨC DINH DƯỠNG',
-                    value: sensor.nutrientLevel,
-                    unit: '%',
+                    label: 'TDS',
+                    value: reading?.tds,
+                    unit: 'ppm',
                     color: const Color(0xFFF2A93B), // nutrient gauge orange
                     icon: Icons.science,
                     onTap: () => context.push('/home/sensor/nutrient'),
                   ),
                   GaugeRing(
-                    label: 'NHIỆT ĐỘ',
-                    value: sensor.temperature,
+                    label: 'NHIỆT ĐỘ KK',
+                    value: reading?.temperature,
                     unit: '°C',
                     color: const Color(0xFFCDB59A), // temp gauge tan
                     icon: Icons.thermostat,
@@ -347,24 +350,46 @@ class _SensorCard extends StatelessWidget {
                   ),
                   GaugeRing(
                     label: 'ÁNH SÁNG',
-                    value: sensor.lightLevel,
-                    unit: '%',
+                    value: reading?.lux,
+                    unit: 'lux',
                     color: const Color(0xFFE3A72F),
                     icon: Icons.wb_sunny_outlined,
                     onTap: () => context.push('/home/sensor/light'),
                   ),
+                  GaugeRing(
+                    label: 'NHIỆT ĐỘ NƯỚC',
+                    value: reading?.solutionTemperature,
+                    unit: '°C',
+                    color: const Color(0xFFC86464),
+                    icon: Icons.water,
+                    onTap: () => context.push('/home/sensor/solutionTemperature'),
+                  ),
+                  GaugeRing(
+                    label: 'ĐỘ ẨM KHÔNG KHÍ',
+                    value: reading?.humidity,
+                    unit: '%',
+                    color: const Color(0xFF4D94C7),
+                    icon: Icons.water_drop_outlined,
+                    onTap: () => context.push('/home/sensor/humidity'),
+                  ),
                 ];
-                if (constraints.maxWidth < 340) {
-                  return Wrap(
-                    alignment: WrapAlignment.spaceEvenly,
-                    spacing: 20,
-                    runSpacing: 14,
-                    children: gauges,
+                if (constraints.maxWidth >= 680) {
+                  return Row(
+                    children: [
+                      for (final gauge in gauges)
+                        Expanded(child: Center(child: gauge)),
+                    ],
                   );
                 }
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: gauges,
+
+                return SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceEvenly,
+                    spacing: 12,
+                    runSpacing: 14,
+                    children: gauges,
+                  ),
                 );
               },
             ),

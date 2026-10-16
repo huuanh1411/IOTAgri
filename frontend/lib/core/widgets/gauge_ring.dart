@@ -5,8 +5,7 @@ import '../theme/app_colors.dart';
 /// Circular gauge showing a percentage/value with an icon.
 class GaugeRing extends StatelessWidget {
   final String label;
-  final double
-  value; // 0‑100 range for percentages or raw value for temperature
+  final double? value;
   final String unit;
   final Color color;
   final IconData icon;
@@ -25,7 +24,7 @@ class GaugeRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Normalize value for 0‑100 percentage for the radial progress.
-    final double progress = (value / (unit == '°C' ? 100 : 100)).clamp(
+    final double progress = ((value ?? 0) / 100).clamp(
       0.0,
       1.0,
     );
@@ -69,7 +68,7 @@ class GaugeRing extends StatelessWidget {
                   Icon(icon, size: 20, color: color),
                   const SizedBox(height: 4),
                   Text(
-                    '${value.toStringAsFixed(0)}$unit',
+                    value == null ? '—' : '${value!.toStringAsFixed(0)}$unit',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,

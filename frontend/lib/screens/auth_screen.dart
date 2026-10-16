@@ -22,6 +22,28 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   bool _hidePassword = true;
   bool _hideConfirmPassword = true;
 
+  String? _validatePassword(String? value, {required bool isLogin}) {
+    if (value == null || value.isEmpty) {
+      return 'Vui lòng nhập mật khẩu';
+    }
+    if (isLogin) return null;
+
+    final hasRequiredCharacters =
+        value.length >= 8 &&
+        RegExp(r'[a-z]').hasMatch(value) &&
+        RegExp(r'[A-Z]').hasMatch(value) &&
+        RegExp(r'\d').hasMatch(value) &&
+        RegExp(r'[^A-Za-z0-9]').hasMatch(value);
+    if (hasRequiredCharacters) return null;
+
+    return 'Mật khẩu cần có:\n'
+        '• Ít nhất 8 ký tự\n'
+        '• Chữ thường\n'
+        '• Chữ hoa\n'
+        '• Số\n'
+        '• Ký tự đặc biệt';
+  }
+
   @override
   void dispose() {
     _email.dispose();
@@ -155,9 +177,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                               ),
                             ),
                             validator: (value) =>
-                                value == null || value.length < 8
-                                ? 'Mật khẩu ít nhất 8 ký tự'
-                                : null,
+                                _validatePassword(value, isLogin: isLogin),
                           ),
                           if (!isLogin) ...[
                             const SizedBox(height: 12),

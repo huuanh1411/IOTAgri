@@ -19,6 +19,9 @@ class MoreScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProfileProvider);
+    final avatarInitial = user.fullName.trim().isEmpty
+        ? '?'
+        : user.fullName.trim()[0].toUpperCase();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -44,7 +47,7 @@ class MoreScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      // Gradient avatar with initial "M"
+                      // Gradient avatar with the current user's initial.
                       Container(
                         width: 56,
                         height: 56,
@@ -55,9 +58,9 @@ class MoreScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.all(Radius.circular(12)),
                         ),
                         alignment: Alignment.center,
-                        child: const Text(
-                          'M',
-                          style: TextStyle(
+                        child: Text(
+                          avatarInitial,
+                          style: const TextStyle(
                             fontSize: 24,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

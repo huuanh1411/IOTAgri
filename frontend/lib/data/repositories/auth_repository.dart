@@ -1,5 +1,6 @@
 import '../models/user.dart';
 import '../../services/api_service.dart';
+import '../../models/user.dart' as api_models;
 
 /// Authentication boundary for the Material/Riverpod application shell.
 ///
@@ -13,7 +14,7 @@ class AuthRepository {
   Future<User?> getCurrentUser() async {
     final session = await _api.restoreSession();
     if (session == null) return null;
-    return _toScreenUser(session.id, session.fullName, session.email, session.role);
+    return _loadCurrentProfile(session);
   }
 
   Future<User> login({required String email, required String password}) async {
@@ -21,7 +22,7 @@ class AuthRepository {
     final token = response['accessToken'];
     final session = token is String ? _api.userFromAccessToken(token) : null;
     if (session == null) throw Exception('Không đọc được phiên đăng nhập.');
-    return _toScreenUser(session.id, session.fullName, session.email, session.role);
+    return _loadCurrentProfile(session);
   }
 
   Future<User> signUp({required String fullName, required String email, required String password}) async {
@@ -30,6 +31,28 @@ class AuthRepository {
   }
 
   Future<void> logout() => _api.logout();
+
+  Future<User> _loadCurrentProfile(api_models.User session) async {
+    try {
+      final profile = await _api.getProfile();
+      final roles = (profile['roles'] as List<dynamic>? ?? const [])
+          .map((role) => role.toString());
+      return _toScreenUser(
+        profile['id'] as String? ?? session.id,
+        profile['fullName'] as String? ?? session.fullName,
+        profile['email'] as String? ?? session.email,
+        roles.contains('Admin') ? 'admin' : 'user',
+      );
+    } catch (_) {
+      // Retain an authenticated offline session when the profile API is unavailable.
+      return _toScreenUser(
+        session.id,
+        session.fullName,
+        session.email,
+        session.role,
+      );
+    }
+  }
 
   User _toScreenUser(String id, String fullName, String email, String role) => User(
         id: id,

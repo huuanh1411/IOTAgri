@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 import '../core/animation/app_motion.dart';
 import '../core/theme/app_colors.dart';
 import '../core/widgets/gauge_ring.dart';
-import '../data/models.dart';
+import '../models/sensor_reading.dart';
 import '../models/history_data.dart';
 import '../providers/data_providers.dart';
 import '../services/api_service.dart';
@@ -22,7 +22,10 @@ class SensorDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = _SensorDetail.forMetric(metric);
-    final reading = ref.watch(sensorStreamProvider).valueOrNull;
+    final devices = ref.watch(dashboardDevicesProvider).valueOrNull;
+    final reading = devices == null || devices.isEmpty
+        ? null
+        : devices.first.latestReading;
     final value = detail.valueFrom(reading);
 
     return Scaffold(
@@ -69,7 +72,7 @@ class SensorDetailScreen extends ConsumerWidget {
                 ),
                 if (metric == 'water') ...[
                   const SizedBox(height: 24),
-                  WaterPumpControlPanel(waterLevel: value),
+                  WaterPumpControlPanel(waterLevel: value ?? 0),
                 ],
                 if (metric == 'light') ...[
                   const SizedBox(height: 24),
@@ -110,6 +113,8 @@ class _SensorHistoryCardState extends State<_SensorHistoryCard> {
     'nutrient' => HistorySensor.tds,
     'temperature' => HistorySensor.temperature,
     'light' => HistorySensor.lux,
+    'solutionTemperature' => HistorySensor.solutionTemperature,
+    'humidity' => HistorySensor.humidity,
     _ => HistorySensor.temperature,
   };
 
@@ -940,8 +945,8 @@ class _SensorDetail {
   final String idealRange;
   final String description;
   final String historyTitle;
-  final double Function(SensorReading? reading) valueFrom;
-  final String Function(double value) status;
+  final double? Function(SensorReading? reading) valueFrom;
+  final String Function(double? value) status;
 
   factory _SensorDetail.forMetric(String metric) {
     switch (metric) {
@@ -956,23 +961,26 @@ class _SensorDetail {
           description:
               'Theo dõi lượng nước trong hệ thống để cây luôn được tưới phù hợp.',
           historyTitle: 'Lịch sử mức nước',
-          valueFrom: (reading) => reading?.waterLevel ?? 0,
-          status: (value) => value < 30 ? 'Mức nước thấp' : 'Mức nước ổn định',
+          valueFrom: (reading) => reading?.waterLevel,
+          status: (value) => value == null
+              ? 'Chưa có dữ liệu'
+              : value < 30
+              ? 'Mức nước thấp'
+              : 'Mức nước ổn định',
         );
       case 'nutrient':
         return _SensorDetail(
-          title: 'Mức dinh dưỡng',
-          label: 'MỨC DINH DƯỠNG',
-          unit: '%',
+          title: 'TDS',
+          label: 'TDS',
+          unit: 'ppm',
           color: const Color(0xFFF2A93B),
           icon: Icons.science,
-          idealRange: '45–70%',
+          idealRange: 'Chưa cấu hình',
           description:
               'Theo dõi nồng độ dinh dưỡng để hỗ trợ cây phát triển đồng đều.',
           historyTitle: 'Lịch sử mức dinh dưỡng',
-          valueFrom: (reading) => reading?.nutrientLevel ?? 0,
-          status: (value) =>
-              value < 45 ? 'Dinh dưỡng cần bổ sung' : 'Dinh dưỡng ổn định',
+          valueFrom: (reading) => reading?.tds,
+          status: (value) => value == null ? 'Chưa có dữ liệu' : 'Đã nhận dữ liệu',
         );
       case 'temperature':
         return _SensorDetail(
@@ -984,24 +992,52 @@ class _SensorDetail {
           idealRange: '20–28°C',
           description: 'Theo dõi nhiệt độ môi trường quanh khu vực trồng cây.',
           historyTitle: 'Lịch sử nhiệt độ',
-          valueFrom: (reading) => reading?.temperature ?? 0,
-          status: (value) => value < 20 || value > 28
+          valueFrom: (reading) => reading?.temperature,
+          status: (value) => value == null
+              ? 'Chưa có dữ liệu'
+              : value < 20 || value > 28
               ? 'Nhiệt độ cần chú ý'
               : 'Nhiệt độ phù hợp',
+        );
+      case 'solutionTemperature':
+        return _SensorDetail(
+          title: 'Nhiệt độ nước',
+          label: 'NHIỆT ĐỘ NƯỚC',
+          unit: '°C',
+          color: const Color(0xFFC86464),
+          icon: Icons.water,
+          idealRange: 'Chưa cấu hình',
+          description: 'Theo dõi nhiệt độ dung dịch bằng cảm biến nhiệt độ nước.',
+          historyTitle: 'Lịch sử nhiệt độ nước',
+          valueFrom: (reading) => reading?.solutionTemperature,
+          status: (value) => value == null ? 'Chưa có dữ liệu' : 'Đã nhận dữ liệu',
+        );
+      case 'humidity':
+        return _SensorDetail(
+          title: 'Độ ẩm không khí',
+          label: 'ĐỘ ẨM KHÔNG KHÍ',
+          unit: '%',
+          color: const Color(0xFF4D94C7),
+          icon: Icons.water_drop_outlined,
+          idealRange: 'Chưa cấu hình',
+          description: 'Theo dõi độ ẩm không khí bằng cảm biến AHT20.',
+          historyTitle: 'Lịch sử độ ẩm không khí',
+          valueFrom: (reading) => reading?.humidity,
+          status: (value) => value == null ? 'Chưa có dữ liệu' : 'Đã nhận dữ liệu',
         );
       default:
         return _SensorDetail(
           title: 'Ánh sáng',
           label: 'ÁNH SÁNG',
-          unit: '%',
+          unit: 'lux',
           color: const Color(0xFFE3A72F),
           icon: Icons.wb_sunny_outlined,
-          idealRange: '60–85%',
+          idealRange: 'Chưa cấu hình',
           description:
               'Theo dõi cường độ ánh sáng để cây nhận đủ năng lượng quang hợp.',
           historyTitle: 'Lịch sử ánh sáng',
-          valueFrom: (reading) => reading?.lightLevel ?? 0,
-          status: (value) => value < 60 ? 'Ánh sáng thấp' : 'Ánh sáng phù hợp',
+          valueFrom: (reading) => reading?.lux,
+          status: (value) => value == null ? 'Chưa có dữ liệu' : 'Đã nhận dữ liệu',
         );
     }
   }

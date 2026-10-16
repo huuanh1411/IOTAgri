@@ -5,7 +5,25 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models.dart';
 import '../data/mock_data.dart';
+import '../models/device_overview.dart';
 import '../repositories/plant_repository.dart';
+import '../services/api_service.dart';
+
+/// Persisted device readings used by the live gauge dashboard.
+/// Errors stay visible to the UI; this provider deliberately has no mock fallback.
+final dashboardDevicesProvider = StreamProvider<List<DeviceOverview>>((ref) {
+  final api = ApiService();
+  return (() async* {
+    while (true) {
+      final data = await api.getDashboardOverview();
+      yield data
+          .whereType<Map<String, dynamic>>()
+          .map(DeviceOverview.fromJson)
+          .toList(growable: false);
+      await Future<void>.delayed(const Duration(seconds: 10));
+    }
+  })();
+});
 
 // Provides the currently selected active plant.
 final currentPlantProvider = StateProvider<ActivePlant>((ref) => defaultActivePlant);

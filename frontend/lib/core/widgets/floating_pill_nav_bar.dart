@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../animation/app_motion.dart';
 import '../theme/app_colors.dart';
+import '../../utils/l10n.dart';
 
 /// Floating bottom navigation with a single sliding selection indicator.
 class FloatingPillNavBar extends StatelessWidget {
@@ -21,7 +22,7 @@ class FloatingPillNavBar extends StatelessWidget {
     Icons.more_horiz_outlined,
   ];
 
-  static const _labels = ['Trang chủ', 'Cảnh báo', 'Chọn giống', 'Khác'];
+  static const _labelKeys = ['home', 'alerts', 'choose_plant', 'more'];
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +98,7 @@ class FloatingPillNavBar extends StatelessWidget {
                               duration: duration,
                               curve: AppMotion.easeOut,
                               style: TextStyle(fontSize: 10, color: foreground),
-                              child: Text(_labels[index]),
+                              child: Text(context.tr(_labelKeys[index])),
                             ),
                           ],
                         ),
