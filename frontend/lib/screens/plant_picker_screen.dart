@@ -77,14 +77,9 @@ class PlantPickerScreen extends ConsumerWidget {
                                 ),
                               );
                               if (confirm == true) {
-                                // Reset active plant state.
-                                ref
+                                await ref
                                     .read(currentPlantProvider.notifier)
-                                    .state = ActivePlant(
-                                  plant: plant,
-                                  startDate: DateTime.now(),
-                                  currentDay: 1,
-                                );
+                                    .startGrowing(plant);
                                 // Show feedback.
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(

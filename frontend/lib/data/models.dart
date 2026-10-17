@@ -39,13 +39,22 @@ class Plant {
 class ActivePlant {
   final Plant plant;
   final DateTime startDate;
-  final int currentDay; // 0‑based day count
 
-  const ActivePlant({
-    required this.plant,
-    required this.startDate,
-    required this.currentDay,
-  });
+  const ActivePlant({required this.plant, required this.startDate});
+
+  /// Zero-based growing day derived from the persisted planting date.
+  int currentDayAt(DateTime now) {
+    final start = DateTime(startDate.year, startDate.month, startDate.day);
+    final today = DateTime(now.year, now.month, now.day);
+    return today.difference(start).inDays.clamp(0, plant.durationWeeks * 7 - 1);
+  }
+
+  int get currentDay => currentDayAt(DateTime.now());
+
+  int get totalDays => plant.durationWeeks * 7;
+
+  double progressAt(DateTime now) =>
+      ((currentDayAt(now) + 1) / totalDays).clamp(0.0, 1.0);
 }
 
 /// Sensor readings drifting over time.

@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/models.dart';
 import '../data/mock_data.dart';
 import '../models/device_overview.dart';
@@ -25,8 +26,78 @@ final dashboardDevicesProvider = StreamProvider<List<DeviceOverview>>((ref) {
   })();
 });
 
-// Provides the currently selected active plant.
-final currentPlantProvider = StateProvider<ActivePlant>((ref) => defaultActivePlant);
+abstract class ActivePlantStore {
+  Future<String?> readPlantId();
+  Future<DateTime?> readStartDate();
+  Future<void> write(ActivePlant activePlant);
+}
+
+class SharedPreferencesActivePlantStore implements ActivePlantStore {
+  static const _plantIdKey = 'active_plant_id';
+  static const _startDateKey = 'active_plant_start_date';
+
+  @override
+  Future<String?> readPlantId() async =>
+      (await SharedPreferences.getInstance()).getString(_plantIdKey);
+
+  @override
+  Future<DateTime?> readStartDate() async {
+    final value = (await SharedPreferences.getInstance()).getString(
+      _startDateKey,
+    );
+    return value == null ? null : DateTime.tryParse(value);
+  }
+
+  @override
+  Future<void> write(ActivePlant activePlant) async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setString(_plantIdKey, activePlant.plant.id);
+    await preferences.setString(
+      _startDateKey,
+      activePlant.startDate.toIso8601String(),
+    );
+  }
+}
+
+class ActivePlantController extends StateNotifier<ActivePlant> {
+  ActivePlantController({ActivePlantStore? store, DateTime Function()? now})
+    : _store = store ?? SharedPreferencesActivePlantStore(),
+      _now = now ?? DateTime.now,
+      super(defaultActivePlant) {
+    restored = _restore();
+  }
+
+  final ActivePlantStore _store;
+  final DateTime Function() _now;
+  late final Future<void> restored;
+
+  Future<void> _restore() async {
+    try {
+      final plantId = await _store.readPlantId();
+      final startDate = await _store.readStartDate();
+      if (plantId == null || startDate == null) return;
+      final plant = mockPlants.where((item) => item.id == plantId).firstOrNull;
+      if (plant != null) {
+        state = ActivePlant(plant: plant, startDate: startDate);
+      }
+    } catch (_) {
+      // Keep the existing default when local persistence is unavailable.
+    }
+  }
+
+  Future<void> startGrowing(Plant plant) async {
+    await restored;
+    final activePlant = ActivePlant(plant: plant, startDate: _now());
+    await _store.write(activePlant);
+    state = activePlant;
+  }
+}
+
+// Single source of truth shared by Plant Selection and Home Dashboard.
+final currentPlantProvider =
+    StateNotifierProvider<ActivePlantController, ActivePlant>((ref) {
+      return ActivePlantController();
+    });
 
 // Stream of sensor readings that fetch from the backend API every few seconds.
 final sensorStreamProvider = StreamProvider<SensorReading>((ref) {

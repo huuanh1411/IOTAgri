@@ -101,7 +101,6 @@ final List<Plant> mockPlants = [
 final ActivePlant defaultActivePlant = ActivePlant(
   plant: mockPlants[0],
   startDate: DateTime.now().subtract(const Duration(days: 14)),
-  currentDay: 14,
 );
 
 // Default sensor reading used as a starting point for the drift stream.

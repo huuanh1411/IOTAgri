@@ -166,7 +166,8 @@ class _HeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final plant = activePlant.plant;
-    final progress = (activePlant.currentDay + 1) / (plant.durationWeeks * 7);
+    final currentDay = activePlant.currentDay;
+    final progress = activePlant.progressAt(DateTime.now());
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -249,7 +250,7 @@ class _HeroCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '${plant.variety} · Ngày ${activePlant.currentDay + 1} / ${plant.durationWeeks * 7}',
+                '${plant.variety} · Ngày ${currentDay + 1} / ${activePlant.totalDays}',
                 style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
               const SizedBox(height: 16),
