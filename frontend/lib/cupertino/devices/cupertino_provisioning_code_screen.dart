@@ -261,7 +261,7 @@ class _CupertinoProvisioningCodeScreenState
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: CupertinoColors.label.resolveFrom(context),
-                  fontFamily: 'monospace',
+                  fontFamily: 'Inter',
                   fontSize: 30,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 2,

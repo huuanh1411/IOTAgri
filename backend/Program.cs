@@ -6,6 +6,7 @@ using IOTAgriBackend.Endpoints;
 using IOTAgriBackend.Models;
 using IOTAgriBackend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -106,6 +107,15 @@ builder.Services.AddRateLimiter(options => options.AddPolicy("deviceClaims", con
             AutoReplenishment = true,
         })));
 
+// Trust forwarded headers only from the Docker bridge range; the API has no published host port, so only Caddy reaches it.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+    options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse("172.16.0.0/12"));
+});
+
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddSingleton<MqttIngestionService>();
 builder.Services.AddHostedService(services => services.GetRequiredService<MqttIngestionService>());
@@ -131,6 +141,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 
 app.UseCors(FlutterCorsPolicy);

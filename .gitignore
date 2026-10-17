@@ -2,6 +2,9 @@
 **/obj/
 graphify-out/
 .env
+.env.production
+deploy/mosquitto-certs/*.crt
+deploy/mosquitto-certs/*.key
 .compose-start.stderr.log
 .compose-start.stdout.log
 .run/

@@ -10,6 +10,8 @@ public class PumpSchedule
     public TimeOnly StartTime { get; set; }
     public TimeOnly? EndTime { get; set; }
     public int? IntervalMinutes { get; set; }
+    public DateOnly? ActiveFromDate { get; set; }
+    public DateOnly? ActiveUntilDate { get; set; }
     public int DurationSeconds { get; set; }
     public string TimeZone { get; set; } = string.Empty;
     public DateTime? LastDispatchedOccurrenceUtc { get; set; }

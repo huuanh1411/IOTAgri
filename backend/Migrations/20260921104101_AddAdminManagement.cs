@@ -61,7 +61,7 @@ namespace IOTAgriBackend.Migrations
             migrationBuilder.Sql(
                 """
                 DO $$ BEGIN
-                    IF EXISTS (SELECT 1 FROM \"Devices\" WHERE \"OwnerId\" IS NULL) THEN
+                    IF EXISTS (SELECT 1 FROM "Devices" WHERE "OwnerId" IS NULL) THEN
                         RAISE EXCEPTION 'Cannot revert AddAdminManagement while unowned devices exist.';
                     END IF;
                 END $$;

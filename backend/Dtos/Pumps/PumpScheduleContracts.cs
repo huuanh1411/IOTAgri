@@ -7,7 +7,9 @@ public record PumpScheduleRequest(
     int DurationSeconds,
     string? TimeZone,
     TimeOnly? EndTime = null,
-    int? IntervalMinutes = null);
+    int? IntervalMinutes = null,
+    DateOnly? ActiveFromDate = null,
+    DateOnly? ActiveUntilDate = null);
 
 public record PumpScheduleResponse(
     Guid Id,
@@ -20,4 +22,6 @@ public record PumpScheduleResponse(
     int DurationSeconds,
     string TimeZone,
     DateTime? LastDispatchedOccurrenceUtc,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    DateOnly? ActiveFromDate,
+    DateOnly? ActiveUntilDate);

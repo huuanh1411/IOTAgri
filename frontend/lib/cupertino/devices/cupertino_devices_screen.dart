@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/animation/app_motion.dart';
 import '../../models/device.dart';
 import '../../services/api_service.dart';
 import 'cupertino_device_detail_screen.dart';
@@ -19,7 +20,7 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
   late final ApiService _apiService;
   List<Device> _devices = const [];
   bool _isLoading = true;
-  final bool _isCreating = false;
+  bool _isCreating = false;
   String? _deletingDeviceId;
   String? _errorMessage;
   String _searchQuery = '';
@@ -146,7 +147,8 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
 
   Future<void> _openDevice(Device device) async {
     await Navigator.of(context).push<void>(
-      CupertinoPageRoute<void>(
+      AppMotion.detailRoute<void>(
+        context: context,
         builder: (_) => CupertinoDeviceDetailScreen(
           device: device,
           apiService: _apiService,

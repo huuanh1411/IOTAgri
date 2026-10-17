@@ -4,6 +4,7 @@ namespace IOTAgriBackend.Dtos.Pumps;
 
 public record PumpCommandResponse(
     Guid Id,
+    Guid DeviceId,
     bool IsOn,
     int? DurationSeconds,
     PumpCommandStatus Status,

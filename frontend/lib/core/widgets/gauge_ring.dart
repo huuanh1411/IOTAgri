@@ -5,10 +5,12 @@ import '../theme/app_colors.dart';
 /// Circular gauge showing a percentage/value with an icon.
 class GaugeRing extends StatelessWidget {
   final String label;
-  final double value; // 0‑100 range for percentages or raw value for temperature
+  final double
+  value; // 0‑100 range for percentages or raw value for temperature
   final String unit;
   final Color color;
   final IconData icon;
+  final VoidCallback? onTap;
 
   const GaugeRing({
     super.key,
@@ -17,13 +19,17 @@ class GaugeRing extends StatelessWidget {
     required this.unit,
     required this.color,
     required this.icon,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     // Normalize value for 0‑100 percentage for the radial progress.
-    final double progress = (value / (unit == '°C' ? 100 : 100)).clamp(0.0, 1.0);
-    return Column(
+    final double progress = (value / (unit == '°C' ? 100 : 100)).clamp(
+      0.0,
+      1.0,
+    );
+    final gauge = Column(
       children: [
         SizedBox(
           width: 72,
@@ -64,7 +70,10 @@ class GaugeRing extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '${value.toStringAsFixed(0)}$unit',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -77,6 +86,16 @@ class GaugeRing extends StatelessWidget {
           style: const TextStyle(fontSize: 12, color: AppColors.secondaryText),
         ),
       ],
+    );
+    if (onTap == null) return gauge;
+    return Semantics(
+      button: true,
+      label: 'Xem chi tiết $label',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(padding: const EdgeInsets.all(6), child: gauge),
+      ),
     );
   }
 }

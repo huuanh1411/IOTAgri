@@ -43,8 +43,6 @@ services:
     image: eclipse-mosquitto:2
     profiles: ["pump-simulator"]
     command: ["/bin/sh", "/simulator.sh"]
-    environment:
-      SIMULATOR_DEVICE_KEY: ${PUMP_SIMULATOR_DEVICE_KEY:-}
     volumes:
       - ./tools/pump-simulator.sh:/simulator.sh:ro
     depends_on:
@@ -68,6 +66,7 @@ services:
       Cors__AllowedOrigins__7: http://localhost:3009
       Cors__AllowedOrigins__8: http://localhost:3010
       Cors__AllowPrivateLanOrigins: "true"
+      Cors__AllowedOrigins__9: http://localhost
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       Jwt__Issuer: IOTAgriBackend
       Jwt__Audience: IOTAgriBackendClients
@@ -88,6 +87,18 @@ services:
         condition: service_healthy
       mosquitto:
         condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - default
 
 volumes:
   postgres-data:

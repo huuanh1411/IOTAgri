@@ -174,6 +174,42 @@ Run the API behind HTTPS, keep API and PostgreSQL private, restart core containe
 - [ ] HTTPS, MQTT authorization, restart, backup, and restore checks pass.
 - [ ] README states production hardening is implemented only after these checks pass.
 
+## Task 0: Verify open questions before Task 1
+
+**Description:** Confirm facts the plan depends on but has not checked.
+
+**Acceptance criteria:**
+- [ ] Confirm which endpoints apply `RequireRateLimiting("deviceClaims")`; confirm the limiter key is the real client IP after Task 2.
+- [ ] Confirm Flutter app production API base URL and CORS origin.
+- [ ] Confirm Dockerfile runtime user is non-root; set one if not.
+- [ ] Confirm PostgreSQL resource limits and volume ownership for `postgres-data`.
+
+**Verification:** grep for `RequireRateLimiting`; read `frontend/lib` config; `docker compose -f compose.production.yaml config` shows limits and user.
+
+**Dependencies:** None.
+
+**Files likely touched:** `Dockerfile`, `compose.production.yaml`, `backend/Endpoints/*.cs`, `frontend/lib/**`.
+
+**Estimated scope:** Small.
+
+## Task 9: Production runtime rules
+
+**Description:** Encode production constraints in the stack and code.
+
+**Acceptance criteria:**
+- [ ] Swagger and OpenAPI UI stay disabled when `ASPNETCORE_ENVIRONMENT=Production`; add a test.
+- [ ] `api` service has a healthcheck on `/health` and `restart: unless-stopped`; `mosquitto` too.
+- [ ] `api` runs as exactly one replica. Document in `deploy/README.md`: `MqttIngestionService` and `PumpScheduleDispatchService` run in-process; more than one replica double-ingests readings and double-dispatches pump commands.
+- [ ] Startup `MigrateAsync()` runs once per deploy. Document that it runs on every boot; acceptable only with one replica.
+
+**Verification:** test asserts Swagger off in Production; `docker compose -f compose.production.yaml config` shows healthchecks and restart policy.
+
+**Dependencies:** Task 1, Task 2.
+
+**Files likely touched:** `backend/Program.cs`, `compose.production.yaml`, `deploy/README.md`, `backend/tests/ProductionRuntimeTests.cs`.
+
+**Estimated scope:** Small.
+
 ## Risks and mitigations
 
 | Risk | Mitigation |

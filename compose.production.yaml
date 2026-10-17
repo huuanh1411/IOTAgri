@@ -1,0 +1,81 @@
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    environment:
+      MOSQUITTO_DYNSEC_PASSWORD: ${MQTT_ADMIN_PASSWORD}
+    ports:
+      - "8883:8883"
+    networks:
+      default:
+        aliases:
+          - mqtt.aerogreen.vn # lets the API validate the certificate hostname internally
+    volumes:
+      - ./mosquitto/mosquitto.production.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./deploy/mosquitto-certs:/mosquitto/certs:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+
+  api:
+    build: .
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      AllowedHosts: api.aerogreen.vn
+      Cors__AllowedOrigins__0: https://app.aerogreen.vn
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      Jwt__Issuer: IOTAgriBackend
+      Jwt__Audience: IOTAgriBackendClients
+      Jwt__Key: ${JWT_KEY}
+      AdminBootstrap__Email: ${ADMIN_BOOTSTRAP_EMAIL:-}
+      AdminBootstrap__Password: ${ADMIN_BOOTSTRAP_PASSWORD:-}
+      AdminBootstrap__FullName: ${ADMIN_BOOTSTRAP_FULL_NAME:-Administrator}
+      Mqtt__Host: mqtt.aerogreen.vn
+      Mqtt__Port: 8883
+      Mqtt__UseTls: "true"
+      Mqtt__Username: api
+      Mqtt__Password: ${MQTT_API_PASSWORD}
+      Mqtt__ClientId: iotagribackend-production
+      DeviceProvisioning__MqttHost: mqtt.aerogreen.vn
+      PumpScheduling__Enabled: "false"
+      PumpScheduling__PollSeconds: ${PUMP_SCHEDULING_POLL_SECONDS:-30}
+      PumpScheduling__DueWindowSeconds: ${PUMP_SCHEDULING_DUE_WINDOW_SECONDS:-90}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+
+volumes:
+  postgres-data:
+  mosquitto-data:
+  mosquitto-log:
+  caddy-data:
+  caddy-config:

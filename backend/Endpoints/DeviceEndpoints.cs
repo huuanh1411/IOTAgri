@@ -33,6 +33,7 @@ public static class DeviceEndpoints
         group.MapGet("/{id:guid}/alert-settings", GetAlertSettingsAsync);
         group.MapPut("/{id:guid}/alert-settings", UpdateAlertSettingsAsync);
         group.MapGet("/{id:guid}/alerts", GetAlertsAsync);
+        group.MapPut("/{id:guid}/alerts/{alertId:guid}/resolve", ResolveAlertAsync);
 
         return app;
     }
@@ -51,9 +52,14 @@ public static class DeviceEndpoints
             return Results.Unauthorized();
         }
 
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            return Results.BadRequest(new { error = "name is required." });
+        }
+
         var device = new Device
         {
-            Name = request.Name,
+            Name = request.Name.Trim(),
             // URL-safe (no '+' or '/') so the key can be used as an MQTT topic segment.
             DeviceKey = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32))
                 .Replace('+', '-').Replace('/', '_').TrimEnd('='),
@@ -134,7 +140,12 @@ public static class DeviceEndpoints
             return Results.NotFound();
         }
 
-        device.Name = request.Name;
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            return Results.BadRequest(new { error = "name is required." });
+        }
+
+        device.Name = request.Name.Trim();
         await db.SaveChangesAsync();
 
         return Results.Ok(new DeviceResponse(
@@ -245,6 +256,7 @@ public static class DeviceEndpoints
 
     private static PumpCommandResponse ToResponse(PumpCommand command) => new(
         command.Id,
+        command.DeviceId,
         command.IsOn,
         command.DurationSeconds,
         command.Status,
@@ -337,6 +349,7 @@ public static class DeviceEndpoints
             .Take(query.PageSize)
             .Select(command => new PumpCommandHistoryResponse(
                 command.Id,
+                command.DeviceId,
                 command.IsOn,
                 command.DurationSeconds,
                 command.Source,
@@ -379,7 +392,7 @@ public static class DeviceEndpoints
         var maximumDurationSeconds = configuration.GetValue<int?>("PumpControl:MaximumDurationSeconds") ?? 600;
         if (maximumDurationSeconds <= 0) return Results.Problem("PumpControl:MaximumDurationSeconds must be positive.", statusCode: StatusCodes.Status503ServiceUnavailable);
 
-        var error = PumpScheduleRules.Validate(request.IsEnabled, request.WeekdayMask, request.StartTime, request.DurationSeconds, request.TimeZone, maximumDurationSeconds, request.EndTime, request.IntervalMinutes);
+        var error = PumpScheduleRules.Validate(request.IsEnabled, request.WeekdayMask, request.StartTime, request.DurationSeconds, request.TimeZone, maximumDurationSeconds, request.EndTime, request.IntervalMinutes, request.ActiveFromDate, request.ActiveUntilDate);
         if (error is not null) return Results.BadRequest(new { error });
 
         var schedule = new PumpSchedule
@@ -390,6 +403,8 @@ public static class DeviceEndpoints
             StartTime = request.StartTime!.Value,
             EndTime = request.EndTime,
             IntervalMinutes = request.IntervalMinutes,
+            ActiveFromDate = request.ActiveFromDate,
+            ActiveUntilDate = request.ActiveUntilDate,
             DurationSeconds = request.DurationSeconds,
             TimeZone = request.TimeZone!,
         };
@@ -421,7 +436,7 @@ public static class DeviceEndpoints
         var maximumDurationSeconds = configuration.GetValue<int?>("PumpControl:MaximumDurationSeconds") ?? 600;
         if (maximumDurationSeconds <= 0) return Results.Problem("PumpControl:MaximumDurationSeconds must be positive.", statusCode: StatusCodes.Status503ServiceUnavailable);
 
-        var error = PumpScheduleRules.Validate(request.IsEnabled, request.WeekdayMask, request.StartTime, request.DurationSeconds, request.TimeZone, maximumDurationSeconds, request.EndTime, request.IntervalMinutes);
+        var error = PumpScheduleRules.Validate(request.IsEnabled, request.WeekdayMask, request.StartTime, request.DurationSeconds, request.TimeZone, maximumDurationSeconds, request.EndTime, request.IntervalMinutes, request.ActiveFromDate, request.ActiveUntilDate);
         if (error is not null) return Results.BadRequest(new { error });
 
         schedule.IsEnabled = request.IsEnabled!.Value;
@@ -429,6 +444,8 @@ public static class DeviceEndpoints
         schedule.StartTime = request.StartTime!.Value;
         schedule.EndTime = request.EndTime;
         schedule.IntervalMinutes = request.IntervalMinutes;
+        schedule.ActiveFromDate = request.ActiveFromDate;
+        schedule.ActiveUntilDate = request.ActiveUntilDate;
         schedule.DurationSeconds = request.DurationSeconds;
         schedule.TimeZone = request.TimeZone!;
 
@@ -465,7 +482,9 @@ public static class DeviceEndpoints
         schedule.DurationSeconds,
         schedule.TimeZone,
         schedule.LastDispatchedOccurrenceUtc,
-        schedule.CreatedAt);
+        schedule.CreatedAt,
+        schedule.ActiveFromDate,
+        schedule.ActiveUntilDate);
 
     private static async Task<IResult?> SavePumpScheduleAsync(
         ApplicationDbContext db,
@@ -587,5 +606,26 @@ public static class DeviceEndpoints
             query.Page,
             query.PageSize,
             totalCount));
+    }
+
+    private static async Task<IResult> ResolveAlertAsync(
+        Guid id,
+        Guid alertId,
+        ClaimsPrincipal principal,
+        ApplicationDbContext db)
+    {
+        var userId = GetUserId(principal);
+        if (userId is null) return Results.Unauthorized();
+
+        var alert = await db.DeviceAlerts
+            .Include(candidate => candidate.Device)
+            .FirstOrDefaultAsync(candidate => candidate.Id == alertId && candidate.DeviceId == id && candidate.Device!.OwnerId == userId);
+        if (alert is null) return Results.NotFound();
+
+        // Resolution is idempotent so retrying a user action does not create a
+        // second lifecycle event or alter its original resolution timestamp.
+        alert.ResolvedAt ??= DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return Results.Ok(DeviceAlertResponse.From(alert));
     }
 }

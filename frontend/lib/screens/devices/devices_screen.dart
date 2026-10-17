@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../../models/device.dart';
+import '../../core/animation/app_motion.dart';
 import '../../services/api_service.dart';
 import '../../widgets/loading_indicators.dart';
 import '../../widgets/custom_buttons.dart';
@@ -239,7 +240,8 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
   Future<void> _openDevice(Device device) async {
     await Navigator.of(context).push<void>(
-      CupertinoPageRoute<void>(
+      AppMotion.detailRoute<void>(
+        context: context,
         builder: (_) => CupertinoDeviceDetailScreen(device: device),
       ),
     );
@@ -319,7 +321,9 @@ class _DeviceStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isOnline ? Colors.green : Colors.grey;
-    return Container(
+    return AnimatedContainer(
+      duration: AppMotion.duration(context, AppMotion.status),
+      curve: AppMotion.easeInOut,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),

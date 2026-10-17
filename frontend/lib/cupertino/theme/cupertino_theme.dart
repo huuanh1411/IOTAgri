@@ -10,7 +10,7 @@ class AerogreenCupertinoTheme {
       textTheme: CupertinoTextThemeData(
         primaryColor: CupertinoColors.label,
         textStyle: TextStyle(
-          fontFamily: '.SF Pro Text',
+          fontFamily: 'Inter',
           fontSize: 17,
           color: CupertinoColors.label,
         ),
@@ -27,7 +27,7 @@ class AerogreenCupertinoTheme {
       textTheme: CupertinoTextThemeData(
         primaryColor: CupertinoColors.label,
         textStyle: TextStyle(
-          fontFamily: '.SF Pro Text',
+          fontFamily: 'Inter',
           fontSize: 17,
           color: CupertinoColors.label,
         ),

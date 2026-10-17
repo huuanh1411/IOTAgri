@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/animation/app_motion.dart';
 import '../../cupertino/devices/cupertino_device_detail_screen.dart';
 import '../../models/device.dart';
 import '../../models/device_alert.dart';
@@ -390,7 +391,8 @@ class AlertDetailScreen extends StatelessWidget {
             const SizedBox(height: 24),
             CupertinoButton.filled(
               onPressed: () => Navigator.of(context).push<void>(
-                CupertinoPageRoute(
+                AppMotion.detailRoute<void>(
+                  context: context,
                   builder: (_) => CupertinoDeviceDetailScreen(
                     device: item.device,
                     initialSensor: alert.sensorKey,

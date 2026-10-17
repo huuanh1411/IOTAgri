@@ -6,7 +6,8 @@ enum HistorySensor {
   humidity('humidity', 'Độ ẩm', '%'),
   tds('tds', 'TDS', 'ppm'),
   ph('ph', 'pH', ''),
-  waterLevel('waterLevel', 'Mực nước', '%');
+  waterLevel('waterLevel', 'Mực nước', '%'),
+  lux('lux', 'Ánh sáng', 'lux');
 
   const HistorySensor(this.key, this.label, this.unit);
 
@@ -21,6 +22,7 @@ enum HistorySensor {
     HistorySensor.tds => reading.tds,
     HistorySensor.ph => reading.ph,
     HistorySensor.waterLevel => reading.waterLevel,
+    HistorySensor.lux => reading.lux,
   };
 
   double? valueFromAggregate(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ enum HistorySensor {
       HistorySensor.tds => 'avgTds',
       HistorySensor.ph => 'avgPh',
       HistorySensor.waterLevel => 'avgWaterLevel',
+      HistorySensor.lux => 'avgLux',
     };
     return (json[key] as num?)?.toDouble();
   }

@@ -48,7 +48,7 @@ public static class SensorEndpoints
             .Where(r => r.DeviceId == deviceId)
             .OrderByDescending(r => r.RecordedAt)
             .Take(Math.Clamp(take, 1, 500))
-            .Select(r => new SensorReadingResponse(r.Id, r.Temperature, r.SolutionTemperature, r.Humidity, r.Ph, r.Tds, r.WaterLevel, r.Lux, r.RecordedAt))
+            .Select(r => new SensorReadingResponse(r.Id, r.DeviceId, r.Temperature, r.SolutionTemperature, r.Humidity, r.Ph, r.Tds, r.WaterLevel, r.Lux, r.RecordedAt))
             .ToListAsync();
 
         return Results.Ok(readings);

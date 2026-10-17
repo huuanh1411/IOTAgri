@@ -133,6 +133,52 @@ public class HttpIntegrationTests : IClassFixture<PostgresTestFixture>
     }
 
     [Fact]
+    public async Task Ticket_owner_can_list_read_and_reply_but_another_user_cannot_read_it()
+    {
+        await using var db = await _fixture.CreateDatabaseAsync();
+        await using var app = await BackendHttpTestHost.CreateAsync(db);
+        using var client = app.GetTestClient();
+        var owner = await RegisterLogin(client, "owner@example.test");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", owner.AccessToken);
+        using var create = await client.PostAsJsonAsync("/api/tickets", new CreateSupportTicketRequest("QA Ticket", "Initial message", "Cảm biến"));
+        Assert.Equal(HttpStatusCode.Created, create.StatusCode);
+        var ticket = (await create.Content.ReadFromJsonAsync<SupportTicketDetailResponse>())!;
+        Assert.Equal("Cảm biến", ticket.Ticket.Category);
+
+        using var list = await client.GetAsync("/api/tickets?status=open");
+        Assert.Equal(HttpStatusCode.OK, list.StatusCode);
+        var page = (await list.Content.ReadFromJsonAsync<SupportTicketPage>())!;
+        Assert.Contains(page.Items, item => item.Id == ticket.Ticket.Id);
+
+        using var reply = await client.PostAsJsonAsync($"/api/tickets/{ticket.Ticket.Id}/messages", new AddSupportTicketMessageRequest("Owner reply"));
+        Assert.Equal(HttpStatusCode.OK, reply.StatusCode);
+        var detail = (await reply.Content.ReadFromJsonAsync<SupportTicketDetailResponse>())!;
+        Assert.Contains(detail.Messages, message => message.Message == "Owner reply");
+
+        var other = await RegisterLogin(client, "other@example.test");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", other.AccessToken);
+        using var forbiddenByOwnership = await client.GetAsync($"/api/tickets/{ticket.Ticket.Id}");
+        Assert.Equal(HttpStatusCode.NotFound, forbiddenByOwnership.StatusCode);
+    }
+
+    [Fact]
+    public async Task Password_change_rejects_wrong_current_password_and_accepts_new_password()
+    {
+        await using var db = await _fixture.CreateDatabaseAsync();
+        await using var app = await BackendHttpTestHost.CreateAsync(db);
+        using var client = app.GetTestClient();
+        var tokens = await RegisterLogin(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokens.AccessToken);
+
+        using var rejected = await client.PostAsJsonAsync("/api/auth/change-password", new ChangePasswordRequest("wrong-password", "NewQaPassword1!"));
+        Assert.Equal(HttpStatusCode.BadRequest, rejected.StatusCode);
+        using var changed = await client.PostAsJsonAsync("/api/auth/change-password", new ChangePasswordRequest("QaPassword1!", "NewQaPassword1!"));
+        Assert.Equal(HttpStatusCode.NoContent, changed.StatusCode);
+        using var login = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest("qa@example.test", "NewQaPassword1!"));
+        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
+    }
+
+    [Fact]
     public async Task Device_create_over_http_must_reject_blank_required_name()
     {
         await using var db = await _fixture.CreateDatabaseAsync();

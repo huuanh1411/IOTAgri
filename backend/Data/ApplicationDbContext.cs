@@ -126,10 +126,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
         builder.Entity<SupportTicket>(entity =>
         {
             entity.Property(ticket => ticket.Subject).HasMaxLength(200);
+            entity.Property(ticket => ticket.Category).HasMaxLength(64).HasDefaultValue("Kỹ thuật");
+            entity.Property(ticket => ticket.DeviceName).HasMaxLength(200);
             entity.Property(ticket => ticket.Status).HasMaxLength(16);
             entity.Property(ticket => ticket.Priority).HasMaxLength(16);
             entity.HasIndex(ticket => new { ticket.Status, ticket.UpdatedAt });
             entity.HasIndex(ticket => ticket.UserId);
+            entity.HasIndex(ticket => ticket.DeviceId);
             entity.HasOne(ticket => ticket.User)
                 .WithMany()
                 .HasForeignKey(ticket => ticket.UserId)

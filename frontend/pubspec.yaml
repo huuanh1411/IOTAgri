@@ -52,6 +52,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_native_splash: ^2.4.7
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -67,12 +68,22 @@ dev_dependencies:
 flutter:
 
   assets:
+    - assets/images/aerogreen_app_icon.png
+    - assets/images/aerogreen_splash_logo.png
     - assets/images/foliage_background.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+flutter_native_splash:
+  color: "#F6EEDE"
+  image: assets/images/aerogreen_splash_logo.png
+  web: false
+  android_12:
+    color: "#F6EEDE"
+    image: assets/images/aerogreen_splash_logo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

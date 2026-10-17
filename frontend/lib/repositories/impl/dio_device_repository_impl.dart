@@ -66,19 +66,15 @@ class DioDeviceRepositoryImpl implements DeviceRepository {
 
   @override
   Future<ProvisioningCode> getActiveProvisioningCode(String deviceId) async {
-    final response = await _dio.get(ApiConstants.activeProvisioningCode(deviceId));
-    return ProvisioningCode.fromJson(response.data as Map<String, dynamic>);
+    throw UnsupportedError(
+      'Provisioning codes are intentionally write-only. Generate a new code instead.',
+    );
   }
 
   @override
   Future<Device> claimDevice(String code, {String? name}) async {
-    final response = await _dio.post(
-      ApiConstants.claimDevice,
-      data: {
-        'code': code,
-        'name': ?name,
-      },
+    throw UnsupportedError(
+      'Device claims are an unauthenticated hardware provisioning flow and require a hardwareId.',
     );
-    return Device.fromJson(response.data as Map<String, dynamic>);
   }
 }

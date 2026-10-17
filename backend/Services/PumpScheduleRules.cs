@@ -7,7 +7,7 @@ public static class PumpScheduleRules
     private const int AllDaysMask = 0b1111111;
     private const long TicksPerWeek = TimeSpan.TicksPerDay * 7;
 
-    public static string? Validate(bool? isEnabled, int weekdayMask, TimeOnly? startTime, int durationSeconds, string? timeZone, int maximumDurationSeconds, TimeOnly? endTime = null, int? intervalMinutes = null)
+    public static string? Validate(bool? isEnabled, int weekdayMask, TimeOnly? startTime, int durationSeconds, string? timeZone, int maximumDurationSeconds, TimeOnly? endTime = null, int? intervalMinutes = null, DateOnly? activeFromDate = null, DateOnly? activeUntilDate = null)
     {
         if (isEnabled is null) return "isEnabled is required.";
         if (weekdayMask <= 0 || (weekdayMask & ~AllDaysMask) != 0) return "weekdayMask must include one or more days from Sunday (1) through Saturday (64).";
@@ -16,6 +16,7 @@ public static class PumpScheduleRules
         if (endTime.HasValue != intervalMinutes.HasValue) return "endTime and intervalMinutes must be provided together.";
         if (intervalMinutes is <= 0 or > 60) return "intervalMinutes must be between 1 and 60.";
         if (endTime == startTime) return "endTime must differ from startTime.";
+        if (activeFromDate is not null && activeUntilDate is not null && activeUntilDate < activeFromDate) return "activeUntilDate must not be before activeFromDate.";
         if (intervalMinutes is not null && durationSeconds >= intervalMinutes * 60) return "durationSeconds must be shorter than intervalMinutes.";
         if (string.IsNullOrWhiteSpace(timeZone) || !TimeZoneInfo.TryConvertIanaIdToWindowsId(timeZone, out _)) return "timeZone must be a valid IANA time zone.";
         return null;
@@ -72,6 +73,9 @@ public static class PumpScheduleRules
         for (var dayOffset = -1; dayOffset <= 0; dayOffset++)
         {
             var date = localNow.Date.AddDays(dayOffset);
+            var scheduleDate = DateOnly.FromDateTime(date);
+            if (schedule.ActiveFromDate is not null && scheduleDate < schedule.ActiveFromDate) continue;
+            if (schedule.ActiveUntilDate is not null && scheduleDate > schedule.ActiveUntilDate) continue;
             if ((schedule.WeekdayMask & (1 << (int)date.DayOfWeek)) == 0) continue;
 
             foreach (var offset in OccurrenceOffsets(schedule))

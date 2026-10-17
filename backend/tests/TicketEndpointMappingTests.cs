@@ -15,7 +15,7 @@ namespace IOTAgriBackend.Tests;
 public class TicketEndpointMappingTests
 {
     [Fact]
-    public void Ticket_create_requires_login_and_admin_routes_require_admin_policy()
+    public void Ticket_user_routes_require_login_and_admin_routes_require_admin_policy()
     {
         var builder = WebApplication.CreateBuilder();
         builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql("Host=localhost;Database=ticket_endpoint_test"));
@@ -25,8 +25,9 @@ public class TicketEndpointMappingTests
         var endpoints = ((IEndpointRouteBuilder)app).DataSources.SelectMany(source => source.Endpoints)
             .OfType<RouteEndpoint>().ToList();
 
-        var create = Assert.Single(endpoints, endpoint => endpoint.RoutePattern.RawText?.StartsWith("/api/tickets") == true);
-        Assert.Contains(create.Metadata.GetOrderedMetadata<IAuthorizeData>(), data => data.Policy is null);
+        var userRoutes = endpoints.Where(endpoint => endpoint.RoutePattern.RawText?.StartsWith("/api/tickets") == true).ToList();
+        Assert.Equal(4, userRoutes.Count);
+        Assert.All(userRoutes, endpoint => Assert.Contains(endpoint.Metadata.GetOrderedMetadata<IAuthorizeData>(), data => data.Policy is null));
 
         var admin = endpoints.Where(endpoint => endpoint.RoutePattern.RawText?.StartsWith("/api/admin/tickets") == true).ToList();
         Assert.Equal(5, admin.Count);

@@ -102,7 +102,7 @@ class DioAuthRepositoryImpl implements AuthRepository {
       );
       return response.statusCode == 200 || response.statusCode == 204;
     } catch (_) {
-      return true;
+      return false;
     }
   }
 }

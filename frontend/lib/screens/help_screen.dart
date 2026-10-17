@@ -48,8 +48,13 @@ class HelpScreen extends ConsumerWidget {
                   icon: const Icon(Icons.chat),
                   label: const Text('Chat với chúng tôi'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
                 ),
               ),
@@ -71,10 +76,22 @@ class _FaqAccordion extends StatefulWidget {
 
 class _FaqAccordionState extends State<_FaqAccordion> {
   final List<_FaqItem> _items = [
-    _FaqItem(question: 'Cách thêm cây mới?', answer: 'Vào tab "Cây" → nhấn nút "+" và điền thông tin cây.'),
-    _FaqItem(question: 'Cách thiết lập cảnh báo?', answer: 'Vào tab "Khác" → "Thông báo" và bật các công tắc cảnh báo.'),
-    _FaqItem(question: 'Làm sao thay đổi đơn vị?', answer: 'Vào tab "Khác" → "Tùy chỉnh" để chọn đơn vị và ngôn ngữ.'),
-    _FaqItem(question: 'Thu hoạch đã qua?', answer: 'Xem lịch sử thu hoạch trong tab "Lịch sử thu hoạch".'),
+    _FaqItem(
+      question: 'Cách thêm cây mới?',
+      answer: 'Vào tab "Cây" → nhấn nút "+" và điền thông tin cây.',
+    ),
+    _FaqItem(
+      question: 'Cách thiết lập cảnh báo?',
+      answer: 'Vào tab "Khác" → "Tùy chỉnh" và bật các công tắc cảnh báo.',
+    ),
+    _FaqItem(
+      question: 'Làm sao thay đổi đơn vị?',
+      answer: 'Vào tab "Khác" → "Tùy chỉnh" để chọn đơn vị và ngôn ngữ.',
+    ),
+    _FaqItem(
+      question: 'Thu hoạch đã qua?',
+      answer: 'Xem lịch sử thu hoạch trong tab "Lịch sử thu hoạch".',
+    ),
   ];
 
   @override
@@ -85,10 +102,16 @@ class _FaqAccordionState extends State<_FaqAccordion> {
         return ExpansionPanelRadio(
           value: item.question,
           headerBuilder: (context, isExpanded) => ListTile(
-            title: Text(item.question, style: const TextStyle(fontWeight: FontWeight.w600)),
+            title: Text(
+              item.question,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
           body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: Text(item.answer),
           ),
         );
