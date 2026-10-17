@@ -3,6 +3,7 @@ using System.Data;
 using IOTAgriBackend.Data;
 using IOTAgriBackend.Dtos.Alerts;
 using IOTAgriBackend.Dtos.Devices;
+using IOTAgriBackend.Dtos.Lights;
 using IOTAgriBackend.Dtos.Pumps;
 using IOTAgriBackend.Models;
 using IOTAgriBackend.Services;
@@ -23,6 +24,7 @@ public static class DeviceEndpoints
         group.MapPut("/{id:guid}", UpdateAsync);
         group.MapDelete("/{id:guid}", DeleteAsync);
         group.MapPost("/{id:guid}/pump/commands", SendPumpCommandAsync);
+        group.MapPost("/{id:guid}/light/commands", SendLightCommandAsync);
         group.MapGet("/{id:guid}/pump-commands", GetPumpCommandsAsync);
         group.MapGet("/{id:guid}/pump-schedules", ListPumpSchedulesAsync);
         group.MapPost("/{id:guid}/pump-schedules", CreatePumpScheduleAsync);
@@ -83,7 +85,14 @@ public static class DeviceEndpoints
         var devices = await db.Devices
             .Where(d => d.OwnerId == userId)
             .OrderByDescending(d => d.CreatedAt)
-            .Select(d => new DeviceResponse(d.Id, d.Name, d.IsOnline, d.LastSeenAt, d.CreatedAt))
+            .Select(d => new DeviceResponse(
+                d.Id,
+                d.Name,
+                d.IsOnline,
+                d.LastSeenAt,
+                d.CreatedAt,
+                d.IsLightOn,
+                d.LightStatusUpdatedAt))
             .ToListAsync();
 
         return Results.Ok(devices);
@@ -103,7 +112,14 @@ public static class DeviceEndpoints
             return Results.NotFound();
         }
 
-        return Results.Ok(new DeviceResponse(device.Id, device.Name, device.IsOnline, device.LastSeenAt, device.CreatedAt));
+        return Results.Ok(new DeviceResponse(
+            device.Id,
+            device.Name,
+            device.IsOnline,
+            device.LastSeenAt,
+            device.CreatedAt,
+            device.IsLightOn,
+            device.LightStatusUpdatedAt));
     }
 
     private static async Task<IResult> UpdateAsync(
@@ -132,7 +148,14 @@ public static class DeviceEndpoints
         device.Name = request.Name.Trim();
         await db.SaveChangesAsync();
 
-        return Results.Ok(new DeviceResponse(device.Id, device.Name, device.IsOnline, device.LastSeenAt, device.CreatedAt));
+        return Results.Ok(new DeviceResponse(
+            device.Id,
+            device.Name,
+            device.IsOnline,
+            device.LastSeenAt,
+            device.CreatedAt,
+            device.IsLightOn,
+            device.LightStatusUpdatedAt));
     }
 
     private static async Task<IResult> DeleteAsync(Guid id, ClaimsPrincipal principal, ApplicationDbContext db)
@@ -240,6 +263,53 @@ public static class DeviceEndpoints
         command.IssuedAt,
         command.AcknowledgedAt,
         command.AcknowledgedIsOn);
+
+    private static async Task<IResult> SendLightCommandAsync(
+        Guid id,
+        LightCommandRequest request,
+        ClaimsPrincipal principal,
+        ApplicationDbContext db,
+        MqttIngestionService mqtt,
+        CancellationToken cancellationToken)
+    {
+        var userId = GetUserId(principal);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var device = await db.Devices.FirstOrDefaultAsync(
+            candidate => candidate.Id == id && candidate.OwnerId == userId,
+            cancellationToken);
+        if (device is null)
+        {
+            return Results.NotFound();
+        }
+
+        if (!request.IsValid)
+        {
+            return Results.BadRequest(new { error = "A non-empty commandId is required." });
+        }
+
+        try
+        {
+            await mqtt.PublishLightCommandAsync(
+                device.DeviceKey,
+                request.CommandId,
+                request.IsOn,
+                cancellationToken);
+        }
+        catch (InvalidOperationException)
+        {
+            return Results.Problem(
+                "Light command could not be sent because MQTT is unavailable.",
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
+
+        return Results.Accepted(
+            $"/api/devices/{device.Id}",
+            new LightCommandResponse(request.CommandId, request.IsOn, "Pending"));
+    }
 
     private static async Task<IResult> GetPumpCommandsAsync(
         Guid id,

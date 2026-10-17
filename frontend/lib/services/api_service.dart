@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/api_constants.dart';
 import '../models/user.dart';
 import '../models/pump_schedule.dart';
@@ -33,26 +34,73 @@ class ApiService {
 
   final http.Client _client;
   final FlutterSecureStorage _storage;
+  final bool _allowWebStorageFallback;
   String? _accessToken;
   Future<http.Response>? _refreshFuture;
 
-  ApiService({http.Client? client, FlutterSecureStorage? storage})
-    : _client = client ?? http.Client(),
-      _storage = storage ?? const FlutterSecureStorage();
+  ApiService({
+    http.Client? client,
+    FlutterSecureStorage? storage,
+    bool? allowWebStorageFallback,
+  }) : _client = client ?? http.Client(),
+       _storage = storage ?? const FlutterSecureStorage(),
+       _allowWebStorageFallback = allowWebStorageFallback ?? kIsWeb;
+
+  static String _webFallbackKey(String key) => 'iotagri.auth.$key';
+
+  Future<String?> _readToken(String key) async {
+    try {
+      final value = await _storage.read(key: key);
+      if (value != null || !_allowWebStorageFallback) return value;
+    } catch (error) {
+      if (!_allowWebStorageFallback) rethrow;
+      debugPrint(
+        'Secure token storage unavailable; using web fallback: $error',
+      );
+    }
+
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getString(_webFallbackKey(key));
+  }
+
+  Future<void> _removeWebFallbackTokens() async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove(_webFallbackKey('access_token'));
+    await preferences.remove(_webFallbackKey('refresh_token'));
+  }
 
   Future<void> _loadTokens() async {
-    _accessToken = await _storage.read(key: 'access_token');
+    _accessToken = await _readToken('access_token');
   }
 
   Future<void> _saveTokens(String accessToken, String refreshToken) async {
-    await _storage.write(key: 'access_token', value: accessToken);
-    await _storage.write(key: 'refresh_token', value: refreshToken);
+    try {
+      await _storage.write(key: 'access_token', value: accessToken);
+      await _storage.write(key: 'refresh_token', value: refreshToken);
+      if (_allowWebStorageFallback) await _removeWebFallbackTokens();
+    } catch (error) {
+      if (!_allowWebStorageFallback) rethrow;
+      debugPrint(
+        'Secure token storage unavailable; using web fallback: $error',
+      );
+      final preferences = await SharedPreferences.getInstance();
+      await preferences.setString(_webFallbackKey('access_token'), accessToken);
+      await preferences.setString(
+        _webFallbackKey('refresh_token'),
+        refreshToken,
+      );
+    }
     _accessToken = accessToken;
   }
 
   Future<void> _clearTokens() async {
-    await _storage.delete(key: 'access_token');
-    await _storage.delete(key: 'refresh_token');
+    try {
+      await _storage.delete(key: 'access_token');
+      await _storage.delete(key: 'refresh_token');
+    } catch (_) {
+      if (!_allowWebStorageFallback) rethrow;
+    }
+    if (_allowWebStorageFallback) await _removeWebFallbackTokens();
     _accessToken = null;
   }
 
@@ -77,7 +125,7 @@ class ApiService {
   }
 
   Future<http.Response> _performRefresh() async {
-    final refreshToken = await _storage.read(key: 'refresh_token');
+    final refreshToken = await _readToken('refresh_token');
     if (refreshToken == null) {
       throw const _RefreshTokenRejected();
     }
@@ -126,8 +174,8 @@ class ApiService {
   }
 
   Future<User?> restoreSession() async {
-    final refreshToken = await _storage.read(key: 'refresh_token');
-    final accessToken = await _storage.read(key: 'access_token');
+    final refreshToken = await _readToken('refresh_token');
+    final accessToken = await _readToken('access_token');
     if (refreshToken == null && accessToken == null) return null;
 
     final cachedUser = accessToken == null
@@ -189,7 +237,7 @@ class ApiService {
 
   // Auth methods
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse('${ApiConstants.baseUrl}${ApiConstants.login}'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
@@ -212,7 +260,7 @@ class ApiService {
     String password,
     String fullName,
   ) async {
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse('${ApiConstants.baseUrl}${ApiConstants.register}'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -246,9 +294,9 @@ class ApiService {
 
   Future<void> logout() async {
     try {
-      if (await _storage.read(key: 'refresh_token') != null) {
+      if (await _readToken('refresh_token') != null) {
         await _refreshAccessToken();
-        final refreshToken = await _storage.read(key: 'refresh_token');
+        final refreshToken = await _readToken('refresh_token');
         if (refreshToken != null) {
           await _client.post(
             Uri.parse('${ApiConstants.baseUrl}${ApiConstants.logout}'),
@@ -495,6 +543,27 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> sendLightCommand(
+    String deviceId,
+    String commandId,
+    bool isOn,
+  ) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.lightCommands(deviceId)}',
+        ),
+        headers: headers,
+        body: jsonEncode({'commandId': commandId, 'isOn': isOn}),
+      ),
+    );
+
+    if (response.statusCode == 202) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to send light command: ${response.body}');
+  }
+
   Future<Map<String, dynamic>> getPumpCommands(
     String deviceId, {
     int page = 1,
@@ -505,8 +574,9 @@ class ApiService {
     final queryParams = <String, String>{
       'page': page.toString(),
       'pageSize': pageSize.toString(),
-      if (rangeHours case final r?) 'from': now.subtract(Duration(hours: r)).toIso8601String(),
-      if (rangeHours case final r?) 'to': now.toIso8601String(),
+      if (rangeHours case final r?)
+        'from': now.subtract(Duration(hours: r)).toIso8601String(),
+      if (rangeHours != null) 'to': now.toIso8601String(),
     };
 
     final uri = Uri.parse(
@@ -603,11 +673,17 @@ class ApiService {
           'startTime': formattedStartTime,
           'durationSeconds': durationSeconds,
           if (localEnd != null)
-            'endTime': '${localEnd.hour.toString().padLeft(2, '0')}:'
+            'endTime':
+                '${localEnd.hour.toString().padLeft(2, '0')}:'
                 '${localEnd.minute.toString().padLeft(2, '0')}:00',
           'intervalMinutes': ?intervalMinutes,
-          if (activeFromDate != null) 'activeFromDate': activeFromDate.toIso8601String().substring(0, 10),
-          if (activeUntilDate != null) 'activeUntilDate': activeUntilDate.toIso8601String().substring(0, 10),
+          if (activeFromDate != null)
+            'activeFromDate': activeFromDate.toIso8601String().substring(0, 10),
+          if (activeUntilDate != null)
+            'activeUntilDate': activeUntilDate.toIso8601String().substring(
+              0,
+              10,
+            ),
           'timeZone': 'Asia/Ho_Chi_Minh',
         }),
       ),
@@ -891,17 +967,21 @@ class ApiService {
       ),
     );
     if (response.statusCode == 201) {
-      return _flattenTicketDetail(jsonDecode(response.body) as Map<String, dynamic>);
+      return _flattenTicketDetail(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
     }
     throw Exception('Failed to create support ticket: ${response.body}');
   }
 
   Future<List<Map<String, dynamic>>> getMyTickets({String? status}) async {
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tickets}').replace(
-      queryParameters: {
-        if (status != null && status.isNotEmpty && status != 'all') 'status': status,
-      },
-    );
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tickets}')
+        .replace(
+          queryParameters: {
+            if (status != null && status.isNotEmpty && status != 'all')
+              'status': status,
+          },
+        );
     final response = await _authenticatedRequest(
       (headers) => _client.get(uri, headers: headers),
     );
@@ -922,23 +1002,34 @@ class ApiService {
       ),
     );
     if (response.statusCode == 200) {
-      return _flattenTicketDetail(jsonDecode(response.body) as Map<String, dynamic>);
+      return _flattenTicketDetail(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
     }
     throw Exception('Failed to load support ticket: ${response.body}');
   }
 
-  Future<Map<String, dynamic>> replyToMyTicket(String id, String message) async {
+  Future<Map<String, dynamic>> replyToMyTicket(
+    String id,
+    String message,
+  ) async {
     final response = await _authenticatedRequest(
       (headers) => _client.post(
-        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tickets}/$id/messages'),
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.tickets}/$id/messages',
+        ),
         headers: headers,
         body: jsonEncode({'message': message}),
       ),
     );
     if (response.statusCode == 200) {
-      final ticket = _flattenTicketDetail(jsonDecode(response.body) as Map<String, dynamic>);
+      final ticket = _flattenTicketDetail(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
       final messages = ticket['messages'] as List<dynamic>? ?? const [];
-      if (messages.isNotEmpty) return Map<String, dynamic>.from(messages.last as Map);
+      if (messages.isNotEmpty) {
+        return Map<String, dynamic>.from(messages.last as Map);
+      }
     }
     throw Exception('Failed to reply to support ticket: ${response.body}');
   }

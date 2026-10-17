@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import '../../core/animation/app_motion.dart';
 import '../../models/device.dart';
 import '../../services/api_service.dart';
-import 'add_device_screen.dart';
 import 'cupertino_device_detail_screen.dart';
 import 'cupertino_provisioning_code_screen.dart';
 
@@ -21,7 +20,7 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
   late final ApiService _apiService;
   List<Device> _devices = const [];
   bool _isLoading = true;
-  final bool _isCreating = false;
+  bool _isCreating = false;
   String? _deletingDeviceId;
   String? _errorMessage;
   String _searchQuery = '';
@@ -60,11 +59,52 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
   }
 
   Future<void> _createAndProvisionDevice() async {
-    final result = await Navigator.of(
-      context,
-    ).push<Device>(CupertinoPageRoute(builder: (_) => const AddDeviceScreen()));
-    if (result != null && mounted) {
-      await _loadDevices(showLoading: false);
+    final controller = TextEditingController(text: 'ESP32');
+    final name = await showCupertinoDialog<String>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('Thêm thiết bị'),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: CupertinoTextField(
+            controller: controller,
+            autofocus: true,
+            placeholder: 'Tên thiết bị',
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Hủy'),
+          ),
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(dialogContext).pop(controller.text),
+            child: const Text('Tiếp tục'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (name == null || name.trim().isEmpty || !mounted) return;
+
+    setState(() => _isCreating = true);
+    try {
+      final response = await _apiService.createDevice(name.trim());
+      if (!mounted) return;
+      final device = Device.fromJson(response);
+      await Navigator.of(context).push<void>(
+        CupertinoPageRoute<void>(
+          builder: (_) => CupertinoProvisioningCodeScreen(
+            device: device,
+            apiService: _apiService,
+          ),
+        ),
+      );
+      if (mounted) await _loadDevices(showLoading: false);
+    } catch (error) {
+      if (mounted) _showError('Không thể thêm thiết bị: $error');
+    } finally {
+      if (mounted) setState(() => _isCreating = false);
     }
   }
 

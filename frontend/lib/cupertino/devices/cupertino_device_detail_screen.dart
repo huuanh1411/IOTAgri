@@ -48,6 +48,8 @@
     Map<String, dynamic> _alertSettings = const {};
     bool _isLoading = true;
     bool _isSendingCommand = false;
+    bool _isSendingLightCommand = false;
+    late bool _isLightOn;
     String? _errorMessage;
     DateTime? _lastUpdated;
     Timer? _refreshTimer;
@@ -62,6 +64,7 @@
       super.initState();
       _apiService = widget.apiService ?? ApiService();
       _device = widget.device;
+      _isLightOn = widget.device.isLightOn;
       _loadDeviceData();
       if (widget.initialSensor != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -115,6 +118,7 @@
 
         setState(() {
           _device = Device.fromJson(deviceData);
+          _isLightOn = _device.isLightOn;
           _readings = readings;
           _commands = commandItems
               .map((item) => PumpCommand.fromJson(item as Map<String, dynamic>))
@@ -284,6 +288,26 @@
         if (mounted) _showMessage('Không thể gửi lệnh: $error');
       } finally {
         if (mounted) setState(() => _isSendingCommand = false);
+      }
+    }
+
+    Future<void> _toggleLight() async {
+      if (!_device.isOnline || _isSendingLightCommand) return;
+      final requestedState = !_isLightOn;
+      setState(() => _isSendingLightCommand = true);
+      try {
+        await _apiService.sendLightCommand(
+          _device.id,
+          ApiService.generatePumpCommandId(),
+          requestedState,
+        );
+        if (!mounted) return;
+        setState(() => _isLightOn = requestedState);
+        HapticFeedback.lightImpact();
+      } catch (error) {
+        if (mounted) _showMessage('Không thể gửi lệnh đèn: $error');
+      } finally {
+        if (mounted) setState(() => _isSendingLightCommand = false);
       }
     }
 
@@ -595,6 +619,13 @@
                       onModeChange: _switchPumpMode,
                       onManualToggle: _showManualDurationDialog,
                       onStop: () => _sendPumpCommand(),
+                    ),
+                    const SizedBox(height: 16),
+                    LightControlCard(
+                      isOnline: _device.isOnline,
+                      isOn: _isLightOn,
+                      isSending: _isSendingLightCommand,
+                      onToggle: _toggleLight,
                     ),
                     const SizedBox(height: 16),
                     ScheduleSummaryCard(
@@ -1153,6 +1184,82 @@
       }
       return '${minutes.toString().padLeft(2, '0')} phút';
     }
+  }
+
+  class LightControlCard extends StatelessWidget {
+    final bool isOnline;
+    final bool isOn;
+    final bool isSending;
+    final VoidCallback? onToggle;
+
+    const LightControlCard({
+      super.key,
+      required this.isOnline,
+      required this.isOn,
+      required this.isSending,
+      this.onToggle,
+    });
+
+    @override
+    Widget build(BuildContext context) => _DetailSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isOn ? CupertinoIcons.lightbulb_fill : CupertinoIcons.lightbulb,
+                color: !isOnline
+                    ? CupertinoColors.systemGrey
+                    : isOn
+                    ? CupertinoColors.systemYellow
+                    : AerogreenCupertinoTheme.aerogreenPrimary,
+                size: 22,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _DetailSectionTitle(title: 'Điều khiển đèn'),
+                    const SizedBox(height: 3),
+                    Text(
+                      !isOnline
+                          ? 'Không thể điều khiển đèn khi ngoại tuyến'
+                          : isSending
+                          ? 'Đang gửi lệnh…'
+                          : isOn
+                          ? 'Đèn đang bật'
+                          : 'Đèn đang tắt',
+                      style: const TextStyle(
+                        color: CupertinoColors.secondaryLabel,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: CupertinoButton.filled(
+              onPressed: isOnline && !isSending ? onToggle : null,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: isSending
+                  ? const CupertinoActivityIndicator(
+                      color: CupertinoColors.white,
+                    )
+                  : Text(
+                      isOn ? 'TẮT ĐÈN' : 'BẬT ĐÈN',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   class ScheduleSummaryCard extends StatelessWidget {

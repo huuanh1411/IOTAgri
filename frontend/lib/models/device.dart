@@ -6,6 +6,8 @@ class Device {
   final String createdAt;
   final String? deviceKey;
   final String? location;
+  final bool isLightOn;
+  final String? lightStatusUpdatedAt;
 
   Device({
     required this.id,
@@ -15,6 +17,8 @@ class Device {
     required this.createdAt,
     this.deviceKey,
     this.location,
+    this.isLightOn = false,
+    this.lightStatusUpdatedAt,
   });
 
   factory Device.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,8 @@ class Device {
       createdAt: json['createdAt'] ?? '',
       deviceKey: json['deviceKey'],
       location: json['location'],
+      isLightOn: json['isLightOn'] ?? false,
+      lightStatusUpdatedAt: json['lightStatusUpdatedAt'],
     );
   }
 
@@ -38,6 +44,8 @@ class Device {
       'createdAt': createdAt,
       'deviceKey': deviceKey,
       'location': location,
+      'isLightOn': isLightOn,
+      'lightStatusUpdatedAt': lightStatusUpdatedAt,
     };
   }
 }

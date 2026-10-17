@@ -13,6 +13,7 @@ import '../../providers/alert_center_provider.dart';
 import '../../screens/alerts/alerts_screen.dart';
 import '../devices/cupertino_devices_screen.dart';
 import '../devices/cupertino_device_detail_screen.dart';
+import '../devices/cupertino_provisioning_code_screen.dart';
 import '../profile/cupertino_profile_screen.dart';
 import '../tickets/cupertino_create_ticket_screen.dart';
 import '../../screens/pumps/pump_schedules_screen.dart';
@@ -536,7 +537,18 @@ class _CupertinoDashboardScreenState extends State<CupertinoDashboardScreen> {
     if (name == null || name.trim().isEmpty) return;
 
     try {
-      await _apiService.createDevice(name.trim());
+      final response = await _apiService.createDevice(name.trim());
+      if (!mounted) return;
+      final device = Device.fromJson(response);
+      await Navigator.of(context).push<void>(
+        CupertinoPageRoute<void>(
+          builder: (_) => CupertinoProvisioningCodeScreen(
+            device: device,
+            apiService: _apiService,
+          ),
+        ),
+      );
+      if (!mounted) return;
       await _loadDashboardData(showLoading: false);
     } catch (error) {
       if (mounted) _showMessage('Không thể thêm thiết bị: $error');

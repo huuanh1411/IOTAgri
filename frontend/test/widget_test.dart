@@ -764,6 +764,45 @@ void main() {
     expect(find.text('Đang gửi lệnh…'), findsOneWidget);
     expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
   });
+
+  testWidgets('light control exposes on and off actions', (
+    WidgetTester tester,
+  ) async {
+    var toggles = 0;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: LightControlCard(
+              isOnline: true,
+              isOn: false,
+              isSending: false,
+              onToggle: () => toggles++,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('BẬT ĐÈN'), findsOneWidget);
+    await tester.tap(find.text('BẬT ĐÈN'));
+    expect(toggles, 1);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: Center(
+            child: LightControlCard(
+              isOnline: true,
+              isOn: true,
+              isSending: false,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('TẮT ĐÈN'), findsOneWidget);
+  });
 }
 
 void _noop() {}

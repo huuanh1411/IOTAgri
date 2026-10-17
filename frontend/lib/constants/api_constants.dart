@@ -1,8 +1,27 @@
+import 'package:flutter/foundation.dart';
+
 class ApiConstants {
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://localhost:8080',
+  static String get baseUrl => _resolveApiBaseUrl(
+        const String.fromEnvironment('API_BASE_URL'),
+      );
+
+  static String get deviceApiBaseUrl {
+    const configured = String.fromEnvironment('DEVICE_API_BASE_URL');
+    return configured.isNotEmpty ? configured : baseUrl;
+  }
+
+  static const String espSetupUrl = String.fromEnvironment(
+    'ESP_SETUP_URL',
+    defaultValue: 'http://192.168.4.1',
   );
+
+  static String _resolveApiBaseUrl(String configured) {
+    if (configured.isNotEmpty) return configured;
+    if (kIsWeb && Uri.base.host.isNotEmpty) {
+      return '${Uri.base.scheme}://${Uri.base.host}:8080';
+    }
+    return 'http://localhost:8080';
+  }
 
   // Auth endpoints
   static const String login = '/api/auth/login';
@@ -31,6 +50,7 @@ class ApiConstants {
 
   // Pump control endpoints
   static String pumpCommands(String id) => '/api/devices/$id/pump/commands';
+  static String lightCommands(String id) => '/api/devices/$id/light/commands';
   static String pumpCommandHistory(String id) =>
       '/api/devices/$id/pump-commands';
   static String pumpSchedules(String id) => '/api/devices/$id/pump-schedules';

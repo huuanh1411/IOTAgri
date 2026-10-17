@@ -2,18 +2,22 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import '../../constants/api_constants.dart';
 import '../../models/device.dart';
 import '../../models/provisioning_code.dart';
 import '../../services/api_service.dart';
+import '../../services/esp_provisioning_service.dart';
 
 class CupertinoProvisioningCodeScreen extends StatefulWidget {
   final Device device;
   final ApiService? apiService;
+  final EspProvisioningService? espProvisioningService;
 
   const CupertinoProvisioningCodeScreen({
     super.key,
     required this.device,
     this.apiService,
+    this.espProvisioningService,
   });
 
   @override
@@ -24,16 +28,35 @@ class CupertinoProvisioningCodeScreen extends StatefulWidget {
 class _CupertinoProvisioningCodeScreenState
     extends State<CupertinoProvisioningCodeScreen> {
   late final ApiService _apiService;
+  late final EspProvisioningService _espProvisioningService;
+  final TextEditingController _ssidController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   ProvisioningCode? _provisioningCode;
+  List<EspWifiNetwork> _networks = const [];
   bool _isLoading = true;
   bool _isCopied = false;
+  bool _isCheckingEsp = false;
+  bool _isProvisioning = false;
+  bool _provisioned = false;
   String? _errorMessage;
+  String? _espMessage;
+  String? _espHardwareId;
 
   @override
   void initState() {
     super.initState();
     _apiService = widget.apiService ?? ApiService();
+    _espProvisioningService =
+        widget.espProvisioningService ?? EspProvisioningService();
     _generateCode();
+  }
+
+  @override
+  void dispose() {
+    _ssidController.dispose();
+    _passwordController.dispose();
+    _espProvisioningService.close();
+    super.dispose();
   }
 
   Future<void> _generateCode() async {
@@ -41,6 +64,7 @@ class _CupertinoProvisioningCodeScreenState
       _isLoading = true;
       _errorMessage = null;
       _isCopied = false;
+      _provisioned = false;
     });
     try {
       final response = await _apiService.createProvisioningCode(
@@ -56,6 +80,73 @@ class _CupertinoProvisioningCodeScreenState
       setState(() {
         _errorMessage = error.toString();
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _checkEsp() async {
+    setState(() {
+      _isCheckingEsp = true;
+      _espMessage = null;
+    });
+    try {
+      final status = await _espProvisioningService.getStatus();
+      final networks = await _espProvisioningService.scanNetworks();
+      if (!mounted) return;
+      setState(() {
+        _espHardwareId = status.hardwareId;
+        _networks = networks;
+        _isCheckingEsp = false;
+        _espMessage = networks.isEmpty
+            ? 'Đã thấy ESP nhưng chưa tìm thấy mạng Wi-Fi 2.4 GHz.'
+            : 'Đã kết nối ESP. Chọn mạng Wi-Fi bên dưới.';
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isCheckingEsp = false;
+        _espMessage =
+            'Không kết nối được ESP. Hãy nối thiết bị này vào Wi-Fi IOTAgri-Setup rồi thử lại. ($error)';
+      });
+    }
+  }
+
+  Future<void> _provisionEsp(String claimCode) async {
+    final ssid = _ssidController.text.trim();
+    if (ssid.isEmpty) {
+      setState(
+        () => _espMessage = 'Vui lòng nhập hoặc chọn tên Wi-Fi 2.4 GHz.',
+      );
+      return;
+    }
+    if (_passwordController.text.isEmpty) {
+      setState(() => _espMessage = 'Vui lòng nhập mật khẩu Wi-Fi.');
+      return;
+    }
+
+    setState(() {
+      _isProvisioning = true;
+      _espMessage = 'Đang gửi cấu hình trực tiếp tới ESP...';
+    });
+    try {
+      await _espProvisioningService.provision(
+        ssid: ssid,
+        password: _passwordController.text,
+        backendUrl: ApiConstants.deviceApiBaseUrl,
+        claimCode: claimCode,
+      );
+      if (!mounted) return;
+      setState(() {
+        _isProvisioning = false;
+        _provisioned = true;
+        _espMessage =
+            'Thiết lập thành công. ESP đang khởi động lại; hãy kết nối lại Wi-Fi $ssid.';
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isProvisioning = false;
+        _espMessage = error.toString();
       });
     }
   }
@@ -205,28 +296,45 @@ class _CupertinoProvisioningCodeScreenState
           ),
         ),
         const SizedBox(height: 20),
+        _DirectEspSetupPanel(
+          ssidController: _ssidController,
+          passwordController: _passwordController,
+          networks: _networks,
+          hardwareId: _espHardwareId,
+          message: _espMessage,
+          isChecking: _isCheckingEsp,
+          isProvisioning: _isProvisioning,
+          provisioned: _provisioned,
+          onCheckEsp: _checkEsp,
+          onProvision: () => _provisionEsp(code.code),
+          onNetworkSelected: (ssid) => setState(() {
+            _ssidController.text = ssid;
+          }),
+        ),
+        const SizedBox(height: 20),
         _SetupStep(
           number: '1',
-          text: 'Bật ESP32 và kết nối điện thoại với Wi-Fi IOTAgri-Setup.',
+          text:
+              'Giữ laptop chạy backend và frontend trên Wi-Fi chính. Trên điện thoại, mở màn hình này trước.',
         ),
         _SetupStep(
           number: '2',
           text:
-              'Mở trang cài đặt của thiết bị tại địa chỉ được in trong Serial Monitor (mặc định thường là 192.168.4.1).',
+              'Kết nối điện thoại với Wi-Fi IOTAgri-Setup, quay lại màn hình này và nhấn Kiểm tra kết nối ESP.',
         ),
         _SetupStep(
           number: '3',
           text:
-              'Nhập Wi-Fi của nông trại, Backend URL và mã thiết lập ở trên rồi nhấn Connect.',
+              'Chọn Wi-Fi 2.4 GHz, nhập mật khẩu rồi nhấn Kết nối ESP. Frontend tự gửi mã và địa chỉ backend.',
         ),
         _SetupStep(
           number: '4',
           text:
-              'Mã dùng một lần và hết hạn sau 15 phút. Sau khi ESP32 nhận mã, máy chủ cấp thông tin kết nối để thiết bị lên mạng.',
+              'Khi báo thành công, kết nối điện thoại trở lại Wi-Fi chính và chờ thiết bị chuyển sang trạng thái online.',
         ),
         const SizedBox(height: 12),
         Text(
-          'Mã được nhập trên trang cài đặt ESP32, không nhập vào màn hình này.',
+          'Backend dành cho ESP: ${ApiConstants.deviceApiBaseUrl}',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -241,6 +349,164 @@ class _CupertinoProvisioningCodeScreenState
       ],
     );
   }
+}
+
+class _DirectEspSetupPanel extends StatelessWidget {
+  final TextEditingController ssidController;
+  final TextEditingController passwordController;
+  final List<EspWifiNetwork> networks;
+  final String? hardwareId;
+  final String? message;
+  final bool isChecking;
+  final bool isProvisioning;
+  final bool provisioned;
+  final VoidCallback onCheckEsp;
+  final VoidCallback onProvision;
+  final ValueChanged<String> onNetworkSelected;
+
+  const _DirectEspSetupPanel({
+    required this.ssidController,
+    required this.passwordController,
+    required this.networks,
+    required this.hardwareId,
+    required this.message,
+    required this.isChecking,
+    required this.isProvisioning,
+    required this.provisioned,
+    required this.onCheckEsp,
+    required this.onProvision,
+    required this.onNetworkSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+      borderRadius: BorderRadius.circular(18),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Kết nối trực tiếp với ESP',
+          style: TextStyle(
+            color: CupertinoColors.label.resolveFrom(context),
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Không cần mở Swagger hoặc trang cấu hình 192.168.4.1.',
+          style: TextStyle(
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 14),
+        CupertinoButton(
+          color: CupertinoColors.activeBlue,
+          onPressed: isChecking || isProvisioning ? null : onCheckEsp,
+          child: isChecking
+              ? const CupertinoActivityIndicator(
+                  color: CupertinoColors.white,
+                  radius: 10,
+                )
+              : const Text('Kiểm tra kết nối ESP'),
+        ),
+        if (hardwareId != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Đã thấy ESP: $hardwareId',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: CupertinoColors.systemGreen,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+        if (networks.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          const Text(
+            'Wi-Fi 2.4 GHz ESP nhìn thấy:',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 7,
+            runSpacing: 7,
+            children: networks
+                .map(
+                  (network) => CupertinoButton(
+                    minimumSize: const Size(30, 30),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    color: ssidController.text == network.ssid
+                        ? CupertinoColors.activeBlue
+                        : CupertinoColors.systemGrey5.resolveFrom(context),
+                    onPressed: () => onNetworkSelected(network.ssid),
+                    child: Text(
+                      '${network.ssid} (${network.rssi} dBm)',
+                      style: TextStyle(
+                        color: ssidController.text == network.ssid
+                            ? CupertinoColors.white
+                            : CupertinoColors.label.resolveFrom(context),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
+        const SizedBox(height: 14),
+        CupertinoTextField(
+          controller: ssidController,
+          enabled: !isProvisioning,
+          placeholder: 'Tên Wi-Fi 2.4 GHz (SSID)',
+          padding: const EdgeInsets.all(13),
+        ),
+        const SizedBox(height: 10),
+        CupertinoTextField(
+          controller: passwordController,
+          enabled: !isProvisioning,
+          placeholder: 'Mật khẩu Wi-Fi',
+          obscureText: true,
+          padding: const EdgeInsets.all(13),
+        ),
+        if (message != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            message!,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: provisioned
+                  ? CupertinoColors.systemGreen
+                  : CupertinoColors.systemOrange,
+              fontSize: 12,
+              height: 1.35,
+            ),
+          ),
+        ],
+        const SizedBox(height: 14),
+        CupertinoButton.filled(
+          onPressed: isChecking || isProvisioning || provisioned
+              ? null
+              : onProvision,
+          child: isProvisioning
+              ? const CupertinoActivityIndicator(
+                  color: CupertinoColors.white,
+                  radius: 10,
+                )
+              : Text(provisioned ? 'Đã kết nối' : 'Kết nối ESP'),
+        ),
+      ],
+    ),
+  );
 }
 
 class _SetupStep extends StatelessWidget {

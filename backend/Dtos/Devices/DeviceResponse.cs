@@ -5,5 +5,7 @@ public record DeviceResponse(
     string Name,
     bool IsOnline,
     DateTime? LastSeenAt,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    bool IsLightOn,
+    DateTime? LightStatusUpdatedAt
 );
