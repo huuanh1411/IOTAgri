@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../models/device.dart';
 import '../../models/pump_schedule.dart';
 import '../../services/api_service.dart';
+import '../../utils/l10n.dart';
 
 enum SchedulePreset {
   seedlings('Cây giống', 10, 15),
@@ -85,17 +86,17 @@ class _CupertinoPumpSchedulesScreenState
     final confirm = await showCupertinoDialog<bool>(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Xác nhận xóa'),
-        content: const Text('Bạn có chắc muốn xóa lịch trình này?'),
+        title: Text(context.l10n.confirmDeletion),
+        content: Text(context.l10n.deleteScheduleConfirmation),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Hủy'),
+            child: Text(context.l10n.cancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Xóa'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -110,12 +111,12 @@ class _CupertinoPumpSchedulesScreenState
           showCupertinoDialog(
             context: context,
             builder: (context) => CupertinoAlertDialog(
-              title: const Text('Lỗi'),
-              content: Text('Không thể xóa: $e'),
+              title: Text(context.l10n.error),
+              content: Text(context.l10n.deleteScheduleFailed(e.toString())),
               actions: [
                 CupertinoDialogAction(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Đã hiểu'),
+                  child: Text(context.l10n.dismiss),
                 ),
               ],
             ),
@@ -129,7 +130,7 @@ class _CupertinoPumpSchedulesScreenState
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: Text('Lịch tưới - ${widget.device.name}'),
+        middle: Text(context.l10n.wateringScheduleFor(widget.device.name)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -171,7 +172,7 @@ class _CupertinoPumpSchedulesScreenState
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Không thể tải lịch trình',
+                        context.l10n.scheduleLoadError,
                         style: TextStyle(
                           color: CupertinoColors.label.resolveFrom(context),
                           fontSize: 18,
@@ -190,7 +191,7 @@ class _CupertinoPumpSchedulesScreenState
                       const SizedBox(height: 16),
                       CupertinoButton.filled(
                         onPressed: _loadSchedules,
-                        child: const Text('Thử lại'),
+                        child: Text(context.l10n.retry),
                       ),
                     ],
                   ),
@@ -210,7 +211,7 @@ class _CupertinoPumpSchedulesScreenState
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Chưa có lịch trình',
+                        context.l10n.noSchedulesYet,
                         style: TextStyle(
                           color: CupertinoColors.label.resolveFrom(context),
                           fontSize: 18,
@@ -219,7 +220,7 @@ class _CupertinoPumpSchedulesScreenState
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Thêm lịch trình tưới tự động',
+                        context.l10n.addAutomaticWateringSchedule,
                         style: TextStyle(
                           color: CupertinoColors.secondaryLabel.resolveFrom(
                             context,
@@ -229,7 +230,7 @@ class _CupertinoPumpSchedulesScreenState
                       const SizedBox(height: 16),
                       CupertinoButton.filled(
                         onPressed: _addSchedule,
-                        child: const Text('Thêm lịch trình'),
+                        child: Text(context.l10n.addScheduleTitle),
                       ),
                     ],
                   ),

@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../core/widgets/section_chip.dart';
 import '../core/widgets/page_header.dart';
 import '../core/widgets/outline_danger_button.dart';
 import '../core/theme/app_colors.dart';
@@ -11,6 +10,7 @@ import '../core/theme/app_text.dart';
 import '../providers/auth_controller.dart';
 import '../providers/user_provider.dart';
 import 'package:go_router/go_router.dart';
+import '../utils/l10n.dart';
 
 /// "More" / "Khác" tab – profile and navigable rows.
 class MoreScreen extends ConsumerWidget {
@@ -27,16 +27,15 @@ class MoreScreen extends ConsumerWidget {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const PageHeader(
-                chip: SectionChip(label: 'Tài khoản'),
-                title: 'Khác',
-                subtitle: '',
+              PageHeader(
+                title: context.l10n.more,
+                subtitle: context.l10n.moreSubtitle,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               // Profile card
               Card(
                 shape: RoundedRectangleBorder(
@@ -119,22 +118,22 @@ class MoreScreen extends ConsumerWidget {
                   children: [
                     _ListRow(
                       icon: Icons.settings, // gear
-                      title: 'Tùy chỉnh',
-                      subtitle: 'Ngôn ngữ và thông báo',
+                      title: context.l10n.customization,
+                      subtitle: context.l10n.languageAndNotifications,
                       onTap: () => context.push('/other/settings'),
                     ),
                     const Divider(height: 1),
                     _ListRow(
                       icon: Icons.eco, // leaf
-                      title: 'Lịch sử thu hoạch',
-                      subtitle: 'Đã trồng 32 cây',
+                      title: context.l10n.harvestHistory,
+                      subtitle: context.l10n.plantsGrown,
                       onTap: () => context.push('/other/harvest'),
                     ),
                     const Divider(height: 1),
                     _ListRow(
                       icon: Icons.help_center, // help circle
-                      title: 'Trợ giúp & Hỗ trợ',
-                      subtitle: 'Câu hỏi thường gặp và chat',
+                      title: context.l10n.helpAndSupport,
+                      subtitle: context.l10n.faqAndChat,
                       onTap: () => context.push('/other/help'),
                     ),
                   ],
@@ -143,22 +142,22 @@ class MoreScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               // Logout button
               OutlineDangerButton(
-                label: 'Đăng xuất',
+                label: context.l10n.logOut,
                 icon: Icons.logout,
                 onPressed: () async {
                   final confirmed = await showDialog<bool>(
                     context: context,
                     builder: (c) => AlertDialog(
-                      title: const Text('Xác nhận'),
-                      content: const Text('Bạn có chắc muốn đăng xuất?'),
+                      title: Text(c.l10n.confirm),
+                      content: Text(c.l10n.logoutConfirmation),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(c, false),
-                          child: const Text('Hủy'),
+                          child: Text(c.l10n.cancel),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(c, true),
-                          child: const Text('Đăng xuất'),
+                          child: Text(c.l10n.logOut),
                         ),
                       ],
                     ),

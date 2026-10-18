@@ -19,10 +19,9 @@ class FloatingPillNavBar extends StatelessWidget {
     Icons.home_outlined,
     Icons.notifications_none_outlined,
     Icons.spa_outlined,
+    Icons.devices_other_outlined,
     Icons.more_horiz_outlined,
   ];
-
-  static const _labelKeys = ['home', 'alerts', 'choose_plant', 'more'];
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +97,13 @@ class FloatingPillNavBar extends StatelessWidget {
                               duration: duration,
                               curve: AppMotion.easeOut,
                               style: TextStyle(fontSize: 10, color: foreground),
-                              child: Text(context.tr(_labelKeys[index])),
+                              child: Text([
+                                context.l10n.home,
+                                context.l10n.alerts,
+                                context.l10n.choosePlant,
+                                context.l10n.device,
+                                context.l10n.more,
+                              ][index]),
                             ),
                           ],
                         ),

@@ -3,6 +3,7 @@ using System.Data;
 using IOTAgriBackend.Data;
 using IOTAgriBackend.Dtos.Alerts;
 using IOTAgriBackend.Dtos.Devices;
+using IOTAgriBackend.Dtos.Lights;
 using IOTAgriBackend.Dtos.Pumps;
 using IOTAgriBackend.Models;
 using IOTAgriBackend.Services;
@@ -24,6 +25,8 @@ public static class DeviceEndpoints
         group.MapDelete("/{id:guid}", DeleteAsync);
         group.MapPost("/{id:guid}/pump/commands", SendPumpCommandAsync);
         group.MapGet("/{id:guid}/pump-commands", GetPumpCommandsAsync);
+        group.MapPost("/{id:guid}/light/commands", SendLightCommandAsync);
+        group.MapGet("/{id:guid}/light/status", GetLightStatusAsync);
         group.MapGet("/{id:guid}/pump-schedules", ListPumpSchedulesAsync);
         group.MapPost("/{id:guid}/pump-schedules", CreatePumpScheduleAsync);
         group.MapPut("/{id:guid}/pump-schedules/{scheduleId:guid}", UpdatePumpScheduleAsync);
@@ -240,6 +243,59 @@ public static class DeviceEndpoints
         command.IssuedAt,
         command.AcknowledgedAt,
         command.AcknowledgedIsOn);
+
+    private static async Task<IResult> SendLightCommandAsync(
+        Guid id,
+        LightCommandRequest request,
+        ClaimsPrincipal principal,
+        ApplicationDbContext db,
+        MqttIngestionService mqtt,
+        CancellationToken cancellationToken)
+    {
+        var userId = GetUserId(principal);
+        if (userId is null) return Results.Unauthorized();
+        if (request.CommandId == Guid.Empty)
+        {
+            return Results.BadRequest(new { error = "commandId is required." });
+        }
+
+        var device = await db.Devices.FirstOrDefaultAsync(
+            candidate => candidate.Id == id && candidate.OwnerId == userId,
+            cancellationToken);
+        if (device is null) return Results.NotFound();
+
+        try
+        {
+            await mqtt.PublishLightCommandAsync(device.DeviceKey, request, cancellationToken);
+        }
+        catch (InvalidOperationException)
+        {
+            return Results.Problem(
+                "Light command could not be sent because MQTT is unavailable.",
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
+
+        return Results.Accepted(
+            $"/api/devices/{device.Id}/light/status",
+            new LightCommandResponse(request.CommandId, request.IsOn, "Pending"));
+    }
+
+    private static async Task<IResult> GetLightStatusAsync(
+        Guid id,
+        ClaimsPrincipal principal,
+        ApplicationDbContext db,
+        MqttIngestionService mqtt,
+        CancellationToken cancellationToken)
+    {
+        var userId = GetUserId(principal);
+        if (userId is null) return Results.Unauthorized();
+        var device = await db.Devices.FirstOrDefaultAsync(
+            candidate => candidate.Id == id && candidate.OwnerId == userId,
+            cancellationToken);
+        return device is null
+            ? Results.NotFound()
+            : Results.Ok(mqtt.GetLightStatus(device.DeviceKey));
+    }
 
     private static async Task<IResult> GetPumpCommandsAsync(
         Guid id,

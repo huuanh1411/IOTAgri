@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../models/device.dart';
 import '../../models/provisioning_code.dart';
 import '../../services/api_service.dart';
+import '../../utils/l10n.dart';
 
 class CupertinoProvisioningCodeScreen extends StatefulWidget {
   final Device device;
@@ -67,11 +68,11 @@ class _CupertinoProvisioningCodeScreenState
     showCupertinoDialog<void>(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
-        content: Text('$label đã sao chép.'),
+        content: Text(context.l10n.copiedLabel(label)),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Đã hiểu'),
+            child: Text(context.l10n.dismiss),
           ),
         ],
       ),
@@ -89,8 +90,8 @@ class _CupertinoProvisioningCodeScreenState
 
   @override
   Widget build(BuildContext context) => CupertinoPageScaffold(
-    navigationBar: const CupertinoNavigationBar(
-      middle: Text('Thiết lập thiết bị'),
+    navigationBar: CupertinoNavigationBar(
+      middle: Text(context.l10n.deviceSetup),
     ),
     child: SafeArea(
       bottom: false,

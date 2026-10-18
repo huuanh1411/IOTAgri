@@ -506,7 +506,7 @@ class ApiService {
       'page': page.toString(),
       'pageSize': pageSize.toString(),
       if (rangeHours case final r?) 'from': now.subtract(Duration(hours: r)).toIso8601String(),
-      if (rangeHours case final r?) 'to': now.toIso8601String(),
+      if (rangeHours != null) 'to': now.toIso8601String(),
     };
 
     final uri = Uri.parse(
@@ -522,6 +522,43 @@ class ApiService {
     } else {
       throw Exception('Failed to load pump commands: ${response.body}');
     }
+  }
+
+  Future<Map<String, dynamic>> sendLightCommand(
+    String deviceId,
+    String commandId,
+    bool isOn,
+  ) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.lightCommands(deviceId)}',
+        ),
+        headers: headers,
+        body: jsonEncode({'commandId': commandId, 'isOn': isOn}),
+      ),
+    );
+
+    if (response.statusCode == 202) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to send light command: ${response.body}');
+  }
+
+  Future<Map<String, dynamic>> getLightStatus(String deviceId) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.lightStatus(deviceId)}',
+        ),
+        headers: headers,
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to load light status: ${response.body}');
   }
 
   Future<List<dynamic>> getPumpSchedules(String deviceId) async {
@@ -938,7 +975,9 @@ class ApiService {
     if (response.statusCode == 200) {
       final ticket = _flattenTicketDetail(jsonDecode(response.body) as Map<String, dynamic>);
       final messages = ticket['messages'] as List<dynamic>? ?? const [];
-      if (messages.isNotEmpty) return Map<String, dynamic>.from(messages.last as Map);
+      if (messages.isNotEmpty) {
+        return Map<String, dynamic>.from(messages.last as Map);
+      }
     }
     throw Exception('Failed to reply to support ticket: ${response.body}');
   }

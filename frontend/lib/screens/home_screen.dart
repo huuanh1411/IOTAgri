@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../core/widgets/status_pill.dart';
 import '../core/widgets/info_row.dart';
 import '../core/widgets/gauge_ring.dart';
+import '../core/widgets/page_header.dart';
 import '../core/widgets/skeleton.dart'; // placeholder skeleton widget
 import '../providers/data_providers.dart';
 import '../providers/user_provider.dart';
@@ -15,6 +16,7 @@ import '../models/device_overview.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text.dart';
 import '../core/animation/app_motion.dart';
+import '../utils/l10n.dart';
 
 /// Home tab UI that matches the design (Phase 4).
 class HomeScreen extends ConsumerWidget {
@@ -23,28 +25,15 @@ class HomeScreen extends ConsumerWidget {
   // Greeting based on hour of day.
   String _greeting(BuildContext context) {
     final hour = TimeOfDay.now().hour;
-    final isVietnamese = Localizations.localeOf(context).languageCode == 'vi';
-    if (hour < 12) return isVietnamese ? 'Chào buổi sáng' : 'Good morning';
-    if (hour < 18) return isVietnamese ? 'Chào buổi chiều' : 'Good afternoon';
-    return isVietnamese ? 'Chào buổi tối' : 'Good evening';
-  }
-
-  // Compute health percent from sensor vs. plant ideal ranges.
-  double _healthPercent(SensorReading reading, Plant plant) {
-    double waterScore = (reading.waterLevel / 100).clamp(0.0, 1.0);
-    double nutrientScore = (reading.nutrientLevel / 100).clamp(0.0, 1.0);
-    double tempMid = (plant.tempMin + plant.tempMax) / 2;
-    double tempRange = (plant.tempMax - plant.tempMin) / 2;
-    double tempScore = 1 - ((reading.temperature - tempMid).abs() / tempRange);
-    tempScore = tempScore.clamp(0.0, 1.0);
-    return ((waterScore + nutrientScore + tempScore) / 3) * 100;
+    if (hour < 12) return context.l10n.goodMorning;
+    if (hour < 18) return context.l10n.goodAfternoon;
+    return context.l10n.goodEvening;
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProfileProvider);
     final activePlant = ref.watch(currentPlantProvider);
-    final sensorAsync = ref.watch(sensorStreamProvider);
 
     return ColoredBox(
       color: AppColors.background,
@@ -54,88 +43,61 @@ class HomeScreen extends ConsumerWidget {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 24.0,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header with greeting and avatar
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _greeting(context),
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: AppColors.secondaryText),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              Localizations.localeOf(context).languageCode == 'vi'
-                                  ? 'Vườn của ${user.fullName.split(' ')[0]}'
-                                  : "${user.fullName.split(' ')[0]}'s Garden",
-                              style: AppText.heading(context, fontSize: 24),
-                            ),
-                          ],
+                    PageHeader(
+                      leadingContent: Text(
+                        _greeting(context),
+                        style: AppText.body(context, fontSize: 14).copyWith(
+                          color: AppColors.mutedSage,
                         ),
-                        // Avatar with gradient and initial
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor: Colors.transparent,
-                          child: Container(
-                            width: 48,
-                            height: 48,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                colors: [AppColors.sage, AppColors.forestGreen],
-                              ),
+                      ),
+                      title: context.l10n.gardenTitle,
+                      subtitle: context.l10n.gardenSubtitle,
+                      trailingAction: CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.transparent,
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [AppColors.sage, AppColors.forestGreen],
                             ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              user.fullName[0].toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            user.fullName.trim().isEmpty
+                                ? '?'
+                                : user.fullName.trim()[0].toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 24),
-                    // Hero card – loading skeleton while sensor data resolves
-                    sensorAsync.when(
-                      data: (sensor) {
-                        final health = _healthPercent(
-                          sensor,
-                          activePlant.plant,
-                        ).round();
-                        return _HeroCard(
-                          activePlant: activePlant,
-                          sensor: sensor,
-                          healthPercent: health,
-                        );
-                      },
-                      loading: () => Skeleton(height: 180, borderRadius: 28),
-                      error: (_, _) => const Text('Lỗi tải cảm biến'),
-                    ),
+                    const SizedBox(height: 28),
+                    _HeroCard(activePlant: activePlant),
                     const SizedBox(height: 24),
                     // These gauges intentionally use persisted backend readings.
-                    ref.watch(dashboardDevicesProvider).when(
-                      data: (devices) => AppMotionEntrance(
-                        child: _LiveSensorCard(
-                          device: devices.isEmpty ? null : devices.first,
+                    ref
+                        .watch(dashboardDevicesProvider)
+                        .when(
+                          data: (devices) => AppMotionEntrance(
+                            child: _LiveSensorCard(
+                              device: devices.isEmpty ? null : devices.first,
+                            ),
+                          ),
+                          loading: () =>
+                              Skeleton(height: 180, borderRadius: 24),
+                          error: (_, _) => Text(context.l10n.sensorLoadError),
                         ),
-                      ),
-                      loading: () => Skeleton(height: 180, borderRadius: 24),
-                      error: (_, _) => const Text('Không thể tải cảm biến'),
-                    ),
                     const SizedBox(height: 24),
                     // Care schedule card
                     _CareScheduleCard(activePlant: activePlant),
@@ -151,17 +113,11 @@ class HomeScreen extends ConsumerWidget {
 }
 
 // -----------------------------------------------------------------------------
-// Hero card widget – shows plant progress & health.
+// Hero card widget – shows plant progress.
 class _HeroCard extends StatelessWidget {
-  const _HeroCard({
-    required this.activePlant,
-    required this.sensor,
-    required this.healthPercent,
-  });
+  const _HeroCard({required this.activePlant});
 
   final ActivePlant activePlant;
-  final SensorReading sensor;
-  final int healthPercent;
 
   @override
   Widget build(BuildContext context) {
@@ -179,36 +135,9 @@ class _HeroCard extends StatelessWidget {
         ],
       ),
       padding: const EdgeInsets.all(20),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top‑right health percent
-          Positioned(
-            right: 0,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '$healthPercent%',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Text(
-                  'KHỎE MẠNH',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
               // Translucent chip
               Container(
                 decoration: BoxDecoration(
@@ -218,12 +147,16 @@ class _HeroCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.auto_awesome, color: Colors.white70, size: 16),
-                    SizedBox(width: 4),
+                  children: [
+                    const Icon(
+                      Icons.auto_awesome,
+                      color: Colors.white70,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
                     Text(
-                      'ĐANG TRỒNG',
-                      style: TextStyle(
+                      context.l10n.growing,
+                      style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -250,7 +183,11 @@ class _HeroCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '${plant.variety} · Ngày ${currentDay + 1} / ${activePlant.totalDays}',
+                context.l10n.dayProgress(
+                  plant.variety,
+                  currentDay + 1,
+                  activePlant.totalDays,
+                ),
                 style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
               const SizedBox(height: 16),
@@ -267,23 +204,21 @@ class _HeroCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   Text(
-                    'Nảy mầm',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                    context.l10n.germination,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                   Text(
-                    'Sinh trưởng',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                    context.l10n.growth,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                   Text(
-                    'Thu hoạch',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                    context.l10n.harvest,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                 ],
               ),
-            ],
-          ),
         ],
       ),
     );
@@ -310,12 +245,12 @@ class _LiveSensorCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Cảm biến Trực tiếp',
+                Text(
+                  context.l10n.liveSensors,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
-                const StatusPill(
-                  label: '● Đã đồng bộ',
+                StatusPill(
+                  label: context.l10n.synced,
                   color: AppColors.primaryText,
                 ),
               ],
@@ -326,7 +261,7 @@ class _LiveSensorCard extends StatelessWidget {
                 final reading = device?.latestReading;
                 final gauges = [
                   GaugeRing(
-                    label: 'MỨC NƯỚC',
+                    label: context.l10n.waterLevel,
                     value: reading?.waterLevel,
                     unit: '%',
                     color: AppColors.forestGreen,
@@ -342,7 +277,7 @@ class _LiveSensorCard extends StatelessWidget {
                     onTap: () => context.push('/home/sensor/nutrient'),
                   ),
                   GaugeRing(
-                    label: 'NHIỆT ĐỘ KK',
+                    label: context.l10n.airTemperature,
                     value: reading?.temperature,
                     unit: '°C',
                     color: const Color(0xFFCDB59A), // temp gauge tan
@@ -350,7 +285,7 @@ class _LiveSensorCard extends StatelessWidget {
                     onTap: () => context.push('/home/sensor/temperature'),
                   ),
                   GaugeRing(
-                    label: 'ÁNH SÁNG',
+                    label: context.l10n.light,
                     value: reading?.lux,
                     unit: 'lux',
                     color: const Color(0xFFE3A72F),
@@ -358,15 +293,16 @@ class _LiveSensorCard extends StatelessWidget {
                     onTap: () => context.push('/home/sensor/light'),
                   ),
                   GaugeRing(
-                    label: 'NHIỆT ĐỘ NƯỚC',
+                    label: context.l10n.waterTemperature,
                     value: reading?.solutionTemperature,
                     unit: '°C',
                     color: const Color(0xFFC86464),
                     icon: Icons.water,
-                    onTap: () => context.push('/home/sensor/solutionTemperature'),
+                    onTap: () =>
+                        context.push('/home/sensor/solutionTemperature'),
                   ),
                   GaugeRing(
-                    label: 'ĐỘ ẨM KHÔNG KHÍ',
+                    label: context.l10n.airHumidity,
                     value: reading?.humidity,
                     unit: '%',
                     color: const Color(0xFF4D94C7),
@@ -425,31 +361,37 @@ class _CareScheduleCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Lịch chăm sóc ${plant.name}',
+                  context.l10n.careScheduleFor(plant.name),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 StatusPill(
-                  label: isSmart ? 'Tự động tối ưu' : 'Đã tạm dừng',
+                  label: isSmart
+                      ? context.l10n.automaticOptimized
+                      : context.l10n.paused,
                   color: isSmart ? AppColors.forestGreen : AppColors.alertRed,
                 ),
               ],
             ),
             const SizedBox(height: 12),
             InfoRow(
-              label: 'CHU KỲ TƯỚI',
-              value:
-                  '${plant.pumpMinutes} phút mỗi ${plant.pumpEveryMinutes} phút',
+              label: context.l10n.wateringCycle,
+              value: context.l10n.wateringCycleValue(
+                plant.pumpMinutes,
+                plant.pumpEveryMinutes,
+              ),
             ),
             InfoRow(
-              label: 'CHU KỲ DINH DƯỠNG',
-              value:
-                  '${plant.nutrientMl}ml mỗi ${plant.nutrientEveryDays} ngày',
+              label: context.l10n.nutrientCycle,
+              value: context.l10n.nutrientCycleValue(
+                plant.nutrientMl,
+                plant.nutrientEveryDays,
+              ),
             ),
             InfoRow(
-              label: 'NHIỆT ĐỘ LÝ TƯỞNG',
+              label: context.l10n.idealTemperature,
               value: '${plant.tempMin.toInt()}–${plant.tempMax.toInt()}°C',
             ),
           ],

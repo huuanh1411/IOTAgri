@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../core/widgets/section_chip.dart';
 import '../core/widgets/page_header.dart';
 import '../core/widgets/gradient_button.dart';
 import '../core/theme/app_colors.dart';
@@ -11,6 +10,16 @@ import '../core/theme/app_text.dart';
 import '../data/models.dart';
 import '../data/mock_data.dart';
 import '../providers/data_providers.dart';
+import '../utils/l10n.dart';
+
+const _plantImageAssets = <String, String>{
+  '1': 'assets/images/plants/lettuce.png',
+  '2': 'assets/images/plants/basil.png',
+  '3': 'assets/images/plants/spinach.png',
+  '4': 'assets/images/plants/mint.png',
+  '5': 'assets/images/plants/kale.png',
+  '6': 'assets/images/plants/coriander.png',
+};
 
 /// Plant Picker tab – matches the design in Phase 5.
 class PlantPickerScreen extends ConsumerWidget {
@@ -24,18 +33,16 @@ class PlantPickerScreen extends ConsumerWidget {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Page header
-              const PageHeader(
-                chip: SectionChip(label: 'Chọn Giống Cây'),
-                title: 'Chọn Giống Cây',
-                subtitle:
-                    'Chọn cây — hệ thống sẽ tự động điều chỉnh ánh sáng, nước và dinh dưỡng.',
+              PageHeader(
+                title: context.l10n.choosePlantTitle,
+                subtitle: context.l10n.choosePlantSubtitle,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               // 2‑column grid of plant cards
               Expanded(
                 child: GridView.builder(
@@ -55,42 +62,9 @@ class PlantPickerScreen extends ConsumerWidget {
                       onStart: isCurrent
                           ? null
                           : () async {
-                              final confirm = await showDialog<bool>(
-                                context: context,
-                                builder: (_) => AlertDialog(
-                                  title: const Text('Xác nhận'),
-                                  content: Text(
-                                    'Bạn sẽ thay thế "${activePlant.plant.name}" bằng "${plant.name}". Tiếp tục?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, false),
-                                      child: const Text('Hủy'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, true),
-                                      child: const Text('Đồng ý'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              if (confirm == true) {
-                                await ref
-                                    .read(currentPlantProvider.notifier)
-                                    .startGrowing(plant);
-                                // Show feedback.
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Bắt đầu trồng ${plant.name}',
-                                      ),
-                                    ), // Vietnamese message
-                                  );
-                                }
-                              }
+                              await ref
+                                  .read(currentPlantProvider.notifier)
+                                  .startGrowing(plant);
                             },
                     );
                   },
@@ -127,7 +101,7 @@ class _PlantCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Illustration area with pastel tint.
+            // Transparent plant photography on the existing pastel tint.
             Container(
               height: 80,
               width: double.infinity,
@@ -136,9 +110,14 @@ class _PlantCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               alignment: Alignment.center,
-              child: Text(
-                plant.illustration,
-                style: const TextStyle(fontSize: 36),
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: Image.asset(
+                  _plantImageAssets[plant.id]!,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                  semanticLabel: plant.name,
+                ),
               ),
             ),
             const SizedBox(height: 8),
@@ -157,7 +136,7 @@ class _PlantCard extends StatelessWidget {
                 const Icon(Icons.access_time, size: 16, color: Colors.grey),
                 const SizedBox(width: 4),
                 Text(
-                  '${plant.durationWeeks} tuần',
+                  context.l10n.weeks(plant.durationWeeks),
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 const SizedBox(width: 12),
@@ -181,7 +160,10 @@ class _PlantCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    'Bơm ${plant.pumpMinutes} phút mỗi ${plant.pumpEveryMinutes} phút',
+                    context.l10n.pumpCycle(
+                      plant.pumpMinutes,
+                      plant.pumpEveryMinutes,
+                    ),
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
@@ -194,7 +176,10 @@ class _PlantCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    'Bổ sung ${plant.nutrientMl}ml mỗi ${plant.nutrientEveryDays} ngày',
+                    context.l10n.nutrientCycleShort(
+                      plant.nutrientMl,
+                      plant.nutrientEveryDays,
+                    ),
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
@@ -225,15 +210,21 @@ class _PlantCard extends StatelessWidget {
                   ? ElevatedButton.icon(
                       onPressed: null,
                       icon: const Icon(Icons.check),
-                      label: const Text('✓ Đang trồng'),
+                      label: Text(context.l10n.currentlyGrowing),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.forestGreen,
+                        disabledBackgroundColor:
+                            AppColors.growingDisabledBackground,
+                        disabledForegroundColor:
+                            AppColors.growingDisabledForeground,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
                     )
-                  : GradientButton(label: 'Bắt Đầu Trồng', onPressed: onStart),
+                  : GradientButton(
+                      label: context.l10n.startGrowing,
+                      onPressed: onStart,
+                    ),
             ),
           ],
         ),

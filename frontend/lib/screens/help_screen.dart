@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/widgets/page_header.dart';
 import '../core/widgets/section_chip.dart';
+import '../utils/l10n.dart';
 
 /// Help & Support screen – FAQ accordion and a placeholder chat button.
 class HelpScreen extends ConsumerWidget {
@@ -29,9 +30,9 @@ class HelpScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const PageHeader(
-                chip: SectionChip(label: 'Trợ giúp'),
-                title: 'Hỗ trợ',
+              PageHeader(
+                chip: SectionChip(label: context.l10n.help),
+                title: context.l10n.support,
                 subtitle: '',
               ),
               const SizedBox(height: 24),
@@ -42,11 +43,11 @@ class HelpScreen extends ConsumerWidget {
                   onPressed: () {
                     // Placeholder for future chat integration.
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Chat chưa được tích hợp')),
+                      SnackBar(content: Text(context.l10n.chatNotAvailable)),
                     );
                   },
                   icon: const Icon(Icons.chat),
-                  label: const Text('Chat với chúng tôi'),
+                  label: Text(context.l10n.chatWithUs),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -75,30 +76,29 @@ class _FaqAccordion extends StatefulWidget {
 }
 
 class _FaqAccordionState extends State<_FaqAccordion> {
-  final List<_FaqItem> _items = [
-    _FaqItem(
-      question: 'Cách thêm cây mới?',
-      answer: 'Vào tab "Cây" → nhấn nút "+" và điền thông tin cây.',
-    ),
-    _FaqItem(
-      question: 'Cách thiết lập cảnh báo?',
-      answer: 'Vào tab "Khác" → "Tùy chỉnh" và bật các công tắc cảnh báo.',
-    ),
-    _FaqItem(
-      question: 'Làm sao thay đổi đơn vị?',
-      answer: 'Vào tab "Khác" → "Tùy chỉnh" để chọn đơn vị và ngôn ngữ.',
-    ),
-    _FaqItem(
-      question: 'Thu hoạch đã qua?',
-      answer: 'Xem lịch sử thu hoạch trong tab "Lịch sử thu hoạch".',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final items = [
+      _FaqItem(
+        question: context.l10n.faqAddPlantQuestion,
+        answer: context.l10n.faqAddPlantAnswer,
+      ),
+      _FaqItem(
+        question: context.l10n.faqAlertsQuestion,
+        answer: context.l10n.faqAlertsAnswer,
+      ),
+      _FaqItem(
+        question: context.l10n.faqUnitsQuestion,
+        answer: context.l10n.faqUnitsAnswer,
+      ),
+      _FaqItem(
+        question: context.l10n.faqHarvestQuestion,
+        answer: context.l10n.faqHarvestAnswer,
+      ),
+    ];
     return ExpansionPanelList.radio(
       expandedHeaderPadding: const EdgeInsets.symmetric(vertical: 4),
-      children: _items.map<ExpansionPanelRadio>((_FaqItem item) {
+      children: items.map<ExpansionPanelRadio>((_FaqItem item) {
         return ExpansionPanelRadio(
           value: item.question,
           headerBuilder: (context, isExpanded) => ListTile(

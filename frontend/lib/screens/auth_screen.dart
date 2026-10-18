@@ -6,6 +6,7 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_text.dart';
 import '../core/widgets/gradient_button.dart';
 import '../providers/auth_controller.dart';
+import '../utils/l10n.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -24,7 +25,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   String? _validatePassword(String? value, {required bool isLogin}) {
     if (value == null || value.isEmpty) {
-      return 'Vui lòng nhập mật khẩu';
+      return context.l10n.passwordRequired;
     }
     if (isLogin) return null;
 
@@ -36,12 +37,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         RegExp(r'[^A-Za-z0-9]').hasMatch(value);
     if (hasRequiredCharacters) return null;
 
-    return 'Mật khẩu cần có:\n'
-        '• Ít nhất 8 ký tự\n'
-        '• Chữ thường\n'
-        '• Chữ hoa\n'
-        '• Số\n'
-        '• Ký tự đặc biệt';
+    return context.l10n.passwordRequirements;
   }
 
   @override
@@ -55,13 +51,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu.',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.checkSignUpDetails)));
       return;
     }
     final controller = ref.read(authControllerProvider.notifier);
@@ -88,14 +80,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         context.go('/home');
       }
     });
-    if (auth.error != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(auth.error!)));
-        ref.read(authControllerProvider.notifier).clearError();
-      });
-    }
     return Scaffold(
       body: SafeArea(
         child: Align(
@@ -109,12 +93,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   const _Brand(),
                   const SizedBox(height: 26),
                   Text(
-                    'Trồng Rau Đô Thị Nhàn Tênh',
+                    context.l10n.authHeadline,
                     style: AppText.heading(context, fontSize: 26),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.',
+                    context.l10n.authTagline,
                     textAlign: TextAlign.center,
                     style: AppText.body(
                       context,
@@ -146,26 +130,32 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             _Field(
                               controller: _name,
                               icon: Icons.person_outline,
-                              hint: 'Họ và tên',
+                              hint: context.l10n.fullName,
                             ),
                             const SizedBox(height: 12),
                           ],
                           _Field(
                             controller: _email,
                             icon: Icons.mail_outline,
-                            hint: 'ban@vidu.com',
+                            hint: context.l10n.emailExample,
                             keyboardType: TextInputType.emailAddress,
+                            onChanged: (_) => ref
+                                .read(authControllerProvider.notifier)
+                                .clearError(),
                             validator: (value) =>
                                 value == null || !value.contains('@')
-                                ? 'Email không hợp lệ'
+                                ? context.l10n.invalidEmail
                                 : null,
                           ),
                           const SizedBox(height: 12),
                           _Field(
                             controller: _password,
                             icon: Icons.lock_outline,
-                            hint: 'Mật khẩu',
+                            hint: context.l10n.password,
                             obscure: _hidePassword,
+                            onChanged: (_) => ref
+                                .read(authControllerProvider.notifier)
+                                .clearError(),
                             suffix: IconButton(
                               icon: Icon(
                                 _hidePassword
@@ -184,7 +174,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             _Field(
                               controller: _confirmPassword,
                               icon: Icons.lock_outline,
-                              hint: 'Xác nhận mật khẩu',
+                              hint: context.l10n.confirmPassword,
                               obscure: _hideConfirmPassword,
                               suffix: IconButton(
                                 icon: Icon(
@@ -198,30 +188,34 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                                 ),
                               ),
                               validator: (value) => value != _password.text
-                                  ? 'Mật khẩu không khớp'
+                                  ? context.l10n.passwordsDoNotMatch
                                   : null,
                             ),
+                          ],
+                          if (auth.error != null) ...[
+                            const SizedBox(height: 12),
+                            _AuthError(message: auth.error!),
                           ],
                           const SizedBox(height: 18),
                           SizedBox(
                             width: double.infinity,
                             child: GradientButton(
                               label: isLogin
-                                  ? 'Đăng nhập  →'
-                                  : 'Tạo tài khoản  →',
+                                  ? '${context.l10n.signIn}  →'
+                                  : '${context.l10n.createAccount}  →',
                               isLoading: auth.isLoading,
                               onPressed: _submit,
                             ),
                           ),
                           const SizedBox(height: 18),
-                          const Row(
+                          Row(
                             children: [
                               Expanded(child: Divider()),
                               Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 10),
                                 child: Text(
-                                  'hoặc tiếp tục với',
-                                  style: TextStyle(
+                                  context.l10n.orContinueWith,
+                                  style: const TextStyle(
                                     fontSize: 11,
                                     color: AppColors.secondaryText,
                                   ),
@@ -254,7 +248,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ),
                   const SizedBox(height: 22),
                   Text(
-                    'Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản & Quyền riêng tư.',
+                    context.l10n.termsNotice,
                     textAlign: TextAlign.center,
                     style: AppText.body(
                       context,
@@ -306,8 +300,8 @@ class _Tabs extends ConsumerWidget {
     ),
     child: Row(
       children: [
-        _tab(context, ref, 'Đăng Nhập', 0, isLogin),
-        _tab(context, ref, 'Đăng Ký', 1, !isLogin),
+        _tab(context, ref, context.l10n.signIn, 0, isLogin),
+        _tab(context, ref, context.l10n.signUp, 1, !isLogin),
       ],
     ),
   );
@@ -362,6 +356,7 @@ class _Field extends StatelessWidget {
     this.obscure = false,
     this.suffix,
     this.validator,
+    this.onChanged,
   });
   final TextEditingController controller;
   final IconData icon;
@@ -370,12 +365,14 @@ class _Field extends StatelessWidget {
   final bool obscure;
   final Widget? suffix;
   final String? Function(String?)? validator;
+  final ValueChanged<String>? onChanged;
   @override
   Widget build(BuildContext context) => TextFormField(
     controller: controller,
     keyboardType: keyboardType,
     obscureText: obscure,
     validator: validator,
+    onChanged: onChanged,
     decoration: InputDecoration(
       prefixIcon: Icon(icon, size: 19, color: AppColors.secondaryText),
       suffixIcon: suffix,
@@ -394,6 +391,42 @@ class _Field extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         borderSide: BorderSide(color: color, width: width),
       );
+}
+
+class _AuthError extends StatelessWidget {
+  const _AuthError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    liveRegion: true,
+    child: Container(
+      key: const Key('auth-error-message'),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      decoration: BoxDecoration(
+        color: AppColors.alertBackground,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.error_outline, size: 19, color: AppColors.alertRed),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Text(
+              message,
+              style: AppText.body(context, fontSize: 12).copyWith(
+                color: AppColors.alertRed,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _SocialButton extends StatelessWidget {

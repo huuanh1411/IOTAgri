@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../core/widgets/page_header.dart';
 import '../core/widgets/section_chip.dart';
 import '../core/theme/app_colors.dart';
+import '../utils/l10n.dart';
 
 /// Simple model for a past harvest.
 class HarvestRecord {
@@ -53,9 +54,9 @@ class HarvestScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const PageHeader(
-                chip: SectionChip(label: 'Lịch sử thu hoạch'),
-                title: 'Nhật ký thu hoạch',
+              PageHeader(
+                chip: SectionChip(label: context.l10n.harvestHistory),
+                title: context.l10n.harvestLog,
                 subtitle: '',
               ),
               const SizedBox(height: 16),
@@ -69,8 +70,8 @@ class HarvestScreen extends ConsumerWidget {
                       leading: const Icon(Icons.eco, color: AppColors.mint),
                       title: Text('${h.plantName} – ${h.yield}'),
                       subtitle: Text(
-                        'Bắt đầu: ${h.startDate.day}/${h.startDate.month}/${h.startDate.year}\n'
-                        'Thu hoạch: ${h.harvestDate.day}/${h.harvestDate.month}/${h.harvestDate.year}',
+                        '${context.l10n.startedOn(_date(h.startDate))}\n'
+                        '${context.l10n.harvestedOn(_date(h.harvestDate))}',
                       ),
                     );
                   },
@@ -82,4 +83,7 @@ class HarvestScreen extends ConsumerWidget {
       ),
     );
   }
+
+  String _date(DateTime value) =>
+      '${value.day}/${value.month}/${value.year}';
 }

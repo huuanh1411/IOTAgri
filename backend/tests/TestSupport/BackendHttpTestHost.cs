@@ -61,7 +61,7 @@ internal static class BackendHttpTestHost
         app.MapDeviceProvisioningEndpoints();
         app.MapSensorEndpoints();
         app.MapDashboardEndpoints();
-        await RoleSeeder.SeedAsync(app.Services);
+        await RoleSeeder.SeedAsync(app.Services, app.Configuration);
         await app.StartAsync();
         return app;
     }

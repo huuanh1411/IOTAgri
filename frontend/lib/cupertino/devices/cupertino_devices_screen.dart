@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/animation/app_motion.dart';
+import '../../core/widgets/page_header.dart';
 import '../../models/device.dart';
 import '../../services/api_service.dart';
+import '../../utils/l10n.dart';
 import 'add_device_screen.dart';
 import 'cupertino_device_detail_screen.dart';
 import 'cupertino_provisioning_code_screen.dart';
@@ -172,19 +174,26 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            CupertinoSliverNavigationBar(
-              largeTitle: const Text('Thiết bị'),
-              trailing: CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: _isCreating ? null : _createAndProvisionDevice,
-                child: _isCreating
-                    ? const CupertinoActivityIndicator()
-                    : const Icon(CupertinoIcons.add),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+                child: PageHeader(
+                  title: context.l10n.devicesTitle,
+                  subtitle: context.l10n.devicesSubtitle,
+                  trailingAction: CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(44, 44),
+                    onPressed: _isCreating ? null : _createAndProvisionDevice,
+                    child: _isCreating
+                        ? const CupertinoActivityIndicator()
+                        : const Icon(CupertinoIcons.add),
+                  ),
+                ),
               ),
             ),
             CupertinoSliverRefreshControl(onRefresh: () => _loadDevices()),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(18, 12, 18, 32),
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
               sliver: SliverList.list(
                 children: [
                   if (_isLoading)

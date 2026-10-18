@@ -134,8 +134,9 @@ await using (var scope = app.Services.CreateAsyncScope())
 {
     await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
 }
-await RoleSeeder.SeedAsync(app.Services);
+await RoleSeeder.SeedAsync(app.Services, app.Configuration);
 await AdminBootstrapper.SeedAsync(app.Services, app.Configuration);
+await MockDeviceSeeder.SeedAsync(app.Services, app.Configuration);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

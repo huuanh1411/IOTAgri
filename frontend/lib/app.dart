@@ -7,6 +7,7 @@ import 'package:provider/provider.dart' as provider;
 import 'router.dart';
 import 'core/theme/app_theme.dart';
 import 'providers/app_settings_provider.dart';
+import 'l10n/app_localizations.dart';
 
 /// The root widget of the app. It reads the [goRouterProvider] which
 /// contains the authentication‑aware routing configuration.
@@ -22,6 +23,8 @@ class AerogreenApp extends ConsumerWidget {
       title: 'Aerogreen',
       theme: AppTheme.lightTheme,
       locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       routerConfig: router,
       builder: (context, child) => CupertinoTheme(
         data: CupertinoThemeData(

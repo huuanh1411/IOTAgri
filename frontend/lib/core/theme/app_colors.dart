@@ -7,6 +7,7 @@ class AppColors {
   static const Color surface = Color(0xFFFFFEF9);
   static const Color mintChip = Color(0xFFDDEFE0);
   static const Color rowBackground = Color(0xFFF1F2E8);
+  static const Color growingDisabledBackground = Color(0xFFE3E5DF);
 
   // Primary palette
   static const Color forestGreen = Color(0xFF2F5D3F);
@@ -18,6 +19,9 @@ class AppColors {
   // Text
   static const Color primaryText = Color(0xFF102F20);
   static const Color secondaryText = Color(0xFF3C654D);
+  static const Color mutedSage = Color(0xFF637568);
+  static const Color growingDisabledForeground = Color(0xFF42614C);
+  static const Color paleSageAccent = Color(0xFFDCEBDA);
   static const Color lightGreetingText = Color(0xFFF7FFF9);
   static const Color photoTextGlow = Color(0xB3FFFFFF);
   static const Color photoTextShadow = Color(0x660A2417);

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/connectivity_service.dart';
+import '../../utils/l10n.dart';
 
 class GlobalOfflineBanner extends StatelessWidget {
   final Widget child;
@@ -27,7 +28,7 @@ class GlobalOfflineBanner extends StatelessWidget {
                 bottom: false,
                 child: Semantics(
                   container: true,
-                  label: 'Cảnh báo mất kết nối mạng. Bạn đang offline. Hiển thị dữ liệu gần nhất.',
+                  label: context.l10n.offlineBannerSemantics,
                   liveRegion: true,
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -43,18 +44,18 @@ class GlobalOfflineBanner extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           CupertinoIcons.wifi_slash,
                           color: CupertinoColors.white,
                           size: 20,
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Bạn đang offline. Hiển thị dữ liệu gần nhất.',
-                            style: TextStyle(
+                            context.l10n.offlineBanner,
+                            style: const TextStyle(
                               color: CupertinoColors.white,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
