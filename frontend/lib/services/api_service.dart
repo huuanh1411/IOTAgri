@@ -505,8 +505,8 @@ class ApiService {
     final queryParams = <String, String>{
       'page': page.toString(),
       'pageSize': pageSize.toString(),
-      if (rangeHours case final r?) 'from': now.subtract(Duration(hours: r)).toIso8601String(),
-      if (rangeHours case final r?) 'to': now.toIso8601String(),
+      if (rangeHours != null) 'from': now.subtract(Duration(hours: rangeHours)).toIso8601String(),
+      if (rangeHours != null) 'to': now.toIso8601String(),
     };
 
     final uri = Uri.parse(
@@ -582,15 +582,19 @@ class ApiService {
     DateTime? activeFromDate,
     DateTime? activeUntilDate,
   }) async {
-    final localStart = DateTime.parse(startTime);
-    final localEnd = endTime == null ? null : DateTime.parse(endTime);
+    // Recurrence is a device wall clock, not a DateTime/phone-zone instant.
+    String wallClock(String value) {
+      if (!RegExp(r'^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$').hasMatch(value)) {
+        throw const FormatException('Schedule time must be HH:mm:ss in Asia/Ho_Chi_Minh');
+      }
+      return value;
+    }
+    final formattedStartTime = wallClock(startTime);
+    final formattedEndTime = endTime == null ? null : wallClock(endTime);
     final weekdayMask = daysOfWeek.fold<int>(
       0,
       (mask, day) => mask | (1 << day),
     );
-    final formattedStartTime =
-        '${localStart.hour.toString().padLeft(2, '0')}:'
-        '${localStart.minute.toString().padLeft(2, '0')}:00';
     final response = await _authenticatedRequest(
       (headers) => _client.post(
         Uri.parse(
@@ -602,9 +606,7 @@ class ApiService {
           'weekdayMask': weekdayMask,
           'startTime': formattedStartTime,
           'durationSeconds': durationSeconds,
-          if (localEnd != null)
-            'endTime': '${localEnd.hour.toString().padLeft(2, '0')}:'
-                '${localEnd.minute.toString().padLeft(2, '0')}:00',
+          'endTime': ?formattedEndTime,
           'intervalMinutes': ?intervalMinutes,
           if (activeFromDate != null) 'activeFromDate': activeFromDate.toIso8601String().substring(0, 10),
           if (activeUntilDate != null) 'activeUntilDate': activeUntilDate.toIso8601String().substring(0, 10),

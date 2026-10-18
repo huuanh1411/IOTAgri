@@ -1,6 +1,7 @@
   import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../models/device.dart';
 import '../../models/pump_schedule.dart';
 import '../../services/api_service.dart';
@@ -128,7 +129,10 @@ class _CupertinoPumpSchedulesScreenState
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
+      backgroundColor: AppColors.background,
       navigationBar: CupertinoNavigationBar(
+        backgroundColor: AppColors.background,
+        border: null,
         middle: Text('Lịch tưới - ${widget.device.name}'),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -173,7 +177,7 @@ class _CupertinoPumpSchedulesScreenState
                       Text(
                         'Không thể tải lịch trình',
                         style: TextStyle(
-                          color: CupertinoColors.label.resolveFrom(context),
+                          color: AppColors.primaryText,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
@@ -182,9 +186,7 @@ class _CupertinoPumpSchedulesScreenState
                       Text(
                         _errorMessage!,
                         style: TextStyle(
-                          color: CupertinoColors.secondaryLabel.resolveFrom(
-                            context,
-                          ),
+                          color: AppColors.secondaryText,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -212,7 +214,7 @@ class _CupertinoPumpSchedulesScreenState
                       Text(
                         'Chưa có lịch trình',
                         style: TextStyle(
-                          color: CupertinoColors.label.resolveFrom(context),
+                          color: AppColors.primaryText,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
@@ -221,9 +223,7 @@ class _CupertinoPumpSchedulesScreenState
                       Text(
                         'Thêm lịch trình tưới tự động',
                         style: TextStyle(
-                          color: CupertinoColors.secondaryLabel.resolveFrom(
-                            context,
-                          ),
+                          color: AppColors.secondaryText,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -269,7 +269,7 @@ class _ScheduleCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -285,7 +285,7 @@ class _ScheduleCard extends StatelessWidget {
                         ? CupertinoIcons.checkmark_circle_fill
                         : CupertinoIcons.circle,
                     color: schedule.isEnabled
-                        ? CupertinoColors.systemGreen
+                        ? AppColors.forestGreen
                         : CupertinoColors.systemGrey,
                     size: 24,
                   ),
@@ -293,7 +293,7 @@ class _ScheduleCard extends StatelessWidget {
                   Text(
                     _formatTime(schedule.startTime),
                     style: TextStyle(
-                      color: CupertinoColors.label.resolveFrom(context),
+                      color: AppColors.primaryText,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                     ),
@@ -315,7 +315,7 @@ class _ScheduleCard extends StatelessWidget {
           Text(
             'Thời gian phun: ${schedule.durationSeconds} giây',
             style: TextStyle(
-              color: CupertinoColors.label.resolveFrom(context),
+              color: AppColors.primaryText,
               fontSize: 15,
             ),
           ),
@@ -324,7 +324,7 @@ class _ScheduleCard extends StatelessWidget {
             Text(
               'Lặp lại mỗi ${schedule.intervalMinutes} phút',
               style: TextStyle(
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                color: AppColors.secondaryText,
                 fontSize: 13,
               ),
             ),
@@ -333,7 +333,7 @@ class _ScheduleCard extends StatelessWidget {
           Text(
             'Ngày: ${_formatDays(schedule.weekdayMask)}',
             style: TextStyle(
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              color: AppColors.secondaryText,
               fontSize: 13,
             ),
           ),
@@ -481,21 +481,9 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
     });
 
     try {
-      final now = DateTime.now();
-      final startTimeStr = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        _startTime.hour,
-        _startTime.minute,
-      ).toIso8601String();
-      final endTimeStr = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        _endTime.hour,
-        _endTime.minute,
-      ).toIso8601String();
+      String wallClock(DateTime time) => '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00';
+      final startTimeStr = wallClock(_startTime);
+      final endTimeStr = wallClock(_endTime);
 
       await _apiService.createPumpSchedule(
         widget.device.id,
@@ -593,6 +581,8 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                 padding: const EdgeInsets.fromLTRB(18, 12, 18, 32),
                 sliver: SliverList.list(
                   children: [
+                    const Text('Giờ thiết bị: Asia/Ho_Chi_Minh. Lịch ưu tiên hơn điều khiển thủ công.'),
+                    const SizedBox(height: 12),
                     // Preset chips
                     const Text(
                       'Mẫu cài đặt',
@@ -622,7 +612,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                             style: TextStyle(
                               color: _selectedPreset == preset
                                   ? CupertinoColors.white
-                                  : CupertinoColors.label.resolveFrom(context),
+                                  : AppColors.primaryText,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -741,7 +731,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                             style: TextStyle(
                               color: _selectedDays.contains(index)
                                   ? CupertinoColors.white
-                                  : CupertinoColors.label.resolveFrom(context),
+                                  : AppColors.primaryText,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -763,7 +753,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                           const Icon(
                             CupertinoIcons.info_circle,
                             size: 16,
-                            color: CupertinoColors.secondaryLabel,
+                            color: AppColors.secondaryText,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -881,7 +871,7 @@ class _ScheduleField extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            color: AppColors.secondaryText,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -893,7 +883,7 @@ class _ScheduleField extends StatelessWidget {
         placeholder: placeholder,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: errorText != null
@@ -936,7 +926,7 @@ class _TimeButton extends StatelessWidget {
     child: Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -945,7 +935,7 @@ class _TimeButton extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              color: AppColors.secondaryText,
               fontSize: 11,
             ),
           ),
@@ -953,7 +943,7 @@ class _TimeButton extends StatelessWidget {
           Text(
             '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
             style: TextStyle(
-              color: CupertinoColors.label.resolveFrom(context),
+              color: AppColors.primaryText,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),

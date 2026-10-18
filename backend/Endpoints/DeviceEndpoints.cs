@@ -3,6 +3,7 @@ using System.Data;
 using IOTAgriBackend.Data;
 using IOTAgriBackend.Dtos.Alerts;
 using IOTAgriBackend.Dtos.Devices;
+using IOTAgriBackend.Dtos.Lights;
 using IOTAgriBackend.Dtos.Pumps;
 using IOTAgriBackend.Models;
 using IOTAgriBackend.Services;
@@ -23,6 +24,7 @@ public static class DeviceEndpoints
         group.MapPut("/{id:guid}", UpdateAsync);
         group.MapDelete("/{id:guid}", DeleteAsync);
         group.MapPost("/{id:guid}/pump/commands", SendPumpCommandAsync);
+        group.MapPost("/{id:guid}/light/commands", SendLightCommandAsync);
         group.MapGet("/{id:guid}/pump-commands", GetPumpCommandsAsync);
         group.MapGet("/{id:guid}/pump-schedules", ListPumpSchedulesAsync);
         group.MapPost("/{id:guid}/pump-schedules", CreatePumpScheduleAsync);
@@ -187,10 +189,28 @@ public static class DeviceEndpoints
             return Results.BadRequest(new { error = "commandId, on duration, and a valid duration are required." });
         }
 
+        // Recurrence owns the interval even before the dispatch poll or acknowledgement.
+        // Persisted commands retain ownership if their schedule is subsequently edited/deleted.
+        var now = DateTime.UtcNow;
+        var schedules = await db.PumpSchedules.AsNoTracking()
+            .Where(schedule => schedule.DeviceId == id && schedule.IsEnabled)
+            .ToListAsync(cancellationToken);
+        var scheduledCommands = await db.PumpCommands.AsNoTracking()
+            .Where(command => command.DeviceId == id && command.Source == PumpCommandSource.Scheduled
+                && command.IsOn && command.DurationSeconds != null && command.IssuedAt <= now
+                && command.IssuedAt.AddSeconds(command.DurationSeconds!.Value) > now)
+            .ToListAsync(cancellationToken);
+        if (scheduledCommands.Count != 0 || schedules.Any(schedule =>
+            PumpScheduleRules.GetDueOccurrencesUtc(schedule, now, TimeSpan.FromSeconds(schedule.DurationSeconds))
+                .Any(start => now < start.AddSeconds(schedule.DurationSeconds))))
+        {
+            return Results.Conflict(new { error = "Scheduled watering owns the pump until its scheduled end.", code = "SCHEDULE_ACTIVE" });
+        }
+
         var existing = await db.PumpCommands.FirstOrDefaultAsync(c => c.Id == request.CommandId, cancellationToken);
         if (existing is not null)
         {
-            if (existing.DeviceId != device.Id || existing.IsOn != request.IsOn || existing.DurationSeconds != request.DurationSeconds)
+            if (existing.Source != PumpCommandSource.Manual || existing.DeviceId != device.Id || existing.IsOn != request.IsOn || existing.DurationSeconds != request.DurationSeconds)
             {
                 return Results.Conflict(new { error = "commandId was already used for a different command." });
             }
@@ -229,6 +249,40 @@ public static class DeviceEndpoints
         }
 
         return Results.Created($"/api/devices/{device.Id}/pump/commands/{command.Id}", ToResponse(command));
+    }
+
+    private static async Task<IResult> SendLightCommandAsync(
+        Guid id,
+        LightCommandRequest request,
+        ClaimsPrincipal principal,
+        ApplicationDbContext db,
+        MqttIngestionService mqtt,
+        CancellationToken cancellationToken)
+    {
+        var userId = GetUserId(principal);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var device = await db.Devices.FirstOrDefaultAsync(d => d.Id == id && d.OwnerId == userId, cancellationToken);
+        if (device is null)
+        {
+            return Results.NotFound();
+        }
+
+        try
+        {
+            await mqtt.PublishLightCommandAsync(device.DeviceKey, request.IsOn, cancellationToken);
+        }
+        catch (InvalidOperationException)
+        {
+            return Results.Problem(
+                "Light command failed because MQTT is unavailable.",
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
+
+        return Results.Accepted($"/api/devices/{device.Id}/light", new { isOn = request.IsOn });
     }
 
     private static PumpCommandResponse ToResponse(PumpCommand command) => new(

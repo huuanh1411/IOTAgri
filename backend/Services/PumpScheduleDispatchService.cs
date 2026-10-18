@@ -127,9 +127,20 @@ public class PumpScheduleDispatchService : BackgroundService
                 IsOn = true,
                 DurationSeconds = occurrence.Schedule.DurationSeconds,
                 Source = PumpCommandSource.Scheduled,
+                IssuedAt = occurrence.OccurrenceUtc,
             };
             db.PumpCommands.Add(command);
             await db.SaveChangesAsync(cancellationToken);
+        }
+
+        // Retries must not shift the window or restart watering after its end.
+        if (command.IssuedAt.AddSeconds(command.DurationSeconds ?? 0) <= DateTime.UtcNow)
+        {
+            command.Status = PumpCommandStatus.Failed;
+            command.FailureReason = "SCHEDULE_EXPIRED";
+            occurrence.DispatchedAt = DateTime.UtcNow; // terminal; no further retry
+            await db.SaveChangesAsync(cancellationToken);
+            return;
         }
 
         try

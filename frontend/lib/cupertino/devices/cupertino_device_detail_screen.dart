@@ -7,6 +7,7 @@
   import 'package:intl/intl.dart';
 
   import '../../core/animation/app_motion.dart';
+  import '../../core/theme/app_colors.dart';
   import '../../models/device.dart';
   import '../../models/device_alert.dart';
   import '../../models/pump_command.dart';
@@ -15,7 +16,6 @@
   import '../../screens/sensors/sensor_history_screen.dart';
   import '../../screens/alerts/alerts_screen.dart';
   import '../../services/api_service.dart';
-  import '../theme/cupertino_theme.dart';
   import 'pump_schedules_screen.dart';
 
   enum PumpMode { auto, manual }
@@ -511,7 +511,10 @@
     Widget build(BuildContext context) {
       if (_isLoading && _readings.isEmpty && _errorMessage == null) {
         return CupertinoPageScaffold(
+          backgroundColor: AppColors.background,
           navigationBar: CupertinoNavigationBar(
+            backgroundColor: AppColors.background,
+            border: null,
             leading: _returnButton(context),
             middle: Text('Thiết bị'),
           ),
@@ -521,7 +524,10 @@
 
       if (_errorMessage != null && _readings.isEmpty) {
         return CupertinoPageScaffold(
+          backgroundColor: AppColors.background,
           navigationBar: CupertinoNavigationBar(
+            backgroundColor: AppColors.background,
+            border: null,
             leading: _returnButton(context),
             middle: Text(_device.name),
           ),
@@ -536,7 +542,10 @@
 
       final reading = _readings.isEmpty ? null : _readings.first;
       return CupertinoPageScaffold(
+        backgroundColor: AppColors.background,
         navigationBar: CupertinoNavigationBar(
+          backgroundColor: AppColors.background,
+          border: null,
           leading: _returnButton(context),
           middle: Text(
             _device.name,
@@ -645,10 +654,10 @@
     Widget build(BuildContext context) {
       final online = device.isOnline;
       final tint = online
-          ? AerogreenCupertinoTheme.aerogreenPrimary.withValues(alpha: 0.11)
+          ? AppColors.forestGreen.withValues(alpha: 0.11)
           : CupertinoColors.systemGrey5.resolveFrom(context);
       final accent = online
-          ? AerogreenCupertinoTheme.aerogreenPrimary
+          ? AppColors.forestGreen
           : CupertinoColors.systemGrey;
       return Container(
         padding: const EdgeInsets.all(20),
@@ -665,7 +674,7 @@
                   child: Text(
                     device.name,
                     style: TextStyle(
-                      color: CupertinoColors.label.resolveFrom(context),
+                      color: AppColors.primaryText,
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                     ),
@@ -676,6 +685,7 @@
             ),
             const SizedBox(height: 12),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(
                   online ? CupertinoIcons.wifi : CupertinoIcons.wifi_slash,
@@ -683,22 +693,27 @@
                   size: 16,
                 ),
                 const SizedBox(width: 7),
-                Text(
-                  online ? 'Kết nối ổn định' : 'Thiết bị ngoại tuyến',
-                  style: TextStyle(
-                    color: accent,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Text(
+                    online ? 'Kết nối ổn định' : 'Thiết bị ngoại tuyến',
+                    style: TextStyle(
+                      color: accent,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-                const Spacer(),
-                Text(
-                  lastUpdated == null
-                      ? 'Chưa có dữ liệu'
-                      : 'Cập nhật ${DateFormat('HH:mm').format(lastUpdated!.toLocal())}',
-                  style: TextStyle(
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                    fontSize: 11,
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    lastUpdated == null
+                        ? 'Chưa có dữ liệu'
+                        : 'Cập nhật ${DateFormat('HH:mm').format(lastUpdated!.toLocal())}',
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      color: AppColors.secondaryText,
+                      fontSize: 11,
+                    ),
                   ),
                 ),
               ],
@@ -708,7 +723,7 @@
               const Text(
                 'Lịch tự động vẫn tiếp tục chạy khi thiết bị ngoại tuyến.',
                 style: TextStyle(
-                  color: CupertinoColors.secondaryLabel,
+                  color: AppColors.secondaryText,
                   fontSize: 12,
                 ),
               ),
@@ -727,7 +742,7 @@
     @override
     Widget build(BuildContext context) {
       final color = isOnline
-          ? AerogreenCupertinoTheme.aerogreenPrimary
+          ? AppColors.forestGreen
           : CupertinoColors.systemGrey;
       return AnimatedContainer(
         duration: AppMotion.duration(context, AppMotion.status),
@@ -889,7 +904,7 @@
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(17),
           ),
           child: Row(
@@ -908,9 +923,7 @@
                     Text(
                       spec.label,
                       style: TextStyle(
-                        color: CupertinoColors.secondaryLabel.resolveFrom(
-                          context,
-                        ),
+                        color: AppColors.secondaryText,
                         fontSize: 12,
                       ),
                     ),
@@ -987,7 +1000,7 @@
                   decoration: BoxDecoration(
                     color: isRunning
                         ? CupertinoColors.systemOrange.withValues(alpha: 0.12)
-                        : CupertinoColors.systemGreen.withValues(alpha: 0.08),
+                        : AppColors.forestGreen.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -995,7 +1008,7 @@
                     color: isOnline
                         ? (isRunning
                               ? CupertinoColors.systemOrange
-                              : AerogreenCupertinoTheme.aerogreenPrimary)
+                              : AppColors.forestGreen)
                         : CupertinoColors.systemGrey,
                     size: 22,
                   ),
@@ -1017,7 +1030,7 @@
                           ? 'Bơm đang chạy'
                           : 'Bơm đang tắt',
                       style: const TextStyle(
-                        color: CupertinoColors.secondaryLabel,
+                        color: AppColors.secondaryText,
                         fontSize: 12,
                       ),
                     ),
@@ -1051,13 +1064,13 @@
                   const Icon(
                     CupertinoIcons.clock,
                     size: 16,
-                    color: CupertinoColors.secondaryLabel,
+                    color: AppColors.secondaryText,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Lần phun tiếp theo sau ${_formatTimeRemaining(nextScheduleTime)}',
                     style: const TextStyle(
-                      color: CupertinoColors.secondaryLabel,
+                      color: AppColors.secondaryText,
                       fontSize: 13,
                     ),
                   ),
@@ -1067,7 +1080,7 @@
               const Text(
                 'Không có lịch phun được kích hoạt',
                 style: TextStyle(
-                  color: CupertinoColors.secondaryLabel,
+                  color: AppColors.secondaryText,
                   fontSize: 13,
                 ),
               ),
@@ -1196,7 +1209,7 @@
                   child: Text(
                     'Phun ${schedule.durationSeconds} giây mỗi ${schedule.intervalMinutes ?? 5} phút, ${_scheduleTime(schedule.startTime)}-${_scheduleEndTime(schedule.startTime, schedule.durationSeconds)}',
                     style: TextStyle(
-                      color: CupertinoColors.label.resolveFrom(context),
+                      color: AppColors.primaryText,
                       fontSize: 13,
                     ),
                   ),
@@ -1290,12 +1303,12 @@
                               ),
                           ],
                           isCurved: true,
-                          color: AerogreenCupertinoTheme.aerogreenPrimary,
+                          color: AppColors.forestGreen,
                           barWidth: 2.5,
                           dotData: const FlDotData(show: false),
                           belowBarData: BarAreaData(
                             show: true,
-                            color: AerogreenCupertinoTheme.aerogreenPrimary
+                            color: AppColors.forestGreen
                                 .withValues(alpha: 0.1),
                           ),
                         ),
@@ -1310,7 +1323,7 @@
               Text(
                 '${points.length} lần ghi · Nhiệt độ',
                 style: TextStyle(
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  color: AppColors.secondaryText,
                   fontSize: 11,
                 ),
               ),
@@ -1344,7 +1357,7 @@
                   ? CupertinoIcons.checkmark_circle_fill
                   : CupertinoIcons.exclamationmark_triangle_fill,
               color: alerts.isEmpty
-                  ? AerogreenCupertinoTheme.aerogreenPrimary
+                  ? AppColors.forestGreen
                   : CupertinoColors.systemOrange,
               size: 21,
             ),
@@ -1360,7 +1373,7 @@
                         ? 'Không có cảnh báo đang mở.'
                         : '${alerts.length} cảnh báo đang mở',
                     style: const TextStyle(
-                      color: CupertinoColors.secondaryLabel,
+                      color: AppColors.secondaryText,
                       fontSize: 12,
                     ),
                   ),
@@ -1681,7 +1694,10 @@
 
     @override
     Widget build(BuildContext context) => CupertinoPageScaffold(
+      backgroundColor: AppColors.background,
       navigationBar: CupertinoNavigationBar(
+        backgroundColor: AppColors.background,
+        border: null,
         middle: const Text('Cài đặt thiết bị'),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
@@ -1767,7 +1783,7 @@
     Widget _buildRenameCard() => Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -1779,7 +1795,7 @@
                 Text(
                   'Tên thiết bị',
                   style: TextStyle(
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    color: AppColors.secondaryText,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1788,7 +1804,7 @@
                 Text(
                   _currentDevice.name,
                   style: TextStyle(
-                    color: CupertinoColors.label.resolveFrom(context),
+                    color: AppColors.primaryText,
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                   ),
@@ -1830,7 +1846,7 @@
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -1839,7 +1855,7 @@
             Text(
               'Thông tin thiết bị',
               style: TextStyle(
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                color: AppColors.secondaryText,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -1871,7 +1887,7 @@
                   Text(
                     'Tín hiệu Wi-Fi',
                     style: TextStyle(
-                      color: CupertinoColors.label.resolveFrom(context),
+                      color: AppColors.primaryText,
                       fontSize: 14,
                     ),
                   ),
@@ -1906,14 +1922,14 @@
           Text(
             label,
             style: TextStyle(
-              color: CupertinoColors.label.resolveFrom(context),
+              color: AppColors.primaryText,
               fontSize: 14,
             ),
           ),
           Text(
             value,
             style: TextStyle(
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              color: AppColors.secondaryText,
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -1938,7 +1954,7 @@
           child: Text(
             label,
             style: TextStyle(
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              color: AppColors.secondaryText,
               fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
@@ -1949,7 +1965,7 @@
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
-            color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(14),
           ),
         ),
@@ -1970,7 +1986,7 @@
           child: Text(
             title,
             style: TextStyle(
-              color: CupertinoColors.label.resolveFrom(context),
+              color: AppColors.primaryText,
               fontSize: 17,
               fontWeight: FontWeight.w700,
             ),
@@ -1980,7 +1996,7 @@
           Text(
             subtitle!,
             style: TextStyle(
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              color: AppColors.secondaryText,
               fontSize: 11,
             ),
           ),
@@ -1998,7 +2014,7 @@
       width: double.infinity,
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
-        color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(17),
       ),
       child: child,

@@ -7,6 +7,25 @@ namespace IOTAgriBackend.Tests;
 
 public class PumpScheduleRulesTests
 {
+    [Theory]
+    [InlineData("America/New_York")]
+    [InlineData("Europe/London")]
+    [InlineData("Asia/Tokyo")]
+    public void Vietnam_midnight_uses_local_date_and_previous_utc_day_independent_of_phone_zone(string phoneZone)
+    {
+        var instant = new DateTime(2026, 10, 14, 17, 5, 0, DateTimeKind.Utc);
+        var phoneClock = TimeZoneInfo.ConvertTimeFromUtc(instant, TimeZoneInfo.FindSystemTimeZoneById(phoneZone));
+        var sameInstant = TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(phoneClock, DateTimeKind.Unspecified), TimeZoneInfo.FindSystemTimeZoneById(phoneZone));
+        var schedule = new PumpSchedule
+        {
+            IsEnabled = true, WeekdayMask = 1 << (int)DayOfWeek.Thursday,
+            StartTime = new TimeOnly(0, 5), DurationSeconds = 60, TimeZone = "Asia/Ho_Chi_Minh",
+            ActiveFromDate = new DateOnly(2026, 10, 15), ActiveUntilDate = new DateOnly(2026, 10, 15),
+        };
+        Assert.Equal(instant, Assert.Single(PumpScheduleRules.GetDueOccurrencesUtc(schedule, sameInstant, TimeSpan.FromSeconds(60))));
+        Assert.Empty(PumpScheduleRules.GetDueOccurrencesUtc(schedule, instant.AddDays(7), TimeSpan.FromSeconds(60)));
+    }
+
     [Fact]
     public void Validates_mask_duration_and_iana_time_zone()
     {

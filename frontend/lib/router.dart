@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import 'screens/alert_center_tab_screen.dart';
 import 'screens/auth_screen.dart';
+import 'screens/devices/devices_screen.dart';
 import 'screens/harvest_screen.dart';
 import 'screens/help_screen.dart';
 import 'screens/home_screen.dart';
@@ -127,6 +128,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 path: '/pick',
                 name: 'pick',
                 builder: (context, state) => const PlantPickerScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/devices',
+                name: 'devices',
+                builder: (context, state) => const DevicesScreen(),
               ),
             ],
           ),

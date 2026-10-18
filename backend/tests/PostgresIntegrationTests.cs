@@ -50,8 +50,9 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
     {
         await using var db = await _fixture.CreateDatabaseAsync();
         var applied = (await db.Database.GetAppliedMigrationsAsync()).ToList();
-        Assert.Equal(14, applied.Count);
+        Assert.Equal(15, applied.Count);
         Assert.Contains("20261009120000_AddSolutionTemperatureToSensorReadings", applied);
+        Assert.Contains("20261014072501_AddPumpScheduleActiveDateRange", applied);
         Assert.Empty(await db.Database.GetPendingMigrationsAsync());
         Assert.False(db.Database.HasPendingModelChanges());
     }
@@ -400,18 +401,27 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
         using var mqtt = new MqttIngestionService(scopes, new ConfigurationBuilder().Build(), NullLogger<MqttIngestionService>.Instance);
         using var scheduler = new PumpScheduleDispatchService(scopes, new ConfigurationBuilder().Build(), mqtt, NullLogger<PumpScheduleDispatchService>.Instance);
         var claim = typeof(PumpScheduleDispatchService).GetMethod("ClaimAndPublishAsync", BindingFlags.Instance | BindingFlags.NonPublic)!;
-        var occurrence = new DateTime(2026, 10, 1, 0, 0, 0, DateTimeKind.Utc);
+        var occurrence = DateTime.UtcNow.AddSeconds(-5);
         await (Task)claim.Invoke(scheduler, new object[] { schedule.Id, occurrence, System.Threading.CancellationToken.None })!;
         await (Task)claim.Invoke(scheduler, new object[] { schedule.Id, occurrence, System.Threading.CancellationToken.None })!;
         db.ChangeTracker.Clear();
         var pending = await db.PumpScheduleOccurrences.SingleAsync();
         Assert.Null(pending.DispatchedAt);
-        Assert.Equal(occurrence, pending.OccurrenceUtc);
+        Assert.Equal(occurrence.Ticks / 10, pending.OccurrenceUtc.Ticks / 10);
         var command = await db.PumpCommands.SingleAsync();
         Assert.Equal(pending.CommandId, command.Id);
         Assert.Equal(PumpCommandSource.Scheduled, command.Source);
+        Assert.Equal(occurrence.Ticks / 10, command.IssuedAt.Ticks / 10); // PostgreSQL microseconds
         Assert.Equal(PumpCommandStatus.Pending, command.Status);
         Assert.False(mqtt.IsConnected);
+
+        command.IssuedAt = DateTime.UtcNow.AddMinutes(-10);
+        await db.SaveChangesAsync();
+        await (Task)typeof(PumpScheduleDispatchService).GetMethod("PublishAsync", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .Invoke(scheduler, new object[] { pending.Id, System.Threading.CancellationToken.None })!;
+        db.ChangeTracker.Clear();
+        Assert.Equal("SCHEDULE_EXPIRED", (await db.PumpCommands.SingleAsync()).FailureReason);
+        Assert.NotNull((await db.PumpScheduleOccurrences.SingleAsync()).DispatchedAt);
     }
 
     [Fact]

@@ -9,6 +9,21 @@ public class PumpMqttMessageTests
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     [Fact]
+    public void Scheduled_command_carries_source_and_fixed_utc_window()
+    {
+        var start = new System.DateTime(2026, 10, 14, 17, 5, 0, System.DateTimeKind.Utc);
+        var command = new IOTAgriBackend.Models.PumpCommand
+        {
+            IsOn = true, DurationSeconds = 60, IssuedAt = start,
+            Source = IOTAgriBackend.Models.PumpCommandSource.Scheduled,
+        };
+        using var json = JsonDocument.Parse(JsonSerializer.Serialize(PumpCommandMessage.From(command), JsonOptions));
+        Assert.Equal("scheduled", json.RootElement.GetProperty("source").GetString());
+        Assert.Equal(start, json.RootElement.GetProperty("issuedAtUtc").GetDateTime());
+        Assert.Equal(start.AddSeconds(60), json.RootElement.GetProperty("scheduledEndUtc").GetDateTime());
+    }
+
+    [Fact]
     public void Legacy_status_without_success_remains_acknowledged()
     {
         var status = JsonSerializer.Deserialize<PumpStatusMessage>(

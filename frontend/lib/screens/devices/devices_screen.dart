@@ -1,11 +1,16 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import '../../models/device.dart';
+import 'package:flutter/material.dart';
+
 import '../../core/animation/app_motion.dart';
-import '../../services/api_service.dart';
-import '../../widgets/loading_indicators.dart';
-import '../../widgets/custom_buttons.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text.dart';
+import '../../core/widgets/page_header.dart';
+import '../../core/widgets/section_chip.dart';
 import '../../cupertino/devices/cupertino_device_detail_screen.dart';
+import '../../models/device.dart';
+import '../../services/api_service.dart';
+import '../../widgets/custom_buttons.dart';
+import '../../widgets/loading_indicators.dart';
 import 'provisioning_code_screen.dart';
 
 class DevicesScreen extends StatefulWidget {
@@ -82,9 +87,29 @@ class _DevicesScreenState extends State<DevicesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Quản Lý Thiết Bị')),
-      body: _buildBody(),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: RefreshIndicator(
+          color: AppColors.forestGreen,
+          onRefresh: _loadDevices,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            children: [
+              const PageHeader(
+                chip: SectionChip(label: 'Thiết bị'),
+                title: 'Thiết bị',
+                subtitle: 'Theo dõi trạng thái và truy cập nhanh cài đặt.',
+              ),
+              const SizedBox(height: 18),
+              _buildBody(),
+            ],
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.forestGreen,
+        foregroundColor: Colors.white,
         onPressed: _addDevice,
         child: const Icon(Icons.add),
       ),
@@ -93,18 +118,27 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const LoadingState(message: 'Đang tải thiết bị...');
+      return const Padding(
+        padding: EdgeInsets.only(top: 48),
+        child: LoadingState(message: 'Đang tải thiết bị...'),
+      );
     }
 
     if (_errorMessage != null) {
-      return ErrorState(message: _errorMessage!, onRetry: _loadDevices);
+      return Padding(
+        padding: const EdgeInsets.only(top: 40),
+        child: ErrorState(message: _errorMessage!, onRetry: _loadDevices),
+      );
     }
 
     if (_devices.isEmpty) {
-      return EmptyState(
-        icon: Icons.devices_other,
-        title: 'Chưa có thiết bị nào',
-        subtitle: 'Nhấn nút + để thêm thiết bị mới',
+      return const Padding(
+        padding: EdgeInsets.only(top: 40),
+        child: EmptyState(
+          icon: Icons.devices_other,
+          title: 'Chưa có thiết bị nào',
+          subtitle: 'Nhấn nút + để thêm thiết bị mới',
+        ),
       );
     }
 
@@ -114,126 +148,142 @@ class _DevicesScreenState extends State<DevicesScreen> {
     final hasSearch = _devices.length > 6;
     final hasNoResults = hasSearch && filteredDevices.isEmpty;
 
-    return RefreshIndicator(
-      onRefresh: _loadDevices,
-      child: ListView.builder(
+    return Column(
+      children: [
+        if (hasSearch)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: CupertinoSearchTextField(
+              placeholder: 'Tìm thiết bị',
+              onChanged: (value) => setState(() => _searchQuery = value),
+            ),
+          ),
+        if (hasNoResults)
+          const Padding(
+            padding: EdgeInsets.only(top: 32),
+            child: Center(child: Text('Không tìm thấy thiết bị.')),
+          )
+        else
+          ...filteredDevices.map(_buildDeviceCard),
+      ],
+    );
+  }
+
+  Widget _buildDeviceCard(Device device) {
+    final iconColor = device.isOnline ? AppColors.mint : AppColors.alertRed;
+    final location = (device.location == null || device.location!.isEmpty)
+        ? 'Vị trí chưa gán'
+        : device.location!;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 14),
+      child: Padding(
         padding: const EdgeInsets.all(16),
-        itemCount:
-            (hasSearch ? 1 : 0) + (hasNoResults ? 1 : filteredDevices.length),
-        itemBuilder: (context, index) {
-          if (hasSearch && index == 0) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: CupertinoSearchTextField(
-                placeholder: 'Tìm thiết bị',
-                onChanged: (value) => setState(() => _searchQuery = value),
-              ),
-            );
-          }
-          final deviceIndex = index - (hasSearch ? 1 : 0);
-          if (hasNoResults) {
-            return const Padding(
-              padding: EdgeInsets.only(top: 32),
-              child: Center(child: Text('Không tìm thấy thiết bị.')),
-            );
-          }
-          final device = filteredDevices[deviceIndex];
-          return Card(
-            margin: const EdgeInsets.only(bottom: 16),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InkWell(
+              onTap: () {
+                _openDevice(device);
+              },
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  InkWell(
-                    onTap: () {
-                      _openDevice(device);
-                    },
-                    child: Row(
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: iconColor.withValues(alpha: .14),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      device.isOnline ? Icons.wifi : Icons.wifi_off,
+                      color: iconColor,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          device.isOnline ? Icons.wifi : Icons.wifi_off,
-                          color: device.isOnline ? Colors.green : Colors.red,
-                          size: 32,
+                        Text(
+                          device.name,
+                          style: AppText.heading(context, fontSize: 18),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                device.name,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            _DeviceStatusChip(isOnline: device.isOnline),
+                            Text(
+                              location,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.secondaryText,
                               ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  _DeviceStatusChip(isOnline: device.isOnline),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Vị trí chưa gán',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (device.lastSeenAt != null)
-                                Text(
-                                  'Lần hoạt động: ${_formatDate(device.lastSeenAt!)}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                            ],
+                            ),
+                          ],
+                        ),
+                        if (device.lastSeenAt != null) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            'Lần hoạt động: ${_formatDate(device.lastSeenAt!)}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.secondaryText,
+                            ),
                           ),
-                        ),
-                        const Icon(Icons.chevron_right),
+                        ],
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomElevatedButton(
-                          text: 'Chi tiết',
-                          icon: Icons.visibility,
-                          onPressed: () {
-                            _openDevice(device);
-                          },
-                          isFullWidth: true,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: CustomOutlinedButton(
-                          text: 'Mã thiết lập',
-                          icon: Icons.qr_code_2,
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    ProvisioningCodeScreen(device: device),
-                              ),
-                            );
-                          },
-                          isFullWidth: true,
-                        ),
-                      ),
-                    ],
-                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right, color: AppColors.secondaryText),
                 ],
               ),
             ),
-          );
-        },
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                SizedBox(
+                  width: 180,
+                  child: CustomElevatedButton(
+                    text: 'Chi tiết',
+                    icon: Icons.visibility,
+                    onPressed: () {
+                      _openDevice(device);
+                    },
+                    isFullWidth: true,
+                  ),
+                ),
+                SizedBox(
+                  width: 180,
+                  child: CustomOutlinedButton(
+                    text: 'Mã thiết lập',
+                    icon: Icons.qr_code_2,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ProvisioningCodeScreen(device: device),
+                        ),
+                      );
+                    },
+                    isFullWidth: true,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -278,14 +328,29 @@ class _AddDeviceDialogState extends State<AddDeviceDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Thêm Thiết Bị Mới'),
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: Text(
+        'Thêm Thiết Bị Mới',
+        style: AppText.heading(context, fontSize: 18),
+      ),
       content: Form(
         key: _formKey,
         child: TextFormField(
           controller: _controller,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Tên thiết bị',
             hintText: 'Nhập tên thiết bị',
+            filled: true,
+            fillColor: AppColors.rowBackground,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.forestGreen),
+            ),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -298,9 +363,17 @@ class _AddDeviceDialogState extends State<AddDeviceDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
+          style: TextButton.styleFrom(foregroundColor: AppColors.secondaryText),
           child: const Text('Hủy'),
         ),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.forestGreen,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
           onPressed: () {
             if (_formKey.currentState!.validate()) {
               Navigator.pop(context, _controller.text.trim());

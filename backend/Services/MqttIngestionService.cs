@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Text;
 using System.Text.Json;
 using IOTAgriBackend.Data;
+using IOTAgriBackend.Dtos.Lights;
 using IOTAgriBackend.Dtos.Pumps;
 using IOTAgriBackend.Dtos.Sensors;
 using IOTAgriBackend.Models;
@@ -158,7 +159,23 @@ public class MqttIngestionService : BackgroundService
 
         var message = new MqttApplicationMessageBuilder()
             .WithTopic($"devices/{deviceKey}/commands/pump")
-            .WithPayload(JsonSerializer.Serialize(new PumpCommandMessage(command.Id, command.IsOn, command.DurationSeconds), JsonOptions))
+            .WithPayload(JsonSerializer.Serialize(PumpCommandMessage.From(command), JsonOptions))
+            .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+            .Build();
+
+        await _mqttClient.PublishAsync(message, cancellationToken);
+    }
+
+    public async Task PublishLightCommandAsync(string deviceKey, bool isOn, CancellationToken cancellationToken)
+    {
+        if (!_mqttClient.IsConnected)
+        {
+            throw new InvalidOperationException("MQTT client is not connected.");
+        }
+
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic($"devices/{deviceKey}/commands/light")
+            .WithPayload(JsonSerializer.Serialize(new LightCommandMessage(isOn), JsonOptions))
             .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
             .Build();
 

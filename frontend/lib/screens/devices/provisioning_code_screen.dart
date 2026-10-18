@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text.dart';
+import '../../core/widgets/page_header.dart';
+import '../../core/widgets/section_chip.dart';
 import '../../models/device.dart';
 import '../../models/provisioning_code.dart';
 import '../../services/api_service.dart';
@@ -95,10 +99,11 @@ class _ProvisioningCodeScreenState extends State<ProvisioningCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Mã Thiết Lập Thiết Bị'),
       ),
-      body: _buildBody(),
+      body: SafeArea(child: _buildBody()),
     );
   }
 
@@ -121,77 +126,70 @@ class _ProvisioningCodeScreenState extends State<ProvisioningCodeScreen> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 32),
-          Icon(
-            Icons.qr_code_2,
-            size: 80,
-            color: Colors.green,
+          PageHeader(
+            chip: const SectionChip(label: 'Thiết lập'),
+            title: 'Mã thiết lập thiết bị',
+            subtitle: widget.device.name,
           ),
           const SizedBox(height: 24),
-          const Text(
-            'Mã Thiết Lập Thiết Bị',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          Center(
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: AppColors.mintChip,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.qr_code_2,
+                size: 40,
+                color: AppColors.forestGreen,
+              ),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            widget.device.name,
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 32),
-          
+          const SizedBox(height: 24),
+
           // Code Display Card
           Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     'Mã thiết lập của bạn:',
-                    style: TextStyle(
-                      fontSize: 16,
+                    style: AppText.body(
+                      context,
                       fontWeight: FontWeight.w600,
+                      fontSize: 16,
                     ),
                   ),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[300]!),
+                      color: AppColors.rowBackground,
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
                       children: [
                         Text(
                           _provisioningCode!.code,
-                          style: const TextStyle(
+                          style: AppText.heading(
+                            context,
                             fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                            fontFamily: 'Inter',
-                          ),
+                          ).copyWith(letterSpacing: 2),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 12),
                         Text(
                           'Hết hạn sau: ${_getExpirationTime()}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
-                            color: Colors.orange[700],
+                            color: Color(0xFFB4690E),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -202,7 +200,9 @@ class _ProvisioningCodeScreenState extends State<ProvisioningCodeScreen> {
                   CustomElevatedButton(
                     text: _isCopied ? 'Đã sao chép!' : 'Sao chép mã',
                     icon: _isCopied ? Icons.check : Icons.copy,
-                    backgroundColor: _isCopied ? Colors.green : Colors.blue,
+                    backgroundColor: _isCopied
+                        ? AppColors.mint
+                        : AppColors.forestGreen,
                     onPressed: _copyCode,
                     isFullWidth: true,
                   ),
@@ -210,12 +210,11 @@ class _ProvisioningCodeScreenState extends State<ProvisioningCodeScreen> {
               ),
             ),
           ),
-          
-          const SizedBox(height: 32),
-          
+
+          const SizedBox(height: 24),
+
           // Instructions Card
           Card(
-            elevation: 2,
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -223,14 +222,14 @@ class _ProvisioningCodeScreenState extends State<ProvisioningCodeScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.info_outline, color: Colors.blue[700]),
+                      const Icon(
+                        Icons.info_outline,
+                        color: AppColors.forestGreen,
+                      ),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         'Hướng dẫn sử dụng:',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppText.heading(context, fontSize: 18),
                       ),
                     ],
                   ),
@@ -255,50 +254,51 @@ class _ProvisioningCodeScreenState extends State<ProvisioningCodeScreen> {
               ),
             ),
           ),
-          
-          const SizedBox(height: 24),
-          
+
+          const SizedBox(height: 20),
+
           // Warning Card
-          Card(
-            color: Colors.orange[50],
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.orange[300]!),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFDF1DD),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFEBCB94)),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Icon(Icons.warning, color: Colors.orange[700]),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Mã thiết lập chỉ sử dụng được một lần. Hãy đảm bảo thiết bị của bạn đã sẵn sàng trước khi sử dụng.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.orange[900],
-                      ),
+            child: Row(
+              children: [
+                const Icon(Icons.warning_amber_rounded, color: Color(0xFFB4690E)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Mã thiết lập chỉ sử dụng được một lần. Hãy đảm bảo thiết bị của bạn đã sẵn sàng trước khi sử dụng.',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF7A4A0E),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-          
-          const SizedBox(height: 32),
-          
+
+          const SizedBox(height: 28),
+
           CustomElevatedButton(
             text: 'Tạo mã mới',
             icon: Icons.refresh,
+            backgroundColor: AppColors.forestGreen,
             onPressed: _generateProvisioningCode,
             isFullWidth: true,
           ),
-          
-          const SizedBox(height: 16),
-          
+
+          const SizedBox(height: 12),
+
           CustomOutlinedButton(
             text: 'Quay lại',
             icon: Icons.arrow_back,
+            borderColor: AppColors.forestGreen,
+            textColor: AppColors.forestGreen,
             onPressed: () => Navigator.pop(context),
             isFullWidth: true,
           ),
@@ -317,7 +317,7 @@ class _ProvisioningCodeScreenState extends State<ProvisioningCodeScreen> {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: Colors.green,
+              color: AppColors.forestGreen,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Center(

@@ -336,6 +336,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Text('Giờ thiết bị: Asia/Ho_Chi_Minh. Lịch ưu tiên hơn điều khiển thủ công.'),
               // Time picker
               InkWell(
                 onTap: _selectTime,
@@ -415,20 +416,13 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
         ElevatedButton(
           onPressed: () {
             if (_formKey.currentState!.validate() && _selectedDays.isNotEmpty) {
-              final now = DateTime.now();
-              final startTime = DateTime(
-                now.year,
-                now.month,
-                now.day,
-                _selectedTime.hour,
-                _selectedTime.minute,
-              ).toIso8601String();
+              String wallClock(TimeOfDay time) => '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00';
 
               Navigator.pop(context, {
-                'startTime': startTime,
+                'startTime': wallClock(_selectedTime),
                 'durationSeconds': int.parse(_durationController.text),
                 'daysOfWeek': _selectedDays,
-                'endTime': DateTime(now.year, now.month, now.day, _endTime.hour, _endTime.minute).toIso8601String(),
+                'endTime': wallClock(_endTime),
                 'intervalMinutes': 60,
                 'activeFromDate': _activeFromDate,
                 'activeUntilDate': _activeUntilDate,
