@@ -1,0 +1,1454 @@
+{
+  "note": "Published copies redact runtime credentials; local originals are unchanged. Historical execution data, not a new test run.",
+  "files": [
+    {
+      "source": "docs/testing/2026-10-18-frontend/analysis-issues.json",
+      "path": "docs/testing/2026-10-18-frontend/analysis-issues.json",
+      "bytes": 243,
+      "sha256": "44c482ce461c987c19a5c566072d89515d4cf88eb3fbdc529f5079f737430b4c",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-18-frontend/BAO_CAO_TEST_FE.txt",
+      "path": "docs/testing/2026-10-18-frontend/BAO_CAO_TEST_FE.txt",
+      "bytes": 24141,
+      "sha256": "563119a4f84e834d08142e9d58e479603bc10965c59aa3f30875049200037d5a",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-18-frontend/browser-status.txt",
+      "path": "docs/testing/2026-10-18-frontend/browser-status.txt",
+      "bytes": 131,
+      "sha256": "7c73166b7939656b14798bb3bcd0e76b64ad95e1a64e9f3014e84b057c275b79",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-18-frontend/browser-test-exit-code.txt",
+      "path": "docs/testing/2026-10-18-frontend/browser-test-exit-code.txt",
+      "bytes": 22,
+      "sha256": "0c156997f3849fe8317d68e2daebf5d08a3eb3c84280e97f60c498e6f198d135",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-18-frontend/browser-test.log",
+      "path": "docs/testing/2026-10-18-frontend/browser-test.log",
+      "bytes": 523,
+      "sha256": "a6c9f75ec549bce6efe72808f7c41d32f4c992e17ac7e55ee90997f179f0e086",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-18-frontend/browser-test.stderr.log",
+      "path": "docs/testing/2026-10-18-frontend/browser-test.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-18-frontend/flutter-analyze-exit-code.txt",
+      "path": "docs/testing/2026-10-18-frontend/flutter-analyze-exit-code.txt",
+      "bytes": 13,
+      "sha256": "4fa76b808b0441857562232acabf29490555d9e389f4509f2b240b0a5b5e3812",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-18-frontend/flutter-analyze.log",
+      "path": "docs/testing/2026-10-18-frontend/flutter-analyze.log",
+      "bytes": 226,
+      "sha256": "38cc6d64d408bb93a269a9e50765139443a435423534e67011a0467e9f572051",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-18-frontend/flutter-analyze.stderr.log",
+      "path": "docs/testing/2026-10-18-frontend/flutter-analyze.stderr.log",
+      "bytes": 30,
+      "sha256": "59b930ed01756766e2c70dca605596331cd8aecb9596aa42203e5df310b2432e",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-18-frontend/flutter-test.jsonl",
+      "path": "docs/testing/2026-10-18-frontend/flutter-test.jsonl",
+      "bytes": 79278,
+      "sha256": "83bb8bb5d4890b684a588422c6a29194670731d0c89b52bbfd4aeb26a25ef13d",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-18-frontend/flutter-test.stderr.log",
+      "path": "docs/testing/2026-10-18-frontend/flutter-test.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-18-frontend/test-cases.json",
+      "path": "docs/testing/2026-10-18-frontend/test-cases.json",
+      "bytes": 27376,
+      "sha256": "b502c4cff5cad46b6a35ad54837d4fb3b3e5a33a4379ac0b2777590697fd88e0",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-18-frontend/test-exit-code.txt",
+      "path": "docs/testing/2026-10-18-frontend/test-exit-code.txt",
+      "bytes": 13,
+      "sha256": "a9f58776a09b5dac438049683f24bf85764e0ff8e7455952456165c68c158627",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/BAO_CAO_UI.txt",
+      "path": "docs/testing/2026-10-19-ui/BAO_CAO_UI.txt",
+      "bytes": 43414,
+      "sha256": "54f48a33bdfcb53521013b674b7e0725b23dd2e130b50a6980eb52b77f40150c",
+      "redacted": true
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/environment.json",
+      "path": "docs/testing/2026-10-19-ui/environment.json",
+      "bytes": 385,
+      "sha256": "4148913101199af02dcb09fdb94b8dc6346b69db5694032c3ab9d1c7e98b8333",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/exit-code.txt",
+      "path": "docs/testing/2026-10-19-ui/exit-code.txt",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/index.html",
+      "path": "docs/testing/2026-10-19-ui/index.html",
+      "bytes": 95751,
+      "sha256": "d7cdc0ac6c2d8d83929394ab9ca5b7bf71e7f3f1420d6b23f6a968cabfdcc606",
+      "redacted": true
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/results.json",
+      "path": "docs/testing/2026-10-19-ui/results.json",
+      "bytes": 84221,
+      "sha256": "d7fba5b4a330d1073766245e4de1f6c66af426adc7fd4ba77a025fc782bee371",
+      "redacted": true
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/runner.log",
+      "path": "docs/testing/2026-10-19-ui/runner.log",
+      "bytes": 34661,
+      "sha256": "dd8aa3acc227c97385700cf43d887d4b2ce181c95f0d37e6775c2cd77368c6e1",
+      "redacted": true
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/verification-runs.json",
+      "path": "docs/testing/2026-10-19-ui/verification-runs.json",
+      "bytes": 748,
+      "sha256": "ae757fa521a638d3fc8be868338a4a09e03f881f1476d70cd14768fd70de72fe",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-01-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-01-01.png",
+      "bytes": 70275,
+      "sha256": "4d218f03e189cf2e6155f7460e77891d0646a780059dd841f3cac0c24f7074ed",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-01-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-01-02.png",
+      "bytes": 70275,
+      "sha256": "4d218f03e189cf2e6155f7460e77891d0646a780059dd841f3cac0c24f7074ed",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-02-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-02-01.png",
+      "bytes": 79719,
+      "sha256": "4f855e98ded6a0c86793bc2a647baaa20985e5e21a455fff288f44d14f60551f",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-02-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-02-02.png",
+      "bytes": 79708,
+      "sha256": "96d3996fe21c314a93d1e47993216b6a288fbc70df87e2899666d25cfa1d293e",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-03-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-03-01.png",
+      "bytes": 92421,
+      "sha256": "282025daeda64fb4149ad63df08621091169bd3b2cf06cafa58d15d9c2dd766e",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-03-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-03-02.png",
+      "bytes": 92395,
+      "sha256": "6edd39e526efe74552c6ae8995402e9c6a88afc5c95124b9f6ca7c1e2f071b11",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-04-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-04-01.png",
+      "bytes": 72093,
+      "sha256": "1aa00ead1855bf5b5dc0b8d15a31e1b176b2055f204652630b0f5d723be53d92",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-05-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-05-01.png",
+      "bytes": 175777,
+      "sha256": "959c750641a0397362347a27502b518fb766807aa42b64fca68fc6b95f5a16fd",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-05-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-05-02.png",
+      "bytes": 175777,
+      "sha256": "959c750641a0397362347a27502b518fb766807aa42b64fca68fc6b95f5a16fd",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-05-03.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-05-03.png",
+      "bytes": 175777,
+      "sha256": "959c750641a0397362347a27502b518fb766807aa42b64fca68fc6b95f5a16fd",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-06-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-06-01.png",
+      "bytes": 31662,
+      "sha256": "afd6508634051e883b339543ca00ea307924610b92b1aa2763dfcb105bd2a75b",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-06-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-06-02.png",
+      "bytes": 150343,
+      "sha256": "fa5670023bfb945e24fad5022094e6e27442c60f378b5ee368ef10ac763c77bf",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-06-03.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-06-03.png",
+      "bytes": 150343,
+      "sha256": "fa5670023bfb945e24fad5022094e6e27442c60f378b5ee368ef10ac763c77bf",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-07-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-07-01.png",
+      "bytes": 51979,
+      "sha256": "470331abae249664c5b460e2a5c4b2f46012c0e60441982db5857e04164f07c2",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-07-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-07-02.png",
+      "bytes": 65768,
+      "sha256": "8a8eb3b757ba4cf5aa4dcb81b3ecf4013013acdb4a6b6f341fe725434e678adb",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-07-03.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-07-03.png",
+      "bytes": 65253,
+      "sha256": "60ce35fecc42e4ad57e8b366c8dba686752c7c854ee1b395f836b496f71efb4a",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-08-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-08-01.png",
+      "bytes": 70307,
+      "sha256": "0bfcfead4a062f42c822dcb99ef5e34a2982e9ebad65246cfc619701ea76a37f",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-08-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-08-02.png",
+      "bytes": 70307,
+      "sha256": "0bfcfead4a062f42c822dcb99ef5e34a2982e9ebad65246cfc619701ea76a37f",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-09-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-09-01.png",
+      "bytes": 71997,
+      "sha256": "fa7a193c1663f3a23a1bc743e80aee0f06565de6a400ee5b6c2802dcecdb8503",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-10-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-10-01.png",
+      "bytes": 38008,
+      "sha256": "2f91e6f76685d4d3d736fd2e141282dacb378747d60427f945b197b347f3bad6",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-10-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-10-02.png",
+      "bytes": 42326,
+      "sha256": "2fa4d04119e74ed96612f7429314116d64ae9589c6dba07012192c2d56d2f539",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-10-03.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-10-03.png",
+      "bytes": 42326,
+      "sha256": "2fa4d04119e74ed96612f7429314116d64ae9589c6dba07012192c2d56d2f539",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-11-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-11-01.png",
+      "bytes": 44318,
+      "sha256": "6c4ce491006edf42eb4e99a2a989148034e415f42a6ee2c2a821e01ebf6948db",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-11-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/desktop-UI-11-02.png",
+      "bytes": 175776,
+      "sha256": "d4945afdc5c495ed8b0615a1f3c35aa0b7c26e384db8e6f23d51078b86849d3c",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-01-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-01-01.png",
+      "bytes": 63386,
+      "sha256": "69be2d38c40a7814e781694473df9aa5743828474870e7fda1d924a4d901e467",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-01-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-01-02.png",
+      "bytes": 63386,
+      "sha256": "69be2d38c40a7814e781694473df9aa5743828474870e7fda1d924a4d901e467",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-02-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-02-01.png",
+      "bytes": 71977,
+      "sha256": "f9ade9018d26ba6449d386120148ecb5d19e9ed2f7e56b77cdf7d6fb4e26b8b7",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-02-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-02-02.png",
+      "bytes": 71976,
+      "sha256": "12460603b133c057dab76e6ffb03b8f9edf93c4a181e4890d00ed44efac54903",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-03-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-03-01.png",
+      "bytes": 70931,
+      "sha256": "9f83ce6a639b2e1ebd92c3735e09679e851ae4170a25b5c8677f0a4dc466ce0f",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-03-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-03-02.png",
+      "bytes": 70893,
+      "sha256": "a69bf435b82006bf80cc4cf1f9acc0b2f78c04b5aa69ec082d99ef1300301987",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-04-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-04-01.png",
+      "bytes": 64928,
+      "sha256": "9f22fc733748c375cfe06665018e9d2a0753c3afe814cb5a707e193a14969225",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-05-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-05-01.png",
+      "bytes": 76804,
+      "sha256": "2898c5715288d16dd75e3eb59b6f5e740ab83c59a5d4c8df2986d0c18630e69b",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-05-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-05-02.png",
+      "bytes": 76804,
+      "sha256": "2898c5715288d16dd75e3eb59b6f5e740ab83c59a5d4c8df2986d0c18630e69b",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-05-03.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-05-03.png",
+      "bytes": 76804,
+      "sha256": "2898c5715288d16dd75e3eb59b6f5e740ab83c59a5d4c8df2986d0c18630e69b",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-06-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-06-01.png",
+      "bytes": 27347,
+      "sha256": "6028b675e9d639ad18f703cceb921bcea5de24c7d45d05f2dc690836c631c50a",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-06-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-06-02.png",
+      "bytes": 77773,
+      "sha256": "08133a795cd1229d3d200d7d18736bbaec2255185ec3d38aeda0a12e5957d61f",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-06-03.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-06-03.png",
+      "bytes": 77773,
+      "sha256": "08133a795cd1229d3d200d7d18736bbaec2255185ec3d38aeda0a12e5957d61f",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-07-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-07-01.png",
+      "bytes": 45967,
+      "sha256": "c361c5b36052475ff95a55766a3f800e5586a6fcd7184b867b9e40d1395d7b56",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-07-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-07-02.png",
+      "bytes": 58578,
+      "sha256": "2191c1579230b2fd5bf4c2f7465f3584ab71ec46e6a10ea6aacf8cad403c709b",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-07-03.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-07-03.png",
+      "bytes": 58346,
+      "sha256": "c78ecf3b4519446b95ac27f67f24a41e553fbdfd5253031d5a6297013312e8eb",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-08-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-08-01.png",
+      "bytes": 63386,
+      "sha256": "69be2d38c40a7814e781694473df9aa5743828474870e7fda1d924a4d901e467",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-08-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-08-02.png",
+      "bytes": 63386,
+      "sha256": "69be2d38c40a7814e781694473df9aa5743828474870e7fda1d924a4d901e467",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-09-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-09-01.png",
+      "bytes": 64864,
+      "sha256": "2172c153db3472d31c9201676f7cea17e549ea2c881afeb51f1af94a45c74d69",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-10-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-10-01.png",
+      "bytes": 32491,
+      "sha256": "5d970d5500a578cc6f6f397f3727f20630d699ba34093772a06020036cbec686",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-10-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-10-02.png",
+      "bytes": 35800,
+      "sha256": "89395185714c5f98e77e3da7eb4ea1c32be80a8da409f4f03efff1fb80ea8c8b",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-10-03.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-10-03.png",
+      "bytes": 35800,
+      "sha256": "89395185714c5f98e77e3da7eb4ea1c32be80a8da409f4f03efff1fb80ea8c8b",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-11-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-11-01.png",
+      "bytes": 38217,
+      "sha256": "bfc78dd2ce58f99bc995702225f66a4ad17b88c5d349823d4d12d07a4aa11ef0",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-11-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/mobile-UI-11-02.png",
+      "bytes": 76802,
+      "sha256": "208d9c5f108cd4e323276a0b0d57c86c4f8c1ce3b6e386415004fb2fcd5c8e4b",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-01-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-01-01.png",
+      "bytes": 50735,
+      "sha256": "23c49412a40ab507bf72088ddbd7eb33ca3f15270cf0c178c800f78720dacd49",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-01-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-01-02.png",
+      "bytes": 50735,
+      "sha256": "23c49412a40ab507bf72088ddbd7eb33ca3f15270cf0c178c800f78720dacd49",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-02-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-02-01.png",
+      "bytes": 50699,
+      "sha256": "aa0e9716a98d733ae183b349710ec9da1c3e8404301628a57426d9b8c405abf8",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-02-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-02-02.png",
+      "bytes": 50694,
+      "sha256": "d5172c4c1e0a9eeab5aee78d432aeb311f1511adfd1082551bb76aaad001afa5",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-03-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-03-01.png",
+      "bytes": 40648,
+      "sha256": "2a94494a5c8feacbb063c94681bc6422ceddfe8e6d341402f7413d5b60a44467",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-03-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-03-02.png",
+      "bytes": 40295,
+      "sha256": "ee61c17d1b2a5bb0e1fde38a6fa23031fb35448593b6b19389ae83a398104ec5",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-04-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-04-01.png",
+      "bytes": 51538,
+      "sha256": "90f36b02d4043470c61df8e3fbf67f3576b97859560a75969c5cc94550baf82f",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-05-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-05-01.png",
+      "bytes": 61634,
+      "sha256": "832a5c66afdd072eecedf0ca554577a9d9b20ee151d3a8ebc46074ba976e535e",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-05-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-05-02.png",
+      "bytes": 61572,
+      "sha256": "828e75d46558b4e0fedc407c43f283d7392560cae860944a29c444a20de18692",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-05-03.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-05-03.png",
+      "bytes": 61572,
+      "sha256": "828e75d46558b4e0fedc407c43f283d7392560cae860944a29c444a20de18692",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-06-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-06-01.png",
+      "bytes": 25366,
+      "sha256": "b1c72963f8125e4831da09a1a44bb3c08a1caf09476bc150ab495684d8abdcfe",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-06-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-06-02.png",
+      "bytes": 40310,
+      "sha256": "854e03424e4c54bdccb14ed821b5ded200a1fe6a29d12e80c41e52689a1959e8",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-06-03.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-06-03.png",
+      "bytes": 42135,
+      "sha256": "05859c308017f245e7dbb8f3e0de505fae50a0da0ae58bb8ce6a6eda9f697f18",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-07-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-07-01.png",
+      "bytes": 41269,
+      "sha256": "2bf37cc4b200837069d01205e14c82f4ac7cc7d1240ef5a022d5543ff8785a4a",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-07-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-07-02.png",
+      "bytes": 41268,
+      "sha256": "0ae2b079abbeb37f8f27b6b6d207b7baa701c3ae5fe946ab9074f615db4adccf",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-08-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-08-01.png",
+      "bytes": 41268,
+      "sha256": "0ae2b079abbeb37f8f27b6b6d207b7baa701c3ae5fe946ab9074f615db4adccf",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-09-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-09-01.png",
+      "bytes": 52173,
+      "sha256": "80aa78e77569dbbeb8d2f38c6c5486fd5a7fff563e05eb4f30523cf492b7e80b",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-10-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-10-01.png",
+      "bytes": 31192,
+      "sha256": "6fede157b5a706a7ff324bd08ce93fc9d06d8cc14f402a452e79d468b649c5bc",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-10-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-10-02.png",
+      "bytes": 33685,
+      "sha256": "7fb455bb31eb197aa07a754d897e3137f870ed9e89eab9f7152b5d83ec2ef81b",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-10-03.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-10-03.png",
+      "bytes": 33685,
+      "sha256": "7fb455bb31eb197aa07a754d897e3137f870ed9e89eab9f7152b5d83ec2ef81b",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-11-01.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-11-01.png",
+      "bytes": 28725,
+      "sha256": "42630e21272d44f66809a59cb8b699d2b5215da4dd38d53a325b20957c624282",
+      "redacted": false
+    },
+    {
+      "source": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-11-02.png",
+      "path": "docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-11-02.png",
+      "bytes": 61569,
+      "sha256": "c7a35677d58af73233402e698be5d1bdf795b1293d1a52dddccb0230bdbb7953",
+      "redacted": false
+    },
+    {
+      "source": "output/pdf/Bao_cao_loi_giao_dien_FE_2026-10-19.pdf",
+      "path": "docs/testing/2026-10-19-ui/Bao_cao_loi_giao_dien_FE_2026-10-19.pdf",
+      "bytes": 421930,
+      "sha256": "3ef23b636a504df7d99a88cc1d5a2a6d99149cfcdb1cd632a82be4e9bb8c164d",
+      "redacted": false
+    },
+    {
+      "source": ".run/pdf-preview/page-1.png",
+      "path": "docs/testing/2026-10-19-ui/pdf-preview/page-1.png",
+      "bytes": 116913,
+      "sha256": "03bf54af5aaa6b8e77cab9e92231a53a5ae40204ac49143acf5a379ada62a084",
+      "redacted": false
+    },
+    {
+      "source": ".run/pdf-preview/page-2.png",
+      "path": "docs/testing/2026-10-19-ui/pdf-preview/page-2.png",
+      "bytes": 132681,
+      "sha256": "d41988608ecdb60784fde0e60f6ed819ae5b323086bdc66f33000ef1d68e9866",
+      "redacted": false
+    },
+    {
+      "source": ".run/pdf-preview/page-3.png",
+      "path": "docs/testing/2026-10-19-ui/pdf-preview/page-3.png",
+      "bytes": 163276,
+      "sha256": "54d2c4c1e901ca6c73377757b2b84afcba1bc16158b48781706edeb3257ab667",
+      "redacted": false
+    },
+    {
+      "source": ".run/pdf-preview/page-4.png",
+      "path": "docs/testing/2026-10-19-ui/pdf-preview/page-4.png",
+      "bytes": 159611,
+      "sha256": "dedb2ca883ecee10cce1369742dcd08b901ffadbd9647fd30f8cd42650f7b76d",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/.last-run.json",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/.last-run.json",
+      "bytes": 439,
+      "sha256": "9293f147e2e57cfcdb516c63c17b491d3eb59f2fec6cd49f8463041b70087065",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/results.json",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/results.json",
+      "bytes": 3236117,
+      "sha256": "8a220290099a15461b5a569bd91a5bbaf1bbc23689efbe0803b562fcb235d278",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-01-login-renders-and-the-submit-button-is-reachable-desktop/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-01-login-renders-and-the-submit-button-is-reachable-desktop/test-finished-1.png",
+      "bytes": 70275,
+      "sha256": "4d218f03e189cf2e6155f7460e77891d0646a780059dd841f3cac0c24f7074ed",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-01-login-renders-and-the-submit-button-is-reachable-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-01-login-renders-and-the-submit-button-is-reachable-mobile/test-finished-1.png",
+      "bytes": 63386,
+      "sha256": "69be2d38c40a7814e781694473df9aa5743828474870e7fda1d924a4d901e467",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-01-login-renders-and-the-submit-button-is-reachable-small-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-01-login-renders-and-the-submit-button-is-reachable-small-mobile/test-finished-1.png",
+      "bytes": 50735,
+      "sha256": "23c49412a40ab507bf72088ddbd7eb33ca3f15270cf0c178c800f78720dacd49",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-02-empty-login-shows-2ba08-hout-sending-an-API-request-desktop/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-02-empty-login-shows-2ba08-hout-sending-an-API-request-desktop/test-finished-1.png",
+      "bytes": 79708,
+      "sha256": "96d3996fe21c314a93d1e47993216b6a288fbc70df87e2899666d25cfa1d293e",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-02-empty-login-shows-2ba08-hout-sending-an-API-request-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-02-empty-login-shows-2ba08-hout-sending-an-API-request-mobile/test-finished-1.png",
+      "bytes": 71976,
+      "sha256": "12460603b133c057dab76e6ffb03b8f9edf93c4a181e4890d00ed44efac54903",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-02-empty-login-shows-2ba08-hout-sending-an-API-request-small-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-02-empty-login-shows-2ba08-hout-sending-an-API-request-small-mobile/test-finished-1.png",
+      "bytes": 50694,
+      "sha256": "d5172c4c1e0a9eeab5aee78d432aeb311f1511adfd1082551bb76aaad001afa5",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-03-registration-vali-636f0-ak-and-mismatched-passwords-desktop/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-03-registration-vali-636f0-ak-and-mismatched-passwords-desktop/test-finished-1.png",
+      "bytes": 92395,
+      "sha256": "6edd39e526efe74552c6ae8995402e9c6a88afc5c95124b9f6ca7c1e2f071b11",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-03-registration-vali-636f0-ak-and-mismatched-passwords-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-03-registration-vali-636f0-ak-and-mismatched-passwords-mobile/test-finished-1.png",
+      "bytes": 70893,
+      "sha256": "a69bf435b82006bf80cc4cf1f9acc0b2f78c04b5aa69ec082d99ef1300301987",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-03-registration-vali-636f0-ak-and-mismatched-passwords-small-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-03-registration-vali-636f0-ak-and-mismatched-passwords-small-mobile/test-finished-1.png",
+      "bytes": 40295,
+      "sha256": "ee61c17d1b2a5bb0e1fde38a6fa23031fb35448593b6b19389ae83a398104ec5",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-desktop/error-context.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-desktop/error-context.md",
+      "bytes": 13083,
+      "sha256": "5e8557fbfa895f419cab60b206a3542a89dd2c2cb9881a70373211affcbb7c95",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-desktop/test-failed-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-desktop/test-failed-1.png",
+      "bytes": 72093,
+      "sha256": "1aa00ead1855bf5b5dc0b8d15a31e1b176b2055f204652630b0f5d723be53d92",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-desktop/trace.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-desktop/trace.zip",
+      "bytes": 4410682,
+      "sha256": "ccc7c1e373f74f5f94f8ca22dd67e018e0c865ee297c5829fc729f802b555d08",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-mobile/error-context.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-mobile/error-context.md",
+      "bytes": 13083,
+      "sha256": "5e8557fbfa895f419cab60b206a3542a89dd2c2cb9881a70373211affcbb7c95",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-mobile/test-failed-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-mobile/test-failed-1.png",
+      "bytes": 64928,
+      "sha256": "9f22fc733748c375cfe06665018e9d2a0753c3afe814cb5a707e193a14969225",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-mobile/trace.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-mobile/trace.zip",
+      "bytes": 4879407,
+      "sha256": "41271b1218a3684194800dc326447819751d24a99db9062aac055ca5400245fe",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-small-mobile/error-context.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-small-mobile/error-context.md",
+      "bytes": 13083,
+      "sha256": "5e8557fbfa895f419cab60b206a3542a89dd2c2cb9881a70373211affcbb7c95",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-small-mobile/test-failed-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-small-mobile/test-failed-1.png",
+      "bytes": 51538,
+      "sha256": "90f36b02d4043470c61df8e3fbf67f3576b97859560a75969c5cc94550baf82f",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-small-mobile/trace.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-small-mobile/trace.zip",
+      "bytes": 4950280,
+      "sha256": "a896915d5596b4a962ddca7abc98528f0d19ef1bfda24371ece392ca9e0fa647",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-05-real-login-loads--450da-d-survives-a-browser-reload-desktop/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-05-real-login-loads--450da-d-survives-a-browser-reload-desktop/test-finished-1.png",
+      "bytes": 65406,
+      "sha256": "22a4ea92b831a6ea72adec0347eb36ee0e5120b7912942876292f53bf2a3e526",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-05-real-login-loads--450da-d-survives-a-browser-reload-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-05-real-login-loads--450da-d-survives-a-browser-reload-mobile/test-finished-1.png",
+      "bytes": 48302,
+      "sha256": "7597ed4507928f0b71cac4df13e6fe9bc816c4d0896b6b0f98bc1f8d0445c18b",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-05-real-login-loads--450da-d-survives-a-browser-reload-small-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-05-real-login-loads--450da-d-survives-a-browser-reload-small-mobile/test-finished-1.png",
+      "bytes": 30220,
+      "sha256": "8adc2a5c964bc5bca8fe6aea4e7f6d6d6ae2fc604b319324fdea8af963175a7f",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-06-alerts-and-plant--d3eb0-n-with-reachable-navigation-desktop/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-06-alerts-and-plant--d3eb0-n-with-reachable-navigation-desktop/test-finished-1.png",
+      "bytes": 150343,
+      "sha256": "fa5670023bfb945e24fad5022094e6e27442c60f378b5ee368ef10ac763c77bf",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-06-alerts-and-plant--d3eb0-n-with-reachable-navigation-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-06-alerts-and-plant--d3eb0-n-with-reachable-navigation-mobile/test-finished-1.png",
+      "bytes": 77773,
+      "sha256": "08133a795cd1229d3d200d7d18736bbaec2255185ec3d38aeda0a12e5957d61f",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-06-alerts-and-plant--d3eb0-n-with-reachable-navigation-small-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-06-alerts-and-plant--d3eb0-n-with-reachable-navigation-small-mobile/test-finished-1.png",
+      "bytes": 42135,
+      "sha256": "05859c308017f245e7dbb8f3e0de505fae50a0da0ae58bb8ce6a6eda9f697f18",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-07-account-and-settings-remain-usable-on-the-viewport-desktop/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-07-account-and-settings-remain-usable-on-the-viewport-desktop/test-finished-1.png",
+      "bytes": 65253,
+      "sha256": "60ce35fecc42e4ad57e8b366c8dba686752c7c854ee1b395f836b496f71efb4a",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-07-account-and-settings-remain-usable-on-the-viewport-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-07-account-and-settings-remain-usable-on-the-viewport-mobile/test-finished-1.png",
+      "bytes": 58346,
+      "sha256": "c78ecf3b4519446b95ac27f67f24a41e553fbdfd5253031d5a6297013312e8eb",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-07-account-and-settings-remain-usable-on-the-viewport-small-mobile/error-context.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-07-account-and-settings-remain-usable-on-the-viewport-small-mobile/error-context.md",
+      "bytes": 10678,
+      "sha256": "9de29581961fe40fc290bdb83278f9694896f67193a226272631def9108a0fca",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-07-account-and-settings-remain-usable-on-the-viewport-small-mobile/test-failed-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-07-account-and-settings-remain-usable-on-the-viewport-small-mobile/test-failed-1.png",
+      "bytes": 41268,
+      "sha256": "0ae2b079abbeb37f8f27b6b6d207b7baa701c3ae5fe946ab9074f615db4adccf",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-07-account-and-settings-remain-usable-on-the-viewport-small-mobile/trace.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-07-account-and-settings-remain-usable-on-the-viewport-small-mobile/trace.zip",
+      "bytes": 5501720,
+      "sha256": "bd8bec975a3035dec74fddb2566415970924f1ea517d789f888154c2b0ba577d",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-desktop/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-desktop/test-finished-1.png",
+      "bytes": 70307,
+      "sha256": "0bfcfead4a062f42c822dcb99ef5e34a2982e9ebad65246cfc619701ea76a37f",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-mobile/test-finished-1.png",
+      "bytes": 63386,
+      "sha256": "69be2d38c40a7814e781694473df9aa5743828474870e7fda1d924a4d901e467",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-small-mobile/error-context.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-small-mobile/error-context.md",
+      "bytes": 10771,
+      "sha256": "07ba1e6ec45ef92c62b5c56186853436cb1067aaa5e0140921bc082d84e7947e",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-small-mobile/test-failed-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-small-mobile/test-failed-1.png",
+      "bytes": 41268,
+      "sha256": "0ae2b079abbeb37f8f27b6b6d207b7baa701c3ae5fe946ab9074f615db4adccf",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-small-mobile/trace.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-small-mobile/trace.zip",
+      "bytes": 5502662,
+      "sha256": "60c1c6bd3b3ad7a55e6d7b9f89ccfda20f223690b4a76296254cc9a3e2e732fc",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-desktop/error-context.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-desktop/error-context.md",
+      "bytes": 9574,
+      "sha256": "7360cfdfc83b20af28ca8a3da6cd59c04aa009294c8f2db8a6607f652f652140",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-desktop/test-failed-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-desktop/test-failed-1.png",
+      "bytes": 71997,
+      "sha256": "fa7a193c1663f3a23a1bc743e80aee0f06565de6a400ee5b6c2802dcecdb8503",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-desktop/trace.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-desktop/trace.zip",
+      "bytes": 4399941,
+      "sha256": "e4fb35c179b301c4cab9ff81e2ae9359871736a0d8bef657beebf897204d5940",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-mobile/error-context.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-mobile/error-context.md",
+      "bytes": 9574,
+      "sha256": "7360cfdfc83b20af28ca8a3da6cd59c04aa009294c8f2db8a6607f652f652140",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-mobile/test-failed-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-mobile/test-failed-1.png",
+      "bytes": 64864,
+      "sha256": "2172c153db3472d31c9201676f7cea17e549ea2c881afeb51f1af94a45c74d69",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-mobile/trace.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-mobile/trace.zip",
+      "bytes": 5119909,
+      "sha256": "ab93aa2651a0d8e7b1ec1de912499d556574a25ca1a4f36539c34570c495398c",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-small-mobile/error-context.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-small-mobile/error-context.md",
+      "bytes": 9574,
+      "sha256": "7360cfdfc83b20af28ca8a3da6cd59c04aa009294c8f2db8a6607f652f652140",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-small-mobile/test-failed-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-small-mobile/test-failed-1.png",
+      "bytes": 52173,
+      "sha256": "80aa78e77569dbbeb8d2f38c6c5486fd5a7fff563e05eb4f30523cf492b7e80b",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-small-mobile/trace.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-small-mobile/trace.zip",
+      "bytes": 4966863,
+      "sha256": "9d73d9b1666e73f1e4fcbc230a8944e72402ba7720b09c5cce02be5cbb39fdb2",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-10-help-and-harvest-history-screens-can-be-opened-desktop/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-10-help-and-harvest-history-screens-can-be-opened-desktop/test-finished-1.png",
+      "bytes": 70431,
+      "sha256": "e65e53b48a92441e7f9fbb08535865f444cb8604f8e7ec5ca2dd9baf4d1c2a9d",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-10-help-and-harvest-history-screens-can-be-opened-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-10-help-and-harvest-history-screens-can-be-opened-mobile/test-finished-1.png",
+      "bytes": 66063,
+      "sha256": "37815ac32b6acddbfecafc2a7a39ebb1bd61a8618a8c148bd190124c1849404f",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/test-results/ui-UI-10-help-and-harvest-history-screens-can-be-opened-small-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/test-results/ui-UI-10-help-and-harvest-history-screens-can-be-opened-small-mobile/test-finished-1.png",
+      "bytes": 60133,
+      "sha256": "a0b96e8552a2ef4e0f43452cdef9478d9d605f056fb290c8ba9cf16b7934a2a8",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/index.html",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/index.html",
+      "bytes": 527444,
+      "sha256": "d7ca8a0a09445dd07f62024aa926e80aab01aef5d13aa78e8358b17b8662afac",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/playwright-report/data/016bdaba64b9ed0ee727d43015e7e90e247fe534.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/data/016bdaba64b9ed0ee727d43015e7e90e247fe534.png",
+      "bytes": 38217,
+      "sha256": "bfc78dd2ce58f99bc995702225f66a4ad17b88c5d349823d4d12d07a4aa11ef0",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/data/0cdd7ddcd719fd1bb7842571c857597ead8b3f1d.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/data/0cdd7ddcd719fd1bb7842571c857597ead8b3f1d.png",
+      "bytes": 61569,
+      "sha256": "c7a35677d58af73233402e698be5d1bdf795b1293d1a52dddccb0230bdbb7953",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/data/19a151e0470fdad9ede6f1bab51abe057ff2d1be.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/data/19a151e0470fdad9ede6f1bab51abe057ff2d1be.png",
+      "bytes": 175776,
+      "sha256": "d4945afdc5c495ed8b0615a1f3c35aa0b7c26e384db8e6f23d51078b86849d3c",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/data/28ebb0ab6e739f2058b1d77d5a0f4d17109c30f5.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/data/28ebb0ab6e739f2058b1d77d5a0f4d17109c30f5.png",
+      "bytes": 76802,
+      "sha256": "208d9c5f108cd4e323276a0b0d57c86c4f8c1ce3b6e386415004fb2fcd5c8e4b",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/data/54d01ff42ecdbbf99013fb8b25db68c798304685.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/data/54d01ff42ecdbbf99013fb8b25db68c798304685.md",
+      "bytes": 8679,
+      "sha256": "691b613f2e3638a7661a97bac5de9b2d55f21cb1cecbd23bc021c02f677c03c2",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/playwright-report/data/8c6d155c1a70f5551ad23a991640681ab331e14d.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/data/8c6d155c1a70f5551ad23a991640681ab331e14d.png",
+      "bytes": 28725,
+      "sha256": "42630e21272d44f66809a59cb8b699d2b5215da4dd38d53a325b20957c624282",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/data/91a53faaabee5d3de05ae21116b04cb88f9e799a.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/data/91a53faaabee5d3de05ae21116b04cb88f9e799a.zip",
+      "bytes": 7696391,
+      "sha256": "6a7dbf49f1714e0f5216ae143aeaae5e0b34c95eb5450d62a15a9b9a04fb168e",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/playwright-report/data/ab243d62aed7da50bbee301eda46372218911bac.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/data/ab243d62aed7da50bbee301eda46372218911bac.png",
+      "bytes": 44318,
+      "sha256": "6c4ce491006edf42eb4e99a2a989148034e415f42a6ee2c2a821e01ebf6948db",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/data/d178981c31e0738093eb7a57df4b014df4a05411.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/data/d178981c31e0738093eb7a57df4b014df4a05411.md",
+      "bytes": 8859,
+      "sha256": "79d26dfabdc86519669ca181d9fa1cdaf9416ab1a1699b6a09a076a4eecd8f8c",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/playwright-report/data/db1cc854ba390f5b6cf0cd9f2310c09ed02ef905.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/data/db1cc854ba390f5b6cf0cd9f2310c09ed02ef905.zip",
+      "bytes": 7168479,
+      "sha256": "ea941fd3bba792d9f9809331191da5a601f8a1862e9066d4661d2e6da63a671d",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/playwright-report/data/ef704f08ab968e6d8f539c4a8ac5481e27062f31.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/data/ef704f08ab968e6d8f539c4a8ac5481e27062f31.zip",
+      "bytes": 6363602,
+      "sha256": "9aa2f6d5325a3551a25d3420fbf8cef16ac524e0ec9667d555aa0457ae29401b",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/codeMirrorModule.-QdMvsKi.css",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/codeMirrorModule.-QdMvsKi.css",
+      "bytes": 6251,
+      "sha256": "20be824a82832b62cc04642d31da3c609fd280b23f1cdcb1e622c4f40aac5ab8",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/codicon.DCmgc-ay.ttf",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/codicon.DCmgc-ay.ttf",
+      "bytes": 80340,
+      "sha256": "0f1d5219934e96e83b8db162d60b4d8c09b5de1e7d38031cbafe4a3c0f2889c9",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/defaultSettingsView.C8BeHuxd.css",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/defaultSettingsView.C8BeHuxd.css",
+      "bytes": 107270,
+      "sha256": "278101b68ab48ee6323a6afbf4e0e629324e10e96902a62a0875643a1bba3d94",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/index.B_TqY17P.css",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/index.B_TqY17P.css",
+      "bytes": 2055,
+      "sha256": "08a212fcacae1866f44f065654afcc4c7d03409c68c74b3315c5bda17a0ca003",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/index.html",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/index.html",
+      "bytes": 2363,
+      "sha256": "4c168083713c6868f577f492f3d50eecdfbf6235e0b0af421796b7ddd9013bd6",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/index.oNry3Hjv.js",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/index.oNry3Hjv.js",
+      "bytes": 6628,
+      "sha256": "87f339e5e169f67633a91e17d9c8f65afb8de66d9b88a4167c79da78f562518d",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/manifest.webmanifest",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/manifest.webmanifest",
+      "bytes": 429,
+      "sha256": "d8540500603a32a39fe7e5a0375dc0f9ebafd11118e06a846db7efc608223ab9",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/playwright-logo.svg",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/playwright-logo.svg",
+      "bytes": 5033,
+      "sha256": "6b0a4367bdeab10995bc239278f04c68c10e48adbec15e799e01909a0d66dcb9",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/snapshot.B_Jk1wbt.js",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/snapshot.B_Jk1wbt.js",
+      "bytes": 650,
+      "sha256": "d4d09e05451d107d8e1a6bbd041405fe518b9fd2833890e4ebaaad83b7f554f5",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/snapshot.html",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/snapshot.html",
+      "bytes": 389,
+      "sha256": "c608c8899c95c5a74d3f556e20146c3d852b9df85ae2854c659a7cc773c9b727",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/sw.bundle.js",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/sw.bundle.js",
+      "bytes": 96737,
+      "sha256": "d1d6fec6687eb3fd93a8990bd9daa3951422695afffae2382f97f10811cf1c30",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/uiMode.CyMfwkXJ.css",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/uiMode.CyMfwkXJ.css",
+      "bytes": 54590,
+      "sha256": "fb403cf0b07007bc1d771e29737f7408924da300e2fab8b289a3ef2e8fc08d7b",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/uiMode.CYwC_gH1.js",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/uiMode.CYwC_gH1.js",
+      "bytes": 38121,
+      "sha256": "c920eaa161f65b6c0dd431a642c4bdf2e6262ae51335c02d155b187f48c0296c",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/uiMode.html",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/uiMode.html",
+      "bytes": 727,
+      "sha256": "6de2f5db7f7532c30e8b1381752a1daf23facbdef6bea130cef0cfa5a003eb22",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/xtermModule.kHJ-D0s7.css",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/xtermModule.kHJ-D0s7.css",
+      "bytes": 2853,
+      "sha256": "0dd60056134e6a2994a86b59a1e9789b9f04e92924da109aef8c923acaf08ce5",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/assets/codeMirrorModule-BEB2e8M3.js",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/assets/codeMirrorModule-BEB2e8M3.js",
+      "bytes": 307393,
+      "sha256": "0da75d228abc1d8b940aa04ec086570dace7b2e7b2ccc5f4bc16f05e79bdb7d7",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/assets/defaultSettingsView-D-g2vrvf.js",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/assets/defaultSettingsView-D-g2vrvf.js",
+      "bytes": 667649,
+      "sha256": "554bdef910d18e763118f1221667b809edafba46e29e3f8de4b9dcf21c6b7d79",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/playwright-report/trace/assets/urlMatch-L3liM589.js",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/playwright-report/trace/assets/urlMatch-L3liM589.js",
+      "bytes": 2510,
+      "sha256": "1bc6321e32d11c31a452bc75896f0b344e6153321854d9f1658818be7f845c16",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/.visual-results/.last-run.json",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/visual-results/.last-run.json",
+      "bytes": 45,
+      "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/.visual-results/ui-UI-05-real-login-loads--450da-d-survives-a-browser-reload-desktop/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/visual-results/ui-UI-05-real-login-loads--450da-d-survives-a-browser-reload-desktop/test-finished-1.png",
+      "bytes": 175777,
+      "sha256": "959c750641a0397362347a27502b518fb766807aa42b64fca68fc6b95f5a16fd",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/.visual-results/ui-UI-05-real-login-loads--450da-d-survives-a-browser-reload-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/visual-results/ui-UI-05-real-login-loads--450da-d-survives-a-browser-reload-mobile/test-finished-1.png",
+      "bytes": 76804,
+      "sha256": "2898c5715288d16dd75e3eb59b6f5e740ab83c59a5d4c8df2986d0c18630e69b",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/.visual-results/ui-UI-05-real-login-loads--450da-d-survives-a-browser-reload-small-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/visual-results/ui-UI-05-real-login-loads--450da-d-survives-a-browser-reload-small-mobile/test-finished-1.png",
+      "bytes": 61572,
+      "sha256": "828e75d46558b4e0fedc407c43f283d7392560cae860944a29c444a20de18692",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/.visual-results/ui-UI-10-help-and-harvest-history-screens-can-be-opened-desktop/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/visual-results/ui-UI-10-help-and-harvest-history-screens-can-be-opened-desktop/test-finished-1.png",
+      "bytes": 42326,
+      "sha256": "2fa4d04119e74ed96612f7429314116d64ae9589c6dba07012192c2d56d2f539",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/.visual-results/ui-UI-10-help-and-harvest-history-screens-can-be-opened-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/visual-results/ui-UI-10-help-and-harvest-history-screens-can-be-opened-mobile/test-finished-1.png",
+      "bytes": 35800,
+      "sha256": "89395185714c5f98e77e3da7eb4ea1c32be80a8da409f4f03efff1fb80ea8c8b",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/.visual-results/ui-UI-10-help-and-harvest-history-screens-can-be-opened-small-mobile/test-finished-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/visual-results/ui-UI-10-help-and-harvest-history-screens-can-be-opened-small-mobile/test-finished-1.png",
+      "bytes": 33685,
+      "sha256": "7fb455bb31eb197aa07a754d897e3137f870ed9e89eab9f7152b5d83ec2ef81b",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/.language-results/.last-run.json",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/language-results/.last-run.json",
+      "bytes": 194,
+      "sha256": "a97150bf79042db3535417e9495e569ebcca0b47088b0ef3bac08694d831aedc",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/.language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-desktop/error-context.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-desktop/error-context.md",
+      "bytes": 8859,
+      "sha256": "79d26dfabdc86519669ca181d9fa1cdaf9416ab1a1699b6a09a076a4eecd8f8c",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/.language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-desktop/test-failed-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-desktop/test-failed-1.png",
+      "bytes": 175776,
+      "sha256": "d4945afdc5c495ed8b0615a1f3c35aa0b7c26e384db8e6f23d51078b86849d3c",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/.language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-desktop/trace.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-desktop/trace.zip",
+      "bytes": 6363602,
+      "sha256": "9aa2f6d5325a3551a25d3420fbf8cef16ac524e0ec9667d555aa0457ae29401b",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/.language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-mobile/error-context.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-mobile/error-context.md",
+      "bytes": 8859,
+      "sha256": "79d26dfabdc86519669ca181d9fa1cdaf9416ab1a1699b6a09a076a4eecd8f8c",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/.language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-mobile/test-failed-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-mobile/test-failed-1.png",
+      "bytes": 76802,
+      "sha256": "208d9c5f108cd4e323276a0b0d57c86c4f8c1ce3b6e386415004fb2fcd5c8e4b",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/.language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-mobile/trace.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-mobile/trace.zip",
+      "bytes": 7696391,
+      "sha256": "6a7dbf49f1714e0f5216ae143aeaae5e0b34c95eb5450d62a15a9b9a04fb168e",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/.language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-small-mobile/error-context.md",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-small-mobile/error-context.md",
+      "bytes": 8679,
+      "sha256": "691b613f2e3638a7661a97bac5de9b2d55f21cb1cecbd23bc021c02f677c03c2",
+      "redacted": true
+    },
+    {
+      "source": "frontend/e2e/.language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-small-mobile/test-failed-1.png",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-small-mobile/test-failed-1.png",
+      "bytes": 61569,
+      "sha256": "c7a35677d58af73233402e698be5d1bdf795b1293d1a52dddccb0230bdbb7953",
+      "redacted": false
+    },
+    {
+      "source": "frontend/e2e/.language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-small-mobile/trace.zip",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/language-results/ui-UI-11-Vietnamese-settin-65e9a-d-in-the-dashboard-greeting-small-mobile/trace.zip",
+      "bytes": 7168479,
+      "sha256": "ea941fd3bba792d9f9809331191da5a601f8a1862e9066d4661d2e6da63a671d",
+      "redacted": true
+    },
+    {
+      "source": ".run/ui-final-matrix.json",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/matrices/ui-final-matrix.json",
+      "bytes": 2775321,
+      "sha256": "86740f408d441aae423bfdb5c8b6e001fd411aa42e319525d36a1d259fb934ea",
+      "redacted": true
+    },
+    {
+      "source": ".run/ui-pilot-results.json",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/matrices/ui-pilot-results.json",
+      "bytes": 284195,
+      "sha256": "48fc24a1fe0eec0950e004ceae0cd169332636a841858f145b000ae4afd0c1e5",
+      "redacted": true
+    },
+    {
+      "source": ".run/ui-visual-results.json",
+      "path": "testing/reports/frontend/e2e/2026-10-19/raw/matrices/ui-visual-results.json",
+      "bytes": 1153729,
+      "sha256": "45ef9c807cd6f1cff6ee08f84fcf616110ec44dcbb28464fcba95e3f55b56af2",
+      "redacted": false
+    },
+    {
+      "source": ".run/unit-tests-raw/20261013-135436/21143562-ec40-44ed-b3fa-4d74e8799624/coverage.cobertura.xml",
+      "path": "testing/reports/archive/2026-10-13/unit-tests-raw/20261013-135436/21143562-ec40-44ed-b3fa-4d74e8799624/coverage.cobertura.xml",
+      "bytes": 1650016,
+      "sha256": "261c6292a4f6ce36c095be8c5068c0c7dfe544be2be7208907c9e4cdc72c5897",
+      "redacted": false
+    },
+    {
+      "source": ".run/unit-tests-raw/20261013-135436/3e9a80fc-325f-47d0-a9e5-614c940da019/coverage.cobertura.xml",
+      "path": "testing/reports/archive/2026-10-13/unit-tests-raw/20261013-135436/3e9a80fc-325f-47d0-a9e5-614c940da019/coverage.cobertura.xml",
+      "bytes": 1652070,
+      "sha256": "f9b5931c63fc652073d69b13092c13c145b3e4714230b73586e4a4578bc6b84e",
+      "redacted": false
+    },
+    {
+      "source": ".run/unit-tests-raw/20261013-135436/dd51ad54-7de3-4d91-a870-31e41b6feb52/coverage.cobertura.xml",
+      "path": "testing/reports/archive/2026-10-13/unit-tests-raw/20261013-135436/dd51ad54-7de3-4d91-a870-31e41b6feb52/coverage.cobertura.xml",
+      "bytes": 1650016,
+      "sha256": "278bbce581f1e3b2d4afacc05765225b593e97cbb5ebd2f5933247fe125858e5",
+      "redacted": false
+    },
+    {
+      "source": ".run/unit-tests-raw/20261013-135436/f7ac865a-f1c0-4948-b4e3-6e8c680dc15f/coverage.cobertura.xml",
+      "path": "testing/reports/archive/2026-10-13/unit-tests-raw/20261013-135436/f7ac865a-f1c0-4948-b4e3-6e8c680dc15f/coverage.cobertura.xml",
+      "bytes": 1652070,
+      "sha256": "00d510f63d24332725662960dd9b855b23cd3f019b04e20c2e1d7b54b7c95962",
+      "redacted": false
+    },
+    {
+      "source": ".run/unit-tests-raw/20261013-135436/Kaizzet_KAIZZET_2026-10-13_14_13_21/In/KAIZZET/coverage.cobertura.xml",
+      "path": "testing/reports/archive/2026-10-13/unit-tests-raw/20261013-135436/Kaizzet_KAIZZET_2026-10-13_14_13_21/In/KAIZZET/coverage.cobertura.xml",
+      "bytes": 1652070,
+      "sha256": "00d510f63d24332725662960dd9b855b23cd3f019b04e20c2e1d7b54b7c95962",
+      "redacted": false
+    },
+    {
+      "source": ".run/unit-tests-raw/20261013-135436/Kaizzet_KAIZZET_2026-10-13_14_10_37/In/KAIZZET/coverage.cobertura.xml",
+      "path": "testing/reports/archive/2026-10-13/unit-tests-raw/20261013-135436/Kaizzet_KAIZZET_2026-10-13_14_10_37/In/KAIZZET/coverage.cobertura.xml",
+      "bytes": 1652070,
+      "sha256": "f9b5931c63fc652073d69b13092c13c145b3e4714230b73586e4a4578bc6b84e",
+      "redacted": false
+    },
+    {
+      "source": ".run/unit-tests-raw/20261013-135436/Kaizzet_KAIZZET_2026-10-13_14_04_00/In/KAIZZET/coverage.cobertura.xml",
+      "path": "testing/reports/archive/2026-10-13/unit-tests-raw/20261013-135436/Kaizzet_KAIZZET_2026-10-13_14_04_00/In/KAIZZET/coverage.cobertura.xml",
+      "bytes": 1650016,
+      "sha256": "278bbce581f1e3b2d4afacc05765225b593e97cbb5ebd2f5933247fe125858e5",
+      "redacted": false
+    },
+    {
+      "source": ".run/unit-tests-raw/20261013-135436/Kaizzet_KAIZZET_2026-10-13_14_00_25/In/KAIZZET/coverage.cobertura.xml",
+      "path": "testing/reports/archive/2026-10-13/unit-tests-raw/20261013-135436/Kaizzet_KAIZZET_2026-10-13_14_00_25/In/KAIZZET/coverage.cobertura.xml",
+      "bytes": 1650016,
+      "sha256": "261c6292a4f6ce36c095be8c5068c0c7dfe544be2be7208907c9e4cdc72c5897",
+      "redacted": false
+    },
+    {
+      "source": ".run/tests-only/20261013-151524/analyze.log",
+      "path": "testing/reports/archive/2026-10-13/tests-only/20261013-151524/analyze.log",
+      "bytes": 263,
+      "sha256": "dca11e789ba339199f0feb71000a5327f5bde4c73cfc16c66d152380da46ff76",
+      "redacted": false
+    },
+    {
+      "source": ".run/tests-only/20261013-151524/backend.log",
+      "path": "testing/reports/archive/2026-10-13/tests-only/20261013-151524/backend.log",
+      "bytes": 853,
+      "sha256": "d807a0c5b9054eb2c5c79556a2c3720fab47487e14c1d616607c6cac269b2963",
+      "redacted": false
+    },
+    {
+      "source": ".run/tests-only/20261013-151524/backend.trx",
+      "path": "testing/reports/archive/2026-10-13/tests-only/20261013-151524/backend.trx",
+      "bytes": 143160,
+      "sha256": "aa8576fd89206ba3d1fe43d18305aad474da550a4cd03213f62801662383620f",
+      "redacted": false
+    },
+    {
+      "source": ".run/tests-only/20261013-151524/frontend-events.jsonl",
+      "path": "testing/reports/archive/2026-10-13/tests-only/20261013-151524/frontend-events.jsonl",
+      "bytes": 390270,
+      "sha256": "70b2151dcbb2ca50879706772f22d2202506fd54a9ffb31dfd743c3bc949e9f9",
+      "redacted": false
+    },
+    {
+      "source": ".run/tests-only/20261013-151524/frontend.log",
+      "path": "testing/reports/archive/2026-10-13/tests-only/20261013-151524/frontend.log",
+      "bytes": 338800,
+      "sha256": "8256dab72227d5a75e509da68d26d5911c780aaf16c0e5c0e5f4ddd1ee0ed6f7",
+      "redacted": false
+    },
+    {
+      "source": ".run/tests-only/20261013-151524/run.ps1",
+      "path": "testing/reports/archive/2026-10-13/tests-only/20261013-151524/run.ps1",
+      "bytes": 1633,
+      "sha256": "ce0dda75f90644e0cb657ddfe3d7c877d5199b2dbcd87e4ffdaf1e70738b6f35",
+      "redacted": false
+    }
+  ]
+}

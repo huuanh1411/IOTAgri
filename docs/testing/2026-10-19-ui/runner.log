@@ -1,0 +1,459 @@
+
+Running 30 tests using 1 worker
+
+(node:37172) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [mobile] › tests\ui.spec.cjs:54:1 › UI-01: login renders and the submit button is reachable (3.4s)
+  ok  2 [mobile] › tests\ui.spec.cjs:63:1 › UI-02: empty login shows field validation without sending an API request (3.3s)
+  ok  3 [mobile] › tests\ui.spec.cjs:72:1 › UI-03: registration validates weak and mismatched passwords (3.9s)
+  x   4 [mobile] › tests\ui.spec.cjs:87:1 › UI-04: rejected credentials show feedback and remain on login (15.8s)
+(node:19668) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  5 [mobile] › tests\ui.spec.cjs:99:1 › UI-05: real login loads dashboard and survives a browser reload (6.4s)
+  ok  6 [mobile] › tests\ui.spec.cjs:111:1 › UI-06: alerts and plant selection tabs open with reachable navigation (4.7s)
+  ok  7 [mobile] › tests\ui.spec.cjs:124:1 › UI-07: account and settings remain usable on the viewport (4.6s)
+  ok  8 [mobile] › tests\ui.spec.cjs:135:1 › UI-08: logout clears the session and returns to login after reload (6.6s)
+  x   9 [mobile] › tests\ui.spec.cjs:151:1 › UI-09: a backend outage displays an error instead of authenticating (15.8s)
+(node:34792) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 10 [mobile] › tests\ui.spec.cjs:163:1 › UI-10: help and harvest history screens can be opened (5.3s)
+(node:41452) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 11 [small-mobile] › tests\ui.spec.cjs:54:1 › UI-01: login renders and the submit button is reachable (3.4s)
+  ok 12 [small-mobile] › tests\ui.spec.cjs:63:1 › UI-02: empty login shows field validation without sending an API request (3.4s)
+  ok 13 [small-mobile] › tests\ui.spec.cjs:72:1 › UI-03: registration validates weak and mismatched passwords (4.0s)
+  x  14 [small-mobile] › tests\ui.spec.cjs:87:1 › UI-04: rejected credentials show feedback and remain on login (15.9s)
+(node:40128) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 15 [small-mobile] › tests\ui.spec.cjs:99:1 › UI-05: real login loads dashboard and survives a browser reload (6.2s)
+  ok 16 [small-mobile] › tests\ui.spec.cjs:111:1 › UI-06: alerts and plant selection tabs open with reachable navigation (4.4s)
+  x  17 [small-mobile] › tests\ui.spec.cjs:124:1 › UI-07: account and settings remain usable on the viewport (16.4s)
+(node:39444) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  18 [small-mobile] › tests\ui.spec.cjs:135:1 › UI-08: logout clears the session and returns to login after reload (45.5s)
+(node:16676) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  19 [small-mobile] › tests\ui.spec.cjs:151:1 › UI-09: a backend outage displays an error instead of authenticating (16.1s)
+(node:39448) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 20 [small-mobile] › tests\ui.spec.cjs:163:1 › UI-10: help and harvest history screens can be opened (5.2s)
+(node:38588) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 21 [desktop] › tests\ui.spec.cjs:54:1 › UI-01: login renders and the submit button is reachable (3.5s)
+  ok 22 [desktop] › tests\ui.spec.cjs:63:1 › UI-02: empty login shows field validation without sending an API request (3.4s)
+  ok 23 [desktop] › tests\ui.spec.cjs:72:1 › UI-03: registration validates weak and mismatched passwords (4.0s)
+  x  24 [desktop] › tests\ui.spec.cjs:87:1 › UI-04: rejected credentials show feedback and remain on login (16.0s)
+(node:25940) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 25 [desktop] › tests\ui.spec.cjs:99:1 › UI-05: real login loads dashboard and survives a browser reload (6.3s)
+  ok 26 [desktop] › tests\ui.spec.cjs:111:1 › UI-06: alerts and plant selection tabs open with reachable navigation (4.8s)
+  ok 27 [desktop] › tests\ui.spec.cjs:124:1 › UI-07: account and settings remain usable on the viewport (4.5s)
+  ok 28 [desktop] › tests\ui.spec.cjs:135:1 › UI-08: logout clears the session and returns to login after reload (6.7s)
+  x  29 [desktop] › tests\ui.spec.cjs:151:1 › UI-09: a backend outage displays an error instead of authenticating (15.9s)
+(node:15476) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 30 [desktop] › tests\ui.spec.cjs:163:1 › UI-10: help and harvest history screens can be opened (5.4s)
+
+
+  1) [mobile] › tests\ui.spec.cjs:87:1 › UI-04: rejected credentials show feedback and remain on login 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+    Expected: visible
+    Timeout: 12000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last() with timeout 12000ms
+      - waiting for getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+
+
+      93 |   expect((await response).status()).toBe(401);
+      94 |   await expect(page).toHaveURL(/#\/auth$/);
+    > 95 |   await expect(page.getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()).toBeVisible();
+         |                                                                                                 ^
+      96 |   await snapshot(page, info, 'rejected-login');
+      97 | });
+      98 |
+        at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:95:97
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: accessibility-tree (text/plain) ─────────────────────────────────────────────────
+    - group:
+      - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+      - button "Đăng Nhập"
+      - button "Đăng Ký"
+      - textbox: missing-ui-user@example.test
+      - textbox: WrongPassword!9
+      - button
+      - button "Đăng nhập →"
+      - text: hoặc tiếp tục với
+      -...
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-mobile\error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › tests\ui.spec.cjs:151:1 › UI-09: a backend outage displays an error instead of authenticating 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+    Expected: visible
+    Timeout: 12000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last() with timeout 12000ms
+      - waiting for getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+
+
+      155 |   await page.getByRole('textbox', { name: 'Mật khẩu', exact: true }).fill('[REDACTED]');
+      156 |   await page.getByRole('button', { name: 'Đăng nhập →', exact: true }).click();
+    > 157 |   await expect(page.getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()).toBeVisible();
+          |                                                                                               ^
+      158 |   await expect(page).toHaveURL(/#\/auth$/);
+      159 |   await expect(page.getByRole('button', { name: 'Đăng nhập →', exact: true })).toBeEnabled();
+      160 |   await snapshot(page, info, 'backend-outage');
+        at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:157:95
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: accessibility-tree (text/plain) ─────────────────────────────────────────────────
+    - group:
+      - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+      - button "Đăng Nhập"
+      - button "Đăng Ký"
+      - textbox: outage@example.test
+      - textbox: [REDACTED]
+      - button
+      - button "Đăng nhập →"
+      - text: hoặc tiếp tục với
+      - button ...
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-mobile\error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [small-mobile] › tests\ui.spec.cjs:87:1 › UI-04: rejected credentials show feedback and remain on login 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+    Expected: visible
+    Timeout: 12000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last() with timeout 12000ms
+      - waiting for getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+
+
+      93 |   expect((await response).status()).toBe(401);
+      94 |   await expect(page).toHaveURL(/#\/auth$/);
+    > 95 |   await expect(page.getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()).toBeVisible();
+         |                                                                                                 ^
+      96 |   await snapshot(page, info, 'rejected-login');
+      97 | });
+      98 |
+        at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:95:97
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-small-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: accessibility-tree (text/plain) ─────────────────────────────────────────────────
+    - group:
+      - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+      - button "Đăng Nhập"
+      - button "Đăng Ký"
+      - textbox: missing-ui-user@example.test
+      - textbox: WrongPassword!9
+      - button
+      - button "Đăng nhập →"
+      - text: hoặc tiếp tục với
+      -...
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-small-mobile\error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-small-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-small-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [small-mobile] › tests\ui.spec.cjs:124:1 › UI-07: account and settings remain usable on the viewport 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: 'Đăng xuất', exact: true })
+    Expected: visible
+    Timeout: 12000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: 'Đăng xuất', exact: true }) with timeout 12000ms
+      - waiting for getByRole('button', { name: 'Đăng xuất', exact: true })
+
+
+      42 |
+      43 | async function insideViewport(locator, page) {
+    > 44 |   await expect(locator).toBeVisible();
+         |                         ^
+      45 |   const box = await locator.boundingBox();
+      46 |   expect(box, 'Element has a rendered rectangle').not.toBeNull();
+      47 |   const size = page.viewportSize();
+        at insideViewport (D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:44:25)
+        at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:129:9
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\ui-UI-07-account-and-settings-remain-usable-on-the-viewport-small-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #4: accessibility-tree (text/plain) ─────────────────────────────────────────────────
+    - text: Tài khoản Khác U UI Test ui-1792343376314@example.test Pro
+    - button "Tùy chỉnh Ngôn ngữ và thông báo"
+    - button "Lịch sử thu hoạch Đã trồng 32 cây"
+    - button "Trợ giúp & Hỗ trợ Câu hỏi thường gặp và chat"
+    - button "Trang chủ"
+    - button "Cảnh báo"
+    - button "Chọn giống"
+    - button "Khác"
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\ui-UI-07-account-and-settings-remain-usable-on-the-viewport-small-mobile\error-context.md
+
+    attachment #6: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\ui-UI-07-account-and-settings-remain-usable-on-the-viewport-small-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\ui-UI-07-account-and-settings-remain-usable-on-the-viewport-small-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [small-mobile] › tests\ui.spec.cjs:135:1 › UI-08: logout clears the session and returns to login after reload 
+
+    Test timeout of 45000ms exceeded.
+
+    Error: locator.click: Test timeout of 45000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Đăng xuất', exact: true })
+
+
+      136 |   await login(page);
+      137 |   await page.getByRole('button', { name: 'Khác', exact: true }).click();
+    > 138 |   await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
+          |                                                                      ^
+      139 |   await expect(page.getByRole('alertdialog')).toBeVisible();
+      140 |   const response = page.waitForResponse(r => r.url().endsWith('/api/auth/logout'));
+      141 |   await page.getByRole('alertdialog').getByRole('button', { name: 'Đăng xuất', exact: true }).click();
+        at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:138:70
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-small-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: accessibility-tree (text/plain) ─────────────────────────────────────────────────
+    - text: Tài khoản Khác U UI Test ui-1792343376314@example.test Pro
+    - button "Tùy chỉnh Ngôn ngữ và thông báo"
+    - button "Lịch sử thu hoạch Đã trồng 32 cây"
+    - button "Trợ giúp & Hỗ trợ Câu hỏi thường gặp và chat"
+    - button "Trang chủ"
+    - button "Cảnh báo"
+    - button "Chọn giống"
+    - button "Khác"
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-small-mobile\error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-small-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\ui-UI-08-logout-clears-the-72e68-turns-to-login-after-reload-small-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [small-mobile] › tests\ui.spec.cjs:151:1 › UI-09: a backend outage displays an error instead of authenticating 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+    Expected: visible
+    Timeout: 12000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last() with timeout 12000ms
+      - waiting for getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+
+
+      155 |   await page.getByRole('textbox', { name: 'Mật khẩu', exact: true }).fill('[REDACTED]');
+      156 |   await page.getByRole('button', { name: 'Đăng nhập →', exact: true }).click();
+    > 157 |   await expect(page.getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()).toBeVisible();
+          |                                                                                               ^
+      158 |   await expect(page).toHaveURL(/#\/auth$/);
+      159 |   await expect(page.getByRole('button', { name: 'Đăng nhập →', exact: true })).toBeEnabled();
+      160 |   await snapshot(page, info, 'backend-outage');
+        at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:157:95
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-small-mobile\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: accessibility-tree (text/plain) ─────────────────────────────────────────────────
+    - group:
+      - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+      - button "Đăng Nhập"
+      - button "Đăng Ký"
+      - textbox: outage@example.test
+      - textbox: [REDACTED]
+      - button
+      - button "Đăng nhập →"
+      - text: hoặc tiếp tục với
+      - button ...
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-small-mobile\error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-small-mobile\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-small-mobile\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [desktop] › tests\ui.spec.cjs:87:1 › UI-04: rejected credentials show feedback and remain on login 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+    Expected: visible
+    Timeout: 12000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last() with timeout 12000ms
+      - waiting for getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+
+
+      93 |   expect((await response).status()).toBe(401);
+      94 |   await expect(page).toHaveURL(/#\/auth$/);
+    > 95 |   await expect(page.getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()).toBeVisible();
+         |                                                                                                 ^
+      96 |   await snapshot(page, info, 'rejected-login');
+      97 | });
+      98 |
+        at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:95:97
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: accessibility-tree (text/plain) ─────────────────────────────────────────────────
+    - group:
+      - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+      - button "Đăng Nhập"
+      - button "Đăng Ký"
+      - textbox: missing-ui-user@example.test
+      - textbox: WrongPassword!9
+      - button
+      - button "Đăng nhập →"
+      - text: hoặc tiếp tục với
+      -...
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-desktop\error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\ui-UI-04-rejected-credenti-95c6c-eedback-and-remain-on-login-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [desktop] › tests\ui.spec.cjs:151:1 › UI-09: a backend outage displays an error instead of authenticating 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+    Expected: visible
+    Timeout: 12000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last() with timeout 12000ms
+      - waiting for getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+
+
+      155 |   await page.getByRole('textbox', { name: 'Mật khẩu', exact: true }).fill('[REDACTED]');
+      156 |   await page.getByRole('button', { name: 'Đăng nhập →', exact: true }).click();
+    > 157 |   await expect(page.getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()).toBeVisible();
+          |                                                                                               ^
+      158 |   await expect(page).toHaveURL(/#\/auth$/);
+      159 |   await expect(page.getByRole('button', { name: 'Đăng nhập →', exact: true })).toBeEnabled();
+      160 |   await snapshot(page, info, 'backend-outage');
+        at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:157:95
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-desktop\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: accessibility-tree (text/plain) ─────────────────────────────────────────────────
+    - group:
+      - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+      - button "Đăng Nhập"
+      - button "Đăng Ký"
+      - textbox: outage@example.test
+      - textbox: [REDACTED]
+      - button
+      - button "Đăng nhập →"
+      - text: hoặc tiếp tục với
+      - button ...
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-desktop\error-context.md
+
+    attachment #5: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-desktop\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\ui-UI-09-a-backend-outage--b9d22-r-instead-of-authenticating-desktop\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8 failed
+    [mobile] › tests\ui.spec.cjs:87:1 › UI-04: rejected credentials show feedback and remain on login 
+    [mobile] › tests\ui.spec.cjs:151:1 › UI-09: a backend outage displays an error instead of authenticating 
+    [small-mobile] › tests\ui.spec.cjs:87:1 › UI-04: rejected credentials show feedback and remain on login 
+    [small-mobile] › tests\ui.spec.cjs:124:1 › UI-07: account and settings remain usable on the viewport 
+    [small-mobile] › tests\ui.spec.cjs:135:1 › UI-08: logout clears the session and returns to login after reload 
+    [small-mobile] › tests\ui.spec.cjs:151:1 › UI-09: a backend outage displays an error instead of authenticating 
+    [desktop] › tests\ui.spec.cjs:87:1 › UI-04: rejected credentials show feedback and remain on login 
+    [desktop] › tests\ui.spec.cjs:151:1 › UI-09: a backend outage displays an error instead of authenticating 
+  22 passed (4.6m)

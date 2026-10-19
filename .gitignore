@@ -15,6 +15,4 @@ graphify-out/
 !.env.example
 **/.auth/
 
-# New frontend executions stay local; reviewed backend evidence stays tracked
-/testing/reports/frontend/e2e/
-/testing/reports/frontend/flutter/
+# Reviewed test evidence under testing/reports/ and docs/testing/ is tracked.

@@ -1,0 +1,8 @@
+[
+  {
+    "severity": "warning",
+    "message": "The value of the local variable 'r' isn't used. Try removing the variable or using it",
+    "location": "lib\\services\\api_service.dart:509:33",
+    "rule": "unused_local_variable"
+  }
+]

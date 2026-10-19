@@ -1,0 +1,4 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":39068,"type":"start","time":0}
+{"suite":{"id":0,"platform":"chrome","path":"D:/Aerogreen/app_web_aerogreen/IOTAgri/frontend/test/add_device_web_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/Aerogreen/app_web_aerogreen/IOTAgri/frontend/test/add_device_web_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":1}
+{"count":1,"time":5,"type":"allSuites"}

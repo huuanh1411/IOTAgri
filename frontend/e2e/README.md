@@ -60,9 +60,9 @@ Dùng thư mục mới cho mỗi phiên; nếu chỉ định lại cùng đườ
 - Playwright gốc: `test-results/` và `playwright-report/` trong thư mục E2E; đây là kết quả local gần nhất.
 - Có thể xuất lại JSON Playwright gần nhất: `npm.cmd run report:export --prefix frontend/e2e`. Lệnh này tạo báo cáo mới từ dữ liệu cũ, không chạy lại test.
 
-Setup tạo một tài khoản `@example.test` qua API local và lưu fixture trong `.auth/`. Tài khoản không tự xóa sau khi chạy. Suite không gửi lệnh điều khiển phần cứng. Credential, trace và báo cáo local được gitignore; rà soát nội dung trước khi bàn giao bằng chứng.
+Setup tạo một tài khoản `@example.test` qua API local và lưu fixture trong `.auth/`. Tài khoản không tự xóa sau khi chạy. Suite không gửi lệnh điều khiển phần cứng. Credential và vùng kết quả tạm trong `frontend/e2e/` được gitignore; bản bằng chứng đã rà soát được lưu ở `testing/reports/` và `docs/testing/`.
 
-Exit code của test được giữ nguyên khi test FAIL. Nếu tiến trình kết thúc bất thường hoặc xuất báo cáo gặp lỗi, runner trả mã khác 0. Nhánh này chưa lưu kết quả chạy đầy đủ E2E; discovery không phải kết quả PASS.
+Exit code của test được giữ nguyên khi test FAIL. Nếu tiến trình kết thúc bất thường hoặc xuất báo cáo gặp lỗi, runner trả mã khác 0. Phiên UI ngày 19/10/2026 đã lưu **33 ca: 22 PASS, 11 FAIL**, gồm các lượt chạy lại chụp ảnh và xác minh ngôn ngữ; xem [báo cáo và ảnh](../../docs/testing/README.md). Đây là bằng chứng lịch sử, không phải kết quả của lần discovery mới.
 
 ## Cấu trúc
 

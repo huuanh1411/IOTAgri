@@ -1,0 +1,1545 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kết quả kiểm thử giao diện Aerogreen</title><style>body{font:16px/1.6 system-ui;margin:32px auto;padding:0 20px;max-width:1200px;background:#f4f6f3;color:#20352b}h1{font-size:30px}article,section{background:white;border:1px solid #d5ded6;border-radius:16px;padding:20px;margin:18px 0}.fail{border-left:6px solid #be3942}.pass{border-left:6px solid #267348}small{color:#59695f}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f4f1;padding:14px;border-radius:8px;font-size:13px}.images{display:flex;gap:16px;overflow-x:auto;align-items:start}img{max-height:500px;max-width:100%;border:1px solid #ccc}.badge{font-weight:bold}a{color:#246d4c}</style><h1>Kiểm thử giao diện Aerogreen</h1><p>00:09:36 19/10/2026 · 22/33 đạt · 11 ca chưa đạt</p><p><a href="BAO_CAO_UI.txt">Báo cáo đầy đủ dạng văn bản</a> · <a href="results.json">Dữ liệu JSON</a></p><section><h2>Phạm vi và giới hạn</h2><ul><li>Phạm vi: bản Flutter web release đang phục vụ tại localhost:3000, API thật tại localhost:5261.</li><li>Viewport: mobile 390×844, small-mobile 320×568, desktop 1280×900; Chrome desktop mô phỏng kích thước và touch của mobile, không phải thiết bị Android/iPhone thật.</li><li>Bộ test bật accessibility/semantics của Flutter để thao tác bằng tên và role; không sửa mã ứng dụng.</li><li>Chuẩn bị tài khoản kiểm thử riêng qua API local. Đăng nhập/đăng xuất và dashboard được kiểm tra qua UI với BE thật. Ca UI-09 cố ý chặn request để tái hiện mất kết nối.</li><li>Ảnh là bằng chứng giao diện thực tế. Chưa có ảnh baseline được duyệt nên chưa khẳng định mọi pixel đều đúng hoặc giao diện giống thiết kế.</li><li>Không kiểm tra lệnh bơm/đèn trên thiết bị thật, provisioning ESP32, mọi trình duyệt hoặc Android/iOS native.</li><li>Màn hình lịch sử thu hoạch đang dùng mockHarvests; chat hỗ trợ là placeholder. Mở được các màn hình này không đồng nghĩa dữ liệu/tính năng đã tích hợp BE.</li><li>Không thay đổi mã ứng dụng để làm test xanh. Trace đầy đủ giữ ở frontend/e2e/test-results (đã gitignore); báo cáo công khai chỉ dùng ảnh, kết quả và log phương thức/URL/status, không xuất token hoặc mật khẩu fixture.</li><li>Kết quả hợp nhất theo ca mới nhất: ma trận 30 ca ban đầu; 6 ca dashboard/hỗ trợ chạy lại để chụp ảnh sau loading/chuyển cảnh; bổ sung 3 ca xác minh tiếng Việt. Tổng 33 ca riêng biệt, 39 lượt thực thi. Chi tiết từng lượt nằm trong verification-runs.json.</li></ul></section><article class="fail"><h2>F-01 — Không hiện phản hồi khi đăng nhập thất bại hoặc mất kết nối</h2><p>Nhập thông tin sai: BE trả 401 nhưng FE không hiện thông báo trong thời gian chờ 12 giây. Khi chặn kết nối login cũng chưa thấy thông báo. Người dùng ở lại màn hình đăng nhập mà không biết lý do.</p><p>Dấu hiệu nguyên nhân từ mã: AuthState.copyWith mặc định đặt error=null; login catch gán error rồi finally gọi copyWith(isLoading:false) xóa error ngay. AuthScreen đọc error trong build nên có thể không kịp dựng SnackBar. Đây là phân tích nguồn, cần sửa và chạy lại để xác nhận.</p><small>mobile/UI-04, mobile/UI-09, small-mobile/UI-04, small-mobile/UI-09, desktop/UI-04, desktop/UI-09</small></article><article class="fail"><h2>F-02 — Trang tài khoản có nội dung vượt khỏi màn hình</h2><p>Trên viewport nhỏ, nút đăng xuất không hiển thị/không nằm đầy đủ trong vùng nhìn thấy. Ảnh xác nhận phần dưới trang tài khoản bị cắt; MoreScreen dùng Column cố định, không có cuộn cho toàn bộ nội dung. Vì vậy ca đăng xuất trên màn hình này cũng có thể không thao tác được.</p><p>Vị trí cần xem: frontend/lib/screens/more_screen.dart. Chưa sửa bố cục trong lượt test này.</p><small>small-mobile/UI-07, small-mobile/UI-08</small></article><article class="fail"><h2>F-03 — Dashboard chưa theo đúng lựa chọn tiếng Việt</h2><p>Cài đặt đánh dấu Tiếng Việt nhưng dashboard vẫn hiển thị Good morning và UI&#39;s Garden, trong khi các nhãn khác là tiếng Việt. Ca test kiểm tra lựa chọn radio trước khi quay lại dashboard.</p><p>Vị trí cần xem: frontend/lib/app.dart truyền locale nhưng chưa khai báo supportedLocales/delegates cho tiếng Việt; HomeScreen đọc Localizations.localeOf(context), còn nhãn điều hướng đọc AppSettingsProvider. Hai nguồn locale có thể lệch nhau.</p><small>mobile/UI-11, small-mobile/UI-11, desktop/UI-11</small></article><article class="pass"><h2>mobile / UI-01 — Hiển thị đăng nhập và nút bấm trên viewport</h2><p class="badge">passed · 3.4 giây</p><p>Mong đợi: Hiện 2 ô nhập, nút đăng nhập nằm trong màn hình sau khi cuộn.</p><div class="images"><a href="screenshots/mobile-UI-01-01.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-01-01.png" alt="login"><br><small>login</small></a><a href="screenshots/mobile-UI-01-02.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-01-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[]</pre><pre>- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox &quot;ban@vidu.com&quot;
+  - textbox &quot;Mật khẩu&quot;
+  - button
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.</pre></details></article><article class="pass"><h2>mobile / UI-02 — Validate đăng nhập bỏ trống</h2><p class="badge">passed · 3.3 giây</p><p>Mong đợi: Hiện lỗi email/mật khẩu và không gửi yêu cầu đăng nhập tới BE.</p><div class="images"><a href="screenshots/mobile-UI-02-01.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-02-01.png" alt="login-validation"><br><small>login-validation</small></a><a href="screenshots/mobile-UI-02-02.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-02-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[]</pre><pre>- text: Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu. Email không hợp lệ
+- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox &quot;ban@vidu.com&quot; [invalid]
+  - text: Email không hợp lệ
+  - textbox &quot;Mật khẩu&quot; [invalid]
+  - button
+  - text: Vui lòng nhập mật khẩu
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.
+- text: Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu.</pre></details></article><article class="pass"><h2>mobile / UI-03 — Validate đăng ký</h2><p class="badge">passed · 3.9 giây</p><p>Mong đợi: Hiện yêu cầu mật khẩu mạnh và lỗi xác nhận mật khẩu; không tạo tài khoản.</p><div class="images"><a href="screenshots/mobile-UI-03-01.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-03-01.png" alt="registration-validation"><br><small>registration-validation</small></a><a href="screenshots/mobile-UI-03-02.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-03-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[]</pre><pre>- text: &quot;Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu. Mật khẩu cần có: • Ít nhất 8 ký tự • Chữ thường • Chữ hoa • Số • Ký tự đặc biệt&quot;
+- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox: UI Test
+  - textbox: validation@example.test
+  - textbox [invalid]: weak
+  - button
+  - text: &quot;Mật khẩu cần có: • Ít nhất 8 ký tự • Chữ thường • Chữ hoa • Số • Ký tự đặc biệt&quot;
+  - textbox [invalid]: different
+  - button
+  - text: Mật khẩu không khớp
+  - button &quot;Tạo tài khoản →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.
+- text: Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu.</pre></details></article><article class="fail"><h2>mobile / UI-04 — Đăng nhập sai thông tin với BE thật</h2><p class="badge">failed · 15.8 giây</p><p>Mong đợi: BE trả 401, FE vẫn ở trang đăng nhập và hiển thị lý do thất bại.</p><pre>Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect &quot;toBeVisible&quot; getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last() with timeout 12000ms
+  - waiting for getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+
+
+  93 |   expect((await response).status()).toBe(401);
+  94 |   await expect(page).toHaveURL(/#\/auth$/);
+&gt; 95 |   await expect(page.getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()).toBeVisible();
+     |                                                                                                 ^
+  96 |   await snapshot(page, info, &#39;rejected-login&#39;);
+  97 | });
+  98 |
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:95:97</pre><div class="images"><a href="screenshots/mobile-UI-04-01.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-04-01.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 401
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 401 (Unauthorized)&quot;
+  }
+]</pre><pre>- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox: missing-ui-user@example.test
+  - textbox: WrongPassword!9
+  - button
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.</pre></details></article><article class="pass"><h2>mobile / UI-05 — Đăng nhập thành công và khôi phục phiên</h2><p class="badge">passed · 13.0 giây</p><p>Mong đợi: BE trả 200, dashboard tải thành công, reload vẫn đăng nhập.</p><div class="images"><a href="screenshots/mobile-UI-05-01.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-05-01.png" alt="dashboard"><br><small>dashboard</small></a><a href="screenshots/mobile-UI-05-02.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-05-02.png" alt="restored-session"><br><small>restored-session</small></a><a href="screenshots/mobile-UI-05-03.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-05-03.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  }
+]</pre><pre>- group:
+  - text: Good morning UI&#39;s Garden U ĐANG TRỒNG Xà lách 37% KHỎE MẠNH Butterhead · Ngày 15 / 28
+  - progressbar &quot;54&quot;
+  - text: Nảy mầm Sinh trưởng Thu hoạch
+  - group &quot;Cảm biến Trực tiếp ● Đã đồng bộ&quot;:
+    - button &quot;Xem chi tiết MỨC NƯỚC — MỨC NƯỚC&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết TDS — TDS&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết NHIỆT ĐỘ KK — NHIỆT ĐỘ KK&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết ÁNH SÁNG — ÁNH SÁNG&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết NHIỆT ĐỘ NƯỚC — NHIỆT ĐỘ NƯỚC&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết ĐỘ ẨM KHÔNG KHÍ — ĐỘ ẨM KHÔNG KHÍ&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+  - text: Lịch chăm sóc Xà lách Tự động tối ưu CHU KỲ TƯỚI 2 phút mỗi 15 phút CHU KỲ DINH DƯỠNG 5ml mỗi 3 ngày NHIỆT ĐỘ LÝ TƯỞNG 18–22°C
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="pass"><h2>mobile / UI-06 — Tab cảnh báo và chọn giống</h2><p class="badge">passed · 4.7 giây</p><p>Mong đợi: Mở được các tab và nút điều hướng nằm trong viewport.</p><div class="images"><a href="screenshots/mobile-UI-06-01.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-06-01.png" alt="alerts"><br><small>alerts</small></a><a href="screenshots/mobile-UI-06-02.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-06-02.png" alt="plant-picker"><br><small>plant-picker</small></a><a href="screenshots/mobile-UI-06-03.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-06-03.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  }
+]</pre><pre>- text: Chọn Giống Cây Chọn Giống Cây Chọn cây — hệ thống sẽ tự động điều chỉnh ánh sáng, nước và dinh dưỡng.
+- group:
+  - group &quot;🥬 Xà lách Butterhead 4 tuần Dễ Bơm 2 phút mỗi 15 phút Bổ sung 5ml mỗi 3 ngày 18–22°C&quot;:
+    - button &quot;✓ Đang trồng&quot; [disabled]
+  - button &quot;🌿 Húng quế Genovese 5 tuần Dễ Bơm 3 phút mỗi 20 phút Bổ sung 7ml mỗi 4 ngày 20–25°C Bắt Đầu Trồng&quot;
+  - button &quot;🥗 Rau chân vịt Baby leaf 6 tuần Dễ Bơm 2 phút mỗi 12 phút Bổ sung 6ml mỗi 3 ngày 16–20°C Bắt Đầu Trồng&quot;
+  - button &quot;🌱 Bạc hà Spearmint 4 tuần Dễ Bơm 4 phút mỗi 25 phút Bổ sung 5ml mỗi 5 ngày 18–24°C Bắt Đầu Trồng&quot;
+  - button &quot;🥦 Cải xoăn Tuscan 7 tuần Trung bình Bơm 3 phút mỗi 18 phút Bổ sung 8ml mỗi 4 ngày 15–21°C Bắt Đầu Trồng&quot;
+  - button &quot;🌾 Rau mùi Slow-bolt 5 tuần Trung bình Bơm 3 phút mỗi 20 phút Bổ sung 6ml mỗi 4 ngày 17–22°C Bắt Đầu Trồng&quot;
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="pass"><h2>mobile / UI-07 — Trang tài khoản và cài đặt</h2><p class="badge">passed · 4.6 giây</p><p>Mong đợi: Hiển thị đúng tài khoản, nút đăng xuất không bị cắt và mở được cài đặt.</p><div class="images"><a href="screenshots/mobile-UI-07-01.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-07-01.png" alt="account"><br><small>account</small></a><a href="screenshots/mobile-UI-07-02.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-07-02.png" alt="settings"><br><small>settings</small></a><a href="screenshots/mobile-UI-07-03.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-07-03.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  }
+]</pre><pre>- button
+- group:
+  - text: Tùy chỉnh Cài đặt Ngôn ngữ
+  - radiogroup:
+    - radio &quot;Tiếng Việt&quot; [checked]
+    - radio &quot;English&quot;
+  - text: Thông báo
+  - switch &quot;Cảnh báo nước thấp&quot; [checked]
+  - switch &quot;Cảnh báo dinh dưỡng thấp&quot; [checked]
+  - switch &quot;Cảnh báo nhiệt độ&quot; [checked]
+  - switch &quot;Nhắc nhở thu hoạch&quot; [checked]
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="pass"><h2>mobile / UI-08 — Đăng xuất và xóa phiên</h2><p class="badge">passed · 6.6 giây</p><p>Mong đợi: Xác nhận đăng xuất, BE chấp nhận, reload vẫn ở trang đăng nhập.</p><div class="images"><a href="screenshots/mobile-UI-08-01.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-08-01.png" alt="logged-out"><br><small>logged-out</small></a><a href="screenshots/mobile-UI-08-02.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-08-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/refresh&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/logout&quot;,
+    &quot;status&quot;: 204
+  }
+]</pre><pre>- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox &quot;ban@vidu.com&quot;
+  - textbox &quot;Mật khẩu&quot;
+  - button
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.</pre></details></article><article class="fail"><h2>mobile / UI-09 — Xử lý mất kết nối backend</h2><p class="badge">failed · 15.8 giây</p><p>Mong đợi: Hiện thông báo lỗi, không đăng nhập và cho phép thử lại. Lỗi mạng được mô phỏng bằng cách chặn đúng request login trong trình duyệt.</p><pre>Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect &quot;toBeVisible&quot; getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last() with timeout 12000ms
+  - waiting for getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+
+
+  155 |   await page.getByRole(&#39;textbox&#39;, { name: &#39;Mật khẩu&#39;, exact: true }).fill(&#39;[REDACTED]&#39;);
+  156 |   await page.getByRole(&#39;button&#39;, { name: &#39;Đăng nhập →&#39;, exact: true }).click();
+&gt; 157 |   await expect(page.getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()).toBeVisible();
+      |                                                                                               ^
+  158 |   await expect(page).toHaveURL(/#\/auth$/);
+  159 |   await expect(page.getByRole(&#39;button&#39;, { name: &#39;Đăng nhập →&#39;, exact: true })).toBeEnabled();
+  160 |   await snapshot(page, info, &#39;backend-outage&#39;);
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:157:95</pre><div class="images"><a href="screenshots/mobile-UI-09-01.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-09-01.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;requestfailed&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;error&quot;: {
+      &quot;errorText&quot;: &quot;net::ERR_CONNECTION_REFUSED&quot;
+    }
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: net::ERR_CONNECTION_REFUSED&quot;
+  }
+]</pre><pre>- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox: outage@example.test
+  - textbox: [REDACTED]
+  - button
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.</pre></details></article><article class="pass"><h2>mobile / UI-10 — Màn hình hỗ trợ và lịch sử thu hoạch</h2><p class="badge">passed · 5.6 giây</p><p>Mong đợi: Mở được hai màn hình bằng thao tác UI; không gửi chat hoặc điều khiển phần cứng.</p><div class="images"><a href="screenshots/mobile-UI-10-01.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-10-01.png" alt="help"><br><small>help</small></a><a href="screenshots/mobile-UI-10-02.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-10-02.png" alt="harvest-history"><br><small>harvest-history</small></a><a href="screenshots/mobile-UI-10-03.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-10-03.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  }
+]</pre><pre>- button
+- text: Lịch sử thu hoạch Nhật ký thu hoạch
+- group: &quot;Xà lách – 1.5 kg Bắt đầu: 1/4/2023 Thu hoạch: 12/5/2023 Húng quế – 0.8 kg Bắt đầu: 10/6/2023 Thu hoạch: 25/7/2023&quot;
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="fail"><h2>mobile / UI-11 — Đồng bộ lựa chọn tiếng Việt với dashboard</h2><p class="badge">failed · 17.5 giây</p><p>Mong đợi: Cài đặt đang chọn Tiếng Việt thì tiêu đề vườn trên dashboard cũng phải hiển thị tiếng Việt.</p><pre>Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Vườn của UI/)
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect &quot;toBeVisible&quot; getByText(/Vườn của UI/) with timeout 12000ms
+  - waiting for getByText(/Vườn của UI/)
+
+
+  187 |   await page.getByRole(&#39;button&#39;, { name: &#39;Trang chủ&#39;, exact: true }).click();
+  188 |   await expect(page).toHaveURL(/#\/home$/);
+&gt; 189 |   await expect(page.getByText(/Vườn của UI/)).toBeVisible();
+      |                                               ^
+  190 |   await snapshot(page, info, &#39;vietnamese-dashboard&#39;);
+  191 | });
+  192 |
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:189:47</pre><div class="images"><a href="screenshots/mobile-UI-11-01.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-11-01.png" alt="vietnamese-selected"><br><small>vietnamese-selected</small></a><a href="screenshots/mobile-UI-11-02.png" target="_blank"><img loading="lazy" src="screenshots/mobile-UI-11-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  }
+]</pre><pre>- group:
+  - text: Good morning UI&#39;s Garden U ĐANG TRỒNG Xà lách 37% KHỎE MẠNH Butterhead · Ngày 15 / 28
+  - progressbar &quot;54&quot;
+  - text: Nảy mầm Sinh trưởng Thu hoạch
+  - group &quot;Cảm biến Trực tiếp ● Đã đồng bộ&quot;:
+    - button &quot;Xem chi tiết MỨC NƯỚC — MỨC NƯỚC&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết TDS — TDS&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết NHIỆT ĐỘ KK — NHIỆT ĐỘ KK&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết ÁNH SÁNG — ÁNH SÁNG&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết NHIỆT ĐỘ NƯỚC — NHIỆT ĐỘ NƯỚC&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết ĐỘ ẨM KHÔNG KHÍ — ĐỘ ẨM KHÔNG KHÍ&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+  - text: Lịch chăm sóc Xà lách Tự động tối ưu CHU KỲ TƯỚI 2 phút mỗi 15 phút CHU KỲ DINH DƯỠNG 5ml mỗi 3 ngày NHIỆT ĐỘ LÝ TƯỞNG 18–22°C
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="pass"><h2>small-mobile / UI-01 — Hiển thị đăng nhập và nút bấm trên viewport</h2><p class="badge">passed · 3.4 giây</p><p>Mong đợi: Hiện 2 ô nhập, nút đăng nhập nằm trong màn hình sau khi cuộn.</p><div class="images"><a href="screenshots/small-mobile-UI-01-01.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-01-01.png" alt="login"><br><small>login</small></a><a href="screenshots/small-mobile-UI-01-02.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-01-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[]</pre><pre>- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox &quot;ban@vidu.com&quot;
+  - textbox &quot;Mật khẩu&quot;
+  - button
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.</pre></details></article><article class="pass"><h2>small-mobile / UI-02 — Validate đăng nhập bỏ trống</h2><p class="badge">passed · 3.4 giây</p><p>Mong đợi: Hiện lỗi email/mật khẩu và không gửi yêu cầu đăng nhập tới BE.</p><div class="images"><a href="screenshots/small-mobile-UI-02-01.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-02-01.png" alt="login-validation"><br><small>login-validation</small></a><a href="screenshots/small-mobile-UI-02-02.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-02-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[]</pre><pre>- text: Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu. Email không hợp lệ
+- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox &quot;ban@vidu.com&quot; [invalid]
+  - text: Email không hợp lệ
+  - textbox &quot;Mật khẩu&quot; [invalid]
+  - button
+  - text: Vui lòng nhập mật khẩu
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.
+- text: Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu.</pre></details></article><article class="pass"><h2>small-mobile / UI-03 — Validate đăng ký</h2><p class="badge">passed · 4.0 giây</p><p>Mong đợi: Hiện yêu cầu mật khẩu mạnh và lỗi xác nhận mật khẩu; không tạo tài khoản.</p><div class="images"><a href="screenshots/small-mobile-UI-03-01.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-03-01.png" alt="registration-validation"><br><small>registration-validation</small></a><a href="screenshots/small-mobile-UI-03-02.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-03-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[]</pre><pre>- text: &quot;Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu. Mật khẩu cần có: • Ít nhất 8 ký tự • Chữ thường • Chữ hoa • Số • Ký tự đặc biệt&quot;
+- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox: UI Test
+  - textbox: validation@example.test
+  - textbox [invalid]: weak
+  - button
+  - text: &quot;Mật khẩu cần có: • Ít nhất 8 ký tự • Chữ thường • Chữ hoa • Số • Ký tự đặc biệt&quot;
+  - textbox [invalid]: different
+  - button
+  - text: Mật khẩu không khớp
+  - button &quot;Tạo tài khoản →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.
+- text: Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu.</pre></details></article><article class="fail"><h2>small-mobile / UI-04 — Đăng nhập sai thông tin với BE thật</h2><p class="badge">failed · 15.9 giây</p><p>Mong đợi: BE trả 401, FE vẫn ở trang đăng nhập và hiển thị lý do thất bại.</p><pre>Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect &quot;toBeVisible&quot; getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last() with timeout 12000ms
+  - waiting for getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+
+
+  93 |   expect((await response).status()).toBe(401);
+  94 |   await expect(page).toHaveURL(/#\/auth$/);
+&gt; 95 |   await expect(page.getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()).toBeVisible();
+     |                                                                                                 ^
+  96 |   await snapshot(page, info, &#39;rejected-login&#39;);
+  97 | });
+  98 |
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:95:97</pre><div class="images"><a href="screenshots/small-mobile-UI-04-01.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-04-01.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 401
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 401 (Unauthorized)&quot;
+  }
+]</pre><pre>- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox: missing-ui-user@example.test
+  - textbox: WrongPassword!9
+  - button
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.</pre></details></article><article class="pass"><h2>small-mobile / UI-05 — Đăng nhập thành công và khôi phục phiên</h2><p class="badge">passed · 12.9 giây</p><p>Mong đợi: BE trả 200, dashboard tải thành công, reload vẫn đăng nhập.</p><div class="images"><a href="screenshots/small-mobile-UI-05-01.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-05-01.png" alt="dashboard"><br><small>dashboard</small></a><a href="screenshots/small-mobile-UI-05-02.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-05-02.png" alt="restored-session"><br><small>restored-session</small></a><a href="screenshots/small-mobile-UI-05-03.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-05-03.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  }
+]</pre><pre>- group:
+  - text: Good morning UI&#39;s Garden U ĐANG TRỒNG Xà lách 37% KHỎE MẠNH Butterhead · Ngày 15 / 28
+  - progressbar &quot;54&quot;
+  - text: Nảy mầm Sinh trưởng Thu hoạch
+  - group &quot;Cảm biến Trực tiếp ● Đã đồng bộ&quot;:
+    - button &quot;Xem chi tiết MỨC NƯỚC — MỨC NƯỚC&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết TDS — TDS&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết NHIỆT ĐỘ KK — NHIỆT ĐỘ KK&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết ÁNH SÁNG — ÁNH SÁNG&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết NHIỆT ĐỘ NƯỚC — NHIỆT ĐỘ NƯỚC&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết ĐỘ ẨM KHÔNG KHÍ — ĐỘ ẨM KHÔNG KHÍ&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="pass"><h2>small-mobile / UI-06 — Tab cảnh báo và chọn giống</h2><p class="badge">passed · 4.4 giây</p><p>Mong đợi: Mở được các tab và nút điều hướng nằm trong viewport.</p><div class="images"><a href="screenshots/small-mobile-UI-06-01.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-06-01.png" alt="alerts"><br><small>alerts</small></a><a href="screenshots/small-mobile-UI-06-02.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-06-02.png" alt="plant-picker"><br><small>plant-picker</small></a><a href="screenshots/small-mobile-UI-06-03.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-06-03.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  }
+]</pre><pre>- text: Chọn Giống Cây Chọn Giống Cây Chọn cây — hệ thống sẽ tự động điều chỉnh ánh sáng, nước và dinh dưỡng.
+- group:
+  - group &quot;🥬 Xà lách Butterhead 4 tuần Dễ Bơm 2 phút mỗi 15 phút Bổ sung 5ml mỗi 3 ngày 18–22°C&quot;:
+    - button &quot;✓ Đang trồng&quot; [disabled]
+  - button &quot;🌿 Húng quế Genovese 5 tuần Dễ Bơm 3 phút mỗi 20 phút Bổ sung 7ml mỗi 4 ngày 20–25°C Bắt Đầu Trồng&quot;
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="fail"><h2>small-mobile / UI-07 — Trang tài khoản và cài đặt</h2><p class="badge">failed · 16.4 giây</p><p>Mong đợi: Hiển thị đúng tài khoản, nút đăng xuất không bị cắt và mở được cài đặt.</p><pre>Error: expect(locator).toBeVisible() failed
+
+Locator: getByRole(&#39;button&#39;, { name: &#39;Đăng xuất&#39;, exact: true })
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect &quot;toBeVisible&quot; getByRole(&#39;button&#39;, { name: &#39;Đăng xuất&#39;, exact: true }) with timeout 12000ms
+  - waiting for getByRole(&#39;button&#39;, { name: &#39;Đăng xuất&#39;, exact: true })
+
+
+  42 |
+  43 | async function insideViewport(locator, page) {
+&gt; 44 |   await expect(locator).toBeVisible();
+     |                         ^
+  45 |   const box = await locator.boundingBox();
+  46 |   expect(box, &#39;Element has a rendered rectangle&#39;).not.toBeNull();
+  47 |   const size = page.viewportSize();
+    at insideViewport (D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:44:25)
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:129:9</pre><div class="images"><a href="screenshots/small-mobile-UI-07-01.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-07-01.png" alt="account"><br><small>account</small></a><a href="screenshots/small-mobile-UI-07-02.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-07-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  }
+]</pre><pre>- text: Tài khoản Khác U UI Test ui-1792343376314@example.test Pro
+- button &quot;Tùy chỉnh Ngôn ngữ và thông báo&quot;
+- button &quot;Lịch sử thu hoạch Đã trồng 32 cây&quot;
+- button &quot;Trợ giúp &amp; Hỗ trợ Câu hỏi thường gặp và chat&quot;
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="fail"><h2>small-mobile / UI-08 — Đăng xuất và xóa phiên</h2><p class="badge">timedOut · 45.5 giây</p><p>Mong đợi: Xác nhận đăng xuất, BE chấp nhận, reload vẫn ở trang đăng nhập.</p><pre>Test timeout of 45000ms exceeded.</pre><pre>Error: locator.click: Test timeout of 45000ms exceeded.
+Call log:
+  - waiting for getByRole(&#39;button&#39;, { name: &#39;Đăng xuất&#39;, exact: true })
+
+
+  136 |   await login(page);
+  137 |   await page.getByRole(&#39;button&#39;, { name: &#39;Khác&#39;, exact: true }).click();
+&gt; 138 |   await page.getByRole(&#39;button&#39;, { name: &#39;Đăng xuất&#39;, exact: true }).click();
+      |                                                                      ^
+  139 |   await expect(page.getByRole(&#39;alertdialog&#39;)).toBeVisible();
+  140 |   const response = page.waitForResponse(r =&gt; r.url().endsWith(&#39;/api/auth/logout&#39;));
+  141 |   await page.getByRole(&#39;alertdialog&#39;).getByRole(&#39;button&#39;, { name: &#39;Đăng xuất&#39;, exact: true }).click();
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:138:70</pre><div class="images"><a href="screenshots/small-mobile-UI-08-01.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-08-01.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  }
+]</pre><pre>- text: Tài khoản Khác U UI Test ui-1792343376314@example.test Pro
+- button &quot;Tùy chỉnh Ngôn ngữ và thông báo&quot;
+- button &quot;Lịch sử thu hoạch Đã trồng 32 cây&quot;
+- button &quot;Trợ giúp &amp; Hỗ trợ Câu hỏi thường gặp và chat&quot;
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="fail"><h2>small-mobile / UI-09 — Xử lý mất kết nối backend</h2><p class="badge">failed · 16.1 giây</p><p>Mong đợi: Hiện thông báo lỗi, không đăng nhập và cho phép thử lại. Lỗi mạng được mô phỏng bằng cách chặn đúng request login trong trình duyệt.</p><pre>Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect &quot;toBeVisible&quot; getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last() with timeout 12000ms
+  - waiting for getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+
+
+  155 |   await page.getByRole(&#39;textbox&#39;, { name: &#39;Mật khẩu&#39;, exact: true }).fill(&#39;[REDACTED]&#39;);
+  156 |   await page.getByRole(&#39;button&#39;, { name: &#39;Đăng nhập →&#39;, exact: true }).click();
+&gt; 157 |   await expect(page.getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()).toBeVisible();
+      |                                                                                               ^
+  158 |   await expect(page).toHaveURL(/#\/auth$/);
+  159 |   await expect(page.getByRole(&#39;button&#39;, { name: &#39;Đăng nhập →&#39;, exact: true })).toBeEnabled();
+  160 |   await snapshot(page, info, &#39;backend-outage&#39;);
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:157:95</pre><div class="images"><a href="screenshots/small-mobile-UI-09-01.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-09-01.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;requestfailed&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;error&quot;: {
+      &quot;errorText&quot;: &quot;net::ERR_CONNECTION_REFUSED&quot;
+    }
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: net::ERR_CONNECTION_REFUSED&quot;
+  }
+]</pre><pre>- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox: outage@example.test
+  - textbox: [REDACTED]
+  - button
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.</pre></details></article><article class="pass"><h2>small-mobile / UI-10 — Màn hình hỗ trợ và lịch sử thu hoạch</h2><p class="badge">passed · 5.6 giây</p><p>Mong đợi: Mở được hai màn hình bằng thao tác UI; không gửi chat hoặc điều khiển phần cứng.</p><div class="images"><a href="screenshots/small-mobile-UI-10-01.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-10-01.png" alt="help"><br><small>help</small></a><a href="screenshots/small-mobile-UI-10-02.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-10-02.png" alt="harvest-history"><br><small>harvest-history</small></a><a href="screenshots/small-mobile-UI-10-03.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-10-03.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  }
+]</pre><pre>- button
+- text: Lịch sử thu hoạch Nhật ký thu hoạch
+- group: &quot;Xà lách – 1.5 kg Bắt đầu: 1/4/2023 Thu hoạch: 12/5/2023 Húng quế – 0.8 kg Bắt đầu: 10/6/2023 Thu hoạch: 25/7/2023&quot;
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="fail"><h2>small-mobile / UI-11 — Đồng bộ lựa chọn tiếng Việt với dashboard</h2><p class="badge">failed · 17.5 giây</p><p>Mong đợi: Cài đặt đang chọn Tiếng Việt thì tiêu đề vườn trên dashboard cũng phải hiển thị tiếng Việt.</p><pre>Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Vườn của UI/)
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect &quot;toBeVisible&quot; getByText(/Vườn của UI/) with timeout 12000ms
+  - waiting for getByText(/Vườn của UI/)
+
+
+  187 |   await page.getByRole(&#39;button&#39;, { name: &#39;Trang chủ&#39;, exact: true }).click();
+  188 |   await expect(page).toHaveURL(/#\/home$/);
+&gt; 189 |   await expect(page.getByText(/Vườn của UI/)).toBeVisible();
+      |                                               ^
+  190 |   await snapshot(page, info, &#39;vietnamese-dashboard&#39;);
+  191 | });
+  192 |
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:189:47</pre><div class="images"><a href="screenshots/small-mobile-UI-11-01.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-11-01.png" alt="vietnamese-selected"><br><small>vietnamese-selected</small></a><a href="screenshots/small-mobile-UI-11-02.png" target="_blank"><img loading="lazy" src="screenshots/small-mobile-UI-11-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  }
+]</pre><pre>- group:
+  - text: Good morning UI&#39;s Garden U ĐANG TRỒNG Xà lách 37% KHỎE MẠNH Butterhead · Ngày 15 / 28
+  - progressbar &quot;54&quot;
+  - text: Nảy mầm Sinh trưởng Thu hoạch
+  - group &quot;Cảm biến Trực tiếp ● Đã đồng bộ&quot;:
+    - button &quot;Xem chi tiết MỨC NƯỚC — MỨC NƯỚC&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết TDS — TDS&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết NHIỆT ĐỘ KK — NHIỆT ĐỘ KK&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết ÁNH SÁNG — ÁNH SÁNG&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết NHIỆT ĐỘ NƯỚC — NHIỆT ĐỘ NƯỚC&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết ĐỘ ẨM KHÔNG KHÍ — ĐỘ ẨM KHÔNG KHÍ&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="pass"><h2>desktop / UI-01 — Hiển thị đăng nhập và nút bấm trên viewport</h2><p class="badge">passed · 3.5 giây</p><p>Mong đợi: Hiện 2 ô nhập, nút đăng nhập nằm trong màn hình sau khi cuộn.</p><div class="images"><a href="screenshots/desktop-UI-01-01.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-01-01.png" alt="login"><br><small>login</small></a><a href="screenshots/desktop-UI-01-02.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-01-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[]</pre><pre>- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox &quot;ban@vidu.com&quot;
+  - textbox &quot;Mật khẩu&quot;
+  - button
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.</pre></details></article><article class="pass"><h2>desktop / UI-02 — Validate đăng nhập bỏ trống</h2><p class="badge">passed · 3.4 giây</p><p>Mong đợi: Hiện lỗi email/mật khẩu và không gửi yêu cầu đăng nhập tới BE.</p><div class="images"><a href="screenshots/desktop-UI-02-01.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-02-01.png" alt="login-validation"><br><small>login-validation</small></a><a href="screenshots/desktop-UI-02-02.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-02-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[]</pre><pre>- text: Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu. Email không hợp lệ
+- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox &quot;ban@vidu.com&quot; [invalid]
+  - text: Email không hợp lệ
+  - textbox &quot;Mật khẩu&quot; [invalid]
+  - button
+  - text: Vui lòng nhập mật khẩu
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.
+- text: Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu.</pre></details></article><article class="pass"><h2>desktop / UI-03 — Validate đăng ký</h2><p class="badge">passed · 4.0 giây</p><p>Mong đợi: Hiện yêu cầu mật khẩu mạnh và lỗi xác nhận mật khẩu; không tạo tài khoản.</p><div class="images"><a href="screenshots/desktop-UI-03-01.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-03-01.png" alt="registration-validation"><br><small>registration-validation</small></a><a href="screenshots/desktop-UI-03-02.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-03-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[]</pre><pre>- text: &quot;Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu. Mật khẩu cần có: • Ít nhất 8 ký tự • Chữ thường • Chữ hoa • Số • Ký tự đặc biệt&quot;
+- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox: UI Test
+  - textbox: validation@example.test
+  - textbox [invalid]: weak
+  - button
+  - text: &quot;Mật khẩu cần có: • Ít nhất 8 ký tự • Chữ thường • Chữ hoa • Số • Ký tự đặc biệt&quot;
+  - textbox [invalid]: different
+  - button
+  - text: Mật khẩu không khớp
+  - button &quot;Tạo tài khoản →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.
+- text: Vui lòng kiểm tra email, mật khẩu (ít nhất 8 ký tự) và phần xác nhận mật khẩu.</pre></details></article><article class="fail"><h2>desktop / UI-04 — Đăng nhập sai thông tin với BE thật</h2><p class="badge">failed · 16.0 giây</p><p>Mong đợi: BE trả 401, FE vẫn ở trang đăng nhập và hiển thị lý do thất bại.</p><pre>Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect &quot;toBeVisible&quot; getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last() with timeout 12000ms
+  - waiting for getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+
+
+  93 |   expect((await response).status()).toBe(401);
+  94 |   await expect(page).toHaveURL(/#\/auth$/);
+&gt; 95 |   await expect(page.getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()).toBeVisible();
+     |                                                                                                 ^
+  96 |   await snapshot(page, info, &#39;rejected-login&#39;);
+  97 | });
+  98 |
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:95:97</pre><div class="images"><a href="screenshots/desktop-UI-04-01.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-04-01.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 401
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 401 (Unauthorized)&quot;
+  }
+]</pre><pre>- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox: missing-ui-user@example.test
+  - textbox: WrongPassword!9
+  - button
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.</pre></details></article><article class="pass"><h2>desktop / UI-05 — Đăng nhập thành công và khôi phục phiên</h2><p class="badge">passed · 13.2 giây</p><p>Mong đợi: BE trả 200, dashboard tải thành công, reload vẫn đăng nhập.</p><div class="images"><a href="screenshots/desktop-UI-05-01.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-05-01.png" alt="dashboard"><br><small>dashboard</small></a><a href="screenshots/desktop-UI-05-02.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-05-02.png" alt="restored-session"><br><small>restored-session</small></a><a href="screenshots/desktop-UI-05-03.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-05-03.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  }
+]</pre><pre>- group:
+  - text: Good morning UI&#39;s Garden U ĐANG TRỒNG Xà lách 37% KHỎE MẠNH Butterhead · Ngày 15 / 28
+  - progressbar &quot;54&quot;
+  - text: Nảy mầm Sinh trưởng Thu hoạch
+  - group &quot;Cảm biến Trực tiếp ● Đã đồng bộ&quot;:
+    - button &quot;Xem chi tiết MỨC NƯỚC — MỨC NƯỚC&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết TDS — TDS&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết NHIỆT ĐỘ KK — NHIỆT ĐỘ KK&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết ÁNH SÁNG — ÁNH SÁNG&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết NHIỆT ĐỘ NƯỚC — NHIỆT ĐỘ NƯỚC&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết ĐỘ ẨM KHÔNG KHÍ — ĐỘ ẨM KHÔNG KHÍ&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+  - text: Lịch chăm sóc Xà lách Tự động tối ưu CHU KỲ TƯỚI 2 phút mỗi 15 phút CHU KỲ DINH DƯỠNG 5ml mỗi 3 ngày NHIỆT ĐỘ LÝ TƯỞNG 18–22°C
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="pass"><h2>desktop / UI-06 — Tab cảnh báo và chọn giống</h2><p class="badge">passed · 4.8 giây</p><p>Mong đợi: Mở được các tab và nút điều hướng nằm trong viewport.</p><div class="images"><a href="screenshots/desktop-UI-06-01.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-06-01.png" alt="alerts"><br><small>alerts</small></a><a href="screenshots/desktop-UI-06-02.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-06-02.png" alt="plant-picker"><br><small>plant-picker</small></a><a href="screenshots/desktop-UI-06-03.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-06-03.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  }
+]</pre><pre>- text: Chọn Giống Cây Chọn Giống Cây Chọn cây — hệ thống sẽ tự động điều chỉnh ánh sáng, nước và dinh dưỡng.
+- group:
+  - group &quot;🥬 Xà lách Butterhead 4 tuần Dễ Bơm 2 phút mỗi 15 phút Bổ sung 5ml mỗi 3 ngày 18–22°C&quot;:
+    - button &quot;✓ Đang trồng&quot; [disabled]
+  - button &quot;🌿 Húng quế Genovese 5 tuần Dễ Bơm 3 phút mỗi 20 phút Bổ sung 7ml mỗi 4 ngày 20–25°C Bắt Đầu Trồng&quot;
+  - button &quot;🥗 Rau chân vịt Baby leaf 6 tuần Dễ Bơm 2 phút mỗi 12 phút Bổ sung 6ml mỗi 3 ngày 16–20°C Bắt Đầu Trồng&quot;
+  - button &quot;🌱 Bạc hà Spearmint 4 tuần Dễ Bơm 4 phút mỗi 25 phút Bổ sung 5ml mỗi 5 ngày 18–24°C Bắt Đầu Trồng&quot;
+  - button &quot;🥦 Cải xoăn Tuscan 7 tuần Trung bình Bơm 3 phút mỗi 18 phút Bổ sung 8ml mỗi 4 ngày 15–21°C Bắt Đầu Trồng&quot;
+  - button &quot;🌾 Rau mùi Slow-bolt 5 tuần Trung bình Bơm 3 phút mỗi 20 phút Bổ sung 6ml mỗi 4 ngày 17–22°C Bắt Đầu Trồng&quot;
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="pass"><h2>desktop / UI-07 — Trang tài khoản và cài đặt</h2><p class="badge">passed · 4.5 giây</p><p>Mong đợi: Hiển thị đúng tài khoản, nút đăng xuất không bị cắt và mở được cài đặt.</p><div class="images"><a href="screenshots/desktop-UI-07-01.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-07-01.png" alt="account"><br><small>account</small></a><a href="screenshots/desktop-UI-07-02.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-07-02.png" alt="settings"><br><small>settings</small></a><a href="screenshots/desktop-UI-07-03.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-07-03.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  }
+]</pre><pre>- button
+- group:
+  - text: Tùy chỉnh Cài đặt Ngôn ngữ
+  - radiogroup:
+    - radio &quot;Tiếng Việt&quot; [checked]
+    - radio &quot;English&quot;
+  - text: Thông báo
+  - switch &quot;Cảnh báo nước thấp&quot; [checked]
+  - switch &quot;Cảnh báo dinh dưỡng thấp&quot; [checked]
+  - switch &quot;Cảnh báo nhiệt độ&quot; [checked]
+  - switch &quot;Nhắc nhở thu hoạch&quot; [checked]
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="pass"><h2>desktop / UI-08 — Đăng xuất và xóa phiên</h2><p class="badge">passed · 6.7 giây</p><p>Mong đợi: Xác nhận đăng xuất, BE chấp nhận, reload vẫn ở trang đăng nhập.</p><div class="images"><a href="screenshots/desktop-UI-08-01.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-08-01.png" alt="logged-out"><br><small>logged-out</small></a><a href="screenshots/desktop-UI-08-02.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-08-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/refresh&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/logout&quot;,
+    &quot;status&quot;: 204
+  }
+]</pre><pre>- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox &quot;ban@vidu.com&quot;
+  - textbox &quot;Mật khẩu&quot;
+  - button
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.</pre></details></article><article class="fail"><h2>desktop / UI-09 — Xử lý mất kết nối backend</h2><p class="badge">failed · 15.9 giây</p><p>Mong đợi: Hiện thông báo lỗi, không đăng nhập và cho phép thử lại. Lỗi mạng được mô phỏng bằng cách chặn đúng request login trong trình duyệt.</p><pre>Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect &quot;toBeVisible&quot; getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last() with timeout 12000ms
+  - waiting for getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+
+
+  155 |   await page.getByRole(&#39;textbox&#39;, { name: &#39;Mật khẩu&#39;, exact: true }).fill(&#39;[REDACTED]&#39;);
+  156 |   await page.getByRole(&#39;button&#39;, { name: &#39;Đăng nhập →&#39;, exact: true }).click();
+&gt; 157 |   await expect(page.getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()).toBeVisible();
+      |                                                                                               ^
+  158 |   await expect(page).toHaveURL(/#\/auth$/);
+  159 |   await expect(page.getByRole(&#39;button&#39;, { name: &#39;Đăng nhập →&#39;, exact: true })).toBeEnabled();
+  160 |   await snapshot(page, info, &#39;backend-outage&#39;);
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:157:95</pre><div class="images"><a href="screenshots/desktop-UI-09-01.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-09-01.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;requestfailed&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;error&quot;: {
+      &quot;errorText&quot;: &quot;net::ERR_CONNECTION_REFUSED&quot;
+    }
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: net::ERR_CONNECTION_REFUSED&quot;
+  }
+]</pre><pre>- group:
+  - text: Aerogreen Trồng Rau Đô Thị Nhàn Tênh Trồng rau sạch ngay trên mặt bếp — Aerogreen lo phần còn lại.
+  - button &quot;Đăng Nhập&quot;
+  - button &quot;Đăng Ký&quot;
+  - textbox: outage@example.test
+  - textbox: [REDACTED]
+  - button
+  - button &quot;Đăng nhập →&quot;
+  - text: hoặc tiếp tục với
+  - button &quot;G Google&quot; [disabled]
+  - button &quot;A Apple&quot; [disabled]
+  - text: Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản &amp; Quyền riêng tư.</pre></details></article><article class="pass"><h2>desktop / UI-10 — Màn hình hỗ trợ và lịch sử thu hoạch</h2><p class="badge">passed · 5.6 giây</p><p>Mong đợi: Mở được hai màn hình bằng thao tác UI; không gửi chat hoặc điều khiển phần cứng.</p><div class="images"><a href="screenshots/desktop-UI-10-01.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-10-01.png" alt="help"><br><small>help</small></a><a href="screenshots/desktop-UI-10-02.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-10-02.png" alt="harvest-history"><br><small>harvest-history</small></a><a href="screenshots/desktop-UI-10-03.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-10-03.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  }
+]</pre><pre>- button
+- text: Lịch sử thu hoạch Nhật ký thu hoạch
+- group: &quot;Xà lách – 1.5 kg Bắt đầu: 1/4/2023 Thu hoạch: 12/5/2023 Húng quế – 0.8 kg Bắt đầu: 10/6/2023 Thu hoạch: 25/7/2023&quot;
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article><article class="fail"><h2>desktop / UI-11 — Đồng bộ lựa chọn tiếng Việt với dashboard</h2><p class="badge">failed · 17.7 giây</p><p>Mong đợi: Cài đặt đang chọn Tiếng Việt thì tiêu đề vườn trên dashboard cũng phải hiển thị tiếng Việt.</p><pre>Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Vườn của UI/)
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect &quot;toBeVisible&quot; getByText(/Vườn của UI/) with timeout 12000ms
+  - waiting for getByText(/Vườn của UI/)
+
+
+  187 |   await page.getByRole(&#39;button&#39;, { name: &#39;Trang chủ&#39;, exact: true }).click();
+  188 |   await expect(page).toHaveURL(/#\/home$/);
+&gt; 189 |   await expect(page.getByText(/Vườn của UI/)).toBeVisible();
+      |                                               ^
+  190 |   await snapshot(page, info, &#39;vietnamese-dashboard&#39;);
+  191 | });
+  192 |
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:189:47</pre><div class="images"><a href="screenshots/desktop-UI-11-01.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-11-01.png" alt="vietnamese-selected"><br><small>vietnamese-selected</small></a><a href="screenshots/desktop-UI-11-02.png" target="_blank"><img loading="lazy" src="screenshots/desktop-UI-11-02.png" alt="screenshot"><br><small>screenshot</small></a></div><details><summary>Log browser/API và accessibility</summary><pre>[
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/login&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/auth/profile&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/dashboard/overview&quot;,
+    &quot;status&quot;: 200
+  },
+  {
+    &quot;type&quot;: &quot;api&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;http://localhost:5261/api/sensor/latest&quot;,
+    &quot;status&quot;: 404
+  },
+  {
+    &quot;type&quot;: &quot;console&quot;,
+    &quot;message&quot;: &quot;Failed to load resource: the server responded with a status of 404 (Not Found)&quot;
+  }
+]</pre><pre>- group:
+  - text: Good morning UI&#39;s Garden U ĐANG TRỒNG Xà lách 37% KHỎE MẠNH Butterhead · Ngày 15 / 28
+  - progressbar &quot;54&quot;
+  - text: Nảy mầm Sinh trưởng Thu hoạch
+  - group &quot;Cảm biến Trực tiếp ● Đã đồng bộ&quot;:
+    - button &quot;Xem chi tiết MỨC NƯỚC — MỨC NƯỚC&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết TDS — TDS&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết NHIỆT ĐỘ KK — NHIỆT ĐỘ KK&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết ÁNH SÁNG — ÁNH SÁNG&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết NHIỆT ĐỘ NƯỚC — NHIỆT ĐỘ NƯỚC&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+    - button &quot;Xem chi tiết ĐỘ ẨM KHÔNG KHÍ — ĐỘ ẨM KHÔNG KHÍ&quot;:
+      - progressbar &quot;100&quot;
+      - progressbar &quot;0&quot;
+  - text: Lịch chăm sóc Xà lách Tự động tối ưu CHU KỲ TƯỚI 2 phút mỗi 15 phút CHU KỲ DINH DƯỠNG 5ml mỗi 3 ngày NHIỆT ĐỘ LÝ TƯỞNG 18–22°C
+- button &quot;Trang chủ&quot;
+- button &quot;Cảnh báo&quot;
+- button &quot;Chọn giống&quot;
+- button &quot;Khác&quot;</pre></details></article></html>

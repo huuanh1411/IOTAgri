@@ -1,0 +1,1345 @@
+BÁO CÁO TEST GIAO DIỆN FE — CHROME THỰC TẾ
+Bắt đầu: 00:09:36 19/10/2026 (giờ Việt Nam)
+Kết quả: 22/33 đạt; 11 ca chưa đạt.
+
+Phạm vi: bản Flutter web release đang phục vụ tại localhost:3000, API thật tại localhost:5261.
+Viewport: mobile 390×844, small-mobile 320×568, desktop 1280×900; Chrome desktop mô phỏng kích thước và touch của mobile, không phải thiết bị Android/iPhone thật.
+Bộ test bật accessibility/semantics của Flutter để thao tác bằng tên và role; không sửa mã ứng dụng.
+Chuẩn bị tài khoản kiểm thử riêng qua API local. Đăng nhập/đăng xuất và dashboard được kiểm tra qua UI với BE thật. Ca UI-09 cố ý chặn request để tái hiện mất kết nối.
+Ảnh là bằng chứng giao diện thực tế. Chưa có ảnh baseline được duyệt nên chưa khẳng định mọi pixel đều đúng hoặc giao diện giống thiết kế.
+Không kiểm tra lệnh bơm/đèn trên thiết bị thật, provisioning ESP32, mọi trình duyệt hoặc Android/iOS native.
+Màn hình lịch sử thu hoạch đang dùng mockHarvests; chat hỗ trợ là placeholder. Mở được các màn hình này không đồng nghĩa dữ liệu/tính năng đã tích hợp BE.
+Không thay đổi mã ứng dụng để làm test xanh. Trace đầy đủ giữ ở frontend/e2e/test-results (đã gitignore); báo cáo công khai chỉ dùng ảnh, kết quả và log phương thức/URL/status, không xuất token hoặc mật khẩu fixture.
+Kết quả hợp nhất theo ca mới nhất: ma trận 30 ca ban đầu; 6 ca dashboard/hỗ trợ chạy lại để chụp ảnh sau loading/chuyển cảnh; bổ sung 3 ca xác minh tiếng Việt. Tổng 33 ca riêng biệt, 39 lượt thực thi. Chi tiết từng lượt nằm trong verification-runs.json.
+
+CÁC VẤN ĐỀ ĐÃ GHI NHẬN
+
+F-01 — Không hiện phản hồi khi đăng nhập thất bại hoặc mất kết nối
+Nhập thông tin sai: BE trả 401 nhưng FE không hiện thông báo trong thời gian chờ 12 giây. Khi chặn kết nối login cũng chưa thấy thông báo. Người dùng ở lại màn hình đăng nhập mà không biết lý do.
+Dấu hiệu nguyên nhân từ mã: AuthState.copyWith mặc định đặt error=null; login catch gán error rồi finally gọi copyWith(isLoading:false) xóa error ngay. AuthScreen đọc error trong build nên có thể không kịp dựng SnackBar. Đây là phân tích nguồn, cần sửa và chạy lại để xác nhận.
+Ảnh hưởng: mobile/UI-04, mobile/UI-09, small-mobile/UI-04, small-mobile/UI-09, desktop/UI-04, desktop/UI-09
+
+F-02 — Trang tài khoản có nội dung vượt khỏi màn hình
+Trên viewport nhỏ, nút đăng xuất không hiển thị/không nằm đầy đủ trong vùng nhìn thấy. Ảnh xác nhận phần dưới trang tài khoản bị cắt; MoreScreen dùng Column cố định, không có cuộn cho toàn bộ nội dung. Vì vậy ca đăng xuất trên màn hình này cũng có thể không thao tác được.
+Vị trí cần xem: frontend/lib/screens/more_screen.dart. Chưa sửa bố cục trong lượt test này.
+Ảnh hưởng: small-mobile/UI-07, small-mobile/UI-08
+
+F-03 — Dashboard chưa theo đúng lựa chọn tiếng Việt
+Cài đặt đánh dấu Tiếng Việt nhưng dashboard vẫn hiển thị Good morning và UI's Garden, trong khi các nhãn khác là tiếng Việt. Ca test kiểm tra lựa chọn radio trước khi quay lại dashboard.
+Vị trí cần xem: frontend/lib/app.dart truyền locale nhưng chưa khai báo supportedLocales/delegates cho tiếng Việt; HomeScreen đọc Localizations.localeOf(context), còn nhãn điều hướng đọc AppSettingsProvider. Hai nguồn locale có thể lệch nhau.
+Ảnh hưởng: mobile/UI-11, small-mobile/UI-11, desktop/UI-11
+
+TỪNG CA KIỂM THỬ
+
+[passed] mobile / UI-01: Hiển thị đăng nhập và nút bấm trên viewport
+Mong đợi: Hiện 2 ô nhập, nút đăng nhập nằm trong màn hình sau khi cuộn.
+Thời gian: 3.4 giây.
+Ảnh: screenshots/mobile-UI-01-01.png, screenshots/mobile-UI-01-02.png
+
+[passed] mobile / UI-02: Validate đăng nhập bỏ trống
+Mong đợi: Hiện lỗi email/mật khẩu và không gửi yêu cầu đăng nhập tới BE.
+Thời gian: 3.3 giây.
+Ảnh: screenshots/mobile-UI-02-01.png, screenshots/mobile-UI-02-02.png
+
+[passed] mobile / UI-03: Validate đăng ký
+Mong đợi: Hiện yêu cầu mật khẩu mạnh và lỗi xác nhận mật khẩu; không tạo tài khoản.
+Thời gian: 3.9 giây.
+Ảnh: screenshots/mobile-UI-03-01.png, screenshots/mobile-UI-03-02.png
+
+[failed] mobile / UI-04: Đăng nhập sai thông tin với BE thật
+Mong đợi: BE trả 401, FE vẫn ở trang đăng nhập và hiển thị lý do thất bại.
+Thời gian: 15.8 giây.
+Thực tế / lỗi:
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last() with timeout 12000ms
+  - waiting for getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+
+
+  93 |   expect((await response).status()).toBe(401);
+  94 |   await expect(page).toHaveURL(/#\/auth$/);
+> 95 |   await expect(page.getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()).toBeVisible();
+     |                                                                                                 ^
+  96 |   await snapshot(page, info, 'rejected-login');
+  97 | });
+  98 |
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:95:97
+Ảnh: screenshots/mobile-UI-04-01.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 401
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  }
+]
+
+[passed] mobile / UI-05: Đăng nhập thành công và khôi phục phiên
+Mong đợi: BE trả 200, dashboard tải thành công, reload vẫn đăng nhập.
+Thời gian: 13.0 giây.
+Ảnh: screenshots/mobile-UI-05-01.png, screenshots/mobile-UI-05-02.png, screenshots/mobile-UI-05-03.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  }
+]
+
+[passed] mobile / UI-06: Tab cảnh báo và chọn giống
+Mong đợi: Mở được các tab và nút điều hướng nằm trong viewport.
+Thời gian: 4.7 giây.
+Ảnh: screenshots/mobile-UI-06-01.png, screenshots/mobile-UI-06-02.png, screenshots/mobile-UI-06-03.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  }
+]
+
+[passed] mobile / UI-07: Trang tài khoản và cài đặt
+Mong đợi: Hiển thị đúng tài khoản, nút đăng xuất không bị cắt và mở được cài đặt.
+Thời gian: 4.6 giây.
+Ảnh: screenshots/mobile-UI-07-01.png, screenshots/mobile-UI-07-02.png, screenshots/mobile-UI-07-03.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  }
+]
+
+[passed] mobile / UI-08: Đăng xuất và xóa phiên
+Mong đợi: Xác nhận đăng xuất, BE chấp nhận, reload vẫn ở trang đăng nhập.
+Thời gian: 6.6 giây.
+Ảnh: screenshots/mobile-UI-08-01.png, screenshots/mobile-UI-08-02.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/refresh",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/logout",
+    "status": 204
+  }
+]
+
+[failed] mobile / UI-09: Xử lý mất kết nối backend
+Mong đợi: Hiện thông báo lỗi, không đăng nhập và cho phép thử lại. Lỗi mạng được mô phỏng bằng cách chặn đúng request login trong trình duyệt.
+Thời gian: 15.8 giây.
+Thực tế / lỗi:
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last() with timeout 12000ms
+  - waiting for getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+
+
+  155 |   await page.getByRole('textbox', { name: 'Mật khẩu', exact: true }).fill('[REDACTED]');
+  156 |   await page.getByRole('button', { name: 'Đăng nhập →', exact: true }).click();
+> 157 |   await expect(page.getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()).toBeVisible();
+      |                                                                                               ^
+  158 |   await expect(page).toHaveURL(/#\/auth$/);
+  159 |   await expect(page.getByRole('button', { name: 'Đăng nhập →', exact: true })).toBeEnabled();
+  160 |   await snapshot(page, info, 'backend-outage');
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:157:95
+Ảnh: screenshots/mobile-UI-09-01.png
+Log browser/API:
+[
+  {
+    "type": "requestfailed",
+    "url": "http://localhost:5261/api/auth/login",
+    "error": {
+      "errorText": "net::ERR_CONNECTION_REFUSED"
+    }
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  }
+]
+
+[passed] mobile / UI-10: Màn hình hỗ trợ và lịch sử thu hoạch
+Mong đợi: Mở được hai màn hình bằng thao tác UI; không gửi chat hoặc điều khiển phần cứng.
+Thời gian: 5.6 giây.
+Ảnh: screenshots/mobile-UI-10-01.png, screenshots/mobile-UI-10-02.png, screenshots/mobile-UI-10-03.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  }
+]
+
+[failed] mobile / UI-11: Đồng bộ lựa chọn tiếng Việt với dashboard
+Mong đợi: Cài đặt đang chọn Tiếng Việt thì tiêu đề vườn trên dashboard cũng phải hiển thị tiếng Việt.
+Thời gian: 17.5 giây.
+Thực tế / lỗi:
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Vườn của UI/)
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByText(/Vườn của UI/) with timeout 12000ms
+  - waiting for getByText(/Vườn của UI/)
+
+
+  187 |   await page.getByRole('button', { name: 'Trang chủ', exact: true }).click();
+  188 |   await expect(page).toHaveURL(/#\/home$/);
+> 189 |   await expect(page.getByText(/Vườn của UI/)).toBeVisible();
+      |                                               ^
+  190 |   await snapshot(page, info, 'vietnamese-dashboard');
+  191 | });
+  192 |
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:189:47
+Ảnh: screenshots/mobile-UI-11-01.png, screenshots/mobile-UI-11-02.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  }
+]
+
+[passed] small-mobile / UI-01: Hiển thị đăng nhập và nút bấm trên viewport
+Mong đợi: Hiện 2 ô nhập, nút đăng nhập nằm trong màn hình sau khi cuộn.
+Thời gian: 3.4 giây.
+Ảnh: screenshots/small-mobile-UI-01-01.png, screenshots/small-mobile-UI-01-02.png
+
+[passed] small-mobile / UI-02: Validate đăng nhập bỏ trống
+Mong đợi: Hiện lỗi email/mật khẩu và không gửi yêu cầu đăng nhập tới BE.
+Thời gian: 3.4 giây.
+Ảnh: screenshots/small-mobile-UI-02-01.png, screenshots/small-mobile-UI-02-02.png
+
+[passed] small-mobile / UI-03: Validate đăng ký
+Mong đợi: Hiện yêu cầu mật khẩu mạnh và lỗi xác nhận mật khẩu; không tạo tài khoản.
+Thời gian: 4.0 giây.
+Ảnh: screenshots/small-mobile-UI-03-01.png, screenshots/small-mobile-UI-03-02.png
+
+[failed] small-mobile / UI-04: Đăng nhập sai thông tin với BE thật
+Mong đợi: BE trả 401, FE vẫn ở trang đăng nhập và hiển thị lý do thất bại.
+Thời gian: 15.9 giây.
+Thực tế / lỗi:
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last() with timeout 12000ms
+  - waiting for getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+
+
+  93 |   expect((await response).status()).toBe(401);
+  94 |   await expect(page).toHaveURL(/#\/auth$/);
+> 95 |   await expect(page.getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()).toBeVisible();
+     |                                                                                                 ^
+  96 |   await snapshot(page, info, 'rejected-login');
+  97 | });
+  98 |
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:95:97
+Ảnh: screenshots/small-mobile-UI-04-01.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 401
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  }
+]
+
+[passed] small-mobile / UI-05: Đăng nhập thành công và khôi phục phiên
+Mong đợi: BE trả 200, dashboard tải thành công, reload vẫn đăng nhập.
+Thời gian: 12.9 giây.
+Ảnh: screenshots/small-mobile-UI-05-01.png, screenshots/small-mobile-UI-05-02.png, screenshots/small-mobile-UI-05-03.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  }
+]
+
+[passed] small-mobile / UI-06: Tab cảnh báo và chọn giống
+Mong đợi: Mở được các tab và nút điều hướng nằm trong viewport.
+Thời gian: 4.4 giây.
+Ảnh: screenshots/small-mobile-UI-06-01.png, screenshots/small-mobile-UI-06-02.png, screenshots/small-mobile-UI-06-03.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  }
+]
+
+[failed] small-mobile / UI-07: Trang tài khoản và cài đặt
+Mong đợi: Hiển thị đúng tài khoản, nút đăng xuất không bị cắt và mở được cài đặt.
+Thời gian: 16.4 giây.
+Thực tế / lỗi:
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByRole('button', { name: 'Đăng xuất', exact: true })
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByRole('button', { name: 'Đăng xuất', exact: true }) with timeout 12000ms
+  - waiting for getByRole('button', { name: 'Đăng xuất', exact: true })
+
+
+  42 |
+  43 | async function insideViewport(locator, page) {
+> 44 |   await expect(locator).toBeVisible();
+     |                         ^
+  45 |   const box = await locator.boundingBox();
+  46 |   expect(box, 'Element has a rendered rectangle').not.toBeNull();
+  47 |   const size = page.viewportSize();
+    at insideViewport (D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:44:25)
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:129:9
+Ảnh: screenshots/small-mobile-UI-07-01.png, screenshots/small-mobile-UI-07-02.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  }
+]
+
+[timedOut] small-mobile / UI-08: Đăng xuất và xóa phiên
+Mong đợi: Xác nhận đăng xuất, BE chấp nhận, reload vẫn ở trang đăng nhập.
+Thời gian: 45.5 giây.
+Thực tế / lỗi:
+Test timeout of 45000ms exceeded.
+Error: locator.click: Test timeout of 45000ms exceeded.
+Call log:
+  - waiting for getByRole('button', { name: 'Đăng xuất', exact: true })
+
+
+  136 |   await login(page);
+  137 |   await page.getByRole('button', { name: 'Khác', exact: true }).click();
+> 138 |   await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click();
+      |                                                                      ^
+  139 |   await expect(page.getByRole('alertdialog')).toBeVisible();
+  140 |   const response = page.waitForResponse(r => r.url().endsWith('/api/auth/logout'));
+  141 |   await page.getByRole('alertdialog').getByRole('button', { name: 'Đăng xuất', exact: true }).click();
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:138:70
+Ảnh: screenshots/small-mobile-UI-08-01.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  }
+]
+
+[failed] small-mobile / UI-09: Xử lý mất kết nối backend
+Mong đợi: Hiện thông báo lỗi, không đăng nhập và cho phép thử lại. Lỗi mạng được mô phỏng bằng cách chặn đúng request login trong trình duyệt.
+Thời gian: 16.1 giây.
+Thực tế / lỗi:
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last() with timeout 12000ms
+  - waiting for getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+
+
+  155 |   await page.getByRole('textbox', { name: 'Mật khẩu', exact: true }).fill('[REDACTED]');
+  156 |   await page.getByRole('button', { name: 'Đăng nhập →', exact: true }).click();
+> 157 |   await expect(page.getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()).toBeVisible();
+      |                                                                                               ^
+  158 |   await expect(page).toHaveURL(/#\/auth$/);
+  159 |   await expect(page.getByRole('button', { name: 'Đăng nhập →', exact: true })).toBeEnabled();
+  160 |   await snapshot(page, info, 'backend-outage');
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:157:95
+Ảnh: screenshots/small-mobile-UI-09-01.png
+Log browser/API:
+[
+  {
+    "type": "requestfailed",
+    "url": "http://localhost:5261/api/auth/login",
+    "error": {
+      "errorText": "net::ERR_CONNECTION_REFUSED"
+    }
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  }
+]
+
+[passed] small-mobile / UI-10: Màn hình hỗ trợ và lịch sử thu hoạch
+Mong đợi: Mở được hai màn hình bằng thao tác UI; không gửi chat hoặc điều khiển phần cứng.
+Thời gian: 5.6 giây.
+Ảnh: screenshots/small-mobile-UI-10-01.png, screenshots/small-mobile-UI-10-02.png, screenshots/small-mobile-UI-10-03.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  }
+]
+
+[failed] small-mobile / UI-11: Đồng bộ lựa chọn tiếng Việt với dashboard
+Mong đợi: Cài đặt đang chọn Tiếng Việt thì tiêu đề vườn trên dashboard cũng phải hiển thị tiếng Việt.
+Thời gian: 17.5 giây.
+Thực tế / lỗi:
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Vườn của UI/)
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByText(/Vườn của UI/) with timeout 12000ms
+  - waiting for getByText(/Vườn của UI/)
+
+
+  187 |   await page.getByRole('button', { name: 'Trang chủ', exact: true }).click();
+  188 |   await expect(page).toHaveURL(/#\/home$/);
+> 189 |   await expect(page.getByText(/Vườn của UI/)).toBeVisible();
+      |                                               ^
+  190 |   await snapshot(page, info, 'vietnamese-dashboard');
+  191 | });
+  192 |
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:189:47
+Ảnh: screenshots/small-mobile-UI-11-01.png, screenshots/small-mobile-UI-11-02.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  }
+]
+
+[passed] desktop / UI-01: Hiển thị đăng nhập và nút bấm trên viewport
+Mong đợi: Hiện 2 ô nhập, nút đăng nhập nằm trong màn hình sau khi cuộn.
+Thời gian: 3.5 giây.
+Ảnh: screenshots/desktop-UI-01-01.png, screenshots/desktop-UI-01-02.png
+
+[passed] desktop / UI-02: Validate đăng nhập bỏ trống
+Mong đợi: Hiện lỗi email/mật khẩu và không gửi yêu cầu đăng nhập tới BE.
+Thời gian: 3.4 giây.
+Ảnh: screenshots/desktop-UI-02-01.png, screenshots/desktop-UI-02-02.png
+
+[passed] desktop / UI-03: Validate đăng ký
+Mong đợi: Hiện yêu cầu mật khẩu mạnh và lỗi xác nhận mật khẩu; không tạo tài khoản.
+Thời gian: 4.0 giây.
+Ảnh: screenshots/desktop-UI-03-01.png, screenshots/desktop-UI-03-02.png
+
+[failed] desktop / UI-04: Đăng nhập sai thông tin với BE thật
+Mong đợi: BE trả 401, FE vẫn ở trang đăng nhập và hiển thị lý do thất bại.
+Thời gian: 16.0 giây.
+Thực tế / lỗi:
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last() with timeout 12000ms
+  - waiting for getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()
+
+
+  93 |   expect((await response).status()).toBe(401);
+  94 |   await expect(page).toHaveURL(/#\/auth$/);
+> 95 |   await expect(page.getByText(/Exception:|không|thất bại|Unauthorized|Failed|invalid/i).last()).toBeVisible();
+     |                                                                                                 ^
+  96 |   await snapshot(page, info, 'rejected-login');
+  97 | });
+  98 |
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:95:97
+Ảnh: screenshots/desktop-UI-04-01.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 401
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  }
+]
+
+[passed] desktop / UI-05: Đăng nhập thành công và khôi phục phiên
+Mong đợi: BE trả 200, dashboard tải thành công, reload vẫn đăng nhập.
+Thời gian: 13.2 giây.
+Ảnh: screenshots/desktop-UI-05-01.png, screenshots/desktop-UI-05-02.png, screenshots/desktop-UI-05-03.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  }
+]
+
+[passed] desktop / UI-06: Tab cảnh báo và chọn giống
+Mong đợi: Mở được các tab và nút điều hướng nằm trong viewport.
+Thời gian: 4.8 giây.
+Ảnh: screenshots/desktop-UI-06-01.png, screenshots/desktop-UI-06-02.png, screenshots/desktop-UI-06-03.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  }
+]
+
+[passed] desktop / UI-07: Trang tài khoản và cài đặt
+Mong đợi: Hiển thị đúng tài khoản, nút đăng xuất không bị cắt và mở được cài đặt.
+Thời gian: 4.5 giây.
+Ảnh: screenshots/desktop-UI-07-01.png, screenshots/desktop-UI-07-02.png, screenshots/desktop-UI-07-03.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  }
+]
+
+[passed] desktop / UI-08: Đăng xuất và xóa phiên
+Mong đợi: Xác nhận đăng xuất, BE chấp nhận, reload vẫn ở trang đăng nhập.
+Thời gian: 6.7 giây.
+Ảnh: screenshots/desktop-UI-08-01.png, screenshots/desktop-UI-08-02.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/refresh",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/logout",
+    "status": 204
+  }
+]
+
+[failed] desktop / UI-09: Xử lý mất kết nối backend
+Mong đợi: Hiện thông báo lỗi, không đăng nhập và cho phép thử lại. Lỗi mạng được mô phỏng bằng cách chặn đúng request login trong trình duyệt.
+Thời gian: 15.9 giây.
+Thực tế / lỗi:
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last() with timeout 12000ms
+  - waiting for getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()
+
+
+  155 |   await page.getByRole('textbox', { name: 'Mật khẩu', exact: true }).fill('[REDACTED]');
+  156 |   await page.getByRole('button', { name: 'Đăng nhập →', exact: true }).click();
+> 157 |   await expect(page.getByText(/Exception:|ClientException:|Failed|kết nối|thất bại/i).last()).toBeVisible();
+      |                                                                                               ^
+  158 |   await expect(page).toHaveURL(/#\/auth$/);
+  159 |   await expect(page.getByRole('button', { name: 'Đăng nhập →', exact: true })).toBeEnabled();
+  160 |   await snapshot(page, info, 'backend-outage');
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:157:95
+Ảnh: screenshots/desktop-UI-09-01.png
+Log browser/API:
+[
+  {
+    "type": "requestfailed",
+    "url": "http://localhost:5261/api/auth/login",
+    "error": {
+      "errorText": "net::ERR_CONNECTION_REFUSED"
+    }
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  }
+]
+
+[passed] desktop / UI-10: Màn hình hỗ trợ và lịch sử thu hoạch
+Mong đợi: Mở được hai màn hình bằng thao tác UI; không gửi chat hoặc điều khiển phần cứng.
+Thời gian: 5.6 giây.
+Ảnh: screenshots/desktop-UI-10-01.png, screenshots/desktop-UI-10-02.png, screenshots/desktop-UI-10-03.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  }
+]
+
+[failed] desktop / UI-11: Đồng bộ lựa chọn tiếng Việt với dashboard
+Mong đợi: Cài đặt đang chọn Tiếng Việt thì tiêu đề vườn trên dashboard cũng phải hiển thị tiếng Việt.
+Thời gian: 17.7 giây.
+Thực tế / lỗi:
+Error: expect(locator).toBeVisible() failed
+
+Locator: getByText(/Vườn của UI/)
+Expected: visible
+Timeout: 12000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" getByText(/Vườn của UI/) with timeout 12000ms
+  - waiting for getByText(/Vườn của UI/)
+
+
+  187 |   await page.getByRole('button', { name: 'Trang chủ', exact: true }).click();
+  188 |   await expect(page).toHaveURL(/#\/home$/);
+> 189 |   await expect(page.getByText(/Vườn của UI/)).toBeVisible();
+      |                                               ^
+  190 |   await snapshot(page, info, 'vietnamese-dashboard');
+  191 | });
+  192 |
+    at D:\Aerogreen\app_web_aerogreen\IOTAgri\frontend\e2e\tests\ui.spec.cjs:189:47
+Ảnh: screenshots/desktop-UI-11-01.png, screenshots/desktop-UI-11-02.png
+Log browser/API:
+[
+  {
+    "type": "api",
+    "method": "POST",
+    "url": "http://localhost:5261/api/auth/login",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/auth/profile",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/dashboard/overview",
+    "status": 200
+  },
+  {
+    "type": "api",
+    "method": "GET",
+    "url": "http://localhost:5261/api/sensor/latest",
+    "status": 404
+  },
+  {
+    "type": "console",
+    "message": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  }
+]
+
+CHẠY LẠI
+Từ thư mục repo: npm.cmd test --prefix frontend/e2e
+Chỉ mobile: npm.cmd run test:mobile --prefix frontend/e2e
+Bảo đảm BE đang chạy và frontend/build/web đã build với API_BASE_URL đúng.

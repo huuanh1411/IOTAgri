@@ -36,3 +36,4 @@ Chạy suite liên quan theo [backend README](../../backend/README.md), [fronten
 - Giữ bằng chứng lịch sử; mô tả rõ kết quả mới thay thế hay bổ sung kết quả nào.
 - Kiểm tra `git diff --check` và danh sách file staged trước khi commit; chỉ đưa mã test, công cụ test, tài liệu QA và bằng chứng đã rà soát lên `Test`.
 - Cập nhật README khi đổi lệnh chạy, cấu trúc thư mục hoặc vị trí kết quả.
+- Bàn giao đầy đủ ảnh, log, JSON/XML, coverage, PDF và trace liên quan đến test; che credential trước khi commit. Dependency, SDK, cấu hình IDE và script cài đặt môi trường nằm ngoài phạm vi bàn giao bằng chứng.

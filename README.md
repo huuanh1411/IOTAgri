@@ -11,6 +11,7 @@ Nhánh `Test` tập trung test backend, test Flutter và test giao diện web; m
 | Chạy test Flutter | [Frontend testing](frontend/README.md) |
 | Chạy test giao diện web | [Playwright E2E](frontend/e2e/README.md) |
 | Xem báo cáo và lỗi backend đã ghi nhận | [QA reports](testing/README.md) |
+| Xem ảnh, log, PDF và báo cáo frontend | [Frontend evidence](docs/testing/README.md) |
 | Hiểu TRX, registry JSON và coverage | [Hướng dẫn đọc kết quả](testing/guides/RESULTS_GUIDE.md) |
 | Bổ sung test và bàn giao kết quả | [Quy ước đóng góp](testing/guides/CONTRIBUTING.md) |
 
@@ -54,10 +55,20 @@ Giữ các thư mục test ở đường dẫn chuẩn của dự án để có 
 | Bộ kiểm thử | Nội dung trên nhánh | Kết quả được lưu |
 | --- | --- | --- |
 | Backend | 44 file test C# và 3 helper trong `TestSupport/` | Phiên `followup-final`: **345 ca, 339 PASS, 6 FAIL**, ngày 14/10/2026 |
-| Flutter | 17 file Dart trong `frontend/test/` | Chưa đưa kết quả thực thi frontend lên nhánh này |
-| Web E2E | 11 kịch bản × 3 viewport, **33 ca được discovery** | Discovery chỉ xác nhận danh sách ca, chưa chứng minh test PASS |
+| Flutter | 17 file Dart trong `frontend/test/` | 18/10/2026: **133 PASS**, gồm **57 placeholder**; Chrome test bị kẹt loading, chưa kiểm chứng |
+| Web E2E | 11 kịch bản × 3 viewport | 19/10/2026: **33 ca, 22 PASS, 11 FAIL**; có ảnh, log, JSON và PDF |
 
 Số liệu backend thuộc mã nguồn nền [`318fca1`](https://github.com/huuanh1411/IOTAgri/tree/318fca181741c95e73b56808ebe04a65a3ee0466), không đại diện cho trạng thái hiện tại của `main`. Sáu ca FAIL lịch sử được giữ nguyên trong bằng chứng; xem [báo cáo backend](testing/TEST_REPORT.md).
+
+## Xem ảnh và log trên GitHub
+
+[Báo cáo Flutter](docs/testing/2026-10-18-frontend/BAO_CAO_TEST_FE.txt) · [Báo cáo UI](docs/testing/2026-10-19-ui/BAO_CAO_UI.txt) · [PDF lỗi giao diện](docs/testing/2026-10-19-ui/Bao_cao_loi_giao_dien_FE_2026-10-19.pdf) · [Log E2E](docs/testing/2026-10-19-ui/runner.log) · [Toàn bộ ảnh](docs/testing/2026-10-19-ui/screenshots/)
+
+| Giao diện đăng nhập | Trang tài khoản trên màn hình nhỏ |
+| --- | --- |
+| ![Đăng nhập desktop](docs/testing/2026-10-19-ui/screenshots/desktop-UI-01-01.png) | ![Tài khoản small-mobile](docs/testing/2026-10-19-ui/screenshots/small-mobile-UI-07-01.png) |
+
+Ảnh và log xem trực tiếp trong repo. Với HTML, tải bộ báo cáo về và mở `index.html`. Các trace và dữ liệu Playwright đầy đủ nằm trong [bộ artifact E2E](testing/reports/frontend/e2e/2026-10-19/raw/). Bản công bố đã che mật khẩu/token phiên test; dữ liệu gốc trên máy được giữ nguyên.
 
 ## Chuẩn bị checkout để chạy test
 
@@ -81,6 +92,6 @@ Chi tiết về biến môi trường, phạm vi kiểm thử và cách lấy b�
 ## Quy tắc quản lý kết quả
 
 - Mỗi lần chạy có tên hoặc thư mục riêng; ghi revision ứng dụng, môi trường và exit code.
-- Kết quả backend lịch sử trong `testing/reports/` được giữ để kiểm chứng. Kết quả frontend mới được tạo local và gitignore theo mặc định.
+- Kết quả, ảnh, log và báo cáo test được lưu trong `testing/reports/` và `docs/testing/` để kiểm chứng trên repo.
 - Fixture đăng nhập, dependency, build output và trace thô được gitignore. Chỉ commit bằng chứng đã rà soát.
 - Thay đổi cách tổ chức hoặc tài liệu không đồng nghĩa đã chạy lại test hay xác nhận các lỗi cũ đã được sửa.

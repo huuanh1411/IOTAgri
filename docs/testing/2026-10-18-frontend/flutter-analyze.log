@@ -1,0 +1,4 @@
+Analyzing frontend...                                           
+
+warning - The value of the local variable 'r' isn't used. Try removing the variable or using it - lib\services\api_service.dart:509:33 - unused_local_variable
+

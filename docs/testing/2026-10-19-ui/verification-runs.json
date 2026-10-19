@@ -1,0 +1,38 @@
+[
+  {
+    "kind": "matrix",
+    "stats": {
+      "startTime": "2026-10-18T17:09:36.230Z",
+      "duration": 273467.95900000003,
+      "expected": 22,
+      "skipped": 0,
+      "unexpected": 8,
+      "flaky": 0
+    },
+    "cases": 30
+  },
+  {
+    "kind": "settled-screenshots",
+    "stats": {
+      "startTime": "2026-10-18T17:16:06.933Z",
+      "duration": 58784.065,
+      "expected": 6,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "cases": 6
+  },
+  {
+    "kind": "vietnamese-check",
+    "stats": {
+      "startTime": "2026-10-18T17:17:41.229Z",
+      "duration": 56832.177,
+      "expected": 0,
+      "skipped": 0,
+      "unexpected": 3,
+      "flaky": 0
+    },
+    "cases": 3
+  }
+]

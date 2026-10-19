@@ -40,4 +40,4 @@ Danh mục này nhóm theo mục đích để tra cứu, không phải số lư�
 
 Xem [hướng dẫn Playwright](e2e/README.md) để cài dependencies, chuẩn bị FE/BE và chạy 33 ca trên ba viewport.
 
-Nhánh hiện chưa lưu báo cáo thực thi Flutter/E2E. Quy ước lưu kết quả mới nằm trong [`testing/reports/frontend/`](../testing/reports/frontend/README.md).
+Xem [ảnh, log và báo cáo frontend](../docs/testing/README.md): Flutter có 133 ca PASS (57 placeholder), E2E có 22 PASS và 11 FAIL trong 33 ca. Đây là kết quả đã lưu ngày 18–19/10/2026; test Chrome Flutter bị kẹt loading và chưa kiểm chứng. Artifact Playwright đầy đủ nằm trong [`testing/reports/frontend/`](../testing/reports/frontend/README.md).

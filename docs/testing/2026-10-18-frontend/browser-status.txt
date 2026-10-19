@@ -1,0 +1,1 @@
+status=blocked_loading; action=stopped_by_agent_after_about_180_seconds; assertion_result=not_executed; root_cause=not_determined

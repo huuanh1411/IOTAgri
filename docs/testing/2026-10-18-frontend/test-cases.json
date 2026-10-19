@@ -1,0 +1,933 @@
+[
+  {
+    "file": "active_plant_controller_test.dart",
+    "name": "each plant replaces the active cycle with configured data",
+    "line": 26,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "active_plant_controller_test.dart",
+    "name": "restores the persisted plant and original growing date",
+    "line": 41,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "active_plant_controller_test.dart",
+    "name": "growth progress is capped at harvest and never becomes negative",
+    "line": 54,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Success Path Step 1: Prepare advances to Step 2",
+    "line": 5,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Success Path Step 2: QR scan finds device and advances",
+    "line": 10,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Success Path Step 2: BLE scan finds nearby devices",
+    "line": 15,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Success Path Step 2: Manual claim code option available",
+    "line": 20,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Success Path Step 3: Wi-Fi selection and password entry",
+    "line": 25,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Success Path Step 3: 5GHz network flag blocks connection",
+    "line": 30,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Success Path Step 4: Connecting completes all 3 stages",
+    "line": 35,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Success Path Step 5: Name and place save successfully",
+    "line": 40,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Success Path Step 6: Done state shows device online",
+    "line": 45,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Success Path Complete flow creates device successfully",
+    "line": 50,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Failure Scenarios Device not found: shows error with retry",
+    "line": 57,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Failure Scenarios Wrong Wi-Fi password: returns to Step 3 with focus",
+    "line": 62,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Failure Scenarios 5GHz network: blocks and shows warning",
+    "line": 67,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Failure Scenarios Already claimed: links to support",
+    "line": 72,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Failure Scenarios Timeout: shows reset instructions",
+    "line": 77,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Failure Scenarios Connection timeout after 60 seconds",
+    "line": 82,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Web Platform Web: BLE option hidden",
+    "line": 89,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Web Platform Web: Claim code only with setup message",
+    "line": 94,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Web Platform Web: QR scan disabled with message",
+    "line": 99,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Progress Indicator Progress indicator shows current step",
+    "line": 106,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Progress Indicator Progress indicator marks completed steps",
+    "line": 111,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Progress Indicator Progress indicator updates on step change",
+    "line": 116,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Navigation Back button returns to previous step",
+    "line": 123,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Navigation Cancel on step 1 closes screen",
+    "line": 128,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Navigation Cancel on later steps shows confirmation",
+    "line": 133,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Navigation Unsaved changes warning on cancel",
+    "line": 138,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Name and Place Suggested name: Tháp 1",
+    "line": 145,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Name and Place Location field is optional",
+    "line": 150,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Name and Place Crop type selection saves with device",
+    "line": 155,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Name and Place Name validation: required field",
+    "line": 160,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Done State Done shows device name and online status",
+    "line": 167,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Done State Done has Setup Schedule button",
+    "line": 172,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Done State Done has Open Device button",
+    "line": 177,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Done State Setup Schedule navigates to PumpSchedules",
+    "line": 182,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "add_device_test.dart",
+    "name": "Add Device Flow - Done State Open Device navigates to DeviceDetail",
+    "line": 187,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "alert_center_provider_test.dart",
+    "name": "tracks unread alerts and filters critical alerts",
+    "line": 19,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "alert_center_provider_test.dart",
+    "name": "debounces repeated alert delivery within the interval",
+    "line": 42,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "alert_center_provider_test.dart",
+    "name": "quiet hours suppress non-critical alerts but allow critical ones",
+    "line": 63,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "alert_center_provider_test.dart",
+    "name": "delivers new, repeated, and resolved alert transitions",
+    "line": 75,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "alert_center_provider_test.dart",
+    "name": "targeted device refresh preserves alerts from other devices",
+    "line": 106,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "api_contract_models_test.dart",
+    "name": "maps the backend dashboard DTO without losing device identity or alerts",
+    "line": 6,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "api_contract_models_test.dart",
+    "name": "maps ticket page messageCount from the backend contract",
+    "line": 35,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "app_motion_test.dart",
+    "name": "motion durations collapse when animations are disabled",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "alert_center_provider_test.dart",
+    "name": "notification banner tap follows the tap deep link stream",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "app_motion_test.dart",
+    "name": "card entrance completes once without a repeating ticker",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "app_motion_test.dart",
+    "name": "motion tokens stay inside the requested timing ranges",
+    "line": 41,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "dio_repositories_test.dart",
+    "name": "Phase 13: Dio Repositories Unit Tests DioSupportTicketRepositoryImpl fetches and maps tickets correctly",
+    "line": 55,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "dio_repositories_test.dart",
+    "name": "Phase 13: Dio Repositories Unit Tests DioClient initializes with standardized options and interceptor",
+    "line": 77,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "dio_repositories_test.dart",
+    "name": "Phase 13: RealtimeClient (MQTT / WebSocket Stub) Connect, subscribe, and route incoming telemetry messages",
+    "line": 86,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "dio_repositories_test.dart",
+    "name": "Phase 13: RealtimeClient (MQTT / WebSocket Stub) Schedule reconnect enters reconnecting state",
+    "line": 123,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "history_flow_test.dart",
+    "name": "calculates min average and max for the selected sensor",
+    "line": 20,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "history_flow_test.dart",
+    "name": "maps solution temperature, TDS, and lux without unit conversion",
+    "line": 31,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "history_flow_test.dart",
+    "name": "maps aggregated lux and TDS values without conversion",
+    "line": 50,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "history_flow_test.dart",
+    "name": "generates a real CSV export with readings and pump events",
+    "line": 57,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "history_flow_test.dart",
+    "name": "generates a PDF document",
+    "line": 83,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "live_sensor_contract_test.dart",
+    "name": "maps water temperature and air humidity from the live dashboard DTO",
+    "line": 6,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "device_settings_test.dart",
+    "name": "Phase 10: Device Settings flow displays device info (model, firmware, serial, Wi-Fi signal)",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "device_settings_test.dart",
+    "name": "Phase 10: Device Settings flow offline device shows offline Wi-Fi signal info",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "device_settings_test.dart",
+    "name": "Phase 10: Device Settings flow rename device prefilled dialog, validation, and update",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "device_settings_test.dart",
+    "name": "Phase 10: Device Settings flow remove device flow with destructive button and warning text",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase12_global_states_a11y_test.dart",
+    "name": "Phase 12: Global OfflineBanner Tests Offline banner displays when connectivity is offline",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase11_account_support_test.dart",
+    "name": "Phase 11: Account Page & Settings Live Persistence Account page renders all required rows",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase11_account_support_test.dart",
+    "name": "Phase 11: Account Page & Settings Live Persistence AppSettingsProvider persists live updates to SharedPreferences",
+    "line": 209,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase12_global_states_a11y_test.dart",
+    "name": "Phase 12: Global OfflineBanner Tests Offline banner is hidden when online",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase12_global_states_a11y_test.dart",
+    "name": "Phase 12: Localization (vi + en) Audit All localization keys exist in both Vietnamese and English dictionaries",
+    "line": 71,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase12_global_states_a11y_test.dart",
+    "name": "Phase 12: Localization (vi + en) Audit Context extension dynamically translates based on locale",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase12_global_states_a11y_test.dart",
+    "name": "Phase 12: Accessibility and Scaling Audit Text scaling at 1.5x does not cause overflow on banner",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control State Transitions Auto to Manual requires confirmation",
+    "line": 5,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control State Transitions Manual to Auto does not require confirmation",
+    "line": 10,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control State Transitions Manual ON opens duration action sheet",
+    "line": 15,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control State Transitions Sending state blocks new commands",
+    "line": 20,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control State Transitions Confirmed ON starts countdown",
+    "line": 25,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control State Transitions Auto-off with toast when countdown ends",
+    "line": 30,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control State Transitions Early stop shows Stopping state",
+    "line": 35,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "phase12_global_states_a11y_test.dart",
+    "name": "Phase 12: Accessibility and Scaling Audit Offline banner includes Semantics label for screen readers",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control State Transitions Confirmed OFF stops pump",
+    "line": 40,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control Validation Dry-run block prevents pump activation",
+    "line": 47,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control Validation 10-minute cap on manual duration",
+    "line": 52,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control Validation Timeout reverts to previous state",
+    "line": 57,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control Validation Retry mechanism on timeout",
+    "line": 62,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Pump Control Validation Haptic feedback on confirmed ON",
+    "line": 67,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Manual Mode Reminder Reminder triggers after 30 min with no run",
+    "line": 74,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Manual Mode Reminder Reminder offers switch back to Auto",
+    "line": 79,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Manual Mode Reminder Reminder does not trigger during pump run",
+    "line": 84,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Next Schedule Calculation Correctly calculates next schedule time",
+    "line": 91,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Next Schedule Calculation Handles schedule passed for today",
+    "line": 96,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Next Schedule Calculation Handles no enabled schedules",
+    "line": 101,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Countdown Timer Countdown decrements every second",
+    "line": 108,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Countdown Timer Countdown displays MM:SS format",
+    "line": 113,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "pump_control_test.dart",
+    "name": "Countdown Timer Countdown stops at 00:00",
+    "line": 118,
+    "status": "success",
+    "placeholder": true
+  },
+  {
+    "file": "device_settings_test.dart",
+    "name": "Phase 10: Device Settings flow remove device from detail screen pops back to devices screen with toast",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase13_widget_variants_test.dart",
+    "name": "Phase 13: Home/Dashboard FarmHealthCard Variants noDevices state: neutral card, Chào mừng đến Aerogreen, stats hidden",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase11_account_support_test.dart",
+    "name": "Phase 11: Change Password Screen Strength meter updates dynamically and submission succeeds",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase13_widget_variants_test.dart",
+    "name": "Phase 13: Home/Dashboard FarmHealthCard Variants healthy state: all towers optimal text and green tint",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase13_widget_variants_test.dart",
+    "name": "Phase 13: Home/Dashboard FarmHealthCard Variants attention state: offline tower requires attention",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase13_widget_variants_test.dart",
+    "name": "Phase 13: Home/Dashboard FarmHealthCard Variants critical state: low water level alert triggers critical card",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase11_account_support_test.dart",
+    "name": "Phase 11: Support Flow Support tickets list displays tickets and filter chips work",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase11_account_support_test.dart",
+    "name": "Phase 11: Support Flow Create ticket auto-attaches device information",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase13_widget_variants_test.dart",
+    "name": "Phase 13: Device Detail Variants healthy online variant: displays regular telemetry and auto pump mode",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase11_account_support_test.dart",
+    "name": "Phase 11: Support Flow Ticket detail displays messages and allows replies",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "water_pump_control_panel_test.dart",
+    "name": "toggles the manual pump state locally",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase13_widget_variants_test.dart",
+    "name": "Phase 13: Device Detail Variants warning variant: sensor thresholds breached marked in warning colors",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "water_pump_control_panel_test.dart",
+    "name": "blocks starting the pump when water is below 30 percent",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase13_widget_variants_test.dart",
+    "name": "Phase 13: Device Detail Variants offline variant: greyed controls and schedule-continues message",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "pump schedule screen opens from the Cupertino app",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase13_widget_variants_test.dart",
+    "name": "Phase 13: Device Detail Variants running pump variant: shows countdown and Stop button",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase13_integration_flow_test.dart",
+    "name": "Phase 13 Integration Test: login > add device > open detail > manual run > view history > export",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "water_pump_control_panel_test.dart",
+    "name": "shows the full Vietnam-time schedule form locally",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase13_widget_variants_test.dart",
+    "name": "Phase 13: Device Detail Variants command sending variant: shows activity indicator and sending state",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase13_widget_variants_test.dart",
+    "name": "Phase 13: Schedule Validation Rules mist length must be less than interval",
+    "line": 452,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "phase13_widget_variants_test.dart",
+    "name": "Phase 13: Schedule Validation Rules end time must be after start time unless overnight window",
+    "line": 471,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "registration returns to the authenticated root screen",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "login stays unauthenticated when backend is unavailable",
+    "line": 333,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "access token role claim drives admin routing, including role arrays",
+    "line": 347,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "dashboard shows gateway status summary",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "farm health shows add-device welcome with no devices",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "farm health shows healthy state",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "farm health shows attention for offline device",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "farm health shows critical low-water alert",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "device list search appears only above six devices",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "device tab keeps the dashboard menu",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "profile tab shows account info and logout below the form",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "device deletion requires confirmation and removes the row",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "device creation carries generated ID into provisioning",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "detail disables controls offline and notes saved schedules",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "detail shows running pump state",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "manual mode pauses schedules and auto mode restores them",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "detail shows missing sensor state",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "sensor grid marks values below configured threshold",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  },
+  {
+    "file": "widget_test.dart",
+    "name": "pump control shows command-sending state",
+    "line": 174,
+    "status": "success",
+    "placeholder": false
+  }
+]

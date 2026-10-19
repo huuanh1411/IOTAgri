@@ -1,0 +1,216 @@
+BÁO CÁO KIỂM THỬ FRONTEND IOTAGRI
+Thời điểm lập: 2026-10-18T23:04:48+07:00 (giờ Việt Nam)
+Phạm vi: kiểm thử tự động có sẵn của frontend Flutter và phân tích tĩnh Dart. Không sửa mã frontend/test trong lượt kiểm tra này.
+
+1. KẾT QUẢ
+Test mặc định: 133 ca; đạt 133, lỗi 0, bỏ qua 0. Exit code: 0.
+Không tính 16 sự kiện loading file là ca kiểm thử nghiệp vụ.
+Trong 133 ca đạt: 57 placeholder (35 thêm thiết bị + 22 điều khiển bơm), 76 ca có assertion về dữ liệu/hành vi. Con số này không phải tỷ lệ code coverage.
+Test Chrome: CHƯA KIỂM CHỨNG. add_device_web_test.dart kẹt ở loading khoảng 3 phút, không phát sinh sự kiện testStart cho ca nghiệp vụ, được chủ động dừng để hoàn tất báo cáo.
+Không coi exit code sau khi dừng Chrome là assertion thất bại của ứng dụng. Chưa xác định nguyên nhân Chrome không hoàn tất tải test.
+Phân tích tĩnh: 1 vấn đề; error=0, warning=1, info=0. Xem flutter-analyze-exit-code.txt cho exit code nguyên gốc.
+
+2. ĐÃ TEST VỀ PHẦN GÌ
+active_plant_controller_test.dart: 3 ca, 3 đạt.
+  Chọn cây đang trồng, lưu/khôi phục ngày bắt đầu, giới hạn tiến độ tăng trưởng.
+add_device_test.dart: 35 ca, 35 đạt.
+  Tên ca mô tả QR/BLE, Wi-Fi, claim code, điều hướng, đặt tên; toàn bộ 35 ca là placeholder, không thao tác ứng dụng.
+alert_center_provider_test.dart: 6 ca, 6 đạt.
+  Số cảnh báo chưa đọc, lọc mức nghiêm trọng, chống lặp, giờ yên lặng, chuyển trạng thái, deep link thông báo.
+api_contract_models_test.dart: 2 ca, 2 đạt.
+  Ánh xạ dashboard DTO giữ ID thiết bị/cảnh báo và số tin nhắn hỗ trợ.
+app_motion_test.dart: 3 ca, 3 đạt.
+  Tắt hoạt ảnh theo cài đặt, hiệu ứng xuất hiện kết thúc, thời lượng animation.
+device_settings_test.dart: 5 ca, 5 đạt.
+  Thông tin thiết bị/Wi-Fi offline, đổi tên và validate, xác nhận xóa, điều hướng sau xóa.
+dio_repositories_test.dart: 4 ca, 4 đạt.
+  Repository ticket với API giả, cấu hình Dio/interceptor, định tuyến telemetry và trạng thái reconnect của realtime stub.
+history_flow_test.dart: 5 ca, 5 đạt.
+  Min/trung bình/max, đơn vị cảm biến, dữ liệu tổng hợp, tạo CSV và PDF.
+live_sensor_contract_test.dart: 1 ca, 1 đạt.
+  Ánh xạ nhiệt độ dung dịch và độ ẩm không khí từ DTO mẫu sang lịch sử.
+phase11_account_support_test.dart: 6 ca, 6 đạt.
+  Trang tài khoản, lưu thiết lập, đổi mật khẩu, lọc/tạo ticket và gửi phản hồi với dữ liệu giả.
+phase12_global_states_a11y_test.dart: 6 ca, 6 đạt.
+  Banner offline/online, dịch Việt–Anh, đổi ngôn ngữ, phóng chữ 1.5x, Semantics cho trình đọc màn hình.
+phase13_integration_flow_test.dart: 1 ca, 1 đạt.
+  Widget flow đăng nhập → chi tiết thiết bị → chạy bơm → lịch sử → mở tùy chọn xuất; API giả, thiết bị được tạo trực tiếp trong test, chưa kiểm tra luồng thêm thiết bị thật hoặc tải tệp qua UI.
+phase13_widget_variants_test.dart: 11 ca, 11 đạt.
+  Dashboard rỗng/bình thường/cần chú ý/nguy cấp; thiết bị online/offline/thiếu dữ liệu/bơm chạy/đang gửi. Hai test validate lịch chỉ kiểm tra hàm định nghĩa trong test.
+pump_control_test.dart: 22 ca, 22 đạt.
+  Tên ca mô tả Auto/Manual, bật/tắt, timeout, chống chạy khô và đếm ngược; toàn bộ 22 ca là placeholder.
+water_pump_control_panel_test.dart: 3 ca, 3 đạt.
+  Bật/tắt bơm mô phỏng cục bộ, chặn khi nước dưới 30%, form lịch và múi giờ Việt Nam; không điều khiển bơm thật.
+widget_test.dart: 20 ca, 20 đạt.
+  Đăng ký/đăng nhập, dashboard, tìm/hiện/xóa/tạo thiết bị, tài khoản, trạng thái cảm biến và điều khiển bơm với fake API.
+add_device_web_test.dart: mong đợi web chỉ cho nhập claim code, không hiện quét thiết bị gần/BLE, không ném exception dart:io. Ca này chưa chạy tới assertion.
+
+3. LỖI/ĐIỂM CẦN XỬ LÝ VÀ Ý NGHĨA
+A. Assertion/runtime trong lượt unit/widget test: không ghi nhận ca thất bại. Không thể suy ra mọi chức năng đều đúng từ kết quả này.
+B. Thiếu độ bao phủ: 57 placeholder chỉ dùng expect(true, isTrue). Nếu QR/BLE/Wi-Fi/timeout/đếm ngược hoặc điều khiển bơm bị lỗi, 57 test này vẫn có thể xanh.
+  Tái hiện: mở frontend/test/add_device_test.dart hoặc pump_control_test.dart; mỗi test chỉ kiểm tra hằng true. Cần thay bằng thao tác widget/controller và kiểm tra kết quả thực.
+C. Chrome loading chưa hoàn tất: log browser-test.log kết thúc tại loading và allSuites, không có testDone nghiệp vụ; kiểm tra riêng môi trường runner/browser trước khi kết luận lỗi UI.
+D. Phân tích mã: các nhóm dưới đây là cảnh báo/lint tĩnh, không tự động tương đương lỗi người dùng đã gặp.
+Cụ thể api_service.dart:509:33 — getPumpCommands tạo tham số truy vấn to bằng now, nhưng pattern if (rangeHours case final r?) khai báo r rồi không sử dụng.
+  Mong đợi: chỉ kiểm tra rangeHours khác null khi thêm tham số to; thực tế: thêm một biến cục bộ thừa. Gợi ý: if (rangeHours != null) cho dòng to. Không sửa mã trong lượt báo cáo.
+  Tác động đã quan sát: flutter analyze trả exit code 1 vì warning; unit/widget tests vẫn đạt. Chưa chứng minh lỗi truy vấn lịch sử hoặc lỗi runtime.
+
+unused_local_variable: 1 vị trí (warning).
+  Ý nghĩa: Biến cục bộ được khai báo nhưng không sử dụng; cần kiểm tra logic có bỏ sót hay chỉ là mã thừa.
+  - frontend/lib\services\api_service.dart:509:33: The value of the local variable 'r' isn't used. Try removing the variable or using it
+
+4. GIỚI HẠN CẦN BIẾT
+Nhiều test dùng fake API, mock lưu trữ và realtime stub. Không kiểm tra tài khoản thật, JWT qua backend thật, ESP32/MQTT thật, hay bật/tắt bơm vật lý.
+Test tích hợp hiện tại là widget test với API giả. Test tạo CSV/PDF riêng có kiểm tra tệp, nhưng widget flow export chỉ xác nhận mở sheet và các lựa chọn.
+Các test validation lịch trong phase13_widget_variants_test.dart định nghĩa hàm validate trong test; chưa chứng minh UI hoặc backend áp dụng cùng logic.
+Chưa chạy mọi test trên browser, Android/iOS, kiểm thử tải, bảo mật hay code coverage.
+
+5. TÁI CHẠY
+Chạy từ frontend, đặt PUB_CACHE trỏ tới .runtime/pub-cache và dùng .runtime/flutter/bin/flutter.bat của repo.
+../.runtime/flutter/bin/flutter.bat test --no-pub --machine
+../.runtime/flutter/bin/flutter.bat test --no-pub --platform chrome --machine test/add_device_web_test.dart
+../.runtime/flutter/bin/flutter.bat analyze --no-pub
+
+6. DANH SÁCH TỪNG CA ĐÃ CHẠY
+001. [SUCCESS] active_plant_controller_test.dart:26 | each plant replaces the active cycle with configured data
+002. [SUCCESS] active_plant_controller_test.dart:41 | restores the persisted plant and original growing date
+003. [SUCCESS] active_plant_controller_test.dart:54 | growth progress is capped at harvest and never becomes negative
+004. [SUCCESS] [PLACEHOLDER] add_device_test.dart:5 | Add Device Flow - Success Path Step 1: Prepare advances to Step 2
+005. [SUCCESS] [PLACEHOLDER] add_device_test.dart:10 | Add Device Flow - Success Path Step 2: QR scan finds device and advances
+006. [SUCCESS] [PLACEHOLDER] add_device_test.dart:15 | Add Device Flow - Success Path Step 2: BLE scan finds nearby devices
+007. [SUCCESS] [PLACEHOLDER] add_device_test.dart:20 | Add Device Flow - Success Path Step 2: Manual claim code option available
+008. [SUCCESS] [PLACEHOLDER] add_device_test.dart:25 | Add Device Flow - Success Path Step 3: Wi-Fi selection and password entry
+009. [SUCCESS] [PLACEHOLDER] add_device_test.dart:30 | Add Device Flow - Success Path Step 3: 5GHz network flag blocks connection
+010. [SUCCESS] [PLACEHOLDER] add_device_test.dart:35 | Add Device Flow - Success Path Step 4: Connecting completes all 3 stages
+011. [SUCCESS] [PLACEHOLDER] add_device_test.dart:40 | Add Device Flow - Success Path Step 5: Name and place save successfully
+012. [SUCCESS] [PLACEHOLDER] add_device_test.dart:45 | Add Device Flow - Success Path Step 6: Done state shows device online
+013. [SUCCESS] [PLACEHOLDER] add_device_test.dart:50 | Add Device Flow - Success Path Complete flow creates device successfully
+014. [SUCCESS] [PLACEHOLDER] add_device_test.dart:57 | Add Device Flow - Failure Scenarios Device not found: shows error with retry
+015. [SUCCESS] [PLACEHOLDER] add_device_test.dart:62 | Add Device Flow - Failure Scenarios Wrong Wi-Fi password: returns to Step 3 with focus
+016. [SUCCESS] [PLACEHOLDER] add_device_test.dart:67 | Add Device Flow - Failure Scenarios 5GHz network: blocks and shows warning
+017. [SUCCESS] [PLACEHOLDER] add_device_test.dart:72 | Add Device Flow - Failure Scenarios Already claimed: links to support
+018. [SUCCESS] [PLACEHOLDER] add_device_test.dart:77 | Add Device Flow - Failure Scenarios Timeout: shows reset instructions
+019. [SUCCESS] [PLACEHOLDER] add_device_test.dart:82 | Add Device Flow - Failure Scenarios Connection timeout after 60 seconds
+020. [SUCCESS] [PLACEHOLDER] add_device_test.dart:89 | Add Device Flow - Web Platform Web: BLE option hidden
+021. [SUCCESS] [PLACEHOLDER] add_device_test.dart:94 | Add Device Flow - Web Platform Web: Claim code only with setup message
+022. [SUCCESS] [PLACEHOLDER] add_device_test.dart:99 | Add Device Flow - Web Platform Web: QR scan disabled with message
+023. [SUCCESS] [PLACEHOLDER] add_device_test.dart:106 | Add Device Flow - Progress Indicator Progress indicator shows current step
+024. [SUCCESS] [PLACEHOLDER] add_device_test.dart:111 | Add Device Flow - Progress Indicator Progress indicator marks completed steps
+025. [SUCCESS] [PLACEHOLDER] add_device_test.dart:116 | Add Device Flow - Progress Indicator Progress indicator updates on step change
+026. [SUCCESS] [PLACEHOLDER] add_device_test.dart:123 | Add Device Flow - Navigation Back button returns to previous step
+027. [SUCCESS] [PLACEHOLDER] add_device_test.dart:128 | Add Device Flow - Navigation Cancel on step 1 closes screen
+028. [SUCCESS] [PLACEHOLDER] add_device_test.dart:133 | Add Device Flow - Navigation Cancel on later steps shows confirmation
+029. [SUCCESS] [PLACEHOLDER] add_device_test.dart:138 | Add Device Flow - Navigation Unsaved changes warning on cancel
+030. [SUCCESS] [PLACEHOLDER] add_device_test.dart:145 | Add Device Flow - Name and Place Suggested name: Tháp 1
+031. [SUCCESS] [PLACEHOLDER] add_device_test.dart:150 | Add Device Flow - Name and Place Location field is optional
+032. [SUCCESS] [PLACEHOLDER] add_device_test.dart:155 | Add Device Flow - Name and Place Crop type selection saves with device
+033. [SUCCESS] [PLACEHOLDER] add_device_test.dart:160 | Add Device Flow - Name and Place Name validation: required field
+034. [SUCCESS] [PLACEHOLDER] add_device_test.dart:167 | Add Device Flow - Done State Done shows device name and online status
+035. [SUCCESS] [PLACEHOLDER] add_device_test.dart:172 | Add Device Flow - Done State Done has Setup Schedule button
+036. [SUCCESS] [PLACEHOLDER] add_device_test.dart:177 | Add Device Flow - Done State Done has Open Device button
+037. [SUCCESS] [PLACEHOLDER] add_device_test.dart:182 | Add Device Flow - Done State Setup Schedule navigates to PumpSchedules
+038. [SUCCESS] [PLACEHOLDER] add_device_test.dart:187 | Add Device Flow - Done State Open Device navigates to DeviceDetail
+039. [SUCCESS] alert_center_provider_test.dart:19 | tracks unread alerts and filters critical alerts
+040. [SUCCESS] alert_center_provider_test.dart:42 | debounces repeated alert delivery within the interval
+041. [SUCCESS] alert_center_provider_test.dart:63 | quiet hours suppress non-critical alerts but allow critical ones
+042. [SUCCESS] alert_center_provider_test.dart:75 | delivers new, repeated, and resolved alert transitions
+043. [SUCCESS] alert_center_provider_test.dart:106 | targeted device refresh preserves alerts from other devices
+044. [SUCCESS] api_contract_models_test.dart:6 | maps the backend dashboard DTO without losing device identity or alerts
+045. [SUCCESS] api_contract_models_test.dart:35 | maps ticket page messageCount from the backend contract
+046. [SUCCESS] app_motion_test.dart:174 | motion durations collapse when animations are disabled
+047. [SUCCESS] alert_center_provider_test.dart:174 | notification banner tap follows the tap deep link stream
+048. [SUCCESS] app_motion_test.dart:174 | card entrance completes once without a repeating ticker
+049. [SUCCESS] app_motion_test.dart:41 | motion tokens stay inside the requested timing ranges
+050. [SUCCESS] dio_repositories_test.dart:55 | Phase 13: Dio Repositories Unit Tests DioSupportTicketRepositoryImpl fetches and maps tickets correctly
+051. [SUCCESS] dio_repositories_test.dart:77 | Phase 13: Dio Repositories Unit Tests DioClient initializes with standardized options and interceptor
+052. [SUCCESS] dio_repositories_test.dart:86 | Phase 13: RealtimeClient (MQTT / WebSocket Stub) Connect, subscribe, and route incoming telemetry messages
+053. [SUCCESS] dio_repositories_test.dart:123 | Phase 13: RealtimeClient (MQTT / WebSocket Stub) Schedule reconnect enters reconnecting state
+054. [SUCCESS] history_flow_test.dart:20 | calculates min average and max for the selected sensor
+055. [SUCCESS] history_flow_test.dart:31 | maps solution temperature, TDS, and lux without unit conversion
+056. [SUCCESS] history_flow_test.dart:50 | maps aggregated lux and TDS values without conversion
+057. [SUCCESS] history_flow_test.dart:57 | generates a real CSV export with readings and pump events
+058. [SUCCESS] history_flow_test.dart:83 | generates a PDF document
+059. [SUCCESS] live_sensor_contract_test.dart:6 | maps water temperature and air humidity from the live dashboard DTO
+060. [SUCCESS] device_settings_test.dart:174 | Phase 10: Device Settings flow displays device info (model, firmware, serial, Wi-Fi signal)
+061. [SUCCESS] device_settings_test.dart:174 | Phase 10: Device Settings flow offline device shows offline Wi-Fi signal info
+062. [SUCCESS] device_settings_test.dart:174 | Phase 10: Device Settings flow rename device prefilled dialog, validation, and update
+063. [SUCCESS] device_settings_test.dart:174 | Phase 10: Device Settings flow remove device flow with destructive button and warning text
+064. [SUCCESS] phase12_global_states_a11y_test.dart:174 | Phase 12: Global OfflineBanner Tests Offline banner displays when connectivity is offline
+065. [SUCCESS] phase11_account_support_test.dart:174 | Phase 11: Account Page & Settings Live Persistence Account page renders all required rows
+066. [SUCCESS] phase11_account_support_test.dart:209 | Phase 11: Account Page & Settings Live Persistence AppSettingsProvider persists live updates to SharedPreferences
+067. [SUCCESS] phase12_global_states_a11y_test.dart:174 | Phase 12: Global OfflineBanner Tests Offline banner is hidden when online
+068. [SUCCESS] phase12_global_states_a11y_test.dart:71 | Phase 12: Localization (vi + en) Audit All localization keys exist in both Vietnamese and English dictionaries
+069. [SUCCESS] phase12_global_states_a11y_test.dart:174 | Phase 12: Localization (vi + en) Audit Context extension dynamically translates based on locale
+070. [SUCCESS] phase12_global_states_a11y_test.dart:174 | Phase 12: Accessibility and Scaling Audit Text scaling at 1.5x does not cause overflow on banner
+071. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:5 | Pump Control State Transitions Auto to Manual requires confirmation
+072. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:10 | Pump Control State Transitions Manual to Auto does not require confirmation
+073. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:15 | Pump Control State Transitions Manual ON opens duration action sheet
+074. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:20 | Pump Control State Transitions Sending state blocks new commands
+075. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:25 | Pump Control State Transitions Confirmed ON starts countdown
+076. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:30 | Pump Control State Transitions Auto-off with toast when countdown ends
+077. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:35 | Pump Control State Transitions Early stop shows Stopping state
+078. [SUCCESS] phase12_global_states_a11y_test.dart:174 | Phase 12: Accessibility and Scaling Audit Offline banner includes Semantics label for screen readers
+079. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:40 | Pump Control State Transitions Confirmed OFF stops pump
+080. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:47 | Pump Control Validation Dry-run block prevents pump activation
+081. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:52 | Pump Control Validation 10-minute cap on manual duration
+082. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:57 | Pump Control Validation Timeout reverts to previous state
+083. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:62 | Pump Control Validation Retry mechanism on timeout
+084. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:67 | Pump Control Validation Haptic feedback on confirmed ON
+085. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:74 | Manual Mode Reminder Reminder triggers after 30 min with no run
+086. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:79 | Manual Mode Reminder Reminder offers switch back to Auto
+087. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:84 | Manual Mode Reminder Reminder does not trigger during pump run
+088. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:91 | Next Schedule Calculation Correctly calculates next schedule time
+089. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:96 | Next Schedule Calculation Handles schedule passed for today
+090. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:101 | Next Schedule Calculation Handles no enabled schedules
+091. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:108 | Countdown Timer Countdown decrements every second
+092. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:113 | Countdown Timer Countdown displays MM:SS format
+093. [SUCCESS] [PLACEHOLDER] pump_control_test.dart:118 | Countdown Timer Countdown stops at 00:00
+094. [SUCCESS] device_settings_test.dart:174 | Phase 10: Device Settings flow remove device from detail screen pops back to devices screen with toast
+095. [SUCCESS] phase13_widget_variants_test.dart:174 | Phase 13: Home/Dashboard FarmHealthCard Variants noDevices state: neutral card, Chào mừng đến Aerogreen, stats hidden
+096. [SUCCESS] phase11_account_support_test.dart:174 | Phase 11: Change Password Screen Strength meter updates dynamically and submission succeeds
+097. [SUCCESS] phase13_widget_variants_test.dart:174 | Phase 13: Home/Dashboard FarmHealthCard Variants healthy state: all towers optimal text and green tint
+098. [SUCCESS] phase13_widget_variants_test.dart:174 | Phase 13: Home/Dashboard FarmHealthCard Variants attention state: offline tower requires attention
+099. [SUCCESS] phase13_widget_variants_test.dart:174 | Phase 13: Home/Dashboard FarmHealthCard Variants critical state: low water level alert triggers critical card
+100. [SUCCESS] phase11_account_support_test.dart:174 | Phase 11: Support Flow Support tickets list displays tickets and filter chips work
+101. [SUCCESS] phase11_account_support_test.dart:174 | Phase 11: Support Flow Create ticket auto-attaches device information
+102. [SUCCESS] phase13_widget_variants_test.dart:174 | Phase 13: Device Detail Variants healthy online variant: displays regular telemetry and auto pump mode
+103. [SUCCESS] phase11_account_support_test.dart:174 | Phase 11: Support Flow Ticket detail displays messages and allows replies
+104. [SUCCESS] water_pump_control_panel_test.dart:174 | toggles the manual pump state locally
+105. [SUCCESS] phase13_widget_variants_test.dart:174 | Phase 13: Device Detail Variants warning variant: sensor thresholds breached marked in warning colors
+106. [SUCCESS] water_pump_control_panel_test.dart:174 | blocks starting the pump when water is below 30 percent
+107. [SUCCESS] phase13_widget_variants_test.dart:174 | Phase 13: Device Detail Variants offline variant: greyed controls and schedule-continues message
+108. [SUCCESS] widget_test.dart:174 | pump schedule screen opens from the Cupertino app
+109. [SUCCESS] phase13_widget_variants_test.dart:174 | Phase 13: Device Detail Variants running pump variant: shows countdown and Stop button
+110. [SUCCESS] phase13_integration_flow_test.dart:174 | Phase 13 Integration Test: login > add device > open detail > manual run > view history > export
+111. [SUCCESS] water_pump_control_panel_test.dart:174 | shows the full Vietnam-time schedule form locally
+112. [SUCCESS] phase13_widget_variants_test.dart:174 | Phase 13: Device Detail Variants command sending variant: shows activity indicator and sending state
+113. [SUCCESS] phase13_widget_variants_test.dart:452 | Phase 13: Schedule Validation Rules mist length must be less than interval
+114. [SUCCESS] phase13_widget_variants_test.dart:471 | Phase 13: Schedule Validation Rules end time must be after start time unless overnight window
+115. [SUCCESS] widget_test.dart:174 | registration returns to the authenticated root screen
+116. [SUCCESS] widget_test.dart:333 | login stays unauthenticated when backend is unavailable
+117. [SUCCESS] widget_test.dart:347 | access token role claim drives admin routing, including role arrays
+118. [SUCCESS] widget_test.dart:174 | dashboard shows gateway status summary
+119. [SUCCESS] widget_test.dart:174 | farm health shows add-device welcome with no devices
+120. [SUCCESS] widget_test.dart:174 | farm health shows healthy state
+121. [SUCCESS] widget_test.dart:174 | farm health shows attention for offline device
+122. [SUCCESS] widget_test.dart:174 | farm health shows critical low-water alert
+123. [SUCCESS] widget_test.dart:174 | device list search appears only above six devices
+124. [SUCCESS] widget_test.dart:174 | device tab keeps the dashboard menu
+125. [SUCCESS] widget_test.dart:174 | profile tab shows account info and logout below the form
+126. [SUCCESS] widget_test.dart:174 | device deletion requires confirmation and removes the row
+127. [SUCCESS] widget_test.dart:174 | device creation carries generated ID into provisioning
+128. [SUCCESS] widget_test.dart:174 | detail disables controls offline and notes saved schedules
+129. [SUCCESS] widget_test.dart:174 | detail shows running pump state
+130. [SUCCESS] widget_test.dart:174 | manual mode pauses schedules and auto mode restores them
+131. [SUCCESS] widget_test.dart:174 | detail shows missing sensor state
+132. [SUCCESS] widget_test.dart:174 | sensor grid marks values below configured threshold
+133. [SUCCESS] widget_test.dart:174 | pump control shows command-sending state
+
+7. TỆP ĐÍNH KÈM
+flutter-test.jsonl: log thô đầy đủ, gồm testStart/testDone và output của test.
+flutter-test.stderr.log: stderr của lượt test mặc định.
+test-cases.json: danh sách 133 ca và đánh dấu placeholder để xử lý tự động.
+browser-test.log / browser-test.stderr.log / browser-status.txt: bằng chứng và trạng thái test Chrome.
+flutter-analyze.log / flutter-analyze.stderr.log: toàn bộ kết quả phân tích tĩnh.
+analysis-issues.json: toàn bộ vấn đề phân tích tĩnh có mức độ, vị trí, rule và mô tả gốc.
+*exit-code.txt: exit code nguyên gốc; mã lỗi Chrome do chủ động dừng runner, không phải test assertion.

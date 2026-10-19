@@ -35,7 +35,7 @@ Line coverage: **1399/2071 (~67,55%)**; branch coverage: **463/760 (~60,92%)**. 
 | [reports/summary/backend-integrity.json](reports/summary/backend-integrity.json) | Bằng chứng so sánh source/config của phiên QA gốc |
 | [reports/frontend/README.md](reports/frontend/README.md) | Quy ước lưu kết quả Flutter/E2E mới |
 
-Các phiên cũ trong `reports/coverage/` là lịch sử chạy lại; không cộng dồn số ca giữa các phiên. Dùng trường `run` trong `results.json` để xác định nguồn dữ liệu của bản tổng hợp. Chưa lưu kết quả thực thi frontend trên nhánh này.
+Các phiên cũ trong `reports/coverage/` là lịch sử chạy lại; không cộng dồn số ca giữa các phiên. Dùng trường `run` trong `results.json` để xác định nguồn dữ liệu của bản tổng hợp. [Bằng chứng frontend](../docs/testing/README.md) đã có ảnh, log và PDF; [artifact gốc đã che credential](reports/frontend/e2e/2026-10-19/raw/) gồm trace và báo cáo Playwright. [Archive ngày 13/10](reports/archive/2026-10-13/) giữ các log và coverage cũ, không cộng vào phiên tham chiếu.
 
 ## Công cụ backend
 
