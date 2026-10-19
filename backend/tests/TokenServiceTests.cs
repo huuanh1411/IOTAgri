@@ -18,7 +18,9 @@ public class TokenServiceTests
     private static IConfiguration Configuration(string? key = Key, string? expiry = null) =>
         new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["Jwt:Key"] = key, ["Jwt:Issuer"] = "qa-issuer", ["Jwt:Audience"] = "qa-audience",
+            ["Jwt:Key"] = key,
+            ["Jwt:Issuer"] = "qa-issuer",
+            ["Jwt:Audience"] = "qa-audience",
             ["Jwt:AccessTokenExpiryMinutes"] = expiry,
         }).Build();
 
@@ -34,9 +36,11 @@ public class TokenServiceTests
         var handler = new JwtSecurityTokenHandler { MapInboundClaims = false };
         var principal = handler.ValidateToken(token, new TokenValidationParameters
         {
-            ValidIssuer = "qa-issuer", ValidAudience = "qa-audience",
+            ValidIssuer = "qa-issuer",
+            ValidAudience = "qa-audience",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key)),
-            ValidateLifetime = true, ClockSkew = TimeSpan.Zero,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
         }, out var validated);
         var jwt = Assert.IsType<JwtSecurityToken>(validated);
         Assert.Equal(SecurityAlgorithms.HmacSha256, jwt.Header.Alg);
@@ -74,7 +78,8 @@ public class TokenServiceTests
         var token = new TokenService(Configuration()).CreateAccessToken(new ApplicationUser(), Array.Empty<string>());
         Assert.Throws<SecurityTokenSignatureKeyNotFoundException>(() => handler.ValidateToken(token, new TokenValidationParameters
         {
-            ValidIssuer = "qa-issuer", ValidAudience = "qa-audience",
+            ValidIssuer = "qa-issuer",
+            ValidAudience = "qa-audience",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key.Replace("qa-only", "wrong!!"))),
         }, out _));
     }

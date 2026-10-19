@@ -1,0 +1,6 @@
+node_modules/
+test-results/
+.visual-results/
+.language-results/
+playwright-report/
+.auth/

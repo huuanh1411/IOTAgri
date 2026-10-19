@@ -31,7 +31,9 @@ internal static class BackendHttpTestHost
         const string key = "qa-http-signing-key-0123456789abcdef-0123456789abcdef";
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["Jwt:Key"] = key, ["Jwt:Issuer"] = "qa-http", ["Jwt:Audience"] = "qa-clients",
+            ["Jwt:Key"] = key,
+            ["Jwt:Issuer"] = "qa-http",
+            ["Jwt:Audience"] = "qa-clients",
             ["DeviceProvisioning:MqttHost"] = "qa-broker",
         });
         builder.Services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(db.Database.GetConnectionString()));
@@ -40,8 +42,13 @@ internal static class BackendHttpTestHost
         builder.Services.AddAuthentication(o => { o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; })
             .AddJwtBearer(o => o.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = true, ValidateAudience = true, ValidateLifetime = true, ValidateIssuerSigningKey = true,
-                ValidIssuer = "qa-http", ValidAudience = "qa-clients", IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = "qa-http",
+                ValidAudience = "qa-clients",
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
             });
         builder.Services.AddAuthorization(o => o.AddPolicy("AdminOnly", p => p.RequireRole("Admin")));
         builder.Services.AddCors(o => o.AddPolicy("FlutterClient", p => p.WithOrigins("http://localhost:8081").AllowAnyHeader().AllowAnyMethod()));

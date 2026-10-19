@@ -27,8 +27,8 @@ public class PumpCommandHistoryQueryExtendedTests
     public void Accepts_explicit_from_to_range_within_31_days()
     {
         var from = new DateTimeOffset(2026, 9, 1, 0, 0, 0, TimeSpan.Zero);
-        var to   = new DateTimeOffset(2026, 9, 30, 0, 0, 0, TimeSpan.Zero); // 29 days
-        var now  = new DateTimeOffset(2026, 9, 30, 12, 0, 0, TimeSpan.Zero);
+        var to = new DateTimeOffset(2026, 9, 30, 0, 0, 0, TimeSpan.Zero); // 29 days
+        var now = new DateTimeOffset(2026, 9, 30, 12, 0, 0, TimeSpan.Zero);
 
         var query = new PumpCommandHistoryQuery(From: from, To: to);
         var valid = query.TryGetRange(now, out var start, out var end);
@@ -42,8 +42,8 @@ public class PumpCommandHistoryQueryExtendedTests
     public void Rejects_range_exceeding_31_days()
     {
         var from = new DateTimeOffset(2026, 8, 1, 0, 0, 0, TimeSpan.Zero);
-        var to   = new DateTimeOffset(2026, 9, 5, 0, 0, 0, TimeSpan.Zero); // 35 days
-        var now  = new DateTimeOffset(2026, 9, 10, 0, 0, 0, TimeSpan.Zero);
+        var to = new DateTimeOffset(2026, 9, 5, 0, 0, 0, TimeSpan.Zero); // 35 days
+        var now = new DateTimeOffset(2026, 9, 10, 0, 0, 0, TimeSpan.Zero);
 
         var query = new PumpCommandHistoryQuery(From: from, To: to);
         var valid = query.TryGetRange(now, out _, out _);
@@ -55,7 +55,7 @@ public class PumpCommandHistoryQueryExtendedTests
     public void Rejects_range_where_from_equals_to()
     {
         var point = new DateTimeOffset(2026, 9, 17, 12, 0, 0, TimeSpan.Zero);
-        var now   = new DateTimeOffset(2026, 9, 17, 12, 0, 0, TimeSpan.Zero);
+        var now = new DateTimeOffset(2026, 9, 17, 12, 0, 0, TimeSpan.Zero);
 
         var query = new PumpCommandHistoryQuery(From: point, To: point);
         var valid = query.TryGetRange(now, out _, out _);

@@ -16,7 +16,9 @@ public class SeederBehaviorTests
     private static IConfiguration Configuration(string? email = "qa@example.test", string? fullName = null) =>
         new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["AdminBootstrap:Email"] = email, ["AdminBootstrap:Password"] = "QaPassword1!", ["AdminBootstrap:FullName"] = fullName,
+            ["AdminBootstrap:Email"] = email,
+            ["AdminBootstrap:Password"] = "QaPassword1!",
+            ["AdminBootstrap:FullName"] = fullName,
         }).Build();
 
     [Fact]
