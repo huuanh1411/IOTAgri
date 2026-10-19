@@ -19,6 +19,20 @@ public class ProductionRuntimeTests
     }
 
     [Fact]
+    public void Production_stack_hosts_flutter_web_behind_caddy()
+    {
+        var compose = File.ReadAllText(RepoFile("compose.production.yaml"));
+        var caddyfile = File.ReadAllText(RepoFile("deploy/Caddyfile"));
+        var frontendDockerfile = File.ReadAllText(RepoFile("frontend/Dockerfile"));
+
+        Assert.Contains("  frontend:", compose);
+        Assert.Contains("context: ./frontend", compose);
+        Assert.Contains("app.aerogreen.vn", caddyfile);
+        Assert.Contains("reverse_proxy frontend:80", caddyfile);
+        Assert.Contains("--dart-define=API_BASE_URL=$API_BASE_URL", frontendDockerfile);
+    }
+
+    [Fact]
     public void Production_compose_has_health_checks_single_api_replica_and_resource_limits()
     {
         var compose = File.ReadAllText(RepoFile("compose.production.yaml"));

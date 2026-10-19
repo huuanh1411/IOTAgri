@@ -4,7 +4,7 @@ Run exactly one `api` replica. `MqttIngestionService` and `PumpScheduleDispatchS
 
 ## First VPS deployment
 
-Copy the repository to `/opt/iotagri`, create `.env.production` from `.env.production.example`, replace every example secret, and add DNS A records for `api.aerogreen.vn` and `mqtt.aerogreen.vn`. Then run:
+Copy the repository to `/opt/iotagri`, create `.env.production` from `.env.production.example`, replace every example secret, and add DNS A records for `app.aerogreen.vn`, `api.aerogreen.vn`, and `mqtt.aerogreen.vn`. Then run:
 
 ```
 chmod +x deploy/deploy-production.sh deploy/bootstrap-mqtt-dynsec.sh deploy/sync-mqtt-certs.sh deploy/verify-mqtt-security.sh
