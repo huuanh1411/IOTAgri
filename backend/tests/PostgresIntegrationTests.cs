@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using IOTAgriBackend.Data;
 using IOTAgriBackend.Dtos.Alerts;
@@ -51,9 +52,10 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
     {
         await using var db = await _fixture.CreateDatabaseAsync();
         var applied = (await db.Database.GetAppliedMigrationsAsync()).ToList();
-        Assert.Equal(18, applied.Count);
+        Assert.Equal(19, applied.Count);
         Assert.Contains("20261009120000_AddSolutionTemperatureToSensorReadings", applied);
         Assert.Contains("20261014072501_AddPumpScheduleActiveDateRange", applied);
+        Assert.Contains("20261019101304_AddProvisioningClaimLeaseModel", applied);
         Assert.Empty(await db.Database.GetPendingMigrationsAsync());
         Assert.False(db.Database.HasPendingModelChanges());
     }
@@ -126,7 +128,8 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
         var code = Assert.IsType<CreateProvisioningCodeResponse>(Value(issued));
         var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["DeviceProvisioning:MqttHost"] = "qa-broker", ["Mqtt:Port"] = "1883" }).Build();
         var request = new ClaimDeviceRequest(" " + code.Code.ToLowerInvariant() + " ", " qa-hardware ");
-        var result = await BackendTestDoubles.InvokeHandler(typeof(DeviceProvisioningEndpoints), "ClaimAsync", request, db, config);
+        var broker = new TestMqttBrokerAdminService();
+        var result = await BackendTestDoubles.InvokeHandler(typeof(DeviceProvisioningEndpoints), "ClaimAsync", request, db, config, broker, CancellationToken.None);
         Assert.Equal(200, Status(result));
         Assert.Equal(device.DeviceKey, Assert.IsType<ClaimDeviceResponse>(Value(result)).DeviceKey);
         db.ChangeTracker.Clear();
@@ -135,7 +138,7 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
         Assert.Null(saved.ProvisioningCodeExpiresAt);
         Assert.Equal("QA-HARDWARE", saved.ProvisionedHardwareId);
         Assert.NotNull(saved.ProvisionedAt);
-        Assert.Equal(400, Status(await BackendTestDoubles.InvokeHandler(typeof(DeviceProvisioningEndpoints), "ClaimAsync", request, db, config)));
+        Assert.Equal(400, Status(await BackendTestDoubles.InvokeHandler(typeof(DeviceProvisioningEndpoints), "ClaimAsync", request, db, config, broker, CancellationToken.None)));
     }
 
     [Fact]
@@ -391,8 +394,9 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
         await using var first = new ApplicationDbContext(options);
         await using var second = new ApplicationDbContext(options);
         var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { ["DeviceProvisioning:MqttHost"] = "qa-broker" }).Build();
-        var results = await Task.WhenAll(BackendTestDoubles.InvokeHandler(typeof(DeviceProvisioningEndpoints), "ClaimAsync", new ClaimDeviceRequest(code, "FIRST"), first, config),
-            BackendTestDoubles.InvokeHandler(typeof(DeviceProvisioningEndpoints), "ClaimAsync", new ClaimDeviceRequest(code, "SECOND"), second, config));
+        var broker = new TestMqttBrokerAdminService();
+        var results = await Task.WhenAll(BackendTestDoubles.InvokeHandler(typeof(DeviceProvisioningEndpoints), "ClaimAsync", new ClaimDeviceRequest(code, "FIRST"), first, config, broker, CancellationToken.None),
+            BackendTestDoubles.InvokeHandler(typeof(DeviceProvisioningEndpoints), "ClaimAsync", new ClaimDeviceRequest(code, "SECOND"), second, config, broker, CancellationToken.None));
         Assert.Single(results, r => Status(r) == 200);
         Assert.Single(results, r => Status(r) is 400 or 409);
         db.ChangeTracker.Clear();

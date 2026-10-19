@@ -3,6 +3,11 @@ api.aerogreen.vn {
 	reverse_proxy api:8080
 }
 
+app.aerogreen.vn {
+	encode gzip
+	reverse_proxy frontend:80
+}
+
 # Caddy only obtains and renews this certificate; deploy/sync-mqtt-certs.sh hands it to Mosquitto.
 mqtt.aerogreen.vn {
 	respond 404

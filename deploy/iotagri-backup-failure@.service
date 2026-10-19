@@ -1,0 +1,6 @@
+[Unit]
+Description=IOTAgri backup failure handler for %I
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/logger -t iotagri-backup "Backup unit %I failed. Check systemctl status %I and journalctl -u %I."
