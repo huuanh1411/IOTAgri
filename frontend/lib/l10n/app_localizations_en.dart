@@ -298,6 +298,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'By continuing, you agree to the Terms and Privacy Policy.';
 
   @override
+  String get authInvalidCredentials => 'Incorrect email or password.';
+
+  @override
+  String get authNetworkError => 'Connection problem. Please try again.';
+
+  @override
+  String get authGenericError => 'An error occurred. Please try again.';
+
+  @override
+  String get socialSignInNotAvailable => 'Social sign-in is not available yet.';
+
+  @override
   String get harvestLog => 'Harvest log';
 
   @override

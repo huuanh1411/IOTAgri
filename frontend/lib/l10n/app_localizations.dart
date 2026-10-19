@@ -626,6 +626,30 @@ abstract class AppLocalizations {
   /// **'By continuing, you agree to the Terms and Privacy Policy.'**
   String get termsNotice;
 
+  /// No description provided for @authInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or password.'**
+  String get authInvalidCredentials;
+
+  /// No description provided for @authNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection problem. Please try again.'**
+  String get authNetworkError;
+
+  /// No description provided for @authGenericError.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred. Please try again.'**
+  String get authGenericError;
+
+  /// No description provided for @socialSignInNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Social sign-in is not available yet.'**
+  String get socialSignInNotAvailable;
+
   /// No description provided for @harvestLog.
   ///
   /// In en, this message translates to:

@@ -1,9 +1,15 @@
-// lib/providers/auth_controller.dart
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/models/user.dart';
 
 const _keepAuthError = Object();
+
+enum AuthErrorType {
+  invalidCredentials,
+  network,
+  unknown,
+}
 
 /// State representing authentication status.
 class AuthState {
@@ -11,12 +17,14 @@ class AuthState {
   final bool isLoading;
   final bool isInitializing;
   final String? error;
+  final AuthErrorType? errorType;
 
   const AuthState({
     this.user,
     this.isLoading = false,
     this.isInitializing = true,
     this.error,
+    this.errorType,
   });
 
   AuthState copyWith({
@@ -24,11 +32,15 @@ class AuthState {
     bool? isLoading,
     bool? isInitializing,
     Object? error = _keepAuthError,
+    Object? errorType = _keepAuthError,
   }) => AuthState(
     user: user ?? this.user,
     isLoading: isLoading ?? this.isLoading,
     isInitializing: isInitializing ?? this.isInitializing,
     error: identical(error, _keepAuthError) ? this.error : error as String?,
+    errorType: identical(errorType, _keepAuthError)
+        ? this.errorType
+        : errorType as AuthErrorType?,
   );
 }
 
@@ -50,14 +62,21 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<void> login({required String email, required String password}) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, error: null, errorType: null);
     try {
       final user = await _repo.login(email: email, password: password);
-      state = state.copyWith(user: user);
+      state = state.copyWith(
+        user: user,
+        isLoading: false,
+        error: null,
+        errorType: null,
+      );
     } catch (e) {
-      state = state.copyWith(error: _displayMessage(e));
-    } finally {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(
+        isLoading: false,
+        errorType: _classifyError(e),
+        error: _displayMessage(e),
+      );
     }
   }
 
@@ -66,18 +85,25 @@ class AuthController extends StateNotifier<AuthState> {
     required String email,
     required String password,
   }) async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, error: null, errorType: null);
     try {
       final user = await _repo.signUp(
         fullName: fullName,
         email: email,
         password: password,
       );
-      state = state.copyWith(user: user);
+      state = state.copyWith(
+        user: user,
+        isLoading: false,
+        error: null,
+        errorType: null,
+      );
     } catch (e) {
-      state = state.copyWith(error: _displayMessage(e));
-    } finally {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(
+        isLoading: false,
+        errorType: _classifyError(e),
+        error: _displayMessage(e),
+      );
     }
   }
 
@@ -88,11 +114,44 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   void clearError() {
-    state = state.copyWith(error: null);
+    state = state.copyWith(error: null, errorType: null);
+  }
+
+  AuthErrorType _classifyError(Object error) {
+    final msg = error.toString().toLowerCase();
+    if (msg.contains('401') ||
+        msg.contains('unauthorized') ||
+        msg.contains('invalid email') ||
+        msg.contains('invalid credential') ||
+        msg.contains('không đúng') ||
+        msg.contains('wrong password')) {
+      return AuthErrorType.invalidCredentials;
+    }
+    if (error is SocketException ||
+        msg.contains('socketexception') ||
+        msg.contains('clientexception') ||
+        msg.contains('connection') ||
+        msg.contains('failed host lookup') ||
+        msg.contains('network') ||
+        msg.contains('offline')) {
+      return AuthErrorType.network;
+    }
+    return AuthErrorType.unknown;
   }
 
   String _displayMessage(Object error) {
-    return error.toString().replaceFirst('Exception: ', '');
+    final classified = _classifyError(error);
+    if (classified == AuthErrorType.invalidCredentials) {
+      return 'Email hoặc mật khẩu không đúng.';
+    }
+    if (classified == AuthErrorType.network) {
+      return 'Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.';
+    }
+    final raw = error.toString().replaceFirst('Exception: ', '').trim();
+    if (raw.toLowerCase().contains('exception') || raw.contains('{')) {
+      return 'Đã xảy ra lỗi. Vui lòng thử lại.';
+    }
+    return raw.isNotEmpty ? raw : 'Đã xảy ra lỗi. Vui lòng thử lại.';
   }
 }
 

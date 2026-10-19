@@ -298,6 +298,20 @@ class AppLocalizationsVi extends AppLocalizations {
       'Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản & Quyền riêng tư.';
 
   @override
+  String get authInvalidCredentials => 'Email hoặc mật khẩu không đúng.';
+
+  @override
+  String get authNetworkError =>
+      'Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.';
+
+  @override
+  String get authGenericError => 'Đã xảy ra lỗi. Vui lòng thử lại.';
+
+  @override
+  String get socialSignInNotAvailable =>
+      'Đăng nhập bằng mạng xã hội hiện chưa được hỗ trợ.';
+
+  @override
   String get harvestLog => 'Nhật ký thu hoạch';
 
   @override
