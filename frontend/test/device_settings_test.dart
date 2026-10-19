@@ -4,6 +4,8 @@ import 'package:iotagri_app/cupertino/devices/cupertino_device_detail_screen.dar
 import 'package:iotagri_app/models/device.dart';
 import 'package:iotagri_app/services/api_service.dart';
 
+import 'test_app.dart';
+
 class _FakeSettingsApiService extends ApiService {
   Device device;
   bool deleteCalled = false;
@@ -248,7 +250,7 @@ void main() {
       final apiService = _FakeSettingsApiService(initialDevice);
 
       await tester.pumpWidget(
-        CupertinoApp(
+        buildLocalizedCupertinoApp(
           home: CupertinoPageScaffold(
             child: Builder(
               builder: (context) => CupertinoButton(

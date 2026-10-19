@@ -30,6 +30,8 @@ import 'package:iotagri_app/providers/auth_provider.dart';
 import 'package:iotagri_app/screens/dashboard/dashboard_screen.dart';
 import 'package:iotagri_app/services/api_service.dart';
 
+import 'test_app.dart';
+
 class _OfflineApiService extends ApiService {
   @override
   Future<Map<String, dynamic>> login(String email, String password) async {
@@ -462,7 +464,7 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      CupertinoApp(
+      buildLocalizedCupertinoApp(
         home: CupertinoDevicesScreen(apiService: _DeviceListApiService(6)),
       ),
     );
@@ -470,7 +472,7 @@ void main() {
     expect(find.byType(CupertinoSearchTextField), findsNothing);
 
     await tester.pumpWidget(
-      CupertinoApp(
+      buildLocalizedCupertinoApp(
         home: CupertinoDevicesScreen(
           key: const ValueKey('seven-devices'),
           apiService: _DeviceListApiService(7),
@@ -490,7 +492,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      const CupertinoApp(home: CupertinoDashboardScreen()),
+      buildLocalizedCupertinoApp(home: const CupertinoDashboardScreen()),
     );
     await tester.pump();
     await tester.tap(find.byIcon(CupertinoIcons.square_grid_2x2));
@@ -542,7 +544,9 @@ void main() {
   ) async {
     final apiService = _DeviceListApiService(1);
     await tester.pumpWidget(
-      CupertinoApp(home: CupertinoDevicesScreen(apiService: apiService)),
+      buildLocalizedCupertinoApp(
+        home: CupertinoDevicesScreen(apiService: apiService),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -570,7 +574,9 @@ void main() {
   ) async {
     final apiService = _DeviceListApiService(0);
     await tester.pumpWidget(
-      CupertinoApp(home: CupertinoDevicesScreen(apiService: apiService)),
+      buildLocalizedCupertinoApp(
+        home: CupertinoDevicesScreen(apiService: apiService),
+      ),
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
@@ -598,7 +604,7 @@ void main() {
       createdAt: '2026-10-02T00:00:00Z',
     );
     await tester.pumpWidget(
-      CupertinoApp(
+      buildLocalizedCupertinoApp(
         home: CupertinoDeviceDetailScreen(
           device: device,
           apiService: _DetailApiService(isOnline: false, includeSchedule: true),
@@ -630,7 +636,7 @@ void main() {
       createdAt: '2026-10-02T00:00:00Z',
     );
     await tester.pumpWidget(
-      CupertinoApp(
+      buildLocalizedCupertinoApp(
         home: CupertinoDeviceDetailScreen(
           device: device,
           apiService: _DetailApiService(pumpIsRunning: true),
@@ -659,7 +665,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      CupertinoApp(
+      buildLocalizedCupertinoApp(
         home: CupertinoDeviceDetailScreen(device: device, apiService: api),
       ),
     );
@@ -686,7 +692,7 @@ void main() {
       createdAt: '2026-10-02T00:00:00Z',
     );
     await tester.pumpWidget(
-      CupertinoApp(
+      buildLocalizedCupertinoApp(
         home: CupertinoDeviceDetailScreen(
           device: device,
           apiService: _DetailApiService(includeReading: false),

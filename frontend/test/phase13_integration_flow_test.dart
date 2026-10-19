@@ -11,6 +11,8 @@ import 'package:iotagri_app/services/history_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'test_app.dart';
+
 class _FakeIntegrationApiService extends ApiService {
   bool loginCalled = false;
   bool commandCalled = false;
@@ -212,7 +214,7 @@ void main() {
 
       // STEP 3: Open Device Detail
       await tester.pumpWidget(
-        CupertinoApp(
+        buildLocalizedCupertinoApp(
           home: CupertinoDeviceDetailScreen(
             device: device,
             apiService: api,
