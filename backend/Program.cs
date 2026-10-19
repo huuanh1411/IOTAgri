@@ -1,19 +1,13 @@
-using System.Net;
 using System.Text;
-using System.Threading.RateLimiting;
 using IOTAgriBackend.Data;
 using IOTAgriBackend.Endpoints;
 using IOTAgriBackend.Models;
 using IOTAgriBackend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-
-const string FlutterCorsPolicy = "FlutterClient";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,41 +74,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 });
 
-var allowedCorsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
-var allowPrivateLanOrigins = builder.Environment.IsDevelopment()
-    && builder.Configuration.GetValue<bool>("Cors:AllowPrivateLanOrigins");
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(FlutterCorsPolicy, policy =>
-    {
-        policy.SetIsOriginAllowed(origin =>
-            allowedCorsOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase)
-            || (allowPrivateLanOrigins && IsPrivateLanFrontendOrigin(origin)));
-
-        policy.AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
-
-builder.Services.AddRateLimiter(options => options.AddPolicy("deviceClaims", context =>
-    RateLimitPartition.GetFixedWindowLimiter(
-        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-        _ => new FixedWindowRateLimiterOptions
-        {
-            PermitLimit = 10,
-            Window = TimeSpan.FromMinutes(1),
-            QueueLimit = 0,
-            AutoReplenishment = true,
-        })));
-
-// Trust forwarded headers only from the Docker bridge range; the API has no published host port, so only Caddy reaches it.
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownIPNetworks.Clear();
-    options.KnownProxies.Clear();
-    options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse("172.16.0.0/12"));
-});
+builder.Services.AddApplicationWebSecurity(builder.Configuration, builder.Environment);
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddSingleton<MqttIngestionService>();
@@ -143,10 +103,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseForwardedHeaders();
-app.UseHttpsRedirection();
-
-app.UseCors(FlutterCorsPolicy);
+app.UseApplicationWebSecurity();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
@@ -183,26 +140,6 @@ app.MapGet("/weatherforecast", () =>
 .WithName("GetWeatherForecast");
 
 app.Run();
-
-static bool IsPrivateLanFrontendOrigin(string origin)
-{
-    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)
-        || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
-        || uri.Port != 8081)
-    {
-        return false;
-    }
-
-    if (uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase)) return true;
-    if (!IPAddress.TryParse(uri.Host, out var address)) return false;
-    if (IPAddress.IsLoopback(address)) return true;
-    if (address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork) return false;
-
-    var bytes = address.GetAddressBytes();
-    return bytes[0] == 10
-        || (bytes[0] == 172 && bytes[1] is >= 16 and <= 31)
-        || (bytes[0] == 192 && bytes[1] == 168);
-}
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
