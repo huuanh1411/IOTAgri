@@ -1,4 +1,9 @@
 class ApiConstants {
+  static const String espSetupUrl = String.fromEnvironment(
+    'ESP_SETUP_URL',
+    defaultValue: 'http://192.168.4.1',
+  );
+
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: 'http://localhost:8080',

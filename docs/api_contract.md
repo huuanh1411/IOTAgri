@@ -93,3 +93,14 @@ Provisioning codes are write-only: an owner may generate a 15-minute, single-use
 code, but no active-code read endpoint exists. The claim route does not return a
 user `Device`; it returns hardware MQTT configuration. This prevents disclosure
 of live provisioning secrets through normal Flutter sessions.
+
+## Firmware MQTT contract
+
+Firmware publishes sensor measurements to `devices/{deviceKey}/readings`.
+The JSON payload includes temperature, humidity, soil moisture, and a nullable
+`lux` value from the BH1750 light sensor. A missing or unavailable BH1750 is
+reported as `null` instead of preventing the remaining readings from being sent.
+
+Pump commands and status use `devices/{deviceKey}/commands/pump` and
+`devices/{deviceKey}/pump-status`. Light commands and status use
+`devices/{deviceKey}/commands/light` and `devices/{deviceKey}/light-status`.
