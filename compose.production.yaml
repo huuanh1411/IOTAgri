@@ -50,6 +50,7 @@ services:
       ASPNETCORE_URLS: http://+:8080
       AllowedHosts: api.aerogreen.vn
       Cors__AllowedOrigins__0: https://app.aerogreen.vn
+      Cors__AllowPrivateLanOrigins: "false"
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       Jwt__Issuer: IOTAgriBackend
       Jwt__Audience: IOTAgriBackendClients
