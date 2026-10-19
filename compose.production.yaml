@@ -9,6 +9,11 @@ services:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
       - caddy-config:/config
+    healthcheck:
+      test: ["CMD", "caddy", "version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   postgres:
     image: postgres:17-alpine
@@ -41,10 +46,21 @@ services:
       - ./deploy/mosquitto-certs:/mosquitto/certs:ro
       - mosquitto-data:/mosquitto/data
       - mosquitto-log:/mosquitto/log
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_sub -h 127.0.0.1 -p 1883 -u admin -P \"$$MOSQUITTO_DYNSEC_PASSWORD\" -t '$$SYS/broker/version' -C 1 -W 5 >/dev/null"]
+      interval: 10s
+      timeout: 7s
+      retries: 6
 
   api:
     build: .
     restart: unless-stopped
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "${API_CPU_LIMIT:-1.00}"
+          memory: ${API_MEMORY_LIMIT:-512M}
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
@@ -68,11 +84,16 @@ services:
       PumpScheduling__Enabled: "false"
       PumpScheduling__PollSeconds: ${PUMP_SCHEDULING_POLL_SECONDS:-30}
       PumpScheduling__DueWindowSeconds: ${PUMP_SCHEDULING_DUE_WINDOW_SECONDS:-90}
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
     depends_on:
       postgres:
         condition: service_healthy
       mosquitto:
-        condition: service_started
+        condition: service_healthy
 
 volumes:
   postgres-data:
