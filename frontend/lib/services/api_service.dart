@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/api_constants.dart';
 import '../models/user.dart';
 import '../models/light_schedule.dart';
@@ -34,26 +35,73 @@ class ApiService {
 
   final http.Client _client;
   final FlutterSecureStorage _storage;
+  final bool _allowWebStorageFallback;
   String? _accessToken;
   Future<http.Response>? _refreshFuture;
 
-  ApiService({http.Client? client, FlutterSecureStorage? storage})
-    : _client = client ?? http.Client(),
-      _storage = storage ?? const FlutterSecureStorage();
+  ApiService({
+    http.Client? client,
+    FlutterSecureStorage? storage,
+    bool? allowWebStorageFallback,
+  }) : _client = client ?? http.Client(),
+       _storage = storage ?? const FlutterSecureStorage(),
+       _allowWebStorageFallback = allowWebStorageFallback ?? kIsWeb;
+
+  static String _webFallbackKey(String key) => 'iotagri.auth.$key';
+
+  Future<String?> _readToken(String key) async {
+    try {
+      final value = await _storage.read(key: key);
+      if (value != null || !_allowWebStorageFallback) return value;
+    } catch (error) {
+      if (!_allowWebStorageFallback) rethrow;
+      debugPrint(
+        'Secure token storage unavailable; using web fallback: $error',
+      );
+    }
+
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getString(_webFallbackKey(key));
+  }
+
+  Future<void> _removeWebFallbackTokens() async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove(_webFallbackKey('access_token'));
+    await preferences.remove(_webFallbackKey('refresh_token'));
+  }
 
   Future<void> _loadTokens() async {
-    _accessToken = await _storage.read(key: 'access_token');
+    _accessToken = await _readToken('access_token');
   }
 
   Future<void> _saveTokens(String accessToken, String refreshToken) async {
-    await _storage.write(key: 'access_token', value: accessToken);
-    await _storage.write(key: 'refresh_token', value: refreshToken);
+    try {
+      await _storage.write(key: 'access_token', value: accessToken);
+      await _storage.write(key: 'refresh_token', value: refreshToken);
+      if (_allowWebStorageFallback) await _removeWebFallbackTokens();
+    } catch (error) {
+      if (!_allowWebStorageFallback) rethrow;
+      debugPrint(
+        'Secure token storage unavailable; using web fallback: $error',
+      );
+      final preferences = await SharedPreferences.getInstance();
+      await preferences.setString(_webFallbackKey('access_token'), accessToken);
+      await preferences.setString(
+        _webFallbackKey('refresh_token'),
+        refreshToken,
+      );
+    }
     _accessToken = accessToken;
   }
 
   Future<void> _clearTokens() async {
-    await _storage.delete(key: 'access_token');
-    await _storage.delete(key: 'refresh_token');
+    try {
+      await _storage.delete(key: 'access_token');
+      await _storage.delete(key: 'refresh_token');
+    } catch (_) {
+      if (!_allowWebStorageFallback) rethrow;
+    }
+    if (_allowWebStorageFallback) await _removeWebFallbackTokens();
     _accessToken = null;
   }
 
@@ -78,7 +126,7 @@ class ApiService {
   }
 
   Future<http.Response> _performRefresh() async {
-    final refreshToken = await _storage.read(key: 'refresh_token');
+    final refreshToken = await _readToken('refresh_token');
     if (refreshToken == null) {
       throw const _RefreshTokenRejected();
     }
@@ -127,8 +175,8 @@ class ApiService {
   }
 
   Future<User?> restoreSession() async {
-    final refreshToken = await _storage.read(key: 'refresh_token');
-    final accessToken = await _storage.read(key: 'access_token');
+    final refreshToken = await _readToken('refresh_token');
+    final accessToken = await _readToken('access_token');
     if (refreshToken == null && accessToken == null) return null;
 
     final cachedUser = accessToken == null
@@ -190,7 +238,7 @@ class ApiService {
 
   // Auth methods
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse('${ApiConstants.baseUrl}${ApiConstants.login}'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
@@ -213,7 +261,7 @@ class ApiService {
     String password,
     String fullName,
   ) async {
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse('${ApiConstants.baseUrl}${ApiConstants.register}'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
@@ -247,9 +295,9 @@ class ApiService {
 
   Future<void> logout() async {
     try {
-      if (await _storage.read(key: 'refresh_token') != null) {
+      if (await _readToken('refresh_token') != null) {
         await _refreshAccessToken();
-        final refreshToken = await _storage.read(key: 'refresh_token');
+        final refreshToken = await _readToken('refresh_token');
         if (refreshToken != null) {
           await _client.post(
             Uri.parse('${ApiConstants.baseUrl}${ApiConstants.logout}'),

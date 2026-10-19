@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:iotagri_app/screens/sensor_detail_screen.dart';
 
+import 'test_app.dart';
+
 void main() {
-  Widget buildPanel(double waterLevel) => MaterialApp(
+  Widget buildPanel(double waterLevel) => buildLocalizedMaterialApp(
     home: Scaffold(body: WaterPumpControlPanel(waterLevel: waterLevel)),
   );
 

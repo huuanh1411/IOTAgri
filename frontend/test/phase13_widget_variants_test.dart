@@ -9,6 +9,8 @@ import 'package:iotagri_app/models/pump_schedule.dart';
 import 'package:iotagri_app/models/sensor_reading.dart';
 import 'package:iotagri_app/services/api_service.dart';
 
+import 'test_app.dart';
+
 class _FakeVariantsApiService extends ApiService {
   final bool isOnline;
   final bool isPumpRunning;
@@ -305,7 +307,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          CupertinoApp(
+          buildLocalizedCupertinoApp(
             home: CupertinoDeviceDetailScreen(device: device, apiService: api),
           ),
         );
@@ -338,7 +340,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          CupertinoApp(
+          buildLocalizedCupertinoApp(
             home: CupertinoDeviceDetailScreen(device: device, apiService: api),
           ),
         );
@@ -369,7 +371,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          CupertinoApp(
+          buildLocalizedCupertinoApp(
             home: CupertinoDeviceDetailScreen(device: device, apiService: api),
           ),
         );
@@ -404,7 +406,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        CupertinoApp(
+        buildLocalizedCupertinoApp(
           home: CupertinoDeviceDetailScreen(device: device, apiService: api),
         ),
       );
@@ -437,7 +439,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          CupertinoApp(
+          buildLocalizedCupertinoApp(
             home: CupertinoDeviceDetailScreen(device: device, apiService: api),
           ),
         );
