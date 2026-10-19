@@ -81,6 +81,7 @@ services:
       Cors__AllowedOrigins__6: http://localhost:3008
       Cors__AllowedOrigins__7: http://localhost:3009
       Cors__AllowedOrigins__8: http://localhost:3010
+      Cors__AllowPrivateLanOrigins: "true"
       Cors__AllowedOrigins__9: http://localhost
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       Jwt__Issuer: IOTAgriBackend
