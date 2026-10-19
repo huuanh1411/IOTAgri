@@ -225,3 +225,8 @@ Run the API behind HTTPS, keep API and PostgreSQL private, restart core containe
 - CI/CD deployment and VPS credentials in GitHub.
 - Mutual TLS/client certificates, broker clustering, horizontal API scaling, and generic secret-management platform.
 - Enabling pump scheduling or automatic pump control.
+
+## Remaining deployment blockers
+
+- ESP32 firmware TLS remains owned by firmware team. Production device claims cannot be used until firmware validates the public CA certificate, requires `useTls=true`, and stores returned MQTT credentials only in NVS.
+- VPS deployment requires DNS records, firewall rules, certificate issuance, real broker authorization results, backup target credentials, and a recorded restore drill. Do not mark production readiness complete from local checks alone.
