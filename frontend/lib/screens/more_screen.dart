@@ -23,153 +23,162 @@ class MoreScreen extends ConsumerWidget {
         ? '?'
         : user.fullName.trim()[0].toUpperCase();
 
+    final bottomPadding =
+        24.0 + 80.0 + MediaQuery.paddingOf(context).bottom;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              PageHeader(
-                title: context.l10n.more,
-                subtitle: context.l10n.moreSubtitle,
-              ),
-              const SizedBox(height: 28),
-              // Profile card
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      // Gradient avatar with the current user's initial.
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [AppColors.forestGreen, AppColors.sage],
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(12)),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          avatarInitial,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              user.fullName,
-                              style: AppText.heading(context, fontSize: 20),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(24, 24, 24, bottomPadding),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  PageHeader(
+                    title: context.l10n.more,
+                    subtitle: context.l10n.moreSubtitle,
+                  ),
+                  const SizedBox(height: 28),
+                  // Profile card
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          // Gradient avatar with the current user's initial.
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [AppColors.forestGreen, AppColors.sage],
+                              ),
+                              borderRadius: BorderRadius.all(Radius.circular(12)),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              user.email,
+                            alignment: Alignment.center,
+                            child: Text(
+                              avatarInitial,
                               style: const TextStyle(
-                                color: AppColors.forestGreen,
+                                fontSize: 24,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      // Plan pill "Pro"
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.mint.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Text(
-                          'Pro',
-                          style: TextStyle(
-                            color: AppColors.mint,
-                            fontWeight: FontWeight.w600,
                           ),
-                        ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.fullName,
+                                  style: AppText.heading(context, fontSize: 20),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  user.email,
+                                  style: const TextStyle(
+                                    color: AppColors.forestGreen,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Plan pill "Pro"
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.mint.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Text(
+                              'Pro',
+                              style: TextStyle(
+                                color: AppColors.mint,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              // List of rows
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                elevation: 2,
-                child: Column(
-                  children: [
-                    _ListRow(
-                      icon: Icons.settings, // gear
-                      title: context.l10n.customization,
-                      subtitle: context.l10n.languageAndNotifications,
-                      onTap: () => context.push('/other/settings'),
+                  const SizedBox(height: 24),
+                  // List of rows
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
                     ),
-                    const Divider(height: 1),
-                    _ListRow(
-                      icon: Icons.eco, // leaf
-                      title: context.l10n.harvestHistory,
-                      subtitle: context.l10n.plantsGrown,
-                      onTap: () => context.push('/other/harvest'),
-                    ),
-                    const Divider(height: 1),
-                    _ListRow(
-                      icon: Icons.help_center, // help circle
-                      title: context.l10n.helpAndSupport,
-                      subtitle: context.l10n.faqAndChat,
-                      onTap: () => context.push('/other/help'),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              // Logout button
-              OutlineDangerButton(
-                label: context.l10n.logOut,
-                icon: Icons.logout,
-                onPressed: () async {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (c) => AlertDialog(
-                      title: Text(c.l10n.confirm),
-                      content: Text(c.l10n.logoutConfirmation),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(c, false),
-                          child: Text(c.l10n.cancel),
+                    elevation: 2,
+                    child: Column(
+                      children: [
+                        _ListRow(
+                          icon: Icons.settings, // gear
+                          title: context.l10n.customization,
+                          subtitle: context.l10n.languageAndNotifications,
+                          onTap: () => context.push('/other/settings'),
                         ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(c, true),
-                          child: Text(c.l10n.logOut),
+                        const Divider(height: 1),
+                        _ListRow(
+                          icon: Icons.eco, // leaf
+                          title: context.l10n.harvestHistory,
+                          subtitle: context.l10n.plantsGrown,
+                          onTap: () => context.push('/other/harvest'),
+                        ),
+                        const Divider(height: 1),
+                        _ListRow(
+                          icon: Icons.help_center, // help circle
+                          title: context.l10n.helpAndSupport,
+                          subtitle: context.l10n.faqAndChat,
+                          onTap: () => context.push('/other/help'),
                         ),
                       ],
                     ),
-                  );
-                  if (confirmed == true) {
-                    await ref.read(authControllerProvider.notifier).logout();
-                    if (!context.mounted) return;
-                    context.go('/auth');
-                  }
-                },
+                  ),
+                  const SizedBox(height: 24),
+                  // Logout button
+                  OutlineDangerButton(
+                    label: context.l10n.logOut,
+                    icon: Icons.logout,
+                    onPressed: () async {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (c) => AlertDialog(
+                          title: Text(c.l10n.confirm),
+                          content: Text(c.l10n.logoutConfirmation),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(c, false),
+                              child: Text(c.l10n.cancel),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(c, true),
+                              child: Text(c.l10n.logOut),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirmed == true) {
+                        await ref.read(authControllerProvider.notifier).logout();
+                        if (!context.mounted) return;
+                        context.go('/auth');
+                      }
+                    },
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
