@@ -54,8 +54,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goodEvening => 'Good evening';
 
   @override
+  String get goodNight => 'Good night';
+
+  @override
   String gardenOf(String name) {
     return '$name\'s Garden';
+  }
+
+  @override
+  String gardenOfEndingWithS(String name) {
+    return '$name\' Garden';
   }
 
   @override
@@ -296,6 +304,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get termsNotice =>
       'By continuing, you agree to the Terms and Privacy Policy.';
+
+  @override
+  String get authInvalidCredentials => 'Incorrect email or password.';
+
+  @override
+  String get authNetworkError => 'Connection problem. Please try again.';
+
+  @override
+  String get authGenericError => 'An error occurred. Please try again.';
+
+  @override
+  String get socialSignInNotAvailable => 'Social sign-in is not available yet.';
 
   @override
   String get harvestLog => 'Harvest log';

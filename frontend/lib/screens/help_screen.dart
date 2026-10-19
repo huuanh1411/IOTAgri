@@ -25,7 +25,7 @@ class HelpScreen extends ConsumerWidget {
       ),
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

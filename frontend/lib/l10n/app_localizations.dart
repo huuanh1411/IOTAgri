@@ -188,11 +188,23 @@ abstract class AppLocalizations {
   /// **'Good evening'**
   String get goodEvening;
 
+  /// No description provided for @goodNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Good night'**
+  String get goodNight;
+
   /// No description provided for @gardenOf.
   ///
   /// In en, this message translates to:
   /// **'{name}\'s Garden'**
   String gardenOf(String name);
+
+  /// No description provided for @gardenOfEndingWithS.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\' Garden'**
+  String gardenOfEndingWithS(String name);
 
   /// No description provided for @gardenTitle.
   ///
@@ -625,6 +637,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'By continuing, you agree to the Terms and Privacy Policy.'**
   String get termsNotice;
+
+  /// No description provided for @authInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or password.'**
+  String get authInvalidCredentials;
+
+  /// No description provided for @authNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection problem. Please try again.'**
+  String get authNetworkError;
+
+  /// No description provided for @authGenericError.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred. Please try again.'**
+  String get authGenericError;
+
+  /// No description provided for @socialSignInNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Social sign-in is not available yet.'**
+  String get socialSignInNotAvailable;
 
   /// No description provided for @harvestLog.
   ///

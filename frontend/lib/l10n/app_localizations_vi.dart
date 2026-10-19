@@ -54,7 +54,15 @@ class AppLocalizationsVi extends AppLocalizations {
   String get goodEvening => 'Chào buổi tối';
 
   @override
+  String get goodNight => 'Chúc ngủ ngon';
+
+  @override
   String gardenOf(String name) {
+    return 'Vườn của $name';
+  }
+
+  @override
+  String gardenOfEndingWithS(String name) {
     return 'Vườn của $name';
   }
 
@@ -296,6 +304,20 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get termsNotice =>
       'Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản & Quyền riêng tư.';
+
+  @override
+  String get authInvalidCredentials => 'Email hoặc mật khẩu không đúng.';
+
+  @override
+  String get authNetworkError =>
+      'Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.';
+
+  @override
+  String get authGenericError => 'Đã xảy ra lỗi. Vui lòng thử lại.';
+
+  @override
+  String get socialSignInNotAvailable =>
+      'Đăng nhập bằng mạng xã hội hiện chưa được hỗ trợ.';
 
   @override
   String get harvestLog => 'Nhật ký thu hoạch';

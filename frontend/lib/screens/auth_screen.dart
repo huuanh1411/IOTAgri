@@ -71,6 +71,31 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
   }
 
+  String _resolveErrorMessage(BuildContext context, AuthState auth) {
+    if (auth.errorType != null) {
+      switch (auth.errorType!) {
+        case AuthErrorType.invalidCredentials:
+          return context.l10n.authInvalidCredentials;
+        case AuthErrorType.network:
+          return context.l10n.authNetworkError;
+        case AuthErrorType.unknown:
+          return auth.error?.isNotEmpty == true
+              ? auth.error!
+              : context.l10n.authGenericError;
+      }
+    }
+    return auth.error ?? context.l10n.authGenericError;
+  }
+
+  void _onSocialTap(String label) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.socialSignInNotAvailable),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authControllerProvider);
@@ -192,9 +217,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                                   : null,
                             ),
                           ],
-                          if (auth.error != null) ...[
+                          if (auth.errorType != null || auth.error != null) ...[
                             const SizedBox(height: 12),
-                            _AuthError(message: auth.error!),
+                            _AuthError(
+                              message: _resolveErrorMessage(context, auth),
+                            ),
                           ],
                           const SizedBox(height: 18),
                           SizedBox(
@@ -225,19 +252,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             ],
                           ),
                           const SizedBox(height: 18),
-                          const Row(
+                          Row(
                             children: [
                               Expanded(
                                 child: _SocialButton(
                                   label: 'Google',
                                   letter: 'G',
+                                  onPressed: () => _onSocialTap('Google'),
                                 ),
                               ),
-                              SizedBox(width: 12),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: _SocialButton(
                                   label: 'Apple',
                                   letter: 'A',
+                                  onPressed: () => _onSocialTap('Apple'),
                                 ),
                               ),
                             ],
@@ -430,20 +459,28 @@ class _AuthError extends StatelessWidget {
 }
 
 class _SocialButton extends StatelessWidget {
-  const _SocialButton({required this.label, required this.letter});
+  const _SocialButton({
+    required this.label,
+    required this.letter,
+    this.onPressed,
+  });
   final String label;
   final String letter;
+  final VoidCallback? onPressed;
+
   @override
   Widget build(BuildContext context) => OutlinedButton(
-    onPressed: null,
+    onPressed: onPressed,
     style: OutlinedButton.styleFrom(
+      foregroundColor: AppColors.primaryText,
       disabledForegroundColor: AppColors.primaryText,
       side: const BorderSide(color: Color(0xFFE3EADF)),
-      padding: const EdgeInsets.symmetric(vertical: 11),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     ),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
         CircleAvatar(
           radius: 9,
@@ -457,8 +494,13 @@ class _SocialButton extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 8),
-        Text(label),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     ),
   );
