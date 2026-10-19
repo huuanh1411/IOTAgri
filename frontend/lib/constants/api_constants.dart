@@ -9,6 +9,11 @@ class ApiConstants {
     defaultValue: 'http://localhost:8080',
   );
 
+  static const String deviceApiBaseUrl = String.fromEnvironment(
+    'DEVICE_API_BASE_URL',
+    defaultValue: baseUrl,
+  );
+
   // Auth endpoints
   static const String login = '/api/auth/login';
   static const String register = '/api/auth/register';
