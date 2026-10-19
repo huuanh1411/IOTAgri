@@ -45,6 +45,11 @@ class _FakeSettingsApiService extends ApiService {
       };
 
   @override
+  Future<Map<String, dynamic>> getLightStatus(String deviceId) async => {
+        'isOn': false,
+      };
+
+  @override
   Future<Map<String, dynamic>> updateAlertSettings(
     String deviceId, {
     double? highTemperatureC,
@@ -260,6 +265,8 @@ void main() {
                       builder: (_) => CupertinoDeviceDetailScreen(
                         device: initialDevice,
                         apiService: apiService,
+                        enableBackgroundRefresh: false,
+                        disableAnimations: true,
                       ),
                     ),
                   );

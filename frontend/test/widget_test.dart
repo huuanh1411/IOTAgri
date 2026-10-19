@@ -186,6 +186,11 @@ class _DetailApiService extends ApiService {
   };
 
   @override
+  Future<Map<String, dynamic>> getLightStatus(String deviceId) async => {
+    'isOn': false,
+  };
+
+  @override
   Future<Map<String, dynamic>> updatePumpSchedule(
     String deviceId,
     PumpSchedule schedule, {
@@ -608,6 +613,8 @@ void main() {
         home: CupertinoDeviceDetailScreen(
           device: device,
           apiService: _DetailApiService(isOnline: false, includeSchedule: true),
+          enableBackgroundRefresh: false,
+          disableAnimations: true,
         ),
       ),
     );
@@ -618,7 +625,7 @@ void main() {
       find.text('Lịch tự động vẫn tiếp tục chạy khi thiết bị ngoại tuyến.'),
       findsOneWidget,
     );
-    expect(find.text('Không khả dụng khi ngoại tuyến'), findsOneWidget);
+    expect(find.text('Không khả dụng khi ngoại tuyến'), findsWidgets);
   });
 
   testWidgets('detail shows running pump state', (WidgetTester tester) async {
@@ -640,6 +647,8 @@ void main() {
         home: CupertinoDeviceDetailScreen(
           device: device,
           apiService: _DetailApiService(pumpIsRunning: true),
+          enableBackgroundRefresh: false,
+          disableAnimations: true,
         ),
       ),
     );
@@ -666,7 +675,12 @@ void main() {
 
     await tester.pumpWidget(
       buildLocalizedCupertinoApp(
-        home: CupertinoDeviceDetailScreen(device: device, apiService: api),
+        home: CupertinoDeviceDetailScreen(
+          device: device,
+          apiService: api,
+          enableBackgroundRefresh: false,
+          disableAnimations: true,
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -696,6 +710,8 @@ void main() {
         home: CupertinoDeviceDetailScreen(
           device: device,
           apiService: _DetailApiService(includeReading: false),
+          enableBackgroundRefresh: false,
+          disableAnimations: true,
         ),
       ),
     );

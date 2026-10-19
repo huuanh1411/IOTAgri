@@ -121,6 +121,11 @@ class _FakeIntegrationApiService extends ApiService {
         'highTemperatureC': 32.0,
         'lowWaterLevelPercent': 25.0,
       };
+
+  @override
+  Future<Map<String, dynamic>> getLightStatus(String deviceId) async => {
+        'isOn': false,
+      };
 }
 
 class _FakeHistoryRepository implements HistoryRepository {
@@ -218,6 +223,8 @@ void main() {
           home: CupertinoDeviceDetailScreen(
             device: device,
             apiService: api,
+            enableBackgroundRefresh: false,
+            disableAnimations: true,
           ),
         ),
       );

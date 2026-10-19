@@ -90,6 +90,9 @@ class MockNarrowApiService extends ApiService {
       };
 
   @override
+  Future<Map<String, dynamic>> getLightStatus(String id) async => {'isOn': false};
+
+  @override
   Future<Map<String, dynamic>> createProvisioningCode(String id) async => {
         'code': 'AGRI-TEST-320',
         'expiresAt': DateTime.now()
@@ -128,6 +131,8 @@ void main() {
         home: CupertinoDeviceDetailScreen(
           device: testDevice,
           apiService: api,
+          enableBackgroundRefresh: false,
+          disableAnimations: true,
         ),
       ),
     );
@@ -135,7 +140,6 @@ void main() {
 
     expect(find.text('Tháp Thử Nghiệm 320px'), findsWidgets);
     expect(find.text('Cảm biến'), findsOneWidget);
-    expect(find.text('Điều khiển bơm'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

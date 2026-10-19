@@ -25,12 +25,16 @@
     final Device device;
     final ApiService? apiService;
     final String? initialSensor;
+    final bool enableBackgroundRefresh;
+    final bool disableAnimations;
 
     const CupertinoDeviceDetailScreen({
       super.key,
       required this.device,
       this.apiService,
       this.initialSensor,
+      this.enableBackgroundRefresh = true,
+      this.disableAnimations = false,
     });
 
     @override
@@ -71,10 +75,12 @@
           if (mounted) _openSensorHistory(widget.initialSensor!);
         });
       }
-      _refreshTimer = Timer.periodic(
-        const Duration(seconds: 20),
-        (_) => _loadDeviceData(showLoading: false),
-      );
+      if (widget.enableBackgroundRefresh) {
+        _refreshTimer = Timer.periodic(
+          const Duration(seconds: 20),
+          (_) => _loadDeviceData(showLoading: false),
+        );
+      }
     }
 
     @override
@@ -537,15 +543,18 @@
     @override
     Widget build(BuildContext context) {
       if (_isLoading && _readings.isEmpty && _errorMessage == null) {
-        return CupertinoPageScaffold(
-          backgroundColor: AppColors.background,
-          navigationBar: CupertinoNavigationBar(
+        return TickerMode(
+          enabled: !widget.disableAnimations,
+          child: CupertinoPageScaffold(
             backgroundColor: AppColors.background,
-            border: null,
-            leading: _returnButton(context),
-            middle: Text(context.l10n.device),
+            navigationBar: CupertinoNavigationBar(
+              backgroundColor: AppColors.background,
+              border: null,
+              leading: _returnButton(context),
+              middle: Text(context.l10n.device),
+            ),
+            child: Center(child: CupertinoActivityIndicator(radius: 14)),
           ),
-          child: Center(child: CupertinoActivityIndicator(radius: 14)),
         );
       }
 
@@ -585,9 +594,11 @@
             child: const Icon(CupertinoIcons.settings),
           ),
         ),
-        child: SafeArea(
-          bottom: false,
-          child: CustomScrollView(
+        child: TickerMode(
+          enabled: !widget.disableAnimations,
+          child: SafeArea(
+            bottom: false,
+            child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
               CupertinoSliverRefreshControl(onRefresh: () => _loadDeviceData()),
@@ -660,6 +671,7 @@
                 ),
               ),
             ],
+            ),
           ),
         ),
       );
