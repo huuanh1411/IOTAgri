@@ -1,13 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iotagri_app/core/theme/app_theme.dart';
 import 'package:iotagri_app/cupertino/devices/cupertino_device_detail_screen.dart';
-import 'package:iotagri_app/cupertino/devices/pump_schedules_screen.dart';
 import 'package:iotagri_app/models/device.dart';
 import 'package:iotagri_app/screens/devices/devices_screen.dart';
-import 'package:iotagri_app/screens/devices/provisioning_code_screen.dart';
 import 'package:iotagri_app/services/api_service.dart';
 
 class MockNarrowApiService extends ApiService {
