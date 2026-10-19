@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { e2eRoot, resolveReportDir } = require('./paths.cjs');
 
 const descriptions = {
   'UI-01': [
@@ -50,13 +51,11 @@ const descriptions = {
 
 function generateReport(destination) {
   const report = JSON.parse(
-    fs.readFileSync(path.join(__dirname, 'test-results/results.json'), 'utf8'),
+    fs.readFileSync(path.join(e2eRoot, 'test-results/results.json'), 'utf8'),
   );
-  const out =
-    destination ||
-    path.resolve(__dirname, '../..', 'docs/testing/2026-10-19-ui');
+  const out = destination || resolveReportDir();
   fs.mkdirSync(path.join(out, 'screenshots'), { recursive: true });
-  const fixturePath = path.join(__dirname, '.auth/fixture.json');
+  const fixturePath = path.join(e2eRoot, '.auth/fixture.json');
   const password = fs.existsSync(fixturePath)
     ? JSON.parse(fs.readFileSync(fixturePath, 'utf8')).password
     : '';

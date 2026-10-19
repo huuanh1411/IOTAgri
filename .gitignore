@@ -1,0 +1,20 @@
+# Dependencies and generated build output
+**/node_modules/
+**/bin/
+**/obj/
+**/.dart_tool/
+**/build/
+.runtime/
+.run/
+.worktrees/
+graphify-out/
+
+# Local configuration and test sessions
+.env
+.env.*
+!.env.example
+**/.auth/
+
+# New frontend executions stay local; reviewed backend evidence stays tracked
+/testing/reports/frontend/e2e/
+/testing/reports/frontend/flutter/

@@ -2,8 +2,10 @@
   "name": "iotagri-ui-tests",
   "private": true,
   "scripts": {
-    "test": "node run.cjs",
-    "test:mobile": "node run.cjs --project=mobile --project=small-mobile",
+    "test": "node scripts/run.cjs",
+    "test:mobile": "node scripts/run.cjs --project=mobile --project=small-mobile",
+    "test:list": "playwright test --list",
+    "report:export": "node scripts/report.cjs",
     "report": "playwright show-report"
   },
   "devDependencies": {

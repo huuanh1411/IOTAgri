@@ -2,6 +2,7 @@ const { request } = require('@playwright/test');
 const { randomBytes } = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
+const { e2eRoot } = require('./paths.cjs');
 
 module.exports = async function setup() {
   const apiURL = process.env.API_URL || 'http://localhost:5261';
@@ -21,7 +22,7 @@ module.exports = async function setup() {
       throw new Error(
         `Could not prepare a local test account: HTTP ${response.status()}`,
       );
-    const dir = path.join(__dirname, '.auth');
+    const dir = path.join(e2eRoot, '.auth');
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(
       path.join(dir, 'fixture.json'),

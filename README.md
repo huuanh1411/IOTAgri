@@ -1,148 +1,86 @@
-# IOTAgri — Hướng dẫn đọc dữ liệu kiểm thử
+# IOTAgri · Quality Assurance
 
-Nhánh `Test` lưu mã kiểm thử backend trong `backend/tests/` và tài liệu, dữ liệu kết quả trong `testing/`. Nhánh này không chứa mã nguồn ứng dụng; có thể đọc báo cáo trực tiếp trên GitHub mà không cần cài môi trường.
+Kho mã kiểm thử và bằng chứng QA cho hệ thống nông nghiệp thông minh IOTAgri.
+Nhánh `Test` tập trung test backend, test Flutter và test giao diện web; mã nguồn ứng dụng được quản lý trên `main`.
 
-## 1. Đọc nhanh kết quả
+## Bắt đầu từ đâu?
 
-Lần chạy mới nhất được lưu là **`followup-final`**, bắt đầu lúc **01:42:13 ngày 14/10/2026 (UTC+07:00)**, trên mã nguồn nền `318fca181741c95e73b56808ebe04a65a3ee0466`.
-
-| Chỉ số | Kết quả đã ghi nhận |
+| Nhu cầu | Tài liệu |
 | --- | --- |
-| Test case đã chạy | 345 |
-| PASS / FAIL | 339 / 6 |
-| Skipped / error / aborted | 0 / 0 / 0 |
-| Phương thức test / file test | 212 / 44 |
-| Nhóm lỗi xác nhận | 4 |
-| Line coverage | 1399/2071, khoảng 67,55% |
-| Branch coverage | 463/760, khoảng 60,92% |
-| Exit code của lần chạy | 1 — còn test thất bại |
+| Chạy test backend | [Backend testing](backend/README.md) |
+| Chạy test Flutter | [Frontend testing](frontend/README.md) |
+| Chạy test giao diện web | [Playwright E2E](frontend/e2e/README.md) |
+| Xem báo cáo và lỗi backend đã ghi nhận | [QA reports](testing/README.md) |
+| Hiểu TRX, registry JSON và coverage | [Hướng dẫn đọc kết quả](testing/guides/RESULTS_GUIDE.md) |
+| Bổ sung test và bàn giao kết quả | [Quy ước đóng góp](testing/guides/CONTRIBUTING.md) |
 
-Đây là kết quả của lần chạy đã lưu, không phải kết quả tự động cập nhật theo `main`. Một phương thức có nhiều dòng dữ liệu `[InlineData]` có thể tạo nhiều test case, nên 212 phương thức tương ứng 345 ca thực thi. PASS chỉ cho biết các assertion của ca đó đạt; không chứng minh toàn bộ backend đã đúng.
+## Cấu trúc thư mục
 
-## 2. Thứ tự đọc tài liệu
+```text
+.
+├── backend/
+│   ├── README.md                    # Môi trường và cách chạy backend test
+│   └── tests/                       # xUnit, Moq, HTTP và PostgreSQL fixtures
+│       └── TestSupport/             # Host, test doubles và database fixture
+├── frontend/
+│   ├── README.md                    # Hướng dẫn Flutter và danh mục kiểm thử
+│   ├── test/                        # Unit, provider, repository và widget tests
+│   └── e2e/
+│       ├── README.md                # Cài đặt và chạy Playwright
+│       ├── playwright.config.cjs    # Viewport, timeout và web server
+│       ├── package.json             # Lệnh npm và dependencies
+│       ├── scripts/                 # Setup, runner và xuất báo cáo
+│       └── tests/                   # Các kịch bản UI
+└── testing/
+    ├── README.md                    # Chỉ mục tài liệu và bằng chứng
+    ├── guides/                      # Cách đọc kết quả và quy ước QA
+    ├── TEST_*.md                    # Phạm vi, chiến lược, ca test và báo cáo BE
+    ├── DEFECTS_AND_BLOCKERS.md       # Lỗi backend đã xác nhận
+    ├── run-backend-tests.ps1         # Runner backend có lưu exit code
+    ├── build-test-reports.py         # Chuyển TRX/coverage thành báo cáo
+    ├── finalize-qa-records.py        # Công cụ hoàn thiện hồ sơ QA backend
+    ├── coverage.runsettings         # Cấu hình đo coverage backend
+    └── reports/
+        ├── coverage/                # Coverage và TRX backend đã lưu
+        ├── junit/                   # JUnit chuyển đổi từ kết quả backend
+        ├── summary/                 # Tổng hợp, registry, log và integrity
+        └── frontend/                # Quy ước lưu kết quả Flutter/E2E mới
+```
 
-| Thứ tự | File | Đọc để biết |
+Giữ các thư mục test ở đường dẫn chuẩn của dự án để có thể đưa chúng vào checkout ứng dụng mà không sửa import hoặc project reference. Đường dẫn bằng chứng backend lịch sử được giữ nguyên để đối chiếu báo cáo.
+
+## Trạng thái bằng chứng
+
+| Bộ kiểm thử | Nội dung trên nhánh | Kết quả được lưu |
 | --- | --- | --- |
-| 1 | [TEST_REPORT.md](testing/TEST_REPORT.md) | Kết luận tổng thể, kết quả, phạm vi đã kiểm tra và giới hạn còn lại. |
-| 2 | [DEFECTS_AND_BLOCKERS.md](testing/DEFECTS_AND_BLOCKERS.md) | Lỗi BE-001 đến BE-004: cách tái hiện, expected/actual, bằng chứng; phân biệt lỗi xác nhận, rủi ro và khoảng trống kiểm thử. |
-| 3 | [TEST_CASES.md](testing/TEST_CASES.md) | Từng ca: dữ liệu đầu vào, thân test, assertion, mã `TC-BE-...`, PASS/FAIL và liên kết bằng chứng. |
-| 4 | [TEST_EXECUTION_LOG.md](testing/TEST_EXECUTION_LOG.md) | Lịch sử các lần chạy, môi trường, lệnh đã dùng và danh sách ca thất bại cuối cùng. |
-| 5 | [Coverage SUMMARY.md](testing/reports/coverage/SUMMARY.md) | Mức bao phủ theo module và file mã nguồn. |
-| 6 | [TEST_SCOPE_AND_INVENTORY.md](testing/TEST_SCOPE_AND_INVENTORY.md) | Danh mục mã nguồn, phạm vi đã khảo sát và các phần cần kiểm tra thêm. |
-| 7 | [TEST_STRATEGY.md](testing/TEST_STRATEGY.md) | Cách tổ chức unit/component/integration test, cách cô lập môi trường và giới hạn của từng loại test. |
+| Backend | 44 file test C# và 3 helper trong `TestSupport/` | Phiên `followup-final`: **345 ca, 339 PASS, 6 FAIL**, ngày 14/10/2026 |
+| Flutter | 17 file Dart trong `frontend/test/` | Chưa đưa kết quả thực thi frontend lên nhánh này |
+| Web E2E | 11 kịch bản × 3 viewport, **33 ca được discovery** | Discovery chỉ xác nhận danh sách ca, chưa chứng minh test PASS |
 
-[testing/README.md](testing/README.md) là hướng dẫn kỹ thuật bàn giao và chạy lại suite.
+Số liệu backend thuộc mã nguồn nền [`318fca1`](https://github.com/huuanh1411/IOTAgri/tree/318fca181741c95e73b56808ebe04a65a3ee0466), không đại diện cho trạng thái hiện tại của `main`. Sáu ca FAIL lịch sử được giữ nguyên trong bằng chứng; xem [báo cáo backend](testing/TEST_REPORT.md).
 
-## 3. Tra cứu một test case
+## Chuẩn bị checkout để chạy test
 
-Ví dụ cần xem lỗi đăng nhập tài khoản bị khóa:
-
-1. Mở [DEFECTS_AND_BLOCKERS.md](testing/DEFECTS_AND_BLOCKERS.md), tìm `BE-001` để đọc hành vi mong đợi và thực tế.
-2. Mở [TEST_CASES.md](testing/TEST_CASES.md), tìm `TC-BE-F21073B388` hoặc `Locked_user_with_correct_password_must_not_receive_tokens`.
-3. Đọc phần **Preconditions**, thân test và bảng **Expected Result / Actual Result / Status**. Với ca có tham số, đọc đúng dòng dữ liệu của ca đó.
-4. Mở file test qua liên kết để xem fixture và ngữ cảnh đầy đủ.
-5. Đối chiếu với [registry JSON](testing/reports/summary/test-case-registry.json), [TRX gốc](testing/reports/coverage/followup-final/backend-tests.trx) và [console log](testing/reports/summary/followup-final-test.log).
-
-Trong TRX, dùng `trx_test_id` hoặc `trx_execution_id` của registry để tìm đúng bản ghi. Trong console log, tìm tên phương thức; log không nhất thiết chứa mã `TC-BE-...`.
-
-| Nhóm lỗi | Nội dung | Số ca FAIL trong lần chạy mới nhất |
-| --- | --- | --- |
-| BE-001 | Tài khoản bị khóa vẫn có thể nhận token đăng nhập | 2 |
-| BE-002 | Rollback migration PostgreSQL thất bại | 1 |
-| BE-003 | Trả lời ticket không lưu được tin nhắn mới | 2 |
-| BE-004 | HTTP tạo thiết bị chấp nhận tên chỉ có khoảng trắng | 1 |
-
-Các mục `RISK-*` và `GAP-*` không tự động được tính là ca FAIL hay SKIPPED. Xem giới hạn tái hiện trong tài liệu lỗi, đặc biệt với HTTP host được dựng riêng cho kiểm thử.
-
-## 4. Các file dữ liệu trong reports
-
-Các đường dẫn trong bảng dưới đây tính từ `testing/reports/`.
-
-| File / thư mục | Ý nghĩa và cách đọc |
-| --- | --- |
-| [summary/results.json](testing/reports/summary/results.json) | Tổng hợp lần chạy. `run` xác định phiên; `test_counters` chứa số ca; `trx_times` chứa thời gian; `totals` chứa số dòng/nhánh được bao phủ và tổng số được đo. |
-| [summary/test-case-registry.json](testing/reports/summary/test-case-registry.json) | Mảng bản ghi cho từng ca thực thi: ID, tên test, kết quả, mã lỗi, vị trí mã nguồn và ID đối chiếu TRX. |
-| [coverage/followup-final/backend-tests.trx](testing/reports/coverage/followup-final/backend-tests.trx) | Kết quả XML gốc của test runner: outcome, thời gian, thông báo lỗi và stack trace. Dùng khi cần kiểm chứng báo cáo tổng hợp. |
-| [junit/backend-tests.xml](testing/reports/junit/backend-tests.xml) | Kết quả chuyển sang XML JUnit để công cụ báo cáo/CI có thể đọc; vẫn giữ ca thất bại. |
-| [summary/followup-final-test.log](testing/reports/summary/followup-final-test.log) | Console output của lần chạy mới nhất. File `.log.exitcode` đi kèm ghi mã kết thúc; `.log.restore` ghi bước restore package. |
-| [coverage/SUMMARY.md](testing/reports/coverage/SUMMARY.md) | Bảng coverage dễ đọc cho người xem. |
-| [coverage/coverage.cobertura.xml](testing/reports/coverage/coverage.cobertura.xml) | Coverage ở định dạng Cobertura, chứa số lượt thực thi và thông tin theo dòng. |
-| [coverage/coverage.json](testing/reports/coverage/coverage.json) | Coverage chi tiết do Coverlet xuất ra, gồm dữ liệu dòng và nhánh theo lớp/phương thức. |
-| `coverage/followup-final/<id>/` | Dữ liệu collector gốc của lần chạy, có thể có bản sao dưới thư mục tên máy/người dùng. Các bản sao không phải các lần chạy độc lập. |
-| [summary/backend-integrity.json](testing/reports/summary/backend-integrity.json) | Kết quả so sánh mã nguồn/config trước và sau phiên QA. Đây là bằng chứng tại thời điểm đã ghi, không kiểm tra trạng thái repo hiện tại. |
-| [summary/backend-source-before.json](testing/reports/summary/backend-source-before.json), [backend-source-after.json](testing/reports/summary/backend-source-after.json) | Manifest và SHA-256 dùng để đối chiếu sự thay đổi của mã nguồn/config. |
-| Các log `baseline*`, `iteration*`, `reviewed-existing*` | Lịch sử thử build và xử lý môi trường. Không coi chúng là lần chạy test thành công. |
-
-### Đọc JSON tổng hợp
-
-Trong `results.json`:
-
-- `test_counters.executed`, `passed`, `failed`: số ca thực thi, đạt và thất bại.
-- `test_methods`, `test_files`: số phương thức và file test, không phải số ca thực thi.
-- `totals.lines_covered / totals.lines_valid`: tỷ lệ bao phủ dòng.
-- `totals.branches_covered / totals.branches_valid`: tỷ lệ bao phủ nhánh.
-- Mỗi phần tử trong `files` có dạng `[lines_covered, lines_valid, branches_covered, branches_valid]` của file mã nguồn đó.
-
-Trong `test-case-registry.json`:
-
-- `id`: mã ổn định `TC-BE-...` của ca.
-- `test_name`: tên đầy đủ, gồm tham số nếu có; `fqn`: tên phương thức đầy đủ.
-- `status`, `actual`, `defect`: kết quả, mô tả thực tế và mã lỗi liên quan.
-- `file`, `line`: vị trí định nghĩa test; `setup`, `body`, `expected`: chuẩn bị dữ liệu, thân test và assertion.
-- `trx_test_id`, `trx_execution_id`, `duration`: thông tin đối chiếu với kết quả gốc.
-
-### Đọc coverage đúng cách
-
-**Line coverage** đo tỷ lệ dòng được thực thi; **branch coverage** đo tỷ lệ nhánh được thực thi. Cả hai không phải tỷ lệ test PASS hoặc tỷ lệ chức năng đã hoàn thành. `N/A` ở branch coverage nghĩa là không có nhánh được đo, không phải 0%.
-
-Coverage đã lưu loại migration, file sinh tự động trong `obj` và test assembly khỏi phép đo. `Program.cs` vẫn nằm trong mẫu số; HTTP component host không chạy startup thật nên coverage của file này là 0%. Không có chỉ số instruction coverage trong dữ liệu collector này.
-
-Một số liên kết từ báo cáo coverage tới mã nguồn ứng dụng sẽ không mở được trên nhánh `Test`, vì nhánh chỉ giữ test. Đối chiếu file tương ứng ở [mã nguồn nền 318fca1](https://github.com/huuanh1411/IOTAgri/tree/318fca181741c95e73b56808ebe04a65a3ee0466/backend).
-
-## 5. Phân biệt dữ liệu mới nhất và lịch sử
-
-Trong `coverage/` có các lần chạy `run`, `verified`, `acceptance`, `final`, `postgres-followup`, `postgres-expanded`, `http-followup` và **`followup-final`**. Dùng `results.json.run` và `TEST_EXECUTION_LOG.md` để xác định lần chạy cần đọc; tên `final` không phải lần mới nhất.
-
-Không cộng số ca của các lần chạy với nhau: nhiều ca được chạy lại. Khi trích số liệu, dùng TRX, log và coverage thuộc cùng một phiên. Các file coverage ở ngay `coverage/` là bản xuất ổn định của lần mới nhất được ghi nhận.
-
-Một số tài liệu lịch sử vẫn nhắc đến công cụ hoặc log graphify đã được loại khỏi nhánh `Test`; chúng không phải dữ liệu để tính kết quả kiểm thử.
-
-## 6. Đọc và lọc dữ liệu trên máy
-
-Trên GitHub, Markdown có thể xem trực tiếp; JSON/XML/log lớn có thể cần bấm **Raw** hoặc tải xuống rồi mở bằng VS Code. Nếu log hiển thị sai ký tự, chọn lại encoding phù hợp, thường là UTF-16 LE với log được PowerShell 5.1 ghi.
-
-Để lấy file về thư mục làm việc đang có mã nguồn ứng dụng, chạy từ gốc repo:
+Nhánh này thiếu mã ứng dụng nên không build độc lập. Trong một checkout ứng dụng sạch, lấy đúng các file kiểm thử:
 
 ```powershell
 git fetch origin
-git restore --source=origin/Test -- backend/tests testing
+git restore --source=origin/Test -- backend/tests frontend/test frontend/e2e testing
 ```
 
-Lệnh restore thay thế các file test trùng đường dẫn bằng phiên bản từ `Test`; lưu các chỉnh sửa test local cần giữ trước khi chạy. Nó không tự commit hay push lên `main`.
+Lệnh trên thay thế file trùng đường dẫn; lưu chỉnh sửa test local trước khi dùng. Chọn revision ứng dụng phù hợp với suite. Khi tái hiện báo cáo backend lịch sử, dùng revision nền đã ghi ở trên.
 
-Xem số ca và lọc các ca lỗi bằng PowerShell:
+| Suite | Môi trường | Lệnh từ gốc checkout ứng dụng |
+| --- | --- | --- |
+| Backend | .NET SDK 10, Docker Linux/PostgreSQL 17, Python 3 | `powershell -NoProfile -ExecutionPolicy Bypass -File testing/run-backend-tests.ps1 -RunName local-review` |
+| Flutter | Flutter với Dart tương thích `frontend/pubspec.yaml` | `cd frontend`, `flutter pub get`, `flutter test` |
+| Web E2E | Node.js ≥20, Chrome, Python 3, FE build web và BE local | `npm.cmd ci --prefix frontend/e2e`, `npm.cmd test --prefix frontend/e2e` |
 
-```powershell
-$qaSummary = Get-Content testing/reports/summary/results.json -Raw | ConvertFrom-Json
-$qaSummary.run
-$qaSummary.test_counters
+Chi tiết về biến môi trường, phạm vi kiểm thử và cách lấy báo cáo nằm trong README của từng suite. Trên macOS/Linux, dùng `npm` thay cho `npm.cmd`.
 
-$qaCases = Get-Content testing/reports/summary/test-case-registry.json -Raw | ConvertFrom-Json
-$qaCases | Where-Object { $_.status -eq 'FAIL' } |
-    Select-Object id, test_name, defect, actual | Format-List
-```
+## Quy tắc quản lý kết quả
 
-## 7. Khi cần chạy lại test
-
-Cần mã nguồn ứng dụng nền cùng các file test, .NET SDK 10, Docker Desktop chạy Linux containers, image PostgreSQL 17 hoặc quyền tải image, package cache/NuGet và Python 3. Nhánh `Test` đứng riêng không đủ để build.
-
-Từ repo có mã nguồn nền và đã lấy file test như trên:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File testing/run-backend-tests.ps1 -RunName local-review
-python testing/build-test-reports.py --run local-review
-```
-
-Dùng tên phiên mới để giữ lịch sử cũ. Vẫn chạy lệnh tạo báo cáo khi test kết thúc với mã 1 nếu đã có TRX/coverage. Nếu restore/build thất bại và chưa tạo dữ liệu, đọc log để xử lý môi trường trước.
-
-Fixture PostgreSQL tạo database/container riêng cho kiểm thử. Kết quả mới có thể khác dữ liệu đã lưu nếu mã nguồn hoặc môi trường thay đổi. Đọc [hướng dẫn kỹ thuật](testing/README.md) và [chiến lược test](testing/TEST_STRATEGY.md) trước khi chạy lại.
+- Mỗi lần chạy có tên hoặc thư mục riêng; ghi revision ứng dụng, môi trường và exit code.
+- Kết quả backend lịch sử trong `testing/reports/` được giữ để kiểm chứng. Kết quả frontend mới được tạo local và gitignore theo mặc định.
+- Fixture đăng nhập, dependency, build output và trace thô được gitignore. Chỉ commit bằng chứng đã rà soát.
+- Thay đổi cách tổ chức hoặc tài liệu không đồng nghĩa đã chạy lại test hay xác nhận các lỗi cũ đã được sửa.

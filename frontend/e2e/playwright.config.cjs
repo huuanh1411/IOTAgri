@@ -5,7 +5,7 @@ module.exports = defineConfig({
   expect: { timeout: 12000 },
   workers: 1,
   retries: 0,
-  globalSetup: './setup.cjs',
+  globalSetup: './scripts/setup.cjs',
   outputDir: './test-results',
   reporter: [
     ['list'],
