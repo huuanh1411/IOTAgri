@@ -7,4 +7,5 @@ Requires=docker.service
 Type=oneshot
 EnvironmentFile=/etc/iotagri-backup.env
 ExecStart=/opt/iotagri/deploy/backup-postgres.sh
+OnFailure=iotagri-backup-failure@%n.service
 # A failed run leaves the unit in "failed"; alert on it (see deploy/README.md).

@@ -7,7 +7,7 @@ Run exactly one `api` replica. `MqttIngestionService` and `PumpScheduleDispatchS
 Copy the repository to `/opt/iotagri`, create `.env.production` from `.env.production.example`, replace every example secret, and add DNS A records for `api.aerogreen.vn` and `mqtt.aerogreen.vn`. Then run:
 
 ```
-chmod +x deploy/deploy-production.sh deploy/bootstrap-mqtt-dynsec.sh deploy/sync-mqtt-certs.sh
+chmod +x deploy/deploy-production.sh deploy/bootstrap-mqtt-dynsec.sh deploy/sync-mqtt-certs.sh deploy/verify-mqtt-security.sh
 ./deploy/deploy-production.sh
 ```
 
@@ -36,7 +36,7 @@ Files: `backup-postgres.sh`, `iotagri-backup.service`, `iotagri-backup.timer`.
 5. Install and start:
 
    ```
-   cp deploy/iotagri-backup.service deploy/iotagri-backup.timer /etc/systemd/system/
+   cp deploy/iotagri-backup.service deploy/iotagri-backup.timer deploy/iotagri-backup-failure@.service /etc/systemd/system/
    chmod +x deploy/backup-postgres.sh
    systemctl daemon-reload
    systemctl enable --now iotagri-backup.timer
@@ -67,3 +67,19 @@ A failed run leaves `iotagri-backup.service` in the `failed` state. Check with `
 | Date | Object | Result |
 |------|--------|--------|
 | | | |
+
+## Release evidence
+
+Record each production release without secrets, dump files, private keys, or broker credentials.
+
+| Gate | UTC time | Command/result | Artifact/reference | Owner |
+|---|---|---|---|---|
+| Compose configuration | | | | |
+| Firewall and external port scan (80, 443, 8883 only) | | | | |
+| HTTP redirect and HTTPS `/health` | | | | |
+| API/PostgreSQL public isolation | | | | |
+| MQTT authorization verifier | | | | |
+| Mosquitto restart retains Dynamic Security state | | | | |
+| Encrypted backup upload | | | | |
+| `pg_restore --list` and scratch API health | | | | |
+| ESP32 TLS claim and MQTT proof | | | | |
