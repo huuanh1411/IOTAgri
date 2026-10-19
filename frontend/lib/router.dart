@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import 'screens/alert_center_tab_screen.dart';
 import 'screens/auth_screen.dart';
-import 'screens/devices/devices_screen.dart';
 import 'screens/harvest_screen.dart';
 import 'screens/help_screen.dart';
 import 'screens/home_screen.dart';
@@ -15,6 +14,7 @@ import 'screens/more_screen.dart';
 import 'screens/sensor_detail_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/splash_screen.dart';
+import 'cupertino/devices/cupertino_devices_screen.dart';
 import 'providers/auth_controller.dart';
 import 'core/animation/app_motion.dart';
 import 'core/theme/app_colors.dart';
@@ -136,7 +136,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/devices',
                 name: 'devices',
-                builder: (context, state) => const DevicesScreen(),
+                builder: (context, state) => const CupertinoDevicesScreen(),
               ),
             ],
           ),

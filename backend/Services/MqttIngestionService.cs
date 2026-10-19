@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
 using IOTAgriBackend.Data;
@@ -16,12 +17,14 @@ namespace IOTAgriBackend.Services;
 public class MqttIngestionService : BackgroundService
 {
     private const string PumpStatusTopicFilter = "devices/+/pump-status";
+    private const string LightStatusTopicFilter = "devices/+/light-status";
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IConfiguration _configuration;
     private readonly ILogger<MqttIngestionService> _logger;
     private readonly IMqttClient _mqttClient;
+    private readonly ConcurrentDictionary<string, LightStatusResponse> _lightStatuses = new();
 
     public bool IsConnected => _mqttClient.IsConnected;
 
@@ -78,6 +81,7 @@ public class MqttIngestionService : BackgroundService
                         .CreateSubscribeOptionsBuilder()
                         .WithTopicFilter(readingsTopicFilter)
                         .WithTopicFilter(PumpStatusTopicFilter)
+                        .WithTopicFilter(LightStatusTopicFilter)
                         .Build();
 
                     await _mqttClient.SubscribeAsync(subscribeOptions, stoppingToken);
@@ -142,6 +146,12 @@ public class MqttIngestionService : BackgroundService
             if (segments[2] == "pump-status")
             {
                 await ProcessPumpStatusAsync(deviceKey, payloadBytes, topic);
+                return;
+            }
+
+            if (segments[2] == "light-status")
+            {
+                ProcessLightStatus(deviceKey, payloadBytes, topic);
             }
         }
         catch (Exception ex)
@@ -166,7 +176,20 @@ public class MqttIngestionService : BackgroundService
         await _mqttClient.PublishAsync(message, cancellationToken);
     }
 
-    public async Task PublishLightCommandAsync(string deviceKey, Guid commandId, bool isOn, CancellationToken cancellationToken)
+    public Task PublishLightCommandAsync(
+        string deviceKey,
+        Guid commandId,
+        bool isOn,
+        CancellationToken cancellationToken) =>
+        PublishLightCommandAsync(
+            deviceKey,
+            new LightCommandRequest(commandId, isOn),
+            cancellationToken);
+
+    public async Task PublishLightCommandAsync(
+        string deviceKey,
+        LightCommandRequest command,
+        CancellationToken cancellationToken)
     {
         if (!_mqttClient.IsConnected)
         {
@@ -175,12 +198,17 @@ public class MqttIngestionService : BackgroundService
 
         var message = new MqttApplicationMessageBuilder()
             .WithTopic($"devices/{deviceKey}/commands/light")
-            .WithPayload(JsonSerializer.Serialize(new LightCommandMessage(commandId, isOn), JsonOptions))
+            .WithPayload(JsonSerializer.Serialize(new LightCommandMessage(command.CommandId, command.IsOn), JsonOptions))
             .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
             .Build();
 
         await _mqttClient.PublishAsync(message, cancellationToken);
     }
+
+    public LightStatusResponse GetLightStatus(string deviceKey) =>
+        _lightStatuses.TryGetValue(deviceKey, out var status)
+            ? status
+            : new LightStatusResponse(false, null, false);
 
     private async Task ProcessReadingAsync(string deviceKey, byte[] payloadBytes)
     {
@@ -317,6 +345,24 @@ public class MqttIngestionService : BackgroundService
         }
 
         await db.SaveChangesAsync();
+    }
+
+    private void ProcessLightStatus(string deviceKey, byte[] payloadBytes, string topic)
+    {
+        if (payloadBytes.Length > 1024)
+        {
+            _logger.LogWarning("Ignored oversized light status on topic {Topic}.", topic);
+            return;
+        }
+
+        var status = JsonSerializer.Deserialize<LightStatusMessage>(Encoding.UTF8.GetString(payloadBytes), JsonOptions);
+        if (status is null || !status.WasSuccessful)
+        {
+            _logger.LogWarning("Light command was rejected on topic {Topic}: {Reason}", topic, status?.Reason);
+            return;
+        }
+
+        _lightStatuses[deviceKey] = new LightStatusResponse(status.IsOn, DateTime.UtcNow, true);
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)

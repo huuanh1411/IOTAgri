@@ -1,10 +1,11 @@
-  import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../models/device.dart';
 import '../../models/pump_schedule.dart';
 import '../../services/api_service.dart';
+import '../../utils/l10n.dart';
 
 enum SchedulePreset {
   seedlings('Cây giống', 10, 15),
@@ -86,17 +87,17 @@ class _CupertinoPumpSchedulesScreenState
     final confirm = await showCupertinoDialog<bool>(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Xác nhận xóa'),
-        content: const Text('Bạn có chắc muốn xóa lịch trình này?'),
+        title: Text(context.l10n.confirmDeletion),
+        content: Text(context.l10n.deleteScheduleConfirmation),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Hủy'),
+            child: Text(context.l10n.cancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Xóa'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -111,12 +112,12 @@ class _CupertinoPumpSchedulesScreenState
           showCupertinoDialog(
             context: context,
             builder: (context) => CupertinoAlertDialog(
-              title: const Text('Lỗi'),
-              content: Text('Không thể xóa: $e'),
+              title: Text(context.l10n.error),
+              content: Text(context.l10n.deleteScheduleFailed(e.toString())),
               actions: [
                 CupertinoDialogAction(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Đã hiểu'),
+                  child: Text(context.l10n.dismiss),
                 ),
               ],
             ),
@@ -133,7 +134,7 @@ class _CupertinoPumpSchedulesScreenState
       navigationBar: CupertinoNavigationBar(
         backgroundColor: AppColors.background,
         border: null,
-        middle: Text('Lịch tưới - ${widget.device.name}'),
+        middle: Text(context.l10n.wateringScheduleFor(widget.device.name)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -175,7 +176,7 @@ class _CupertinoPumpSchedulesScreenState
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Không thể tải lịch trình',
+                        context.l10n.scheduleLoadError,
                         style: TextStyle(
                           color: AppColors.primaryText,
                           fontSize: 18,
@@ -185,14 +186,12 @@ class _CupertinoPumpSchedulesScreenState
                       const SizedBox(height: 8),
                       Text(
                         _errorMessage!,
-                        style: TextStyle(
-                          color: AppColors.secondaryText,
-                        ),
+                        style: TextStyle(color: AppColors.secondaryText),
                       ),
                       const SizedBox(height: 16),
                       CupertinoButton.filled(
                         onPressed: _loadSchedules,
-                        child: const Text('Thử lại'),
+                        child: Text(context.l10n.retry),
                       ),
                     ],
                   ),
@@ -212,7 +211,7 @@ class _CupertinoPumpSchedulesScreenState
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Chưa có lịch trình',
+                        context.l10n.noSchedulesYet,
                         style: TextStyle(
                           color: AppColors.primaryText,
                           fontSize: 18,
@@ -221,15 +220,13 @@ class _CupertinoPumpSchedulesScreenState
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Thêm lịch trình tưới tự động',
-                        style: TextStyle(
-                          color: AppColors.secondaryText,
-                        ),
+                        context.l10n.addAutomaticWateringSchedule,
+                        style: TextStyle(color: AppColors.secondaryText),
                       ),
                       const SizedBox(height: 16),
                       CupertinoButton.filled(
                         onPressed: _addSchedule,
-                        child: const Text('Thêm lịch trình'),
+                        child: Text(context.l10n.addScheduleTitle),
                       ),
                     ],
                   ),
@@ -314,28 +311,19 @@ class _ScheduleCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'Thời gian phun: ${schedule.durationSeconds} giây',
-            style: TextStyle(
-              color: AppColors.primaryText,
-              fontSize: 15,
-            ),
+            style: TextStyle(color: AppColors.primaryText, fontSize: 15),
           ),
           if (schedule.intervalMinutes != null) ...[
             const SizedBox(height: 4),
             Text(
               'Lặp lại mỗi ${schedule.intervalMinutes} phút',
-              style: TextStyle(
-                color: AppColors.secondaryText,
-                fontSize: 13,
-              ),
+              style: TextStyle(color: AppColors.secondaryText, fontSize: 13),
             ),
           ],
           const SizedBox(height: 8),
           Text(
             'Ngày: ${_formatDays(schedule.weekdayMask)}',
-            style: TextStyle(
-              color: AppColors.secondaryText,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: AppColors.secondaryText, fontSize: 13),
           ),
         ],
       ),
@@ -481,7 +469,8 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
     });
 
     try {
-      String wallClock(DateTime time) => '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00';
+      String wallClock(DateTime time) =>
+          '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:00';
       final startTimeStr = wallClock(_startTime);
       final endTimeStr = wallClock(_endTime);
 
@@ -581,7 +570,9 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                 padding: const EdgeInsets.fromLTRB(18, 12, 18, 32),
                 sliver: SliverList.list(
                   children: [
-                    const Text('Giờ thiết bị: Asia/Ho_Chi_Minh. Lịch ưu tiên hơn điều khiển thủ công.'),
+                    const Text(
+                      'Giờ thiết bị: Asia/Ho_Chi_Minh. Lịch ưu tiên hơn điều khiển thủ công.',
+                    ),
                     const SizedBox(height: 12),
                     // Preset chips
                     const Text(
@@ -934,10 +925,7 @@ class _TimeButton extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
-              color: AppColors.secondaryText,
-              fontSize: 11,
-            ),
+            style: TextStyle(color: AppColors.secondaryText, fontSize: 11),
           ),
           const SizedBox(height: 4),
           Text(

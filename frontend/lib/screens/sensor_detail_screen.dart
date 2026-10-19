@@ -13,6 +13,7 @@ import '../models/history_data.dart';
 import '../providers/data_providers.dart';
 import '../services/api_service.dart';
 import '../services/history_repository.dart';
+import '../utils/l10n.dart';
 
 class SensorDetailScreen extends ConsumerWidget {
   const SensorDetailScreen({required this.metric, super.key});
@@ -63,7 +64,7 @@ class SensorDetailScreen extends ConsumerWidget {
                   style: const TextStyle(color: AppColors.secondaryText),
                 ),
                 const SizedBox(height: 20),
-                _DetailRow(label: 'Khoảng phù hợp', value: detail.idealRange),
+                _DetailRow(label: context.l10n.idealRange, value: detail.idealRange),
                 const Divider(height: 28),
                 _SensorHistoryCard(
                   title: detail.historyTitle,
@@ -180,7 +181,7 @@ class _SensorHistoryCardState extends State<_SensorHistoryCard> {
               ),
             ),
             PopupMenuButton<HistoryRange>(
-              tooltip: 'Chọn khoảng thời gian',
+              tooltip: context.l10n.selectTimeRange,
               initialValue: _range,
               onSelected: _selectRange,
               itemBuilder: (_) => HistoryRange.values
@@ -212,9 +213,9 @@ class _SensorHistoryCardState extends State<_SensorHistoryCard> {
           children: [
             Icon(Icons.trending_up, size: 17, color: widget.color),
             const SizedBox(width: 6),
-            const Text(
-              'Theo dõi xu hướng thay đổi',
-              style: TextStyle(color: AppColors.secondaryText),
+          Text(
+              context.l10n.trendDescription,
+              style: const TextStyle(color: AppColors.secondaryText),
             ),
           ],
         ),
@@ -230,16 +231,16 @@ class _SensorHistoryCardState extends State<_SensorHistoryCard> {
               if (snapshot.hasError) {
                 return _HistoryMessage(
                   icon: Icons.error_outline,
-                  message: 'Không thể tải lịch sử cảm biến.',
-                  actionLabel: 'Thử lại',
+                  message: context.l10n.sensorHistoryLoadError,
+                  actionLabel: context.l10n.retry,
                   onAction: _retry,
                 );
               }
               final history = snapshot.data!;
               if (history.samples.isEmpty) {
-                return const _HistoryMessage(
+              return _HistoryMessage(
                   icon: Icons.show_chart,
-                  message: 'Chưa có dữ liệu trong khoảng thời gian này.',
+                message: context.l10n.noSensorHistory,
                 );
               }
               return _SensorLineChart(
@@ -563,7 +564,7 @@ class _ActuatorControlPanelState extends State<_ActuatorControlPanel> {
   void _toggleActuator(bool enabled) {
     if (enabled && (widget.waterLevel ?? 100) < 30) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Không thể bật bơm khi mực nước thấp.')),
+        SnackBar(content: Text(context.l10n.cannotStartPumpLowWater)),
       );
       return;
     }
@@ -591,7 +592,7 @@ class _ActuatorControlPanelState extends State<_ActuatorControlPanel> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Điều khiển ${widget.deviceLabel.toLowerCase()} thủ công',
+              context.l10n.manualControl(widget.deviceLabel.toLowerCase()),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
             AnimatedScale(
@@ -611,38 +612,38 @@ class _ActuatorControlPanelState extends State<_ActuatorControlPanel> {
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                     _running
-                        ? '${widget.deviceLabel} đang bật'
-                        : '${widget.deviceLabel} đang tắt',
+                        ? context.l10n.deviceOn(widget.deviceLabel)
+                        : context.l10n.deviceOff(widget.deviceLabel),
                   ),
-                  subtitle: const Text('Chỉ mô phỏng trên giao diện frontend'),
+                  subtitle: Text(context.l10n.frontendSimulationOnly),
                   value: _running,
                   onChanged: _toggleActuator,
                 ),
               ),
             ),
             if ((widget.waterLevel ?? 100) < 30)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(bottom: 12),
                 child: Text(
-                  'Mức nước dưới 30%: chỉ có thể tắt bơm.',
-                  style: TextStyle(color: Colors.redAccent),
+                  context.l10n.lowWaterPumpOnlyOff,
+                  style: const TextStyle(color: Colors.redAccent),
                 ),
               ),
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Lịch tự động (mô phỏng)'),
+                Text(context.l10n.automaticScheduleSimulation),
                 TextButton.icon(
                   onPressed: _addSchedule,
                   icon: const Icon(Icons.add),
-                  label: const Text('Thêm lịch'),
+                  label: Text(context.l10n.addSchedule),
                 ),
               ],
             ),
             if (_schedules.isEmpty)
-              const Text(
-                'Chưa có lịch. Chọn “Thêm lịch” để xem lịch trên giao diện.',
+              Text(
+                context.l10n.noSchedules,
               )
             else
               ..._schedules.map((schedule) {
@@ -734,8 +735,8 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
         interval <= 0 ||
         _selectedDays.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Nhập thời gian hợp lệ và chọn ít nhất một ngày.'),
+        SnackBar(
+          content: Text(context.l10n.invalidSchedule),
         ),
       );
       return;

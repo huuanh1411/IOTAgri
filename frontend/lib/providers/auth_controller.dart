@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/models/user.dart';
 
+const _keepAuthError = Object();
+
 /// State representing authentication status.
 class AuthState {
   final User? user;
@@ -21,12 +23,12 @@ class AuthState {
     User? user,
     bool? isLoading,
     bool? isInitializing,
-    String? error,
+    Object? error = _keepAuthError,
   }) => AuthState(
     user: user ?? this.user,
     isLoading: isLoading ?? this.isLoading,
     isInitializing: isInitializing ?? this.isInitializing,
-    error: error,
+    error: identical(error, _keepAuthError) ? this.error : error as String?,
   );
 }
 
@@ -53,7 +55,7 @@ class AuthController extends StateNotifier<AuthState> {
       final user = await _repo.login(email: email, password: password);
       state = state.copyWith(user: user);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: _displayMessage(e));
     } finally {
       state = state.copyWith(isLoading: false);
     }
@@ -73,7 +75,7 @@ class AuthController extends StateNotifier<AuthState> {
       );
       state = state.copyWith(user: user);
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      state = state.copyWith(error: _displayMessage(e));
     } finally {
       state = state.copyWith(isLoading: false);
     }
@@ -87,6 +89,10 @@ class AuthController extends StateNotifier<AuthState> {
 
   void clearError() {
     state = state.copyWith(error: null);
+  }
+
+  String _displayMessage(Object error) {
+    return error.toString().replaceFirst('Exception: ', '');
   }
 }
 

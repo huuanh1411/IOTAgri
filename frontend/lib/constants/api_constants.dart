@@ -40,6 +40,10 @@ class ApiConstants {
   static String lightSchedule(String id, String scheduleId) =>
       '/api/devices/$id/light-schedules/$scheduleId';
 
+  // Light control endpoints
+  static String lightCommands(String id) => '/api/devices/$id/light/commands';
+  static String lightStatus(String id) => '/api/devices/$id/light/status';
+
   // Alert endpoints
   static String alertSettings(String id) => '/api/devices/$id/alert-settings';
   static String alerts(String id) => '/api/devices/$id/alerts';

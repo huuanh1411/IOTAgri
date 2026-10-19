@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme/app_colors.dart';
+import '../core/widgets/page_header.dart';
 import '../data/models.dart';
 import '../providers/data_providers.dart';
+import '../utils/l10n.dart';
 
 final resolvedAlertIdsProvider = StateProvider<Set<String>>(
   (ref) => <String>{},
@@ -51,25 +53,22 @@ class _AlertCenterTabScreenState extends ConsumerState<AlertCenterTabScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 24, 20, 16),
-              child: Text(
-                'Cảnh báo',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
-              ),
-            ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: TabBar(
-                controller: _tabController,
-                labelColor: AppColors.forestGreen,
-                unselectedLabelColor: AppColors.secondaryText,
-                indicatorColor: AppColors.forestGreen,
-                tabs: const [
-                  Tab(text: 'Tất cả'),
-                  Tab(text: 'Chưa xử lý'),
-                  Tab(text: 'Đã xử lý'),
-                ],
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+              child: PageHeader(
+                title: context.l10n.alerts,
+                subtitle: context.l10n.alertsSubtitle,
+                bottomContent: TabBar(
+                  controller: _tabController,
+                  labelColor: AppColors.forestGreen,
+                  unselectedLabelColor: AppColors.secondaryText,
+                  indicatorColor: AppColors.forestGreen,
+                  tabs: [
+                    Tab(text: context.l10n.all),
+                    Tab(text: context.l10n.unresolved),
+                    Tab(text: context.l10n.resolved),
+                  ],
+                ),
               ),
             ),
             Expanded(
@@ -80,18 +79,19 @@ class _AlertCenterTabScreenState extends ConsumerState<AlertCenterTabScreen>
                     alerts: alerts,
                     resolvedIds: resolvedIds,
                     onResolve: _resolve,
+                    emptyMessage: context.l10n.noAlerts,
                   ),
                   _AlertList(
                     alerts: unresolved,
                     resolvedIds: resolvedIds,
                     onResolve: _resolve,
-                    emptyMessage: 'Không có cảnh báo chưa xử lý.',
+                    emptyMessage: context.l10n.noUnresolvedAlerts,
                   ),
                   _AlertList(
                     alerts: resolved,
                     resolvedIds: resolvedIds,
                     onResolve: _resolve,
-                    emptyMessage: 'Chưa có cảnh báo đã xử lý.',
+                    emptyMessage: context.l10n.noResolvedAlerts,
                   ),
                 ],
               ),
@@ -113,7 +113,7 @@ class _AlertList extends StatelessWidget {
     required this.alerts,
     required this.resolvedIds,
     required this.onResolve,
-    this.emptyMessage = 'Hiện chưa có cảnh báo.',
+    required this.emptyMessage,
   });
 
   final List<AppAlert> alerts;
@@ -174,14 +174,14 @@ class _AlertList extends StatelessWidget {
                       Align(
                         alignment: Alignment.centerRight,
                         child: isResolved
-                            ? const Chip(
-                                label: Text('Đã xử lý'),
+                            ? Chip(
+                                label: Text(context.l10n.resolved),
                                 avatar: Icon(Icons.check_circle_outline, size: 18),
                               )
                             : OutlinedButton.icon(
                                 onPressed: () => onResolve(alert.id),
                                 icon: const Icon(Icons.check, size: 18),
-                                label: const Text('Đánh dấu đã xử lý'),
+                                label: Text(context.l10n.markResolved),
                               ),
                       ),
                     ],

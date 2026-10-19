@@ -49,6 +49,22 @@ services:
       mosquitto:
         condition: service_started
 
+  device-simulator:
+    image: eclipse-mosquitto:2
+    profiles: ["device-simulator"]
+    command: ["/bin/sh", "/simulator.sh"]
+    environment:
+      SIMULATOR_DEVICE_KEY: ${MOCK_DEVICE_KEY:-docker-mock-cac-device}
+      SIMULATOR_READING_INTERVAL_SECONDS: ${SIMULATOR_READING_INTERVAL_SECONDS:-5}
+    volumes:
+      - ./tools/device-simulator.sh:/simulator.sh:ro
+    depends_on:
+      api:
+        condition: service_started
+      mosquitto:
+        condition: service_started
+    restart: unless-stopped
+
   api:
     build: .
     ports:
@@ -81,6 +97,10 @@ services:
       PumpScheduling__Enabled: ${PUMP_SCHEDULING_ENABLED:-false}
       PumpScheduling__PollSeconds: ${PUMP_SCHEDULING_POLL_SECONDS:-30}
       PumpScheduling__DueWindowSeconds: ${PUMP_SCHEDULING_DUE_WINDOW_SECONDS:-90}
+      MockDevice__Enabled: ${MOCK_DEVICE_ENABLED:-false}
+      MockDevice__OwnerEmail: ${MOCK_DEVICE_OWNER_EMAIL:-}
+      MockDevice__DeviceKey: ${MOCK_DEVICE_KEY:-}
+      MockDevice__Name: ${MOCK_DEVICE_NAME:-Aerogreen Docker Mock}
     depends_on:
       postgres:
         condition: service_healthy

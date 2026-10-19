@@ -38,13 +38,13 @@ class SettingsScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               PageHeader(
-                chip: SectionChip(label: context.tr('customize')),
-                title: context.tr('settings'),
+                chip: SectionChip(label: context.l10n.customize),
+                title: context.l10n.settings,
                 subtitle: '',
               ),
               const SizedBox(height: 24),
               Text(
-                context.tr('language'),
+                context.l10n.language,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -71,7 +71,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                context.tr('notifications'),
+                context.l10n.notifications,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -79,28 +79,28 @@ class SettingsScreen extends ConsumerWidget {
                 child: Column(
                   children: [
                     SwitchListTile(
-                      title: Text(context.tr('low_water_alert')),
+                      title: Text(context.l10n.lowWaterAlert),
                       value: alertSettings.lowWaterAlert,
                       onChanged: (value) =>
                           alertNotifier.update(lowWaterAlert: value),
                     ),
                     const Divider(height: 1),
                     SwitchListTile(
-                      title: Text(context.tr('low_nutrient_alert')),
+                      title: Text(context.l10n.lowNutrientAlert),
                       value: alertSettings.lowNutrientAlert,
                       onChanged: (value) =>
                           alertNotifier.update(lowNutrientAlert: value),
                     ),
                     const Divider(height: 1),
                     SwitchListTile(
-                      title: Text(context.tr('temperature_alert')),
+                      title: Text(context.l10n.temperatureAlert),
                       value: alertSettings.temperatureAlert,
                       onChanged: (value) =>
                           alertNotifier.update(temperatureAlert: value),
                     ),
                     const Divider(height: 1),
                     SwitchListTile(
-                      title: Text(context.tr('harvest_reminder')),
+                      title: Text(context.l10n.harvestReminder),
                       value: alertSettings.harvestReminder,
                       onChanged: (value) =>
                           alertNotifier.update(harvestReminder: value),

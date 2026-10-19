@@ -17,6 +17,7 @@
   import '../../screens/alerts/alerts_screen.dart';
   import '../../services/api_service.dart';
   import 'pump_schedules_screen.dart';
+  import '../../utils/l10n.dart';
 
   enum PumpMode { auto, manual }
 
@@ -48,6 +49,8 @@
     Map<String, dynamic> _alertSettings = const {};
     bool _isLoading = true;
     bool _isSendingCommand = false;
+    bool _isLightOn = false;
+    bool _isSendingLightCommand = false;
     String? _errorMessage;
     DateTime? _lastUpdated;
     Timer? _refreshTimer;
@@ -99,6 +102,7 @@
           _apiService.getPumpSchedules(widget.device.id),
           _apiService.getAlerts(widget.device.id, status: 'active'),
           _apiService.getAlertSettings(widget.device.id),
+          _apiService.getLightStatus(widget.device.id),
         ]);
         if (!mounted) return;
 
@@ -126,6 +130,8 @@
               .map((item) => DeviceAlert.fromJson(item as Map<String, dynamic>))
               .toList();
           _alertSettings = results[5] as Map<String, dynamic>;
+          final lightStatus = results[6] as Map<String, dynamic>;
+          _isLightOn = lightStatus['isOn'] as bool? ?? false;
           _lastUpdated = readings.isNotEmpty
               ? DateTime.tryParse(readings.first.recordedAt)
               : DateTime.tryParse(_device.lastSeenAt ?? '');
@@ -210,7 +216,7 @@
       showCupertinoDialog<void>(
         context: context,
         builder: (dialogContext) => CupertinoAlertDialog(
-          title: const Text('Chế độ Thủ công'),
+          title: Text(context.l10n.manualMode),
           content: Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
@@ -220,14 +226,14 @@
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Giữ Thủ công'),
+              child: Text(context.l10n.keepManual),
             ),
             CupertinoDialogAction(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
                 setState(() => _pumpMode = PumpMode.auto);
               },
-              child: const Text('Chuyển Tự động'),
+              child: Text(context.l10n.switchToAuto),
             ),
           ],
         ),
@@ -262,7 +268,7 @@
       if (isStartingPump &&
           waterLevel != null &&
           waterLevel < lowWaterThreshold) {
-        _showMessage('Không thể bật bơm khi mực nước đang thấp.');
+        _showMessage(context.l10n.cannotStartPumpLowWaterDetail);
         return;
       }
       setState(() => _isSendingCommand = true);
@@ -281,9 +287,30 @@
           HapticFeedback.lightImpact();
         }
       } catch (error) {
-        if (mounted) _showMessage('Không thể gửi lệnh: $error');
+        if (mounted) {
+          _showMessage(context.l10n.cannotSendCommand(error.toString()));
+        }
       } finally {
         if (mounted) setState(() => _isSendingCommand = false);
+      }
+    }
+
+    Future<void> _sendLightCommand(bool isOn) async {
+      if (!_device.isOnline || _isSendingLightCommand) return;
+      setState(() => _isSendingLightCommand = true);
+      try {
+        await _apiService.sendLightCommand(
+          _device.id,
+          ApiService.generatePumpCommandId(),
+          isOn,
+        );
+        if (mounted) setState(() => _isLightOn = isOn);
+      } catch (error) {
+        if (mounted) {
+          _showMessage('Không thể gửi lệnh đèn: $error');
+        }
+      } finally {
+        if (mounted) setState(() => _isSendingLightCommand = false);
       }
     }
 
@@ -292,15 +319,15 @@
         final confirmed = await showCupertinoDialog<bool>(
           context: context,
           builder: (dialogContext) => CupertinoAlertDialog(
-            title: const Text('Chuyển sang Thủ công'),
-            content: const Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: Text('Lịch tự động sẽ tạm dừng. Bạn có chắc?'),
+            title: Text(context.l10n.switchToManual),
+            content: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(context.l10n.autoScheduleWillPause),
             ),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: const Text('Hủy'),
+                child: Text(context.l10n.cancel),
               ),
               CupertinoDialogAction(
                 onPressed: () => Navigator.of(dialogContext).pop(true),
@@ -372,29 +399,29 @@
       final duration = await showCupertinoModalPopup<int>(
         context: context,
         builder: (popupContext) => CupertinoActionSheet(
-          title: const Text('Chọn thời gian chạy'),
-          message: const Text('Bơm sẽ tự động tắt sau thời gian đã chọn'),
+          title: Text(context.l10n.selectRunDuration),
+          message: Text(context.l10n.pumpAutoStop),
           actions: [
             CupertinoActionSheetAction(
               onPressed: () => Navigator.of(popupContext).pop(30),
-              child: const Text('30 giây'),
+              child: Text(context.l10n.seconds30),
             ),
             CupertinoActionSheetAction(
               onPressed: () => Navigator.of(popupContext).pop(60),
-              child: const Text('1 phút'),
+              child: Text(context.l10n.minute1),
             ),
             CupertinoActionSheetAction(
               onPressed: () => Navigator.of(popupContext).pop(300),
-              child: const Text('5 phút'),
+              child: Text(context.l10n.minutes5),
             ),
             CupertinoActionSheetAction(
               onPressed: () => Navigator.of(popupContext).pop(600),
-              child: const Text('10 phút'),
+              child: Text(context.l10n.minutes10),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.of(popupContext).pop(),
-            child: const Text('Hủy'),
+            child: Text(context.l10n.cancel),
           ),
         ),
       );
@@ -516,7 +543,7 @@
             backgroundColor: AppColors.background,
             border: null,
             leading: _returnButton(context),
-            middle: Text('Thiết bị'),
+            middle: Text(context.l10n.device),
           ),
           child: Center(child: CupertinoActivityIndicator(radius: 14)),
         );
@@ -576,8 +603,8 @@
                     ),
                     const SizedBox(height: 24),
                     _DetailSectionTitle(
-                      title: 'Cảm biến',
-                      subtitle: reading == null ? 'Không có dữ liệu mới' : null,
+                      title: context.l10n.sensors,
+                      subtitle: reading == null ? context.l10n.noRecentData : null,
                     ),
                     const SizedBox(height: 12),
                     SensorGrid(
@@ -604,6 +631,13 @@
                       onModeChange: _switchPumpMode,
                       onManualToggle: _showManualDurationDialog,
                       onStop: () => _sendPumpCommand(),
+                    ),
+                    const SizedBox(height: 16),
+                    LightControlCard(
+                      isOnline: _device.isOnline,
+                      isOn: _isLightOn,
+                      isSending: _isSendingLightCommand,
+                      onChanged: _sendLightCommand,
                     ),
                     const SizedBox(height: 16),
                     ScheduleSummaryCard(
@@ -695,7 +729,9 @@
                 const SizedBox(width: 7),
                 Expanded(
                   child: Text(
-                    online ? 'Kết nối ổn định' : 'Thiết bị ngoại tuyến',
+                    online
+                        ? context.l10n.stableConnection
+                        : context.l10n.deviceOffline,
                     style: TextStyle(
                       color: accent,
                       fontSize: 13,
@@ -1166,6 +1202,78 @@
       }
       return '${minutes.toString().padLeft(2, '0')} phút';
     }
+  }
+
+  class LightControlCard extends StatelessWidget {
+    final bool isOnline;
+    final bool isOn;
+    final bool isSending;
+    final ValueChanged<bool> onChanged;
+
+    const LightControlCard({
+      super.key,
+      required this.isOnline,
+      required this.isOn,
+      required this.isSending,
+      required this.onChanged,
+    });
+
+    @override
+    Widget build(BuildContext context) => _DetailSurface(
+      child: Row(
+        children: [
+          AnimatedContainer(
+            duration: AppMotion.duration(context, AppMotion.toggle),
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: isOn
+                  ? CupertinoColors.systemYellow.withValues(alpha: 0.18)
+                  : CupertinoColors.systemGrey6,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isOn
+                  ? CupertinoIcons.lightbulb_fill
+                  : CupertinoIcons.lightbulb,
+              color: isOn
+                  ? CupertinoColors.systemYellow
+                  : CupertinoColors.systemGrey,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _DetailSectionTitle(title: 'Điều khiển đèn'),
+                const SizedBox(height: 3),
+                Text(
+                  !isOnline
+                      ? 'Không khả dụng khi ngoại tuyến'
+                      : isSending
+                      ? 'Đang gửi lệnh…'
+                      : isOn
+                      ? 'Đèn đang bật'
+                      : 'Đèn đang tắt',
+                  style: const TextStyle(
+                    color: CupertinoColors.secondaryLabel,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (isSending)
+            const CupertinoActivityIndicator(radius: 9)
+          else
+            CupertinoSwitch(
+              value: isOn,
+              onChanged: isOnline ? onChanged : null,
+            ),
+        ],
+      ),
+    );
   }
 
   class ScheduleSummaryCard extends StatelessWidget {

@@ -137,6 +137,7 @@ await using (var scope = app.Services.CreateAsyncScope())
 }
 await RoleSeeder.SeedAsync(app.Services, app.Configuration);
 await AdminBootstrapper.SeedAsync(app.Services, app.Configuration);
+await MockDeviceSeeder.SeedAsync(app.Services, app.Configuration);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

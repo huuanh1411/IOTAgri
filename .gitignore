@@ -8,6 +8,7 @@ deploy/mosquitto-certs/*.key
 .compose-start.stderr.log
 .compose-start.stdout.log
 .run/
+/debug.log
 # Firmware build artifacts
 .build/
 .pio/

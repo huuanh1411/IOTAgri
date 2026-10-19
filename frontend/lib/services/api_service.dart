@@ -526,6 +526,43 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> sendLightCommand(
+    String deviceId,
+    String commandId,
+    bool isOn,
+  ) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.lightCommands(deviceId)}',
+        ),
+        headers: headers,
+        body: jsonEncode({'commandId': commandId, 'isOn': isOn}),
+      ),
+    );
+
+    if (response.statusCode == 202) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to send light command: ${response.body}');
+  }
+
+  Future<Map<String, dynamic>> getLightStatus(String deviceId) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.lightStatus(deviceId)}',
+        ),
+        headers: headers,
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+    throw Exception('Failed to load light status: ${response.body}');
+  }
+
   Future<List<dynamic>> getPumpSchedules(String deviceId) async {
     final response = await _authenticatedRequest(
       (headers) => _client.get(
