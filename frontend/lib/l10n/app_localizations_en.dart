@@ -54,8 +54,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goodEvening => 'Good evening';
 
   @override
+  String get goodNight => 'Good night';
+
+  @override
   String gardenOf(String name) {
     return '$name\'s Garden';
+  }
+
+  @override
+  String gardenOfEndingWithS(String name) {
+    return '$name\' Garden';
   }
 
   @override

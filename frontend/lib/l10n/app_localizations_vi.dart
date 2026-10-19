@@ -54,7 +54,15 @@ class AppLocalizationsVi extends AppLocalizations {
   String get goodEvening => 'Chào buổi tối';
 
   @override
+  String get goodNight => 'Chúc ngủ ngon';
+
+  @override
   String gardenOf(String name) {
+    return 'Vườn của $name';
+  }
+
+  @override
+  String gardenOfEndingWithS(String name) {
     return 'Vườn của $name';
   }
 

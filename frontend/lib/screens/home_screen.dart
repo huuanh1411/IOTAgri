@@ -20,14 +20,28 @@ import '../utils/l10n.dart';
 
 /// Home tab UI that matches the design (Phase 4).
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.fixedClock});
+
+  final DateTime? fixedClock;
 
   // Greeting based on hour of day.
   String _greeting(BuildContext context) {
-    final hour = TimeOfDay.now().hour;
-    if (hour < 12) return context.l10n.goodMorning;
-    if (hour < 18) return context.l10n.goodAfternoon;
-    return context.l10n.goodEvening;
+    final hour = (fixedClock ?? DateTime.now()).hour;
+    if (hour >= 5 && hour < 12) return context.l10n.goodMorning;
+    if (hour >= 12 && hour < 18) return context.l10n.goodAfternoon;
+    if (hour >= 18 && hour < 22) return context.l10n.goodEvening;
+    return context.l10n.goodNight;
+  }
+
+  String _gardenTitle(BuildContext context, String fullName) {
+    final trimmed = fullName.trim();
+    if (trimmed.isEmpty) return context.l10n.gardenTitle;
+    final firstName = trimmed.split(' ').first;
+    if (firstName.isEmpty) return context.l10n.gardenTitle;
+    if (firstName.endsWith('s') || firstName.endsWith('S')) {
+      return context.l10n.gardenOfEndingWithS(firstName);
+    }
+    return context.l10n.gardenOf(firstName);
   }
 
   @override
@@ -54,7 +68,7 @@ class HomeScreen extends ConsumerWidget {
                           color: AppColors.mutedSage,
                         ),
                       ),
-                      title: context.l10n.gardenTitle,
+                      title: _gardenTitle(context, user.fullName),
                       subtitle: context.l10n.gardenSubtitle,
                       trailingAction: CircleAvatar(
                         radius: 24,
@@ -360,13 +374,18 @@ class _CareScheduleCard extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  context.l10n.careScheduleFor(plant.name),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                Expanded(
+                  child: Text(
+                    context.l10n.careScheduleFor(plant.name),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 StatusPill(
                   label: isSmart
                       ? context.l10n.automaticOptimized

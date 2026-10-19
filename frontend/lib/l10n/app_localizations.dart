@@ -188,11 +188,23 @@ abstract class AppLocalizations {
   /// **'Good evening'**
   String get goodEvening;
 
+  /// No description provided for @goodNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Good night'**
+  String get goodNight;
+
   /// No description provided for @gardenOf.
   ///
   /// In en, this message translates to:
   /// **'{name}\'s Garden'**
   String gardenOf(String name);
+
+  /// No description provided for @gardenOfEndingWithS.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\' Garden'**
+  String gardenOfEndingWithS(String name);
 
   /// No description provided for @gardenTitle.
   ///
