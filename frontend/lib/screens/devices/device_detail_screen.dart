@@ -11,6 +11,7 @@ import '../../widgets/custom_cards.dart';
 import '../../widgets/custom_buttons.dart';
 import '../sensors/sensor_history_screen.dart';
 import '../alerts/alerts_screen.dart';
+import '../lights/light_schedules_screen.dart';
 import '../pumps/pump_schedules_screen.dart';
 import 'provisioning_code_screen.dart';
 
@@ -373,6 +374,19 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                 ),
               );
             },
+            isFullWidth: true,
+          ),
+          const SizedBox(height: 12),
+          CustomElevatedButton(
+            text: 'Quản lý lịch đèn',
+            icon: Icons.lightbulb_outline,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    LightSchedulesScreen(device: widget.device),
+              ),
+            ),
             isFullWidth: true,
           ),
         ],

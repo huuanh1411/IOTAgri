@@ -127,6 +127,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddSingleton<MqttIngestionService>();
 builder.Services.AddHostedService(services => services.GetRequiredService<MqttIngestionService>());
 builder.Services.AddHostedService<PumpScheduleDispatchService>();
+builder.Services.AddHostedService<LightScheduleDispatchService>();
 
 var app = builder.Build();
 
@@ -134,7 +135,7 @@ await using (var scope = app.Services.CreateAsyncScope())
 {
     await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
 }
-await RoleSeeder.SeedAsync(app.Services);
+await RoleSeeder.SeedAsync(app.Services, app.Configuration);
 await AdminBootstrapper.SeedAsync(app.Services, app.Configuration);
 
 // Configure the HTTP request pipeline.

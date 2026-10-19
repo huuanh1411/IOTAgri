@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/api_constants.dart';
 import '../models/user.dart';
+import '../models/light_schedule.dart';
 import '../models/pump_schedule.dart';
 
 class _RefreshTokenRejected implements Exception {
@@ -505,7 +506,8 @@ class ApiService {
     final queryParams = <String, String>{
       'page': page.toString(),
       'pageSize': pageSize.toString(),
-      if (rangeHours != null) 'from': now.subtract(Duration(hours: rangeHours)).toIso8601String(),
+      if (rangeHours != null)
+        'from': now.subtract(Duration(hours: rangeHours)).toIso8601String(),
       if (rangeHours != null) 'to': now.toIso8601String(),
     };
 
@@ -585,10 +587,13 @@ class ApiService {
     // Recurrence is a device wall clock, not a DateTime/phone-zone instant.
     String wallClock(String value) {
       if (!RegExp(r'^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$').hasMatch(value)) {
-        throw const FormatException('Schedule time must be HH:mm:ss in Asia/Ho_Chi_Minh');
+        throw const FormatException(
+          'Schedule time must be HH:mm:ss in Asia/Ho_Chi_Minh',
+        );
       }
       return value;
     }
+
     final formattedStartTime = wallClock(startTime);
     final formattedEndTime = endTime == null ? null : wallClock(endTime);
     final weekdayMask = daysOfWeek.fold<int>(
@@ -608,8 +613,13 @@ class ApiService {
           'durationSeconds': durationSeconds,
           'endTime': ?formattedEndTime,
           'intervalMinutes': ?intervalMinutes,
-          if (activeFromDate != null) 'activeFromDate': activeFromDate.toIso8601String().substring(0, 10),
-          if (activeUntilDate != null) 'activeUntilDate': activeUntilDate.toIso8601String().substring(0, 10),
+          if (activeFromDate != null)
+            'activeFromDate': activeFromDate.toIso8601String().substring(0, 10),
+          if (activeUntilDate != null)
+            'activeUntilDate': activeUntilDate.toIso8601String().substring(
+              0,
+              10,
+            ),
           'timeZone': 'Asia/Ho_Chi_Minh',
         }),
       ),
@@ -634,6 +644,70 @@ class ApiService {
 
     if (response.statusCode != 204) {
       throw Exception('Failed to delete pump schedule: ${response.body}');
+    }
+  }
+
+  Future<List<LightSchedule>> getLightSchedules(String deviceId) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.lightSchedules(deviceId)}',
+        ),
+        headers: headers,
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load light schedules: ${response.body}');
+    }
+    return (jsonDecode(response.body) as List<dynamic>)
+        .map((item) => LightSchedule.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<LightSchedule> createLightSchedule(
+    String deviceId,
+    String startTime,
+    int durationSeconds,
+    List<int> daysOfWeek,
+  ) async {
+    final weekdayMask = daysOfWeek.fold<int>(
+      0,
+      (mask, day) => mask | (1 << day),
+    );
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.lightSchedules(deviceId)}',
+        ),
+        headers: headers,
+        body: jsonEncode({
+          'isEnabled': true,
+          'weekdayMask': weekdayMask,
+          'startTime': startTime,
+          'durationSeconds': durationSeconds,
+          'timeZone': 'Asia/Ho_Chi_Minh',
+        }),
+      ),
+    );
+    if (response.statusCode != 201) {
+      throw Exception('Failed to create light schedule: ${response.body}');
+    }
+    return LightSchedule.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
+  Future<void> deleteLightSchedule(String deviceId, String scheduleId) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.delete(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.lightSchedule(deviceId, scheduleId)}',
+        ),
+        headers: headers,
+      ),
+    );
+    if (response.statusCode != 204) {
+      throw Exception('Failed to delete light schedule: ${response.body}');
     }
   }
 
@@ -893,17 +967,21 @@ class ApiService {
       ),
     );
     if (response.statusCode == 201) {
-      return _flattenTicketDetail(jsonDecode(response.body) as Map<String, dynamic>);
+      return _flattenTicketDetail(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
     }
     throw Exception('Failed to create support ticket: ${response.body}');
   }
 
   Future<List<Map<String, dynamic>>> getMyTickets({String? status}) async {
-    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tickets}').replace(
-      queryParameters: {
-        if (status != null && status.isNotEmpty && status != 'all') 'status': status,
-      },
-    );
+    final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tickets}')
+        .replace(
+          queryParameters: {
+            if (status != null && status.isNotEmpty && status != 'all')
+              'status': status,
+          },
+        );
     final response = await _authenticatedRequest(
       (headers) => _client.get(uri, headers: headers),
     );
@@ -924,23 +1002,34 @@ class ApiService {
       ),
     );
     if (response.statusCode == 200) {
-      return _flattenTicketDetail(jsonDecode(response.body) as Map<String, dynamic>);
+      return _flattenTicketDetail(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
     }
     throw Exception('Failed to load support ticket: ${response.body}');
   }
 
-  Future<Map<String, dynamic>> replyToMyTicket(String id, String message) async {
+  Future<Map<String, dynamic>> replyToMyTicket(
+    String id,
+    String message,
+  ) async {
     final response = await _authenticatedRequest(
       (headers) => _client.post(
-        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.tickets}/$id/messages'),
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.tickets}/$id/messages',
+        ),
         headers: headers,
         body: jsonEncode({'message': message}),
       ),
     );
     if (response.statusCode == 200) {
-      final ticket = _flattenTicketDetail(jsonDecode(response.body) as Map<String, dynamic>);
+      final ticket = _flattenTicketDetail(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
       final messages = ticket['messages'] as List<dynamic>? ?? const [];
-      if (messages.isNotEmpty) return Map<String, dynamic>.from(messages.last as Map);
+      if (messages.isNotEmpty) {
+        return Map<String, dynamic>.from(messages.last as Map);
+      }
     }
     throw Exception('Failed to reply to support ticket: ${response.body}');
   }

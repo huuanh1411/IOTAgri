@@ -11,6 +11,7 @@ using IOTAgriBackend.Dtos.Auth;
 using IOTAgriBackend.Dtos.Admin;
 using IOTAgriBackend.Dtos.Dashboard;
 using IOTAgriBackend.Dtos.Devices;
+using IOTAgriBackend.Dtos.Lights;
 using IOTAgriBackend.Dtos.Pumps;
 using IOTAgriBackend.Dtos.Sensors;
 using IOTAgriBackend.Dtos.Tickets;
@@ -50,7 +51,7 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
     {
         await using var db = await _fixture.CreateDatabaseAsync();
         var applied = (await db.Database.GetAppliedMigrationsAsync()).ToList();
-        Assert.Equal(15, applied.Count);
+        Assert.Equal(18, applied.Count);
         Assert.Contains("20261009120000_AddSolutionTemperatureToSensorReadings", applied);
         Assert.Contains("20261014072501_AddPumpScheduleActiveDateRange", applied);
         Assert.Empty(await db.Database.GetPendingMigrationsAsync());
@@ -320,6 +321,24 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
         Assert.Equal(new TimeOnly(7, 0), Assert.IsType<PumpScheduleResponse>(Value(update)).StartTime);
         Assert.Equal(204, Status(await BackendTestDoubles.InvokeHandler(typeof(DeviceEndpoints), "DeletePumpScheduleAsync", device.Id, saved.Id, Principal(), db)));
         Assert.Empty(await db.PumpSchedules.ToListAsync());
+    }
+
+    [Fact]
+    public async Task Light_schedule_crud_persists_an_owned_recurrence()
+    {
+        await using var db = await _fixture.CreateDatabaseAsync();
+        var device = await SeedDevice(db);
+        var config = new ConfigurationBuilder().Build();
+        var request = new LightScheduleRequest(true, 1, new TimeOnly(18, 0), 3_600, "Asia/Bangkok");
+
+        var create = await BackendTestDoubles.InvokeHandler(typeof(DeviceEndpoints), "CreateLightScheduleAsync", device.Id, request, Principal(), db, config);
+
+        Assert.Equal(201, Status(create));
+        var saved = Assert.IsType<LightScheduleResponse>(Value(create));
+        Assert.Equal(new TimeOnly(18, 0), saved.StartTime);
+        Assert.Equal(3_600, saved.DurationSeconds);
+        Assert.Equal(1, await db.LightSchedules.CountAsync());
+        Assert.Equal(204, Status(await BackendTestDoubles.InvokeHandler(typeof(DeviceEndpoints), "DeleteLightScheduleAsync", device.Id, saved.Id, Principal(), db)));
     }
 
     [Fact]

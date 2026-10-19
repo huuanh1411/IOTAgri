@@ -17,6 +17,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<SensorReading> SensorReadings => Set<SensorReading>();
     public DbSet<PumpCommand> PumpCommands => Set<PumpCommand>();
     public DbSet<PumpSchedule> PumpSchedules => Set<PumpSchedule>();
+    public DbSet<LightSchedule> LightSchedules => Set<LightSchedule>();
     public DbSet<PumpScheduleOccurrence> PumpScheduleOccurrences => Set<PumpScheduleOccurrence>();
     public DbSet<DeviceAlert> DeviceAlerts => Set<DeviceAlert>();
     public DbSet<AdminAuditLog> AdminAuditLogs => Set<AdminAuditLog>();
@@ -85,6 +86,21 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
             entity.HasOne(schedule => schedule.Device)
                 .WithMany(device => device.PumpSchedules)
+                .HasForeignKey(schedule => schedule.DeviceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<LightSchedule>(entity =>
+        {
+            entity.Property(schedule => schedule.TimeZone).HasMaxLength(128);
+            entity.ToTable(table =>
+            {
+                table.HasCheckConstraint("CK_LightSchedules_WeekdayMask", "\"WeekdayMask\" > 0 AND \"WeekdayMask\" <= 127");
+                table.HasCheckConstraint("CK_LightSchedules_DurationSeconds", "\"DurationSeconds\" > 0");
+            });
+
+            entity.HasOne(schedule => schedule.Device)
+                .WithMany(device => device.LightSchedules)
                 .HasForeignKey(schedule => schedule.DeviceId)
                 .OnDelete(DeleteBehavior.Cascade);
         });

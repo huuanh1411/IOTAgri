@@ -7,6 +7,22 @@ namespace IOTAgriBackend.Tests;
 
 public class PumpScheduleRulesTests
 {
+    [Fact]
+    public void Light_schedule_finds_due_occurrence_in_its_time_zone()
+    {
+        var schedule = new LightSchedule
+        {
+            IsEnabled = true,
+            WeekdayMask = 1,
+            StartTime = new TimeOnly(6, 0),
+            DurationSeconds = 3_600,
+            TimeZone = "Asia/Bangkok",
+        };
+        var dueNow = new DateTime(2026, 1, 3, 23, 0, 0, DateTimeKind.Utc);
+
+        Assert.Equal([dueNow], LightScheduleRules.GetDueOccurrencesUtc(schedule, dueNow, TimeSpan.FromSeconds(90)));
+    }
+
     [Theory]
     [InlineData("America/New_York")]
     [InlineData("Europe/London")]

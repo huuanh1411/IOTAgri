@@ -230,6 +230,53 @@ namespace IOTAgriBackend.Migrations
                     b.ToTable("DeviceAlerts");
                 });
 
+            modelBuilder.Entity("IOTAgriBackend.Models.LightSchedule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DurationSeconds")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastDispatchedOccurrenceUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LastTurnedOffOccurrenceUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<string>("TimeZone")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("WeekdayMask")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId");
+
+                    b.ToTable("LightSchedules", t =>
+                        {
+                            t.HasCheckConstraint("CK_LightSchedules_DurationSeconds", "\"DurationSeconds\" > 0");
+
+                            t.HasCheckConstraint("CK_LightSchedules_WeekdayMask", "\"WeekdayMask\" > 0 AND \"WeekdayMask\" <= 127");
+                        });
+                });
+
             modelBuilder.Entity("IOTAgriBackend.Models.PumpCommand", b =>
                 {
                     b.Property<Guid>("Id")
@@ -701,6 +748,17 @@ namespace IOTAgriBackend.Migrations
                     b.Navigation("Device");
                 });
 
+            modelBuilder.Entity("IOTAgriBackend.Models.LightSchedule", b =>
+                {
+                    b.HasOne("IOTAgriBackend.Models.Device", "Device")
+                        .WithMany("LightSchedules")
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Device");
+                });
+
             modelBuilder.Entity("IOTAgriBackend.Models.PumpCommand", b =>
                 {
                     b.HasOne("IOTAgriBackend.Models.Device", "Device")
@@ -845,6 +903,8 @@ namespace IOTAgriBackend.Migrations
             modelBuilder.Entity("IOTAgriBackend.Models.Device", b =>
                 {
                     b.Navigation("Alerts");
+
+                    b.Navigation("LightSchedules");
 
                     b.Navigation("PumpCommands");
 

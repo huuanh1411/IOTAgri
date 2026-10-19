@@ -166,7 +166,7 @@ public class MqttIngestionService : BackgroundService
         await _mqttClient.PublishAsync(message, cancellationToken);
     }
 
-    public async Task PublishLightCommandAsync(string deviceKey, bool isOn, CancellationToken cancellationToken)
+    public async Task PublishLightCommandAsync(string deviceKey, Guid commandId, bool isOn, CancellationToken cancellationToken)
     {
         if (!_mqttClient.IsConnected)
         {
@@ -175,7 +175,7 @@ public class MqttIngestionService : BackgroundService
 
         var message = new MqttApplicationMessageBuilder()
             .WithTopic($"devices/{deviceKey}/commands/light")
-            .WithPayload(JsonSerializer.Serialize(new LightCommandMessage(isOn), JsonOptions))
+            .WithPayload(JsonSerializer.Serialize(new LightCommandMessage(commandId, isOn), JsonOptions))
             .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
             .Build();
 

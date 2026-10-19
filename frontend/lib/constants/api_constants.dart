@@ -36,6 +36,9 @@ class ApiConstants {
   static String pumpSchedules(String id) => '/api/devices/$id/pump-schedules';
   static String pumpSchedule(String id, String scheduleId) =>
       '/api/devices/$id/pump-schedules/$scheduleId';
+  static String lightSchedules(String id) => '/api/devices/$id/light-schedules';
+  static String lightSchedule(String id, String scheduleId) =>
+      '/api/devices/$id/light-schedules/$scheduleId';
 
   // Alert endpoints
   static String alertSettings(String id) => '/api/devices/$id/alert-settings';

@@ -25,6 +25,10 @@ public static class DeviceEndpoints
         group.MapDelete("/{id:guid}", DeleteAsync);
         group.MapPost("/{id:guid}/pump/commands", SendPumpCommandAsync);
         group.MapPost("/{id:guid}/light/commands", SendLightCommandAsync);
+        group.MapGet("/{id:guid}/light-schedules", ListLightSchedulesAsync);
+        group.MapPost("/{id:guid}/light-schedules", CreateLightScheduleAsync);
+        group.MapPut("/{id:guid}/light-schedules/{scheduleId:guid}", UpdateLightScheduleAsync);
+        group.MapDelete("/{id:guid}/light-schedules/{scheduleId:guid}", DeleteLightScheduleAsync);
         group.MapGet("/{id:guid}/pump-commands", GetPumpCommandsAsync);
         group.MapGet("/{id:guid}/pump-schedules", ListPumpSchedulesAsync);
         group.MapPost("/{id:guid}/pump-schedules", CreatePumpScheduleAsync);
@@ -273,7 +277,7 @@ public static class DeviceEndpoints
 
         try
         {
-            await mqtt.PublishLightCommandAsync(device.DeviceKey, request.IsOn, cancellationToken);
+            await mqtt.PublishLightCommandAsync(device.DeviceKey, request.CommandId ?? Guid.NewGuid(), request.IsOn, cancellationToken);
         }
         catch (InvalidOperationException)
         {
@@ -284,6 +288,66 @@ public static class DeviceEndpoints
 
         return Results.Accepted($"/api/devices/{device.Id}/light", new { isOn = request.IsOn });
     }
+
+    private static async Task<IResult> ListLightSchedulesAsync(Guid id, ClaimsPrincipal principal, ApplicationDbContext db)
+    {
+        var userId = GetUserId(principal);
+        if (userId is null) return Results.Unauthorized();
+        if (!await db.Devices.AnyAsync(device => device.Id == id && device.OwnerId == userId)) return Results.NotFound();
+
+        var schedules = await db.LightSchedules.Where(schedule => schedule.DeviceId == id)
+            .OrderBy(schedule => schedule.StartTime).ThenBy(schedule => schedule.Id).ToListAsync();
+        return Results.Ok(schedules.Select(ToResponse).ToList());
+    }
+
+    private static async Task<IResult> CreateLightScheduleAsync(Guid id, LightScheduleRequest request, ClaimsPrincipal principal, ApplicationDbContext db, IConfiguration configuration)
+    {
+        var userId = GetUserId(principal);
+        if (userId is null) return Results.Unauthorized();
+        if (!await db.Devices.AnyAsync(device => device.Id == id && device.OwnerId == userId)) return Results.NotFound();
+
+        var maximumDurationSeconds = configuration.GetValue<int?>("LightControl:MaximumDurationSeconds") ?? 86_400;
+        var error = LightScheduleRules.Validate(request.IsEnabled, request.WeekdayMask, request.StartTime, request.DurationSeconds, request.TimeZone, maximumDurationSeconds);
+        if (error is not null) return Results.BadRequest(new { error });
+
+        var schedule = new LightSchedule { DeviceId = id, IsEnabled = request.IsEnabled!.Value, WeekdayMask = request.WeekdayMask, StartTime = request.StartTime!.Value, DurationSeconds = request.DurationSeconds, TimeZone = request.TimeZone! };
+        db.LightSchedules.Add(schedule);
+        await db.SaveChangesAsync();
+        return Results.Created($"/api/devices/{id}/light-schedules/{schedule.Id}", ToResponse(schedule));
+    }
+
+    private static async Task<IResult> UpdateLightScheduleAsync(Guid id, Guid scheduleId, LightScheduleRequest request, ClaimsPrincipal principal, ApplicationDbContext db, IConfiguration configuration)
+    {
+        var userId = GetUserId(principal);
+        if (userId is null) return Results.Unauthorized();
+        var schedule = await db.LightSchedules.FirstOrDefaultAsync(item => item.Id == scheduleId && item.DeviceId == id && item.Device!.OwnerId == userId);
+        if (schedule is null) return Results.NotFound();
+
+        var maximumDurationSeconds = configuration.GetValue<int?>("LightControl:MaximumDurationSeconds") ?? 86_400;
+        var error = LightScheduleRules.Validate(request.IsEnabled, request.WeekdayMask, request.StartTime, request.DurationSeconds, request.TimeZone, maximumDurationSeconds);
+        if (error is not null) return Results.BadRequest(new { error });
+
+        schedule.IsEnabled = request.IsEnabled!.Value;
+        schedule.WeekdayMask = request.WeekdayMask;
+        schedule.StartTime = request.StartTime!.Value;
+        schedule.DurationSeconds = request.DurationSeconds;
+        schedule.TimeZone = request.TimeZone!;
+        await db.SaveChangesAsync();
+        return Results.Ok(ToResponse(schedule));
+    }
+
+    private static async Task<IResult> DeleteLightScheduleAsync(Guid id, Guid scheduleId, ClaimsPrincipal principal, ApplicationDbContext db)
+    {
+        var userId = GetUserId(principal);
+        if (userId is null) return Results.Unauthorized();
+        var schedule = await db.LightSchedules.FirstOrDefaultAsync(item => item.Id == scheduleId && item.DeviceId == id && item.Device!.OwnerId == userId);
+        if (schedule is null) return Results.NotFound();
+        db.LightSchedules.Remove(schedule);
+        await db.SaveChangesAsync();
+        return Results.NoContent();
+    }
+
+    private static LightScheduleResponse ToResponse(LightSchedule schedule) => new(schedule.Id, schedule.DeviceId, schedule.IsEnabled, schedule.WeekdayMask, schedule.StartTime, schedule.DurationSeconds, schedule.TimeZone, schedule.LastDispatchedOccurrenceUtc, schedule.LastTurnedOffOccurrenceUtc, schedule.CreatedAt);
 
     private static PumpCommandResponse ToResponse(PumpCommand command) => new(
         command.Id,
