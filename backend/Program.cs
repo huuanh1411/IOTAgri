@@ -77,6 +77,10 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddApplicationWebSecurity(builder.Configuration, builder.Environment);
 
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddSingleton<IMqttDynsecTransport, MqttDynsecTransport>();
+builder.Services.AddSingleton<IMqttBrokerAdminService>(services => new MqttBrokerAdminService(
+    services.GetRequiredService<IMqttDynsecTransport>(),
+    services.GetRequiredService<IConfiguration>().GetSection("MqttBrokerAdmin").Get<MqttBrokerAdminOptions>() ?? new MqttBrokerAdminOptions()));
 builder.Services.AddSingleton<MqttIngestionService>();
 builder.Services.AddHostedService(services => services.GetRequiredService<MqttIngestionService>());
 builder.Services.AddHostedService<PumpScheduleDispatchService>();

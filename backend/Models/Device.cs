@@ -24,6 +24,8 @@ public class Device
     public DateTime? ProvisioningCodeExpiresAt { get; set; }
     public string? ProvisionedHardwareId { get; set; }
     public DateTime? ProvisionedAt { get; set; }
+    public Guid? ProvisioningClaimLeaseId { get; set; }
+    public DateTime? ProvisioningClaimLeaseExpiresAt { get; set; }
 
     public ICollection<SensorReading> Readings { get; set; } = new List<SensorReading>();
     public ICollection<PumpCommand> PumpCommands { get; set; } = new List<PumpCommand>();

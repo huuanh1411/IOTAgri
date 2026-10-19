@@ -175,6 +175,12 @@ namespace IOTAgriBackend.Migrations
                     b.Property<string>("ProvisionedHardwareId")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("ProvisioningClaimLeaseExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ProvisioningClaimLeaseId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime?>("ProvisioningCodeExpiresAt")
                         .HasColumnType("timestamp with time zone");
 

@@ -80,6 +80,13 @@ services:
       Mqtt__Username: api
       Mqtt__Password: ${MQTT_API_PASSWORD}
       Mqtt__ClientId: iotagribackend-production
+      MqttBrokerAdmin__Host: mqtt.aerogreen.vn
+      MqttBrokerAdmin__Port: 8883
+      MqttBrokerAdmin__UseTls: "true"
+      MqttBrokerAdmin__Username: admin
+      MqttBrokerAdmin__Password: ${MQTT_ADMIN_PASSWORD}
+      MqttBrokerAdmin__ClientId: iotagribackend-dynsec
+      MqttBrokerAdmin__DeviceRole: device
       DeviceProvisioning__MqttHost: mqtt.aerogreen.vn
       PumpScheduling__Enabled: "false"
       PumpScheduling__PollSeconds: ${PUMP_SCHEDULING_POLL_SECONDS:-30}

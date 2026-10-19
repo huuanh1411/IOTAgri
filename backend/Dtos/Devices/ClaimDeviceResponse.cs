@@ -4,5 +4,8 @@ public record ClaimDeviceResponse(
     string DeviceKey,
     string MqttHost,
     int MqttPort,
-    bool UseTls
+    bool UseTls,
+    string MqttUsername,
+    string MqttPassword,
+    string MqttClientId
 );
