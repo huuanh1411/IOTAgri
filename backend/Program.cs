@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using System.Threading.RateLimiting;
 using IOTAgriBackend.Data;
@@ -80,23 +81,15 @@ builder.Services.AddAuthorization(options =>
 });
 
 var allowedCorsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+var allowPrivateLanOrigins = builder.Environment.IsDevelopment()
+    && builder.Configuration.GetValue<bool>("Cors:AllowPrivateLanOrigins");
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(FlutterCorsPolicy, policy =>
     {
-        if (allowedCorsOrigins.Length > 0)
-        {
-            policy.WithOrigins(allowedCorsOrigins);
-        }
-        else
-        {
-            policy.SetIsOriginAllowed(origin =>
-            {
-                if (string.IsNullOrWhiteSpace(origin)) return false;
-                var uri = new Uri(origin);
-                return uri.Host == "localhost" || uri.Host == "127.0.0.1";
-            });
-        }
+        policy.SetIsOriginAllowed(origin =>
+            allowedCorsOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase)
+            || (allowPrivateLanOrigins && IsPrivateLanFrontendOrigin(origin)));
 
         policy.AllowAnyHeader()
             .AllowAnyMethod();
@@ -189,6 +182,26 @@ app.MapGet("/weatherforecast", () =>
 .WithName("GetWeatherForecast");
 
 app.Run();
+
+static bool IsPrivateLanFrontendOrigin(string origin)
+{
+    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)
+        || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+        || uri.Port != 8081)
+    {
+        return false;
+    }
+
+    if (uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase)) return true;
+    if (!IPAddress.TryParse(uri.Host, out var address)) return false;
+    if (IPAddress.IsLoopback(address)) return true;
+    if (address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork) return false;
+
+    var bytes = address.GetAddressBytes();
+    return bytes[0] == 10
+        || (bytes[0] == 172 && bytes[1] is >= 16 and <= 31)
+        || (bytes[0] == 192 && bytes[1] == 168);
+}
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
