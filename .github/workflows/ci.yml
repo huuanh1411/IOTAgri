@@ -30,3 +30,34 @@ jobs:
 
       - name: Build Docker image
         run: docker build --tag iotagri-backend:ci .
+
+      - name: Validate production Compose
+        run: docker compose --env-file .env.production.example -f compose.production.yaml config
+
+      - name: Validate deployment scripts
+        run: bash -n deploy/backup-postgres.sh deploy/bootstrap-mqtt-dynsec.sh deploy/verify-mqtt-security.sh
+
+  frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: frontend
+        run: flutter analyze
+
+      - name: Test
+        working-directory: frontend
+        run: flutter test
+
+      - name: Build web release
+        working-directory: frontend
+        run: flutter build web --release --dart-define=API_BASE_URL=https://api.aerogreen.vn
