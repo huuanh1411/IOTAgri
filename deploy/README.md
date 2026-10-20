@@ -13,6 +13,20 @@ chmod +x deploy/deploy-production.sh deploy/bootstrap-mqtt-dynsec.sh deploy/sync
 
 After Caddy issues the `mqtt.aerogreen.vn` certificate, run `./deploy/sync-mqtt-certs.sh`, then `./deploy/bootstrap-mqtt-dynsec.sh`, then `docker compose --env-file .env.production -f compose.production.yaml up -d`.
 
+## Continuous deployment
+
+GitHub Actions deploys each push to `main` and supports manual reruns. Create GitHub environment `production`, then add these repository or environment secrets:
+
+- `VPS_HOST`: VPS IP or hostname.
+- `VPS_PORT`: SSH port, normally `22`.
+- `VPS_USER`: `iotagri-deploy`.
+- `VPS_SSH_KEY`: private deployment key.
+- `VPS_KNOWN_HOSTS`: output of `ssh-keyscan -H <VPS_HOST>` run from a trusted machine.
+
+The `iotagri-deploy` user must own `/opt/iotagri`, belong to the `docker` group, and have its matching public key in `~/.ssh/authorized_keys`. Keep `.env.production` only on the VPS; workflow never copies production secrets.
+
+The first deployment still needs the manual bootstrap above. Later deployments run `git pull --ff-only`, rebuild services with production Compose, and wait for `https://api.aerogreen.vn/health`.
+
 ## PostgreSQL backup
 
 Backup target setup is deferred until VPS deployment.
