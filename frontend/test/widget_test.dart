@@ -618,7 +618,7 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpDeviceDetail(tester);
 
     expect(find.text('Offline'), findsOneWidget);
     expect(
@@ -652,13 +652,13 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpDeviceDetail(tester);
 
     expect(find.text('Bơm đang chạy'), findsOneWidget);
     await tester.tap(find.text('Thủ công'));
-    await tester.pumpAndSettle();
+    await pumpDeviceDetail(tester);
     await tester.tap(find.text('Chuyển'));
-    await tester.pumpAndSettle();
+    await pumpDeviceDetail(tester);
     expect(find.text('Dừng'), findsOneWidget);
   });
 
@@ -683,18 +683,18 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpDeviceDetail(tester);
 
     await tester.ensureVisible(find.text('Thủ công'));
-    await tester.pumpAndSettle();
+    await pumpDeviceDetail(tester);
     await tester.tap(find.text('Thủ công'));
-    await tester.pumpAndSettle();
+    await pumpDeviceDetail(tester);
     await tester.tap(find.text('Chuyển'));
-    await tester.pumpAndSettle();
+    await pumpDeviceDetail(tester);
     expect(api.scheduleEnabledUpdates, equals(<bool>[false]));
 
     await tester.tap(find.text('Tự động'));
-    await tester.pumpAndSettle();
+    await pumpDeviceDetail(tester);
     expect(api.scheduleEnabledUpdates, equals(<bool>[false, true]));
   });
 
@@ -715,7 +715,7 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpDeviceDetail(tester);
 
     expect(find.text('Không có dữ liệu mới'), findsOneWidget);
     expect(find.text('Không có dữ liệu'), findsNWidgets(5));

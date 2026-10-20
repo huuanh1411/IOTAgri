@@ -23,7 +23,7 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
   late final ApiService _apiService;
   List<Device> _devices = const [];
   bool _isLoading = true;
-  final bool _isCreating = false;
+  bool _isCreating = false;
   String? _deletingDeviceId;
   String? _errorMessage;
   String _searchQuery = '';
@@ -62,11 +62,17 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
   }
 
   Future<void> _createAndProvisionDevice() async {
-    final result = await Navigator.of(
-      context,
-    ).push<Device>(CupertinoPageRoute(builder: (_) => const AddDeviceScreen()));
+    if (_isCreating) return;
+    setState(() => _isCreating = true);
+    final result = await Navigator.of(context).push<Device>(
+      CupertinoPageRoute(
+        builder: (_) => AddDeviceScreen(apiService: _apiService),
+      ),
+    );
+    if (mounted) setState(() => _isCreating = false);
     if (result != null && mounted) {
       await _loadDevices(showLoading: false);
+      if (mounted) await _openProvisioning(result);
     }
   }
 

@@ -1285,6 +1285,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to load device details'**
   String get cannotLoadDeviceDetails;
+
+  /// No description provided for @addDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Add device'**
+  String get addDevice;
+
+  /// No description provided for @createDeviceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your Aerogreen device'**
+  String get createDeviceTitle;
+
+  /// No description provided for @createDeviceExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Name the device first. After it is created, you will receive a one-time setup code.'**
+  String get createDeviceExplanation;
+
+  /// No description provided for @createAndContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and continue'**
+  String get createAndContinue;
+
+  /// No description provided for @returnToDeviceList.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to device list'**
+  String get returnToDeviceList;
+
+  /// No description provided for @deviceCreateOutcomeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The request was interrupted, so the device may already exist. Return to the device list before trying again to avoid a duplicate.'**
+  String get deviceCreateOutcomeUnknown;
+
+  /// No description provided for @deviceCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to create the device. Please try again.'**
+  String get deviceCreateFailed;
+
+  /// No description provided for @sessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session expired. Please sign in again.'**
+  String get sessionExpired;
+
+  /// No description provided for @deviceActionForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission to manage this device.'**
+  String get deviceActionForbidden;
+
+  /// No description provided for @tooManyRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Please wait before trying again.'**
+  String get tooManyRequests;
+
+  /// No description provided for @serverUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The server is temporarily unavailable. Please try again later.'**
+  String get serverUnavailable;
+
+  /// No description provided for @provisioningCodeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This setup code has expired. Generate a new code.'**
+  String get provisioningCodeExpired;
+
+  /// No description provided for @provisioningAcceptedWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup was accepted. Waiting for the backend to confirm the device is online.'**
+  String get provisioningAcceptedWaiting;
+
+  /// No description provided for @provisioningOutcomeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The request was interrupted and this one-time code may have been consumed. Generate a new code before trying again.'**
+  String get provisioningOutcomeUnknown;
+
+  /// No description provided for @deviceOnlineConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'The backend confirms that the device is online.'**
+  String get deviceOnlineConfirmed;
+
+  /// No description provided for @deviceOnlineNotConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup was accepted, but the backend has not confirmed the device online yet. Check the device list again shortly.'**
+  String get deviceOnlineNotConfirmed;
+
+  /// No description provided for @malformedProvisioningResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'The server returned an invalid setup-code response.'**
+  String get malformedProvisioningResponse;
+
+  /// No description provided for @provisioningCodeRequestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to generate a setup code.'**
+  String get provisioningCodeRequestFailed;
+
+  /// No description provided for @regenerateCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a new code?'**
+  String get regenerateCodeTitle;
+
+  /// No description provided for @regenerateCodeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The current code will stop working immediately.'**
+  String get regenerateCodeWarning;
+
+  /// No description provided for @generateNewCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate new code'**
+  String get generateNewCode;
+
+  /// No description provided for @networkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your network connection and try again.'**
+  String get networkError;
 }
 
 class _AppLocalizationsDelegate

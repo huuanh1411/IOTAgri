@@ -7,6 +7,8 @@ import 'package:iotagri_app/models/device.dart';
 import 'package:iotagri_app/screens/devices/devices_screen.dart';
 import 'package:iotagri_app/services/api_service.dart';
 
+import 'test_app.dart';
+
 class MockNarrowApiService extends ApiService {
   @override
   Future<Map<String, dynamic>> getDevice(String id) async => {
@@ -136,7 +138,7 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpDeviceDetail(tester);
 
     expect(find.text('Tháp Thử Nghiệm 320px'), findsWidgets);
     expect(find.text('Cảm biến'), findsOneWidget);

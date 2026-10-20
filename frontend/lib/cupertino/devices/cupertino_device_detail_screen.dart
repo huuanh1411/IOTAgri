@@ -1115,11 +1115,13 @@
                     color: AppColors.secondaryText,
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'Lần phun tiếp theo sau ${_formatTimeRemaining(nextScheduleTime)}',
-                    style: const TextStyle(
-                      color: AppColors.secondaryText,
-                      fontSize: 13,
+                  Expanded(
+                    child: Text(
+                      'Lần phun tiếp theo sau ${_formatTimeRemaining(nextScheduleTime)}',
+                      style: const TextStyle(
+                        color: AppColors.secondaryText,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],

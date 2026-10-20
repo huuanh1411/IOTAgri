@@ -228,7 +228,7 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
 
       expect(find.text('Tháp Khí Canh 1'), findsWidgets);
       expect(find.text('Online'), findsOneWidget);
@@ -236,20 +236,20 @@ void main() {
 
       // STEP 4: Manual Pump Run
       await tester.tap(find.text('Thủ công'));
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
 
       await tester.tap(find.text('Chuyển'));
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
 
       expect(find.text('BẬT BƠM'), findsOneWidget);
       await tester.tap(find.text('BẬT BƠM'));
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
 
       // Duration selector action sheet appears (30s, 1m, 5m, 10m)
       expect(find.text('Chọn thời gian chạy'), findsOneWidget);
       expect(find.text('1 phút'), findsOneWidget);
       await tester.tap(find.text('1 phút'));
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
 
       expect(api.commandCalled, isTrue);
 

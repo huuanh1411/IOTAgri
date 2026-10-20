@@ -8,12 +8,14 @@ import '../constants/api_constants.dart';
 import '../models/user.dart';
 import '../models/light_schedule.dart';
 import '../models/pump_schedule.dart';
+import 'api_error.dart';
 
 class _RefreshTokenRejected implements Exception {
   const _RefreshTokenRejected();
 }
 
 class ApiService {
+  static const Duration deviceRequestTimeout = Duration(seconds: 15);
   // Backend phát hành vai trò dưới URI claim chuẩn của .NET Identity, không phải
   // tên ngắn 'role'. Giá trị là chuỗi khi có một vai trò và là mảng khi có nhiều.
   static const String roleClaimType =
@@ -372,7 +374,7 @@ class ApiService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load devices: ${response.body}');
+      throw ApiError.fromResponse(response);
     }
   }
 
@@ -387,7 +389,7 @@ class ApiService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to load device: ${response.body}');
+      throw ApiError.fromResponse(response);
     }
   }
 
@@ -398,12 +400,12 @@ class ApiService {
         headers: headers,
         body: jsonEncode({'name': name}),
       ),
-    );
+    ).timeout(deviceRequestTimeout);
 
     if (response.statusCode == 201) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to create device: ${response.body}');
+      throw ApiError.fromResponse(response);
     }
   }
 
@@ -444,12 +446,12 @@ class ApiService {
         ),
         headers: headers,
       ),
-    );
+    ).timeout(deviceRequestTimeout);
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception('Failed to create provisioning code: ${response.body}');
+      throw ApiError.fromResponse(response);
     }
   }
 

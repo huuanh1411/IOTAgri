@@ -673,4 +673,82 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get cannotLoadDeviceDetails => 'Không thể tải chi tiết thiết bị';
+
+  @override
+  String get addDevice => 'Thêm thiết bị';
+
+  @override
+  String get createDeviceTitle => 'Tạo thiết bị Aerogreen';
+
+  @override
+  String get createDeviceExplanation =>
+      'Đặt tên thiết bị trước. Sau khi tạo, bạn sẽ nhận mã thiết lập dùng một lần.';
+
+  @override
+  String get createAndContinue => 'Tạo và tiếp tục';
+
+  @override
+  String get returnToDeviceList => 'Về danh sách thiết bị';
+
+  @override
+  String get deviceCreateOutcomeUnknown =>
+      'Yêu cầu bị gián đoạn nên thiết bị có thể đã được tạo. Hãy về danh sách kiểm tra trước khi thử lại để tránh tạo trùng.';
+
+  @override
+  String get deviceCreateFailed => 'Không thể tạo thiết bị. Vui lòng thử lại.';
+
+  @override
+  String get sessionExpired =>
+      'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+
+  @override
+  String get deviceActionForbidden =>
+      'Bạn không có quyền quản lý thiết bị này.';
+
+  @override
+  String get tooManyRequests => 'Quá nhiều yêu cầu. Vui lòng chờ rồi thử lại.';
+
+  @override
+  String get serverUnavailable =>
+      'Máy chủ tạm thời không khả dụng. Vui lòng thử lại sau.';
+
+  @override
+  String get provisioningCodeExpired =>
+      'Mã thiết lập đã hết hạn. Hãy tạo mã mới.';
+
+  @override
+  String get provisioningAcceptedWaiting =>
+      'ESP đã nhận cấu hình. Đang chờ backend xác nhận thiết bị trực tuyến.';
+
+  @override
+  String get provisioningOutcomeUnknown =>
+      'Yêu cầu bị gián đoạn và mã dùng một lần có thể đã được sử dụng. Hãy tạo mã mới trước khi thử lại.';
+
+  @override
+  String get deviceOnlineConfirmed =>
+      'Backend đã xác nhận thiết bị đang trực tuyến.';
+
+  @override
+  String get deviceOnlineNotConfirmed =>
+      'ESP đã nhận cấu hình nhưng backend chưa xác nhận thiết bị trực tuyến. Hãy kiểm tra lại danh sách thiết bị sau ít phút.';
+
+  @override
+  String get malformedProvisioningResponse =>
+      'Máy chủ trả về dữ liệu mã thiết lập không hợp lệ.';
+
+  @override
+  String get provisioningCodeRequestFailed => 'Không thể tạo mã thiết lập.';
+
+  @override
+  String get regenerateCodeTitle => 'Tạo mã mới?';
+
+  @override
+  String get regenerateCodeWarning =>
+      'Mã hiện tại sẽ mất hiệu lực ngay lập tức.';
+
+  @override
+  String get generateNewCode => 'Tạo mã mới';
+
+  @override
+  String get networkError => 'Hãy kiểm tra kết nối mạng và thử lại.';
 }

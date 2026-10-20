@@ -281,20 +281,20 @@ void main() {
 
       // Open detail screen
       await tester.tap(find.text('Mở chi tiết'));
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
       expect(find.text('Tháp Kiểm Tra'), findsWidgets);
 
       // Tap settings button (gear icon)
       await tester.tap(find.byIcon(CupertinoIcons.settings));
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
       expect(find.text('Cài đặt thiết bị'), findsOneWidget);
 
       // Scroll to remove button and tap
       final removeBtn = find.text('Xóa thiết bị');
       await tester.drag(find.byType(ListView), const Offset(0, -300));
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
       await tester.tap(removeBtn);
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
 
       // Confirm in dialog
       final dialogDeleteAction = find.descendant(
@@ -302,7 +302,7 @@ void main() {
         matching: find.text('Xóa thiết bị'),
       );
       await tester.tap(dialogDeleteAction);
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
 
       // Wait for toast to appear
       await tester.pump(const Duration(milliseconds: 500));

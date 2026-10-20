@@ -675,4 +675,84 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cannotLoadDeviceDetails => 'Unable to load device details';
+
+  @override
+  String get addDevice => 'Add device';
+
+  @override
+  String get createDeviceTitle => 'Create your Aerogreen device';
+
+  @override
+  String get createDeviceExplanation =>
+      'Name the device first. After it is created, you will receive a one-time setup code.';
+
+  @override
+  String get createAndContinue => 'Create and continue';
+
+  @override
+  String get returnToDeviceList => 'Return to device list';
+
+  @override
+  String get deviceCreateOutcomeUnknown =>
+      'The request was interrupted, so the device may already exist. Return to the device list before trying again to avoid a duplicate.';
+
+  @override
+  String get deviceCreateFailed =>
+      'Unable to create the device. Please try again.';
+
+  @override
+  String get sessionExpired => 'Your session expired. Please sign in again.';
+
+  @override
+  String get deviceActionForbidden =>
+      'You do not have permission to manage this device.';
+
+  @override
+  String get tooManyRequests =>
+      'Too many requests. Please wait before trying again.';
+
+  @override
+  String get serverUnavailable =>
+      'The server is temporarily unavailable. Please try again later.';
+
+  @override
+  String get provisioningCodeExpired =>
+      'This setup code has expired. Generate a new code.';
+
+  @override
+  String get provisioningAcceptedWaiting =>
+      'Setup was accepted. Waiting for the backend to confirm the device is online.';
+
+  @override
+  String get provisioningOutcomeUnknown =>
+      'The request was interrupted and this one-time code may have been consumed. Generate a new code before trying again.';
+
+  @override
+  String get deviceOnlineConfirmed =>
+      'The backend confirms that the device is online.';
+
+  @override
+  String get deviceOnlineNotConfirmed =>
+      'Setup was accepted, but the backend has not confirmed the device online yet. Check the device list again shortly.';
+
+  @override
+  String get malformedProvisioningResponse =>
+      'The server returned an invalid setup-code response.';
+
+  @override
+  String get provisioningCodeRequestFailed =>
+      'Unable to generate a setup code.';
+
+  @override
+  String get regenerateCodeTitle => 'Generate a new code?';
+
+  @override
+  String get regenerateCodeWarning =>
+      'The current code will stop working immediately.';
+
+  @override
+  String get generateNewCode => 'Generate new code';
+
+  @override
+  String get networkError => 'Check your network connection and try again.';
 }

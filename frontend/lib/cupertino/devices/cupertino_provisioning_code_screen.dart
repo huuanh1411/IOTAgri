@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +8,7 @@ import '../../constants/api_constants.dart';
 import '../../models/device.dart';
 import '../../models/provisioning_code.dart';
 import '../../services/api_service.dart';
+import '../../services/api_error.dart';
 import '../../services/esp_provisioning_service.dart';
 import '../../utils/l10n.dart';
 
@@ -42,6 +45,8 @@ class _CupertinoProvisioningCodeScreenState
   String? _errorMessage;
   String? _espMessage;
   String? _espHardwareId;
+  Timer? _expiryTimer;
+  int _onlineCheckGeneration = 0;
 
   @override
   void initState() {
@@ -54,6 +59,10 @@ class _CupertinoProvisioningCodeScreenState
 
   @override
   void dispose() {
+    _expiryTimer?.cancel();
+    _onlineCheckGeneration++;
+    _provisioningCode = null;
+    _passwordController.clear();
     _ssidController.dispose();
     _passwordController.dispose();
     _espProvisioningService.close();
@@ -61,6 +70,8 @@ class _CupertinoProvisioningCodeScreenState
   }
 
   Future<void> _generateCode() async {
+    if (_isLoading && _provisioningCode != null) return;
+    _expiryTimer?.cancel();
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -72,14 +83,26 @@ class _CupertinoProvisioningCodeScreenState
         widget.device.id,
       );
       if (!mounted) return;
+      final provisioningCode = ProvisioningCode.fromJson(response);
+      if (provisioningCode.code.trim().isEmpty) {
+        throw const ApiError(
+          kind: ApiErrorKind.malformed,
+          message: 'Provisioning response did not contain a code.',
+        );
+      }
       setState(() {
-        _provisioningCode = ProvisioningCode.fromJson(response);
+        _provisioningCode = provisioningCode;
         _isLoading = false;
+      });
+      _expiryTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (mounted) setState(() {});
       });
     } catch (error) {
       if (!mounted) return;
+      final apiError = ApiError.from(error);
       setState(() {
-        _errorMessage = error.toString();
+        _provisioningCode = null;
+        _errorMessage = _apiErrorMessage(apiError);
         _isLoading = false;
       });
     }
@@ -113,6 +136,10 @@ class _CupertinoProvisioningCodeScreenState
   }
 
   Future<void> _provisionEsp(String claimCode) async {
+    if (_isExpired) {
+      setState(() => _espMessage = context.l10n.provisioningCodeExpired);
+      return;
+    }
     final ssid = _ssidController.text.trim();
     if (ssid.isEmpty) {
       setState(
@@ -140,14 +167,15 @@ class _CupertinoProvisioningCodeScreenState
       setState(() {
         _isProvisioning = false;
         _provisioned = true;
-        _espMessage =
-            'Thiết lập thành công. ESP đang khởi động lại; hãy kết nối lại Wi-Fi $ssid.';
+        _espMessage = context.l10n.provisioningAcceptedWaiting;
       });
+      await _waitForBackendOnline();
     } catch (error) {
       if (!mounted) return;
       setState(() {
         _isProvisioning = false;
-        _espMessage = error.toString();
+        _provisioningCode = null;
+        _espMessage = context.l10n.provisioningOutcomeUnknown;
       });
     }
   }
@@ -177,6 +205,66 @@ class _CupertinoProvisioningCodeScreenState
     if (remaining.isNegative) return 'Mã đã hết hạn';
     if (remaining.inMinutes == 0) return 'Còn ${remaining.inSeconds} giây';
     return 'Hết hạn lúc ${DateFormat('HH:mm').format(expiresAt.toLocal())}';
+  }
+
+  bool get _isExpired {
+    final expiresAt = DateTime.tryParse(_provisioningCode?.expiresAt ?? '');
+    return expiresAt != null && !expiresAt.isAfter(DateTime.now().toUtc());
+  }
+
+  String _apiErrorMessage(ApiError error) => switch (error.kind) {
+    ApiErrorKind.timeout || ApiErrorKind.network => context.l10n.networkError,
+    ApiErrorKind.authentication => context.l10n.sessionExpired,
+    ApiErrorKind.authorization => context.l10n.deviceActionForbidden,
+    ApiErrorKind.rateLimited => context.l10n.tooManyRequests,
+    ApiErrorKind.server => context.l10n.serverUnavailable,
+    ApiErrorKind.malformed => context.l10n.malformedProvisioningResponse,
+    _ =>
+      error.message.isNotEmpty
+          ? error.message
+          : context.l10n.provisioningCodeRequestFailed,
+  };
+
+  Future<void> _waitForBackendOnline() async {
+    final generation = ++_onlineCheckGeneration;
+    for (var attempt = 0; attempt < 10; attempt++) {
+      await Future<void>.delayed(const Duration(seconds: 3));
+      if (!mounted || generation != _onlineCheckGeneration) return;
+      try {
+        final response = await _apiService.getDevice(widget.device.id);
+        if (response['isOnline'] == true) {
+          setState(() => _espMessage = context.l10n.deviceOnlineConfirmed);
+          return;
+        }
+      } catch (_) {
+        // A transient status read must not change the claim outcome.
+      }
+    }
+    if (mounted && generation == _onlineCheckGeneration) {
+      setState(() => _espMessage = context.l10n.deviceOnlineNotConfirmed);
+    }
+  }
+
+  Future<void> _confirmRegenerate() async {
+    final regenerate = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.regenerateCodeTitle),
+        content: Text(context.l10n.regenerateCodeWarning),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.l10n.cancel),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(context.l10n.generateNewCode),
+          ),
+        ],
+      ),
+    );
+    if (regenerate == true && mounted) await _generateCode();
   }
 
   @override
@@ -344,7 +432,7 @@ class _CupertinoProvisioningCodeScreenState
         ),
         const SizedBox(height: 18),
         CupertinoButton(
-          onPressed: _generateCode,
+          onPressed: _confirmRegenerate,
           child: const Text('Tạo mã mới (mã cũ sẽ hết hiệu lực)'),
         ),
       ],

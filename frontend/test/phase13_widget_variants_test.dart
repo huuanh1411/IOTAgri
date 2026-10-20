@@ -321,7 +321,7 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await pumpDeviceDetail(tester);
 
         expect(find.text('Tháp Thí Nghiệm'), findsWidgets);
         expect(find.text('Online'), findsOneWidget);
@@ -359,7 +359,7 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await pumpDeviceDetail(tester);
 
         expect(find.text('36.5 °C'), findsOneWidget);
         expect(find.text('10.0 %'), findsOneWidget);
@@ -395,7 +395,7 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await pumpDeviceDetail(tester);
 
         expect(find.text('Offline'), findsOneWidget);
         expect(find.text('Thiết bị ngoại tuyến'), findsOneWidget);
@@ -435,13 +435,13 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
 
       expect(find.text('Bơm đang chạy'), findsOneWidget);
       await tester.tap(find.text('Thủ công'));
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
       await tester.tap(find.text('Chuyển'));
-      await tester.pumpAndSettle();
+      await pumpDeviceDetail(tester);
       expect(find.text('Dừng'), findsOneWidget);
     });
 
@@ -473,7 +473,7 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await pumpDeviceDetail(tester);
 
         expect(find.text('Đang gửi lệnh…'), findsOneWidget);
       },
