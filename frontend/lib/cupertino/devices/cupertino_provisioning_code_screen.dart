@@ -42,8 +42,8 @@ class _CupertinoProvisioningCodeScreenState
   bool _isCheckingEsp = false;
   bool _isProvisioning = false;
   bool _provisioned = false;
-  String? _errorMessage;
-  String? _espMessage;
+  String Function()? _errorMessage;
+  String Function()? _espMessage;
   String? _espHardwareId;
   Timer? _expiryTimer;
   int _onlineCheckGeneration = 0;
@@ -102,7 +102,7 @@ class _CupertinoProvisioningCodeScreenState
       final apiError = ApiError.from(error);
       setState(() {
         _provisioningCode = null;
-        _errorMessage = _apiErrorMessage(apiError);
+        _errorMessage = () => _apiErrorMessage(apiError);
         _isLoading = false;
       });
     }
@@ -121,40 +121,37 @@ class _CupertinoProvisioningCodeScreenState
         _espHardwareId = status.hardwareId;
         _networks = networks;
         _isCheckingEsp = false;
-        _espMessage = networks.isEmpty
-            ? 'Đã thấy ESP nhưng chưa tìm thấy mạng Wi-Fi 2.4 GHz.'
-            : 'Đã kết nối ESP. Chọn mạng Wi-Fi bên dưới.';
+        _espMessage = () => networks.isEmpty
+            ? context.l10n.espFoundNoNetworks
+            : context.l10n.espConnectedChooseNetwork;
       });
     } catch (error) {
       if (!mounted) return;
       setState(() {
         _isCheckingEsp = false;
-        _espMessage =
-            'Không kết nối được ESP. Hãy nối thiết bị này vào Wi-Fi IOTAgri-Setup rồi thử lại. ($error)';
+        _espMessage = () => context.l10n.espConnectionFailed;
       });
     }
   }
 
   Future<void> _provisionEsp(String claimCode) async {
     if (_isExpired) {
-      setState(() => _espMessage = context.l10n.provisioningCodeExpired);
+      setState(() => _espMessage = () => context.l10n.provisioningCodeExpired);
       return;
     }
     final ssid = _ssidController.text.trim();
     if (ssid.isEmpty) {
-      setState(
-        () => _espMessage = 'Vui lòng nhập hoặc chọn tên Wi-Fi 2.4 GHz.',
-      );
+      setState(() => _espMessage = () => context.l10n.wifiSsidRequired);
       return;
     }
     if (_passwordController.text.isEmpty) {
-      setState(() => _espMessage = 'Vui lòng nhập mật khẩu Wi-Fi.');
+      setState(() => _espMessage = () => context.l10n.wifiPasswordRequired);
       return;
     }
 
     setState(() {
       _isProvisioning = true;
-      _espMessage = 'Đang gửi cấu hình trực tiếp tới ESP...';
+      _espMessage = () => context.l10n.espSendingConfiguration;
     });
     try {
       await _espProvisioningService.provision(
@@ -167,7 +164,7 @@ class _CupertinoProvisioningCodeScreenState
       setState(() {
         _isProvisioning = false;
         _provisioned = true;
-        _espMessage = context.l10n.provisioningAcceptedWaiting;
+        _espMessage = () => context.l10n.provisioningAcceptedWaiting;
       });
       await _waitForBackendOnline();
     } catch (error) {
@@ -175,7 +172,7 @@ class _CupertinoProvisioningCodeScreenState
       setState(() {
         _isProvisioning = false;
         _provisioningCode = null;
-        _espMessage = context.l10n.provisioningOutcomeUnknown;
+        _espMessage = () => context.l10n.provisioningOutcomeUnknown;
       });
     }
   }
@@ -200,11 +197,17 @@ class _CupertinoProvisioningCodeScreenState
 
   String _expirationLabel() {
     final expiresAt = DateTime.tryParse(_provisioningCode?.expiresAt ?? '');
-    if (expiresAt == null) return 'Có hiệu lực trong 15 phút';
+    if (expiresAt == null) return context.l10n.setupCodeValidity;
     final remaining = expiresAt.difference(DateTime.now().toUtc());
-    if (remaining.isNegative) return 'Mã đã hết hạn';
-    if (remaining.inMinutes == 0) return 'Còn ${remaining.inSeconds} giây';
-    return 'Hết hạn lúc ${DateFormat('HH:mm').format(expiresAt.toLocal())}';
+    if (remaining.isNegative) return context.l10n.setupCodeExpired;
+    if (remaining.inMinutes == 0) {
+      return context.l10n.setupCodeSecondsRemaining(
+        (remaining.inSeconds).toString(),
+      );
+    }
+    return context.l10n.setupCodeExpiresAt(
+      (DateFormat('HH:mm').format(expiresAt.toLocal())).toString(),
+    );
   }
 
   bool get _isExpired {
@@ -219,10 +222,7 @@ class _CupertinoProvisioningCodeScreenState
     ApiErrorKind.rateLimited => context.l10n.tooManyRequests,
     ApiErrorKind.server => context.l10n.serverUnavailable,
     ApiErrorKind.malformed => context.l10n.malformedProvisioningResponse,
-    _ =>
-      error.message.isNotEmpty
-          ? error.message
-          : context.l10n.provisioningCodeRequestFailed,
+    _ => context.l10n.provisioningCodeRequestFailed,
   };
 
   Future<void> _waitForBackendOnline() async {
@@ -233,7 +233,9 @@ class _CupertinoProvisioningCodeScreenState
       try {
         final response = await _apiService.getDevice(widget.device.id);
         if (response['isOnline'] == true) {
-          setState(() => _espMessage = context.l10n.deviceOnlineConfirmed);
+          setState(
+            () => _espMessage = () => context.l10n.deviceOnlineConfirmed,
+          );
           return;
         }
       } catch (_) {
@@ -241,7 +243,7 @@ class _CupertinoProvisioningCodeScreenState
       }
     }
     if (mounted && generation == _onlineCheckGeneration) {
-      setState(() => _espMessage = context.l10n.deviceOnlineNotConfirmed);
+      setState(() => _espMessage = () => context.l10n.deviceOnlineNotConfirmed);
     }
   }
 
@@ -291,7 +293,7 @@ class _CupertinoProvisioningCodeScreenState
                     )
                   : _errorMessage != null
                   ? _ProvisioningError(
-                      message: _errorMessage!,
+                      message: _errorMessage!(),
                       onRetry: _generateCode,
                     )
                   : _buildCodeContent(context),
@@ -306,7 +308,7 @@ class _CupertinoProvisioningCodeScreenState
     final code = _provisioningCode;
     if (code == null) {
       return _ProvisioningError(
-        message: 'Máy chủ chưa trả về mã thiết lập.',
+        message: context.l10n.setupCodeMissing,
         onRetry: _generateCode,
       );
     }
@@ -366,7 +368,7 @@ class _CupertinoProvisioningCodeScreenState
               ),
               const SizedBox(height: 16),
               CupertinoButton.filled(
-                onPressed: () => _copy(code.code, 'Mã thiết lập'),
+                onPressed: () => _copy(code.code, context.l10n.setupCodeLabel),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -377,7 +379,11 @@ class _CupertinoProvisioningCodeScreenState
                       size: 17,
                     ),
                     const SizedBox(width: 8),
-                    Text(_isCopied ? 'Sao chép lại mã' : 'Sao chép mã'),
+                    Text(
+                      _isCopied
+                          ? context.l10n.copyCodeAgain
+                          : context.l10n.copySetupCode,
+                    ),
                   ],
                 ),
               ),
@@ -390,7 +396,7 @@ class _CupertinoProvisioningCodeScreenState
           passwordController: _passwordController,
           networks: _networks,
           hardwareId: _espHardwareId,
-          message: _espMessage,
+          message: _espMessage?.call(),
           isChecking: _isCheckingEsp,
           isProvisioning: _isProvisioning,
           provisioned: _provisioned,
@@ -401,29 +407,15 @@ class _CupertinoProvisioningCodeScreenState
           }),
         ),
         const SizedBox(height: 20),
-        _SetupStep(
-          number: '1',
-          text:
-              'Giữ laptop chạy backend và frontend trên Wi-Fi chính. Trên điện thoại, mở màn hình này trước.',
-        ),
-        _SetupStep(
-          number: '2',
-          text:
-              'Kết nối điện thoại với Wi-Fi IOTAgri-Setup, quay lại màn hình này và nhấn Kiểm tra kết nối ESP.',
-        ),
-        _SetupStep(
-          number: '3',
-          text:
-              'Chọn Wi-Fi 2.4 GHz, nhập mật khẩu rồi nhấn Kết nối ESP. Frontend tự gửi mã và địa chỉ backend.',
-        ),
-        _SetupStep(
-          number: '4',
-          text:
-              'Khi báo thành công, kết nối điện thoại trở lại Wi-Fi chính và chờ thiết bị chuyển sang trạng thái online.',
-        ),
+        _SetupStep(number: '1', text: context.l10n.espSetupStepOne),
+        _SetupStep(number: '2', text: context.l10n.espSetupStepTwo),
+        _SetupStep(number: '3', text: context.l10n.espSetupStepThree),
+        _SetupStep(number: '4', text: context.l10n.espSetupStepFour),
         const SizedBox(height: 12),
         Text(
-          'Backend dành cho ESP: ${ApiConstants.deviceApiBaseUrl}',
+          context.l10n.espBackendAddress(
+            (ApiConstants.deviceApiBaseUrl).toString(),
+          ),
           textAlign: TextAlign.center,
           style: TextStyle(
             color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -433,7 +425,7 @@ class _CupertinoProvisioningCodeScreenState
         const SizedBox(height: 18),
         CupertinoButton(
           onPressed: _confirmRegenerate,
-          child: const Text('Tạo mã mới (mã cũ sẽ hết hiệu lực)'),
+          child: Text(context.l10n.regenerateSetupCode),
         ),
       ],
     );
@@ -478,7 +470,7 @@ class _DirectEspSetupPanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Kết nối trực tiếp với ESP',
+          context.l10n.directEspSetup,
           style: TextStyle(
             color: CupertinoColors.label.resolveFrom(context),
             fontSize: 18,
@@ -487,7 +479,7 @@ class _DirectEspSetupPanel extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          'Không cần mở Swagger hoặc trang cấu hình 192.168.4.1.',
+          context.l10n.directEspSetupHint,
           style: TextStyle(
             color: CupertinoColors.secondaryLabel.resolveFrom(context),
             fontSize: 12,
@@ -502,12 +494,12 @@ class _DirectEspSetupPanel extends StatelessWidget {
                   color: CupertinoColors.white,
                   radius: 10,
                 )
-              : const Text('Kiểm tra kết nối ESP'),
+              : Text(context.l10n.checkEspConnection),
         ),
         if (hardwareId != null) ...[
           const SizedBox(height: 8),
           Text(
-            'Đã thấy ESP: $hardwareId',
+            context.l10n.espDetected((hardwareId).toString()),
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: CupertinoColors.systemGreen,
@@ -518,8 +510,8 @@ class _DirectEspSetupPanel extends StatelessWidget {
         ],
         if (networks.isNotEmpty) ...[
           const SizedBox(height: 14),
-          const Text(
-            'Wi-Fi 2.4 GHz ESP nhìn thấy:',
+          Text(
+            context.l10n.espAvailableNetworks,
             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
@@ -556,14 +548,14 @@ class _DirectEspSetupPanel extends StatelessWidget {
         CupertinoTextField(
           controller: ssidController,
           enabled: !isProvisioning,
-          placeholder: 'Tên Wi-Fi 2.4 GHz (SSID)',
+          placeholder: context.l10n.wifiSsidHint,
           padding: const EdgeInsets.all(13),
         ),
         const SizedBox(height: 10),
         CupertinoTextField(
           controller: passwordController,
           enabled: !isProvisioning,
-          placeholder: 'Mật khẩu Wi-Fi',
+          placeholder: context.l10n.wifiPasswordHint,
           obscureText: true,
           padding: const EdgeInsets.all(13),
         ),
@@ -591,7 +583,11 @@ class _DirectEspSetupPanel extends StatelessWidget {
                   color: CupertinoColors.white,
                   radius: 10,
                 )
-              : Text(provisioned ? 'Đã kết nối' : 'Kết nối ESP'),
+              : Text(
+                  provisioned
+                      ? context.l10n.connectedStatus
+                      : context.l10n.connectEsp,
+                ),
         ),
       ],
     ),
@@ -662,7 +658,7 @@ class _ProvisioningError extends StatelessWidget {
             size: 34,
           ),
           const SizedBox(height: 12),
-          const Text('Không thể tạo mã thiết lập.'),
+          Text(context.l10n.provisioningCodeRequestFailed),
           const SizedBox(height: 6),
           Text(
             message,
@@ -677,7 +673,7 @@ class _ProvisioningError extends StatelessWidget {
           const SizedBox(height: 12),
           CupertinoButton.filled(
             onPressed: onRetry,
-            child: const Text('Thử lại'),
+            child: Text(context.l10n.retry),
           ),
         ],
       ),

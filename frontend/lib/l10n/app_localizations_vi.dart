@@ -751,4 +751,753 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get networkError => 'Hãy kiểm tra kết nối mạng và thử lại.';
+
+  @override
+  String get deleteDeviceTitle => 'Xóa thiết bị?';
+
+  @override
+  String deleteNamedDeviceConfirmation(String value0) {
+    return 'Bạn có chắc muốn xóa \"$value0\"? Thao tác này không thể hoàn tác.';
+  }
+
+  @override
+  String get actionFailed => 'Không thể hoàn tất';
+
+  @override
+  String get searchDevicesHint => 'Tìm theo tên hoặc vị trí';
+
+  @override
+  String get noMatchingDevices => 'Không tìm thấy thiết bị.';
+
+  @override
+  String get unassignedLocation => 'Vị trí chưa gán';
+
+  @override
+  String deviceNeverConnected(String value0) {
+    return 'Chưa có kết nối · $value0';
+  }
+
+  @override
+  String deviceLastSeen(String value0, String value1) {
+    return 'Lần cuối $value0 · $value1';
+  }
+
+  @override
+  String get devicesEmptyTitle => 'Chưa có thiết bị nào';
+
+  @override
+  String get devicesEmptyExplanation =>
+      'Tạo thiết bị để bắt đầu thiết lập kết nối.';
+
+  @override
+  String get devicesLoadFailed => 'Không thể tải danh sách thiết bị.';
+
+  @override
+  String switchDeviceToAutoConfirmation(String value0) {
+    return '$value0 đang ở chế độ Thủ công và chưa phun. Chuyển về Tự động?';
+  }
+
+  @override
+  String lightCommandFailed(String value0) {
+    return 'Không thể gửi lệnh đèn: $value0';
+  }
+
+  @override
+  String get switchMode => 'Chuyển';
+
+  @override
+  String get deviceDeleted => 'Đã xóa thiết bị thành công';
+
+  @override
+  String get noReadingsYet => 'Chưa có dữ liệu';
+
+  @override
+  String get automaticMode => 'Tự động';
+
+  @override
+  String pumpRunningCountdown(String value0) {
+    return 'Bơm đang chạy - còn $value0';
+  }
+
+  @override
+  String get noScheduledTime => 'Không có lịch';
+
+  @override
+  String get scheduledTimePassed => 'Đã qua';
+
+  @override
+  String minutesRemaining(String value0) {
+    return '$value0 phút';
+  }
+
+  @override
+  String get lightControl => 'Điều khiển đèn';
+
+  @override
+  String get lightIsOn => 'Đèn đang bật';
+
+  @override
+  String get lightIsOff => 'Đèn đang tắt';
+
+  @override
+  String sprayScheduleSummary(
+    String value0,
+    String value1,
+    String value2,
+    String value3,
+  ) {
+    return 'Phun $value0 giây mỗi $value1 phút, $value2-$value3';
+  }
+
+  @override
+  String get savedSchedulesContinue =>
+      'Lịch đã lưu tiếp tục chạy tự động khi có kết nối.';
+
+  @override
+  String temperatureRecordCount(String value0) {
+    return '$value0 lần ghi · Nhiệt độ';
+  }
+
+  @override
+  String get lowWaterTitle => 'Mực nước thấp';
+
+  @override
+  String get highTemperatureTitle => 'Nhiệt độ cao';
+
+  @override
+  String get invalidDeviceThresholds =>
+      'Kiểm tra lại ngưỡng nhiệt độ và mực nước.';
+
+  @override
+  String get renameAction => 'Đổi tên';
+
+  @override
+  String get wifiSignalGood => 'Tốt (-65 dBm)';
+
+  @override
+  String get wifiSignalMissing => 'Không có tín hiệu';
+
+  @override
+  String get espFoundNoNetworks =>
+      'Đã thấy ESP nhưng chưa tìm thấy mạng Wi-Fi 2.4 GHz.';
+
+  @override
+  String get espConnectedChooseNetwork =>
+      'Đã kết nối ESP. Chọn mạng Wi-Fi bên dưới.';
+
+  @override
+  String get espConnectionFailed =>
+      'Không kết nối được ESP. Hãy nối thiết bị này vào Wi-Fi IOTAgri-Setup rồi thử lại.';
+
+  @override
+  String get wifiSsidRequired => 'Vui lòng nhập hoặc chọn tên Wi-Fi 2.4 GHz.';
+
+  @override
+  String get wifiPasswordRequired => 'Vui lòng nhập mật khẩu Wi-Fi.';
+
+  @override
+  String get espSendingConfiguration =>
+      'Đang gửi cấu hình trực tiếp tới ESP...';
+
+  @override
+  String get setupCodeValidity => 'Có hiệu lực trong 15 phút';
+
+  @override
+  String get setupCodeExpired => 'Mã đã hết hạn';
+
+  @override
+  String setupCodeSecondsRemaining(String value0) {
+    return 'Còn $value0 giây';
+  }
+
+  @override
+  String setupCodeExpiresAt(String value0) {
+    return 'Hết hạn lúc $value0';
+  }
+
+  @override
+  String get setupCodeMissing => 'Máy chủ chưa trả về mã thiết lập.';
+
+  @override
+  String get setupCodeLabel => 'Mã thiết lập';
+
+  @override
+  String get copyCodeAgain => 'Sao chép lại mã';
+
+  @override
+  String get copySetupCode => 'Sao chép mã';
+
+  @override
+  String get espSetupStepOne =>
+      'Giữ laptop chạy backend và frontend trên Wi-Fi chính. Trên điện thoại, mở màn hình này trước.';
+
+  @override
+  String get espSetupStepTwo =>
+      'Kết nối điện thoại với Wi-Fi IOTAgri-Setup, quay lại màn hình này và nhấn Kiểm tra kết nối ESP.';
+
+  @override
+  String get espSetupStepThree =>
+      'Chọn Wi-Fi 2.4 GHz, nhập mật khẩu rồi nhấn Kết nối ESP. Frontend tự gửi mã và địa chỉ backend.';
+
+  @override
+  String get espSetupStepFour =>
+      'Khi báo thành công, kết nối điện thoại trở lại Wi-Fi chính và chờ thiết bị chuyển sang trạng thái online.';
+
+  @override
+  String espBackendAddress(String value0) {
+    return 'Backend dành cho ESP: $value0';
+  }
+
+  @override
+  String get regenerateSetupCode => 'Tạo mã mới (mã cũ sẽ hết hiệu lực)';
+
+  @override
+  String get directEspSetup => 'Kết nối trực tiếp với ESP';
+
+  @override
+  String get directEspSetupHint =>
+      'Không cần mở Swagger hoặc trang cấu hình 192.168.4.1.';
+
+  @override
+  String get checkEspConnection => 'Kiểm tra kết nối ESP';
+
+  @override
+  String espDetected(String value0) {
+    return 'Đã thấy ESP: $value0';
+  }
+
+  @override
+  String get espAvailableNetworks => 'Wi-Fi 2.4 GHz ESP nhìn thấy:';
+
+  @override
+  String get wifiSsidHint => 'Tên Wi-Fi 2.4 GHz (SSID)';
+
+  @override
+  String get wifiPasswordHint => 'Mật khẩu Wi-Fi';
+
+  @override
+  String get connectedStatus => 'Đã kết nối';
+
+  @override
+  String get connectEsp => 'Kết nối ESP';
+
+  @override
+  String get seedlingsPreset => 'Cây giống';
+
+  @override
+  String get leafyPreset => 'Rau lá';
+
+  @override
+  String get herbsPreset => 'Thảo mộc';
+
+  @override
+  String sprayDurationSummary(String value0) {
+    return 'Thời gian phun: $value0 giây';
+  }
+
+  @override
+  String sprayIntervalSummary(String value0) {
+    return 'Lặp lại mỗi $value0 phút';
+  }
+
+  @override
+  String scheduleDaysSummary(String value0) {
+    return 'Ngày: $value0';
+  }
+
+  @override
+  String get noDaysSelected => 'chưa chọn ngày';
+
+  @override
+  String get sprayDurationRequired => 'Vui lòng nhập thời gian phun';
+
+  @override
+  String get sprayDurationRange => 'Thời gian phun từ 1-120 giây';
+
+  @override
+  String get scheduleIntervalRequired => 'Vui lòng nhập khoảng cách';
+
+  @override
+  String get scheduleIntervalRange => 'Khoảng cách từ 1-60 phút';
+
+  @override
+  String get sprayDurationLessThanInterval =>
+      'Thời gian phun phải nhỏ hơn khoảng cách';
+
+  @override
+  String get scheduleEndAfterStart =>
+      'Giờ kết thúc phải sau giờ bắt đầu (trừ khi qua đêm)';
+
+  @override
+  String schedulePreview(
+    String value0,
+    String value1,
+    String value2,
+    String value3,
+    String value4,
+  ) {
+    return 'Phun $value0 giây mỗi $value1 phút, $value2-$value3, $value4';
+  }
+
+  @override
+  String get selectScheduleDay => 'Vui lòng chọn ít nhất một ngày';
+
+  @override
+  String get savedTitle => 'Đã lưu';
+
+  @override
+  String get savedToDevice => 'Đã lưu vào thiết bị';
+
+  @override
+  String saveFailed(String value0) {
+    return 'Không thể lưu: $value0';
+  }
+
+  @override
+  String get unsavedTitle => 'Chưa lưu';
+
+  @override
+  String get unsavedChangesConfirmation =>
+      'Bạn có thay đổi chưa được lưu. Bạn có muốn rời đi?';
+
+  @override
+  String get keepEditing => 'Giữ lại';
+
+  @override
+  String get discardChanges => 'Bỏ thay đổi';
+
+  @override
+  String get deviceScheduleTimezoneHint =>
+      'Giờ thiết bị: Asia/Ho_Chi_Minh. Lịch ưu tiên hơn điều khiển thủ công.';
+
+  @override
+  String get schedulePreset => 'Mẫu cài đặt';
+
+  @override
+  String get sprayDurationSeconds => 'Thời gian phun (giây)';
+
+  @override
+  String get scheduleIntervalMinutes => 'Khoảng cách (phút)';
+
+  @override
+  String get scheduleTimeWindow => 'Khung giờ hoạt động';
+
+  @override
+  String get scheduleStart => 'Bắt đầu';
+
+  @override
+  String get scheduleEnd => 'Kết thúc';
+
+  @override
+  String get scheduleRepeatDays => 'Ngày lặp lại';
+
+  @override
+  String get pumpLabel => 'Bơm';
+
+  @override
+  String get lightLabel => 'Đèn';
+
+  @override
+  String get turnLightOn => 'Bật đèn';
+
+  @override
+  String localScheduleSummary(
+    String value0,
+    String value1,
+    String value2,
+    String value3,
+    String value4,
+  ) {
+    return '$value0 $value1 giây mỗi $value2 phút · $value3\n$value4 · chỉ hiển thị';
+  }
+
+  @override
+  String actionDurationSeconds(String value0) {
+    return 'Thời gian $value0 (giây)';
+  }
+
+  @override
+  String get timezoneLabel => 'Múi giờ';
+
+  @override
+  String get vietnamTimezone => 'Việt Nam · GMT+07:00';
+
+  @override
+  String get localScheduleNotice =>
+      'Lịch này chỉ hiển thị trên frontend, chưa gửi tới thiết bị hoặc backend.';
+
+  @override
+  String get waterSensorTitle => 'Mức nước';
+
+  @override
+  String get waterSensorLabel => 'MỨC NƯỚC';
+
+  @override
+  String get waterSensorDescription =>
+      'Theo dõi lượng nước trong hệ thống để cây luôn được tưới phù hợp.';
+
+  @override
+  String get waterSensorHistory => 'Lịch sử mức nước';
+
+  @override
+  String get waterSensorLow => 'Mức nước thấp';
+
+  @override
+  String get waterSensorStable => 'Mức nước ổn định';
+
+  @override
+  String get notConfigured => 'Chưa cấu hình';
+
+  @override
+  String get nutrientSensorDescription =>
+      'Theo dõi nồng độ dinh dưỡng để hỗ trợ cây phát triển đồng đều.';
+
+  @override
+  String get nutrientSensorHistory => 'Lịch sử mức dinh dưỡng';
+
+  @override
+  String get dataReceived => 'Đã nhận dữ liệu';
+
+  @override
+  String get temperatureSensorTitle => 'Nhiệt độ';
+
+  @override
+  String get temperatureSensorLabel => 'NHIỆT ĐỘ';
+
+  @override
+  String get temperatureSensorDescription =>
+      'Theo dõi nhiệt độ môi trường quanh khu vực trồng cây.';
+
+  @override
+  String get temperatureSensorHistory => 'Lịch sử nhiệt độ';
+
+  @override
+  String get temperatureSensorAttention => 'Nhiệt độ cần chú ý';
+
+  @override
+  String get temperatureSensorHealthy => 'Nhiệt độ phù hợp';
+
+  @override
+  String get waterTemperatureSensorTitle => 'Nhiệt độ nước';
+
+  @override
+  String get waterTemperatureSensorDescription =>
+      'Theo dõi nhiệt độ dung dịch bằng cảm biến nhiệt độ nước.';
+
+  @override
+  String get waterTemperatureSensorHistory => 'Lịch sử nhiệt độ nước';
+
+  @override
+  String get humiditySensorTitle => 'Độ ẩm không khí';
+
+  @override
+  String get humiditySensorDescription =>
+      'Theo dõi độ ẩm không khí bằng cảm biến AHT20.';
+
+  @override
+  String get humiditySensorHistory => 'Lịch sử độ ẩm không khí';
+
+  @override
+  String get lightSensorTitle => 'Ánh sáng';
+
+  @override
+  String get lightSensorDescription =>
+      'Theo dõi cường độ ánh sáng để cây nhận đủ năng lượng quang hợp.';
+
+  @override
+  String get lightSensorHistory => 'Lịch sử ánh sáng';
+
+  @override
+  String get resolveNow => 'Xử lý ngay';
+
+  @override
+  String get plantLettuce => 'Xà lách';
+
+  @override
+  String get plantBasil => 'Húng quế';
+
+  @override
+  String get plantSpinach => 'Rau chân vịt';
+
+  @override
+  String get plantMint => 'Bạc hà';
+
+  @override
+  String get plantKale => 'Cải xoăn';
+
+  @override
+  String get plantCoriander => 'Rau mùi';
+
+  @override
+  String get difficultyEasy => 'Dễ';
+
+  @override
+  String get difficultyMedium => 'Trung bình';
+
+  @override
+  String get lowNutrientTitle => 'Dinh dưỡng thấp';
+
+  @override
+  String get lowWaterMessage => 'Mực nước đang dưới 30% – cần nạp thêm nước.';
+
+  @override
+  String get lowNutrientMessage => 'Mức dinh dưỡng dưới 45% – cần bón thêm.';
+
+  @override
+  String get refillWater => 'Nạp nước';
+
+  @override
+  String get addNutrients => 'Bổ dinh dưỡng';
+
+  @override
+  String get lowTemperatureTitle => 'Nhiệt độ thấp';
+
+  @override
+  String get waterEmptyTitle => 'Bình nước đã cạn';
+
+  @override
+  String get humidityAlertTitle => 'Độ ẩm ngoài ngưỡng';
+
+  @override
+  String get pumpFaultTitle => 'Lỗi bơm';
+
+  @override
+  String get deviceOfflineTitle => 'Thiết bị mất kết nối';
+
+  @override
+  String get deviceOnlineTitle => 'Thiết bị đã trực tuyến';
+
+  @override
+  String get nutrientAlertTitle => 'Dinh dưỡng ngoài ngưỡng';
+
+  @override
+  String get phAlertTitle => 'pH ngoài ngưỡng';
+
+  @override
+  String get sensorAlertTitle => 'Cảnh báo cảm biến';
+
+  @override
+  String highTemperatureMessage(String value, String threshold) {
+    return 'Nhiệt độ $value°C vượt ngưỡng $threshold°C.';
+  }
+
+  @override
+  String lowWaterThresholdMessage(String value, String threshold) {
+    return 'Mực nước $value% thấp hơn ngưỡng $threshold%.';
+  }
+
+  @override
+  String sensorThresholdMessage(String value, String threshold) {
+    return 'Giá trị $value · Ngưỡng $threshold.';
+  }
+
+  @override
+  String get sprayAction => 'Phun';
+
+  @override
+  String get sundayShort => 'CN';
+
+  @override
+  String get mondayShort => 'T2';
+
+  @override
+  String get tuesdayShort => 'T3';
+
+  @override
+  String get wednesdayShort => 'T4';
+
+  @override
+  String get thursdayShort => 'T5';
+
+  @override
+  String get fridayShort => 'T6';
+
+  @override
+  String get saturdayShort => 'T7';
+
+  @override
+  String get stillActiveTitle => 'Vẫn đang xảy ra';
+
+  @override
+  String get alertRecoveredTitle => 'Đã khôi phục';
+
+  @override
+  String alertResolvedMessage(String device, String alert) {
+    return '$device: $alert đã được xử lý.';
+  }
+
+  @override
+  String deviceAlertsTitle(String value0) {
+    return 'Cảnh báo · $value0';
+  }
+
+  @override
+  String get markAllAlertsRead => 'Đánh dấu tất cả đã đọc';
+
+  @override
+  String get todayLabel => 'Hôm nay';
+
+  @override
+  String get earlierLabel => 'Trước đó';
+
+  @override
+  String get criticalSeverity => 'Nghiêm trọng';
+
+  @override
+  String get unreadFilter => 'Chưa đọc';
+
+  @override
+  String get activeAlertStatus => 'Đang xảy ra';
+
+  @override
+  String get alertDetailsTitle => 'Chi tiết cảnh báo';
+
+  @override
+  String get timeLabel => 'Thời gian';
+
+  @override
+  String get statusLabel => 'Trạng thái';
+
+  @override
+  String get openAlertDevice => 'Đi tới thiết bị';
+
+  @override
+  String get alertsQuietTitle => 'Mọi thứ yên tĩnh';
+
+  @override
+  String get noMatchingAlerts => 'Không có cảnh báo phù hợp với bộ lọc.';
+
+  @override
+  String get invalidAlertThreshold =>
+      'Ngưỡng phải là số hợp lệ; mực nước từ 0–100%.';
+
+  @override
+  String get alertThresholdsSaved => 'Đã lưu ngưỡng cảnh báo';
+
+  @override
+  String deviceSettingsUpdated(String value0) {
+    return 'Cài đặt cho $value0 đã được cập nhật.';
+  }
+
+  @override
+  String get alertThresholdsTitle => 'Ngưỡng cảnh báo';
+
+  @override
+  String get supportedSensorsOnly =>
+      'Chỉ những cảm biến thiết bị hiện hỗ trợ mới được hiển thị.';
+
+  @override
+  String get resetRecommendedThresholds => 'Đặt lại khuyến nghị';
+
+  @override
+  String get notificationPreferencesTitle => 'Tùy chọn thông báo';
+
+  @override
+  String get notificationsToggleHint => 'Bật hoặc tắt toàn bộ thông báo';
+
+  @override
+  String get severityHeading => 'MỨC ĐỘ';
+
+  @override
+  String get criticalNotificationsHint => 'Lỗi bơm, hết nước, mất kết nối';
+
+  @override
+  String get warningNotificationsHint => 'Chỉ số cảm biến ngoài ngưỡng';
+
+  @override
+  String get infoSeverity => 'Thông tin';
+
+  @override
+  String get infoNotificationsHint =>
+      'Đã lưu lịch, online lại, cập nhật firmware';
+
+  @override
+  String get quietHoursTitle => 'Giờ yên tĩnh';
+
+  @override
+  String get criticalIgnoresQuietHours =>
+      'Cảnh báo nghiêm trọng bỏ qua giờ yên tĩnh.';
+
+  @override
+  String deviceHistoryTitle(String value0) {
+    return 'Lịch sử · $value0';
+  }
+
+  @override
+  String get hourlyAverages => 'Hiển thị trung bình theo giờ';
+
+  @override
+  String get historyFiltersTitle => 'Bộ lọc lịch sử';
+
+  @override
+  String get showPumpEvents => 'Hiển thị sự kiện bơm';
+
+  @override
+  String get resetAction => 'Đặt lại';
+
+  @override
+  String get applyAction => 'Áp dụng';
+
+  @override
+  String get fromDateLabel => 'Từ ngày';
+
+  @override
+  String get toDateLabel => 'Đến ngày';
+
+  @override
+  String get customHistoryRangeInvalid =>
+      'Khoảng tùy chọn phải từ 1 đến 31 ngày.';
+
+  @override
+  String get exportDataTitle => 'Xuất dữ liệu';
+
+  @override
+  String get exportDataFailed => 'Không thể tạo tệp. Hãy thử khoảng ngắn hơn.';
+
+  @override
+  String get createFileAction => 'Tạo tệp';
+
+  @override
+  String pumpEventsCount(String value0) {
+    return 'Sự kiện bơm · $value0';
+  }
+
+  @override
+  String get minimumLabel => 'Thấp nhất';
+
+  @override
+  String get maximumLabel => 'Cao nhất';
+
+  @override
+  String get historyLoadFailed => 'Không thể tải lịch sử';
+
+  @override
+  String get newDeviceInsufficientData => 'Thiết bị mới chưa có đủ dữ liệu';
+
+  @override
+  String get historyRangeEmpty => 'Không có dữ liệu trong khoảng này';
+
+  @override
+  String get changeHistoryRange => 'Đổi khoảng thời gian';
+
+  @override
+  String viewSensorDetails(String value0) {
+    return 'Xem chi tiết $value0';
+  }
+
+  @override
+  String get genericErrorTitle => 'Đã xảy ra lỗi';
+
+  @override
+  String get requestValidationFailed =>
+      'Kiểm tra thông tin đã nhập và thử lại.';
+
+  @override
+  String get historySevenDays => '7 ngày';
+
+  @override
+  String get historyThirtyDays => '30 ngày';
+
+  @override
+  String get averageLabel => 'Trung bình';
 }

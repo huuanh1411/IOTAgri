@@ -1,3 +1,5 @@
+import '../../utils/display_localizations.dart';
+import '../../utils/l10n.dart';
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
@@ -41,7 +43,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
   late DateTime _customTo;
   bool _showPumpEvents = true;
   bool _isLoading = true;
-  String? _errorMessage;
+  String Function()? _errorMessage;
 
   @override
   void initState() {
@@ -89,7 +91,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = error.toString();
+        _errorMessage = () => localizedApiError(error, context.l10n);
       });
     }
   }
@@ -109,7 +111,9 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
   @override
   Widget build(BuildContext context) => CupertinoPageScaffold(
     navigationBar: CupertinoNavigationBar(
-      middle: Text('Lịch sử · ${widget.device.name}'),
+      middle: Text(
+        context.l10n.deviceHistoryTitle((widget.device.name).toString()),
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -145,7 +149,10 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                 if (_isLoading)
                   const _HistorySkeleton()
                 else if (_errorMessage != null)
-                  _HistoryError(message: _errorMessage!, onRetry: _loadHistory)
+                  _HistoryError(
+                    message: _errorMessage!(),
+                    onRetry: _loadHistory,
+                  )
                 else if (_samples.isEmpty)
                   _HistoryEmpty(
                     isNewDevice:
@@ -173,7 +180,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: _SelectionChip(
-              label: sensor.label,
+              label: sensor.localizedLabel(context.l10n),
               selected: _selectedSensors.contains(sensor),
               color: _sensorColor(sensor),
               onTap: () {
@@ -202,7 +209,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
               right: range == HistoryRange.custom ? 0 : 6,
             ),
             child: _SelectionChip(
-              label: range.label,
+              label: range.localizedLabel(context.l10n),
               selected: _range == range,
               onTap: () async {
                 if (range == HistoryRange.custom && !await _pickCustomRange()) {
@@ -228,9 +235,9 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
     final statistics = HistoryStatistics.fromSamples(_samples, primary);
     final content = <Widget>[
       if (_range.isDownsampled || _window.rangeHours > 48) ...[
-        const _InfoBanner(
+        _InfoBanner(
           icon: CupertinoIcons.chart_bar,
-          text: 'Hiển thị trung bình theo giờ',
+          text: context.l10n.hourlyAverages,
         ),
         const SizedBox(height: 12),
       ],
@@ -280,7 +287,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
       context: context,
       builder: (popupContext) => StatefulBuilder(
         builder: (context, setPopupState) => CupertinoActionSheet(
-          title: const Text('Bộ lọc lịch sử'),
+          title: Text(context.l10n.historyFiltersTitle),
           message: Column(
             children: [
               const SizedBox(height: 8),
@@ -290,7 +297,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                 children: [
                   for (final sensor in HistorySensor.values)
                     _SelectionChip(
-                      label: sensor.label,
+                      label: sensor.localizedLabel(context.l10n),
                       selected: sensors.contains(sensor),
                       color: _sensorColor(sensor),
                       onTap: () => setPopupState(() {
@@ -310,7 +317,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                 children: [
                   for (final option in HistoryRange.values)
                     _SelectionChip(
-                      label: option.label,
+                      label: option.localizedLabel(context.l10n),
                       selected: range == option,
                       onTap: () => setPopupState(() => range = option),
                     ),
@@ -319,7 +326,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
               const SizedBox(height: 14),
               Row(
                 children: [
-                  const Expanded(child: Text('Hiển thị sự kiện bơm')),
+                  Expanded(child: Text(context.l10n.showPumpEvents)),
                   CupertinoSwitch(
                     value: showPumpEvents,
                     onChanged: (value) =>
@@ -338,17 +345,17 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                   showPumpEvents = true;
                 });
               },
-              child: const Text('Đặt lại'),
+              child: Text(context.l10n.resetAction),
             ),
             CupertinoActionSheetAction(
               isDefaultAction: true,
               onPressed: () => Navigator.of(popupContext).pop(true),
-              child: const Text('Áp dụng'),
+              child: Text(context.l10n.applyAction),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.of(popupContext).pop(false),
-            child: const Text('Hủy'),
+            child: Text(context.l10n.cancel),
           ),
         ),
       ),
@@ -364,13 +371,13 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
   }
 
   Future<bool> _pickCustomRange() async {
-    final from = await _pickDate('Từ ngày', _customFrom);
+    final from = await _pickDate(context.l10n.fromDateLabel, _customFrom);
     if (from == null || !mounted) return false;
-    final to = await _pickDate('Đến ngày', _customTo);
+    final to = await _pickDate(context.l10n.toDateLabel, _customTo);
     if (to == null || !mounted) return false;
     final end = DateTime(to.year, to.month, to.day, 23, 59, 59);
     if (!end.isAfter(from) || end.difference(from) > const Duration(days: 31)) {
-      await _showMessage('Khoảng tùy chọn phải từ 1 đến 31 ngày.');
+      await _showMessage(context.l10n.customHistoryRangeInvalid);
       return false;
     }
     _customFrom = DateTime(from.year, from.month, from.day);
@@ -393,7 +400,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                 children: [
                   CupertinoButton(
                     onPressed: () => Navigator.of(popupContext).pop(),
-                    child: const Text('Hủy'),
+                    child: Text(context.l10n.cancel),
                   ),
                   Expanded(
                     child: Text(
@@ -435,7 +442,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
       context: context,
       builder: (popupContext) => StatefulBuilder(
         builder: (context, setPopupState) => CupertinoActionSheet(
-          title: const Text('Xuất dữ liệu'),
+          title: Text(context.l10n.exportDataTitle),
           message: Column(
             children: [
               Text(
@@ -448,7 +455,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                 children: [
                   for (final sensor in HistorySensor.values)
                     _SelectionChip(
-                      label: sensor.label,
+                      label: sensor.localizedLabel(context.l10n),
                       selected: sensors.contains(sensor),
                       onTap: generating
                           ? null
@@ -521,18 +528,22 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
                         if (!popupContext.mounted) return;
                         setPopupState(() {
                           generating = false;
-                          error = 'Không thể tạo tệp. Hãy thử khoảng ngắn hơn.';
+                          error = context.l10n.exportDataFailed;
                         });
                       }
                     },
-              child: Text(error == null ? 'Tạo tệp' : 'Thử lại'),
+              child: Text(
+                error == null
+                    ? context.l10n.createFileAction
+                    : context.l10n.retry,
+              ),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             onPressed: generating
                 ? () {}
                 : () => Navigator.of(popupContext).pop(),
-            child: const Text('Hủy'),
+            child: Text(context.l10n.cancel),
           ),
         ),
       ),
@@ -546,7 +557,7 @@ class _SensorHistoryScreenState extends State<SensorHistoryScreen> {
       actions: [
         CupertinoDialogAction(
           onPressed: () => Navigator.of(dialogContext).pop(),
-          child: const Text('Đã hiểu'),
+          child: Text(context.l10n.dismiss),
         ),
       ],
     ),
@@ -742,7 +753,7 @@ class _PumpEventStrip extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Text(
-              'Sự kiện bơm · ${events.length}',
+              context.l10n.pumpEventsCount((events.length).toString()),
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ],
@@ -806,24 +817,24 @@ class _StatisticsCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          sensor.label,
+          sensor.localizedLabel(context.l10n),
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 14),
         Row(
           children: [
             _Metric(
-              label: 'Thấp nhất',
+              label: context.l10n.minimumLabel,
               value: statistics.minimum,
               sensor: sensor,
             ),
             _Metric(
-              label: 'Trung bình',
+              label: context.l10n.averageLabel,
               value: statistics.average,
               sensor: sensor,
             ),
             _Metric(
-              label: 'Cao nhất',
+              label: context.l10n.maximumLabel,
               value: statistics.maximum,
               sensor: sensor,
             ),
@@ -996,7 +1007,7 @@ class _HistoryError extends StatelessWidget {
           size: 32,
         ),
         const SizedBox(height: 10),
-        const Text('Không thể tải lịch sử'),
+        Text(context.l10n.historyLoadFailed),
         const SizedBox(height: 5),
         Text(
           message,
@@ -1007,7 +1018,7 @@ class _HistoryError extends StatelessWidget {
         const SizedBox(height: 14),
         CupertinoButton.filled(
           onPressed: onRetry,
-          child: const Text('Thử lại'),
+          child: Text(context.l10n.retry),
         ),
       ],
     ),
@@ -1032,14 +1043,14 @@ class _HistoryEmpty extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           isNewDevice
-              ? 'Thiết bị mới chưa có đủ dữ liệu'
-              : 'Không có dữ liệu trong khoảng này',
+              ? context.l10n.newDeviceInsufficientData
+              : context.l10n.historyRangeEmpty,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
         CupertinoButton(
           onPressed: onChangeRange,
-          child: const Text('Đổi khoảng thời gian'),
+          child: Text(context.l10n.changeHistoryRange),
         ),
       ],
     ),

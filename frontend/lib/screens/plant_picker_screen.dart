@@ -1,3 +1,4 @@
+import '../utils/display_localizations.dart';
 // lib/screens/plant_picker_screen.dart
 
 import 'package:flutter/material.dart';
@@ -50,7 +51,7 @@ class PlantPickerScreen extends ConsumerWidget {
                     maxCrossAxisExtent: 280,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
-                    mainAxisExtent: 320,
+                    mainAxisExtent: 360,
                   ),
                   itemCount: mockPlants.length,
                   itemBuilder: (context, index) {
@@ -116,13 +117,16 @@ class _PlantCard extends StatelessWidget {
                   _plantImageAssets[plant.id]!,
                   fit: BoxFit.contain,
                   filterQuality: FilterQuality.high,
-                  semanticLabel: plant.name,
+                  semanticLabel: plant.localizedName(context.l10n),
                 ),
               ),
             ),
             const SizedBox(height: 8),
             // Plant name and variety.
-            Text(plant.name, style: AppText.heading(context, fontSize: 18)),
+            Text(
+              plant.localizedName(context.l10n),
+              style: AppText.heading(context, fontSize: 18),
+            ),
             Text(
               plant.variety,
               style: Theme.of(
@@ -142,9 +146,11 @@ class _PlantCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 const Icon(Icons.emoji_nature, size: 16, color: Colors.grey),
                 const SizedBox(width: 4),
-                Text(
-                  plant.difficulty,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                Flexible(
+                  child: Text(
+                    plant.localizedDifficulty(context.l10n),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                 ),
               ],
             ),

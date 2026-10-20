@@ -14,6 +14,7 @@ import '../providers/data_providers.dart';
 import '../services/api_service.dart';
 import '../services/history_repository.dart';
 import '../utils/l10n.dart';
+import '../utils/display_localizations.dart';
 
 class SensorDetailScreen extends ConsumerWidget {
   const SensorDetailScreen({required this.metric, super.key});
@@ -22,7 +23,7 @@ class SensorDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detail = _SensorDetail.forMetric(metric);
+    final detail = _SensorDetail.forMetric(metric, context);
     final devices = ref.watch(dashboardDevicesProvider).valueOrNull;
     final reading = devices == null || devices.isEmpty
         ? null
@@ -64,7 +65,10 @@ class SensorDetailScreen extends ConsumerWidget {
                   style: const TextStyle(color: AppColors.secondaryText),
                 ),
                 const SizedBox(height: 20),
-                _DetailRow(label: context.l10n.idealRange, value: detail.idealRange),
+                _DetailRow(
+                  label: context.l10n.idealRange,
+                  value: detail.idealRange,
+                ),
                 const Divider(height: 28),
                 _SensorHistoryCard(
                   title: detail.historyTitle,
@@ -187,15 +191,17 @@ class _SensorHistoryCardState extends State<_SensorHistoryCard> {
               itemBuilder: (_) => HistoryRange.values
                   .where((range) => range.duration != null)
                   .map(
-                    (range) =>
-                        PopupMenuItem(value: range, child: Text(range.label)),
+                    (range) => PopupMenuItem(
+                      value: range,
+                      child: Text(range.localizedLabel(context.l10n)),
+                    ),
                   )
                   .toList(),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    _range.label,
+                    _range.localizedLabel(context.l10n),
                     style: TextStyle(
                       fontSize: 12,
                       color: widget.color.withValues(alpha: 0.9),
@@ -213,7 +219,7 @@ class _SensorHistoryCardState extends State<_SensorHistoryCard> {
           children: [
             Icon(Icons.trending_up, size: 17, color: widget.color),
             const SizedBox(width: 6),
-          Text(
+            Text(
               context.l10n.trendDescription,
               style: const TextStyle(color: AppColors.secondaryText),
             ),
@@ -238,9 +244,9 @@ class _SensorHistoryCardState extends State<_SensorHistoryCard> {
               }
               final history = snapshot.data!;
               if (history.samples.isEmpty) {
-              return _HistoryMessage(
+                return _HistoryMessage(
                   icon: Icons.show_chart,
-                message: context.l10n.noSensorHistory,
+                  message: context.l10n.noSensorHistory,
                 );
               }
               return _SensorLineChart(
@@ -526,8 +532,8 @@ class WaterPumpControlPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _ActuatorControlPanel(
-    deviceLabel: 'Bơm',
-    scheduleActionLabel: 'Phun',
+    deviceLabel: context.l10n.pumpLabel,
+    scheduleActionLabel: context.l10n.sprayAction,
     waterLevel: waterLevel,
   );
 }
@@ -536,9 +542,9 @@ class LightControlPanel extends StatelessWidget {
   const LightControlPanel({super.key});
 
   @override
-  Widget build(BuildContext context) => const _ActuatorControlPanel(
-    deviceLabel: 'Đèn',
-    scheduleActionLabel: 'Bật đèn',
+  Widget build(BuildContext context) => _ActuatorControlPanel(
+    deviceLabel: context.l10n.lightLabel,
+    scheduleActionLabel: context.l10n.turnLightOn,
   );
 }
 
@@ -642,9 +648,7 @@ class _ActuatorControlPanelState extends State<_ActuatorControlPanel> {
               ],
             ),
             if (_schedules.isEmpty)
-              Text(
-                context.l10n.noSchedules,
-              )
+              Text(context.l10n.noSchedules)
             else
               ..._schedules.map((schedule) {
                 return SwitchListTile(
@@ -653,7 +657,15 @@ class _ActuatorControlPanelState extends State<_ActuatorControlPanel> {
                     '${schedule['startTime']} – ${schedule['endTime']}',
                   ),
                   subtitle: Text(
-                    '${widget.scheduleActionLabel} ${schedule['durationSeconds']} giây mỗi ${schedule['intervalMinutes']} phút · ${schedule['daysLabel']}\n${schedule['timeZone']} · chỉ hiển thị',
+                    context.l10n.localScheduleSummary(
+                      (widget.scheduleActionLabel).toString(),
+                      (schedule['durationSeconds']).toString(),
+                      (schedule['intervalMinutes']).toString(),
+                      (schedule['days'] as List<int>)
+                          .map((day) => context.localizedWeekdays[day])
+                          .join(', '),
+                      (schedule['timeZone']).toString(),
+                    ),
                   ),
                   value: schedule['isEnabled'] as bool,
                   onChanged: (enabled) =>
@@ -678,7 +690,7 @@ class _LocalScheduleDialog extends StatefulWidget {
 
 class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
   static const _timeZone = 'Asia/Ho_Chi_Minh · GMT+07:00';
-  static const _dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+  List<String> get _dayNames => context.localizedWeekdays;
 
   final _durationController = TextEditingController(text: '30');
   final _intervalController = TextEditingController(text: '30');
@@ -693,6 +705,13 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
     _intervalController.dispose();
     super.dispose();
   }
+
+  String _presetLabel(String preset) => switch (preset) {
+    'Cây giống' => context.l10n.seedlingsPreset,
+    'Rau lá' => context.l10n.leafyPreset,
+    'Thảo mộc' => context.l10n.herbsPreset,
+    _ => context.l10n.customize,
+  };
 
   void _applyPreset(String preset) {
     const settings = {
@@ -734,11 +753,9 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
         interval == null ||
         interval <= 0 ||
         _selectedDays.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.invalidSchedule),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.invalidSchedule)));
       return;
     }
     Navigator.pop(context, {
@@ -746,7 +763,7 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
       'intervalMinutes': interval,
       'startTime': _formatTime(_startTime),
       'endTime': _formatTime(_endTime),
-      'daysLabel': _selectedDays.map((day) => _dayNames[day]).join(', '),
+      'days': _selectedDays.toList(),
       'timeZone': _timeZone,
     });
   }
@@ -757,15 +774,15 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Thêm lịch trình'),
+      title: Text(context.l10n.addScheduleTitle),
       content: SizedBox(
         width: 620,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Mẫu cài đặt',
+              Text(
+                context.l10n.schedulePreset,
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
@@ -775,7 +792,7 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
                 children: ['Cây giống', 'Rau lá', 'Thảo mộc', 'Tùy chỉnh']
                     .map(
                       (preset) => ChoiceChip(
-                        label: Text(preset),
+                        label: Text(_presetLabel(preset)),
                         selected: _preset == preset,
                         onSelected: (_) => _applyPreset(preset),
                       ),
@@ -787,8 +804,9 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
                 controller: _durationController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  labelText:
-                      'Thời gian ${widget.actionLabel.toLowerCase()} (giây)',
+                  labelText: context.l10n.actionDurationSeconds(
+                    (widget.actionLabel.toLowerCase()).toString(),
+                  ),
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -796,14 +814,14 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
               TextField(
                 controller: _intervalController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Khoảng cách (phút)',
+                decoration: InputDecoration(
+                  labelText: context.l10n.scheduleIntervalMinutes,
                   border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Khung giờ hoạt động',
+              Text(
+                context.l10n.scheduleTimeWindow,
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
@@ -811,7 +829,7 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
                 children: [
                   Expanded(
                     child: _TimeField(
-                      label: 'Bắt đầu',
+                      label: context.l10n.scheduleStart,
                       value: _formatTime(_startTime),
                       onTap: () => _pickTime(true),
                     ),
@@ -819,7 +837,7 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _TimeField(
-                      label: 'Kết thúc',
+                      label: context.l10n.scheduleEnd,
                       value: _formatTime(_endTime),
                       onTap: () => _pickTime(false),
                     ),
@@ -827,8 +845,8 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
                 ],
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Ngày lặp lại',
+              Text(
+                context.l10n.scheduleRepeatDays,
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),
@@ -850,21 +868,21 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
                 initialValue: _timeZone,
-                decoration: const InputDecoration(
-                  labelText: 'Múi giờ',
+                decoration: InputDecoration(
+                  labelText: context.l10n.timezoneLabel,
                   border: OutlineInputBorder(),
                 ),
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: _timeZone,
-                    child: Text('Việt Nam · GMT+07:00'),
+                    child: Text(context.l10n.vietnamTimezone),
                   ),
                 ],
                 onChanged: null,
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Lịch này chỉ hiển thị trên frontend, chưa gửi tới thiết bị hoặc backend.',
+              Text(
+                context.l10n.localScheduleNotice,
                 style: TextStyle(color: AppColors.secondaryText, fontSize: 12),
               ),
             ],
@@ -874,9 +892,9 @@ class _LocalScheduleDialogState extends State<_LocalScheduleDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Hủy'),
+          child: Text(context.l10n.cancel),
         ),
-        FilledButton(onPressed: _save, child: const Text('Lưu')),
+        FilledButton(onPressed: _save, child: Text(context.l10n.save)),
       ],
     );
   }
@@ -949,25 +967,24 @@ class _SensorDetail {
   final double? Function(SensorReading? reading) valueFrom;
   final String Function(double? value) status;
 
-  factory _SensorDetail.forMetric(String metric) {
+  factory _SensorDetail.forMetric(String metric, BuildContext context) {
     switch (metric) {
       case 'water':
         return _SensorDetail(
-          title: 'Mức nước',
-          label: 'MỨC NƯỚC',
+          title: context.l10n.waterSensorTitle,
+          label: context.l10n.waterSensorLabel,
           unit: '%',
           color: AppColors.forestGreen,
           icon: Icons.opacity,
           idealRange: '60–80%',
-          description:
-              'Theo dõi lượng nước trong hệ thống để cây luôn được tưới phù hợp.',
-          historyTitle: 'Lịch sử mức nước',
+          description: context.l10n.waterSensorDescription,
+          historyTitle: context.l10n.waterSensorHistory,
           valueFrom: (reading) => reading?.waterLevel,
           status: (value) => value == null
-              ? 'Chưa có dữ liệu'
+              ? context.l10n.noReadingsYet
               : value < 30
-              ? 'Mức nước thấp'
-              : 'Mức nước ổn định',
+              ? context.l10n.waterSensorLow
+              : context.l10n.waterSensorStable,
         );
       case 'nutrient':
         return _SensorDetail(
@@ -976,69 +993,75 @@ class _SensorDetail {
           unit: 'ppm',
           color: const Color(0xFFF2A93B),
           icon: Icons.science,
-          idealRange: 'Chưa cấu hình',
-          description:
-              'Theo dõi nồng độ dinh dưỡng để hỗ trợ cây phát triển đồng đều.',
-          historyTitle: 'Lịch sử mức dinh dưỡng',
+          idealRange: context.l10n.notConfigured,
+          description: context.l10n.nutrientSensorDescription,
+          historyTitle: context.l10n.nutrientSensorHistory,
           valueFrom: (reading) => reading?.tds,
-          status: (value) => value == null ? 'Chưa có dữ liệu' : 'Đã nhận dữ liệu',
+          status: (value) => value == null
+              ? context.l10n.noReadingsYet
+              : context.l10n.dataReceived,
         );
       case 'temperature':
         return _SensorDetail(
-          title: 'Nhiệt độ',
-          label: 'NHIỆT ĐỘ',
+          title: context.l10n.temperatureSensorTitle,
+          label: context.l10n.temperatureSensorLabel,
           unit: '°C',
           color: const Color(0xFFCDB59A),
           icon: Icons.thermostat,
           idealRange: '20–28°C',
-          description: 'Theo dõi nhiệt độ môi trường quanh khu vực trồng cây.',
-          historyTitle: 'Lịch sử nhiệt độ',
+          description: context.l10n.temperatureSensorDescription,
+          historyTitle: context.l10n.temperatureSensorHistory,
           valueFrom: (reading) => reading?.temperature,
           status: (value) => value == null
-              ? 'Chưa có dữ liệu'
+              ? context.l10n.noReadingsYet
               : value < 20 || value > 28
-              ? 'Nhiệt độ cần chú ý'
-              : 'Nhiệt độ phù hợp',
+              ? context.l10n.temperatureSensorAttention
+              : context.l10n.temperatureSensorHealthy,
         );
       case 'solutionTemperature':
         return _SensorDetail(
-          title: 'Nhiệt độ nước',
-          label: 'NHIỆT ĐỘ NƯỚC',
+          title: context.l10n.waterTemperatureSensorTitle,
+          label: context.l10n.waterTemperature,
           unit: '°C',
           color: const Color(0xFFC86464),
           icon: Icons.water,
-          idealRange: 'Chưa cấu hình',
-          description: 'Theo dõi nhiệt độ dung dịch bằng cảm biến nhiệt độ nước.',
-          historyTitle: 'Lịch sử nhiệt độ nước',
+          idealRange: context.l10n.notConfigured,
+          description: context.l10n.waterTemperatureSensorDescription,
+          historyTitle: context.l10n.waterTemperatureSensorHistory,
           valueFrom: (reading) => reading?.solutionTemperature,
-          status: (value) => value == null ? 'Chưa có dữ liệu' : 'Đã nhận dữ liệu',
+          status: (value) => value == null
+              ? context.l10n.noReadingsYet
+              : context.l10n.dataReceived,
         );
       case 'humidity':
         return _SensorDetail(
-          title: 'Độ ẩm không khí',
-          label: 'ĐỘ ẨM KHÔNG KHÍ',
+          title: context.l10n.humiditySensorTitle,
+          label: context.l10n.airHumidity,
           unit: '%',
           color: const Color(0xFF4D94C7),
           icon: Icons.water_drop_outlined,
-          idealRange: 'Chưa cấu hình',
-          description: 'Theo dõi độ ẩm không khí bằng cảm biến AHT20.',
-          historyTitle: 'Lịch sử độ ẩm không khí',
+          idealRange: context.l10n.notConfigured,
+          description: context.l10n.humiditySensorDescription,
+          historyTitle: context.l10n.humiditySensorHistory,
           valueFrom: (reading) => reading?.humidity,
-          status: (value) => value == null ? 'Chưa có dữ liệu' : 'Đã nhận dữ liệu',
+          status: (value) => value == null
+              ? context.l10n.noReadingsYet
+              : context.l10n.dataReceived,
         );
       default:
         return _SensorDetail(
-          title: 'Ánh sáng',
-          label: 'ÁNH SÁNG',
+          title: context.l10n.lightSensorTitle,
+          label: context.l10n.light,
           unit: 'lux',
           color: const Color(0xFFE3A72F),
           icon: Icons.wb_sunny_outlined,
-          idealRange: 'Chưa cấu hình',
-          description:
-              'Theo dõi cường độ ánh sáng để cây nhận đủ năng lượng quang hợp.',
-          historyTitle: 'Lịch sử ánh sáng',
+          idealRange: context.l10n.notConfigured,
+          description: context.l10n.lightSensorDescription,
+          historyTitle: context.l10n.lightSensorHistory,
           valueFrom: (reading) => reading?.lux,
-          status: (value) => value == null ? 'Chưa có dữ liệu' : 'Đã nhận dữ liệu',
+          status: (value) => value == null
+              ? context.l10n.noReadingsYet
+              : context.l10n.dataReceived,
         );
     }
   }

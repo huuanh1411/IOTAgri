@@ -1,3 +1,4 @@
+import '../utils/display_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -152,7 +153,9 @@ class _AlertList extends StatelessWidget {
                 CircleAvatar(
                   backgroundColor: color.withValues(alpha: .12),
                   child: Icon(
-                    isWarning ? Icons.warning_amber_rounded : Icons.info_outline,
+                    isWarning
+                        ? Icons.warning_amber_rounded
+                        : Icons.info_outline,
                     color: color,
                   ),
                 ),
@@ -162,12 +165,12 @@ class _AlertList extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        alert.title,
+                        alert.localizedTitle(context.l10n),
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        alert.message,
+                        alert.localizedMessage(context.l10n),
                         style: const TextStyle(color: AppColors.secondaryText),
                       ),
                       const SizedBox(height: 12),
@@ -176,7 +179,10 @@ class _AlertList extends StatelessWidget {
                         child: isResolved
                             ? Chip(
                                 label: Text(context.l10n.resolved),
-                                avatar: Icon(Icons.check_circle_outline, size: 18),
+                                avatar: Icon(
+                                  Icons.check_circle_outline,
+                                  size: 18,
+                                ),
                               )
                             : OutlinedButton.icon(
                                 onPressed: () => onResolve(alert.id),

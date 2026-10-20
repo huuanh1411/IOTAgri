@@ -1,3 +1,5 @@
+import '../../utils/l10n.dart';
+import '../../utils/display_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
@@ -44,8 +46,10 @@ class _AlertsScreenState extends State<AlertsScreen> {
         navigationBar: CupertinoNavigationBar(
           middle: Text(
             widget.device == null
-                ? 'Cảnh báo'
-                : 'Cảnh báo · ${widget.device!.name}',
+                ? context.l10n.alerts
+                : context.l10n.deviceAlertsTitle(
+                    (widget.device!.name).toString(),
+                  ),
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
@@ -98,7 +102,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                             vertical: 6,
                           ),
                           onPressed: provider.markAllRead,
-                          child: const Text('Đánh dấu tất cả đã đọc'),
+                          child: Text(context.l10n.markAllAlertsRead),
                         ),
                       ),
                     if (provider.isLoading && provider.items.isEmpty)
@@ -114,14 +118,14 @@ class _AlertsScreenState extends State<AlertsScreen> {
                     else ...[
                       if (today.isNotEmpty)
                         _AlertGroup(
-                          title: 'Hôm nay',
+                          title: context.l10n.todayLabel,
                           items: today,
                           provider: provider,
                         ),
                       if (earlier.isNotEmpty) ...[
                         const SizedBox(height: 18),
                         _AlertGroup(
-                          title: 'Trước đó',
+                          title: context.l10n.earlierLabel,
                           items: earlier,
                           provider: provider,
                         ),
@@ -160,18 +164,18 @@ class _AlertsScreenState extends State<AlertsScreen> {
   Widget _filterBar(AlertCenterProvider provider) =>
       CupertinoSlidingSegmentedControl<AlertListFilter>(
         groupValue: provider.filter,
-        children: const {
+        children: {
           AlertListFilter.all: Padding(
             padding: EdgeInsets.symmetric(horizontal: 14),
-            child: Text('Tất cả'),
+            child: Text(context.l10n.all),
           ),
           AlertListFilter.critical: Padding(
             padding: EdgeInsets.symmetric(horizontal: 14),
-            child: Text('Nghiêm trọng'),
+            child: Text(context.l10n.criticalSeverity),
           ),
           AlertListFilter.unread: Padding(
             padding: EdgeInsets.symmetric(horizontal: 14),
-            child: Text('Chưa đọc'),
+            child: Text(context.l10n.unreadFilter),
           ),
         },
         onValueChanged: (value) {
@@ -297,7 +301,7 @@ class _AlertRow extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        item.alert.title,
+                        item.alert.localizedTitle(context.l10n),
                         style: TextStyle(
                           color: CupertinoColors.label.resolveFrom(context),
                           fontWeight: read ? FontWeight.w500 : FontWeight.w700,
@@ -305,7 +309,9 @@ class _AlertRow extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      resolved ? 'Đã xử lý' : 'Đang xảy ra',
+                      resolved
+                          ? context.l10n.resolved
+                          : context.l10n.activeAlertStatus,
                       style: TextStyle(
                         color: resolved ? CupertinoColors.systemGreen : color,
                         fontSize: 10,
@@ -316,7 +322,7 @@ class _AlertRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  '${item.device.name} · ${item.alert.message}',
+                  '${item.device.name} · ${item.alert.localizedMessage(context.l10n)}',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -349,8 +355,8 @@ class AlertDetailScreen extends StatelessWidget {
     final alert = item.alert;
     final triggered = DateTime.tryParse(alert.triggeredAt)?.toLocal();
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Chi tiết cảnh báo'),
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(context.l10n.alertDetailsTitle),
       ),
       child: SafeArea(
         child: ListView(
@@ -363,13 +369,13 @@ class AlertDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             Text(
-              alert.title,
+              alert.localizedTitle(context.l10n),
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
             Text(
-              alert.message,
+              alert.localizedMessage(context.l10n),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: CupertinoColors.secondaryLabel,
@@ -377,15 +383,15 @@ class AlertDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            _DetailRow(label: 'Thiết bị', value: item.device.name),
+            _DetailRow(label: context.l10n.device, value: item.device.name),
             _DetailRow(
-              label: 'Thời gian',
+              label: context.l10n.timeLabel,
               value: triggered == null
                   ? alert.triggeredAt
                   : '${triggered.day.toString().padLeft(2, '0')}/${triggered.month.toString().padLeft(2, '0')}/${triggered.year} ${triggered.hour.toString().padLeft(2, '0')}:${triggered.minute.toString().padLeft(2, '0')}',
             ),
             _DetailRow(
-              label: 'Trạng thái',
+              label: context.l10n.statusLabel,
               value: alert.resolvedAt == null ? 'Active' : 'Resolved',
             ),
             const SizedBox(height: 24),
@@ -399,7 +405,7 @@ class AlertDetailScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              child: const Text('Đi tới thiết bị'),
+              child: Text(context.l10n.openAlertDevice),
             ),
           ],
         ),
@@ -459,7 +465,7 @@ class _AlertsEmpty extends StatelessWidget {
   const _AlertsEmpty();
 
   @override
-  Widget build(BuildContext context) => const Padding(
+  Widget build(BuildContext context) => Padding(
     padding: EdgeInsets.only(top: 90),
     child: Column(
       children: [
@@ -470,12 +476,12 @@ class _AlertsEmpty extends StatelessWidget {
         ),
         SizedBox(height: 14),
         Text(
-          'Mọi thứ yên tĩnh',
+          context.l10n.alertsQuietTitle,
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
         ),
         SizedBox(height: 5),
         Text(
-          'Không có cảnh báo phù hợp với bộ lọc.',
+          context.l10n.noMatchingAlerts,
           style: TextStyle(color: CupertinoColors.secondaryLabel),
         ),
       ],
@@ -504,7 +510,7 @@ class _AlertsError extends StatelessWidget {
         const SizedBox(height: 14),
         CupertinoButton.filled(
           onPressed: onRetry,
-          child: const Text('Thử lại'),
+          child: Text(context.l10n.retry),
         ),
       ],
     ),

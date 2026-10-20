@@ -248,5 +248,471 @@
   "regenerateCodeTitle": "Tạo mã mới?",
   "regenerateCodeWarning": "Mã hiện tại sẽ mất hiệu lực ngay lập tức.",
   "generateNewCode": "Tạo mã mới",
-  "networkError": "Hãy kiểm tra kết nối mạng và thử lại."
+  "networkError": "Hãy kiểm tra kết nối mạng và thử lại.",
+  "deleteDeviceTitle": "Xóa thiết bị?",
+  "deleteNamedDeviceConfirmation": "Bạn có chắc muốn xóa \"{value0}\"? Thao tác này không thể hoàn tác.",
+  "@deleteNamedDeviceConfirmation": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "actionFailed": "Không thể hoàn tất",
+  "searchDevicesHint": "Tìm theo tên hoặc vị trí",
+  "noMatchingDevices": "Không tìm thấy thiết bị.",
+  "unassignedLocation": "Vị trí chưa gán",
+  "deviceNeverConnected": "Chưa có kết nối · {value0}",
+  "@deviceNeverConnected": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceLastSeen": "Lần cuối {value0} · {value1}",
+  "@deviceLastSeen": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      },
+      "value1": {
+        "type": "String"
+      }
+    }
+  },
+  "devicesEmptyTitle": "Chưa có thiết bị nào",
+  "devicesEmptyExplanation": "Tạo thiết bị để bắt đầu thiết lập kết nối.",
+  "devicesLoadFailed": "Không thể tải danh sách thiết bị.",
+  "switchDeviceToAutoConfirmation": "{value0} đang ở chế độ Thủ công và chưa phun. Chuyển về Tự động?",
+  "@switchDeviceToAutoConfirmation": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "lightCommandFailed": "Không thể gửi lệnh đèn: {value0}",
+  "@lightCommandFailed": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "switchMode": "Chuyển",
+  "deviceDeleted": "Đã xóa thiết bị thành công",
+  "noReadingsYet": "Chưa có dữ liệu",
+  "automaticMode": "Tự động",
+  "pumpRunningCountdown": "Bơm đang chạy - còn {value0}",
+  "@pumpRunningCountdown": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "noScheduledTime": "Không có lịch",
+  "scheduledTimePassed": "Đã qua",
+  "minutesRemaining": "{value0} phút",
+  "@minutesRemaining": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "lightControl": "Điều khiển đèn",
+  "lightIsOn": "Đèn đang bật",
+  "lightIsOff": "Đèn đang tắt",
+  "sprayScheduleSummary": "Phun {value0} giây mỗi {value1} phút, {value2}-{value3}",
+  "@sprayScheduleSummary": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      },
+      "value1": {
+        "type": "String"
+      },
+      "value2": {
+        "type": "String"
+      },
+      "value3": {
+        "type": "String"
+      }
+    }
+  },
+  "savedSchedulesContinue": "Lịch đã lưu tiếp tục chạy tự động khi có kết nối.",
+  "temperatureRecordCount": "{value0} lần ghi · Nhiệt độ",
+  "@temperatureRecordCount": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "lowWaterTitle": "Mực nước thấp",
+  "highTemperatureTitle": "Nhiệt độ cao",
+  "invalidDeviceThresholds": "Kiểm tra lại ngưỡng nhiệt độ và mực nước.",
+  "renameAction": "Đổi tên",
+  "wifiSignalGood": "Tốt (-65 dBm)",
+  "wifiSignalMissing": "Không có tín hiệu",
+  "espFoundNoNetworks": "Đã thấy ESP nhưng chưa tìm thấy mạng Wi-Fi 2.4 GHz.",
+  "espConnectedChooseNetwork": "Đã kết nối ESP. Chọn mạng Wi-Fi bên dưới.",
+  "espConnectionFailed": "Không kết nối được ESP. Hãy nối thiết bị này vào Wi-Fi IOTAgri-Setup rồi thử lại.",
+  "wifiSsidRequired": "Vui lòng nhập hoặc chọn tên Wi-Fi 2.4 GHz.",
+  "wifiPasswordRequired": "Vui lòng nhập mật khẩu Wi-Fi.",
+  "espSendingConfiguration": "Đang gửi cấu hình trực tiếp tới ESP...",
+  "setupCodeValidity": "Có hiệu lực trong 15 phút",
+  "setupCodeExpired": "Mã đã hết hạn",
+  "setupCodeSecondsRemaining": "Còn {value0} giây",
+  "@setupCodeSecondsRemaining": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "setupCodeExpiresAt": "Hết hạn lúc {value0}",
+  "@setupCodeExpiresAt": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "setupCodeMissing": "Máy chủ chưa trả về mã thiết lập.",
+  "setupCodeLabel": "Mã thiết lập",
+  "copyCodeAgain": "Sao chép lại mã",
+  "copySetupCode": "Sao chép mã",
+  "espSetupStepOne": "Giữ laptop chạy backend và frontend trên Wi-Fi chính. Trên điện thoại, mở màn hình này trước.",
+  "espSetupStepTwo": "Kết nối điện thoại với Wi-Fi IOTAgri-Setup, quay lại màn hình này và nhấn Kiểm tra kết nối ESP.",
+  "espSetupStepThree": "Chọn Wi-Fi 2.4 GHz, nhập mật khẩu rồi nhấn Kết nối ESP. Frontend tự gửi mã và địa chỉ backend.",
+  "espSetupStepFour": "Khi báo thành công, kết nối điện thoại trở lại Wi-Fi chính và chờ thiết bị chuyển sang trạng thái online.",
+  "espBackendAddress": "Backend dành cho ESP: {value0}",
+  "@espBackendAddress": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "regenerateSetupCode": "Tạo mã mới (mã cũ sẽ hết hiệu lực)",
+  "directEspSetup": "Kết nối trực tiếp với ESP",
+  "directEspSetupHint": "Không cần mở Swagger hoặc trang cấu hình 192.168.4.1.",
+  "checkEspConnection": "Kiểm tra kết nối ESP",
+  "espDetected": "Đã thấy ESP: {value0}",
+  "@espDetected": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "espAvailableNetworks": "Wi-Fi 2.4 GHz ESP nhìn thấy:",
+  "wifiSsidHint": "Tên Wi-Fi 2.4 GHz (SSID)",
+  "wifiPasswordHint": "Mật khẩu Wi-Fi",
+  "connectedStatus": "Đã kết nối",
+  "connectEsp": "Kết nối ESP",
+  "seedlingsPreset": "Cây giống",
+  "leafyPreset": "Rau lá",
+  "herbsPreset": "Thảo mộc",
+  "sprayDurationSummary": "Thời gian phun: {value0} giây",
+  "@sprayDurationSummary": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "sprayIntervalSummary": "Lặp lại mỗi {value0} phút",
+  "@sprayIntervalSummary": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleDaysSummary": "Ngày: {value0}",
+  "@scheduleDaysSummary": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "noDaysSelected": "chưa chọn ngày",
+  "sprayDurationRequired": "Vui lòng nhập thời gian phun",
+  "sprayDurationRange": "Thời gian phun từ 1-120 giây",
+  "scheduleIntervalRequired": "Vui lòng nhập khoảng cách",
+  "scheduleIntervalRange": "Khoảng cách từ 1-60 phút",
+  "sprayDurationLessThanInterval": "Thời gian phun phải nhỏ hơn khoảng cách",
+  "scheduleEndAfterStart": "Giờ kết thúc phải sau giờ bắt đầu (trừ khi qua đêm)",
+  "schedulePreview": "Phun {value0} giây mỗi {value1} phút, {value2}-{value3}, {value4}",
+  "@schedulePreview": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      },
+      "value1": {
+        "type": "String"
+      },
+      "value2": {
+        "type": "String"
+      },
+      "value3": {
+        "type": "String"
+      },
+      "value4": {
+        "type": "String"
+      }
+    }
+  },
+  "selectScheduleDay": "Vui lòng chọn ít nhất một ngày",
+  "savedTitle": "Đã lưu",
+  "savedToDevice": "Đã lưu vào thiết bị",
+  "saveFailed": "Không thể lưu: {value0}",
+  "@saveFailed": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "unsavedTitle": "Chưa lưu",
+  "unsavedChangesConfirmation": "Bạn có thay đổi chưa được lưu. Bạn có muốn rời đi?",
+  "keepEditing": "Giữ lại",
+  "discardChanges": "Bỏ thay đổi",
+  "deviceScheduleTimezoneHint": "Giờ thiết bị: Asia/Ho_Chi_Minh. Lịch ưu tiên hơn điều khiển thủ công.",
+  "schedulePreset": "Mẫu cài đặt",
+  "sprayDurationSeconds": "Thời gian phun (giây)",
+  "scheduleIntervalMinutes": "Khoảng cách (phút)",
+  "scheduleTimeWindow": "Khung giờ hoạt động",
+  "scheduleStart": "Bắt đầu",
+  "scheduleEnd": "Kết thúc",
+  "scheduleRepeatDays": "Ngày lặp lại",
+  "pumpLabel": "Bơm",
+  "lightLabel": "Đèn",
+  "turnLightOn": "Bật đèn",
+  "localScheduleSummary": "{value0} {value1} giây mỗi {value2} phút · {value3}\n{value4} · chỉ hiển thị",
+  "@localScheduleSummary": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      },
+      "value1": {
+        "type": "String"
+      },
+      "value2": {
+        "type": "String"
+      },
+      "value3": {
+        "type": "String"
+      },
+      "value4": {
+        "type": "String"
+      }
+    }
+  },
+  "actionDurationSeconds": "Thời gian {value0} (giây)",
+  "@actionDurationSeconds": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "timezoneLabel": "Múi giờ",
+  "vietnamTimezone": "Việt Nam · GMT+07:00",
+  "localScheduleNotice": "Lịch này chỉ hiển thị trên frontend, chưa gửi tới thiết bị hoặc backend.",
+  "waterSensorTitle": "Mức nước",
+  "waterSensorLabel": "MỨC NƯỚC",
+  "waterSensorDescription": "Theo dõi lượng nước trong hệ thống để cây luôn được tưới phù hợp.",
+  "waterSensorHistory": "Lịch sử mức nước",
+  "waterSensorLow": "Mức nước thấp",
+  "waterSensorStable": "Mức nước ổn định",
+  "notConfigured": "Chưa cấu hình",
+  "nutrientSensorDescription": "Theo dõi nồng độ dinh dưỡng để hỗ trợ cây phát triển đồng đều.",
+  "nutrientSensorHistory": "Lịch sử mức dinh dưỡng",
+  "dataReceived": "Đã nhận dữ liệu",
+  "temperatureSensorTitle": "Nhiệt độ",
+  "temperatureSensorLabel": "NHIỆT ĐỘ",
+  "temperatureSensorDescription": "Theo dõi nhiệt độ môi trường quanh khu vực trồng cây.",
+  "temperatureSensorHistory": "Lịch sử nhiệt độ",
+  "temperatureSensorAttention": "Nhiệt độ cần chú ý",
+  "temperatureSensorHealthy": "Nhiệt độ phù hợp",
+  "waterTemperatureSensorTitle": "Nhiệt độ nước",
+  "waterTemperatureSensorDescription": "Theo dõi nhiệt độ dung dịch bằng cảm biến nhiệt độ nước.",
+  "waterTemperatureSensorHistory": "Lịch sử nhiệt độ nước",
+  "humiditySensorTitle": "Độ ẩm không khí",
+  "humiditySensorDescription": "Theo dõi độ ẩm không khí bằng cảm biến AHT20.",
+  "humiditySensorHistory": "Lịch sử độ ẩm không khí",
+  "lightSensorTitle": "Ánh sáng",
+  "lightSensorDescription": "Theo dõi cường độ ánh sáng để cây nhận đủ năng lượng quang hợp.",
+  "lightSensorHistory": "Lịch sử ánh sáng",
+  "resolveNow": "Xử lý ngay",
+  "plantLettuce": "Xà lách",
+  "plantBasil": "Húng quế",
+  "plantSpinach": "Rau chân vịt",
+  "plantMint": "Bạc hà",
+  "plantKale": "Cải xoăn",
+  "plantCoriander": "Rau mùi",
+  "difficultyEasy": "Dễ",
+  "difficultyMedium": "Trung bình",
+  "lowNutrientTitle": "Dinh dưỡng thấp",
+  "lowWaterMessage": "Mực nước đang dưới 30% – cần nạp thêm nước.",
+  "lowNutrientMessage": "Mức dinh dưỡng dưới 45% – cần bón thêm.",
+  "refillWater": "Nạp nước",
+  "addNutrients": "Bổ dinh dưỡng",
+  "lowTemperatureTitle": "Nhiệt độ thấp",
+  "waterEmptyTitle": "Bình nước đã cạn",
+  "humidityAlertTitle": "Độ ẩm ngoài ngưỡng",
+  "pumpFaultTitle": "Lỗi bơm",
+  "deviceOfflineTitle": "Thiết bị mất kết nối",
+  "deviceOnlineTitle": "Thiết bị đã trực tuyến",
+  "nutrientAlertTitle": "Dinh dưỡng ngoài ngưỡng",
+  "phAlertTitle": "pH ngoài ngưỡng",
+  "sensorAlertTitle": "Cảnh báo cảm biến",
+  "highTemperatureMessage": "Nhiệt độ {value}°C vượt ngưỡng {threshold}°C.",
+  "@highTemperatureMessage": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "lowWaterThresholdMessage": "Mực nước {value}% thấp hơn ngưỡng {threshold}%.",
+  "@lowWaterThresholdMessage": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "sensorThresholdMessage": "Giá trị {value} · Ngưỡng {threshold}.",
+  "@sensorThresholdMessage": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "sprayAction": "Phun",
+  "sundayShort": "CN",
+  "mondayShort": "T2",
+  "tuesdayShort": "T3",
+  "wednesdayShort": "T4",
+  "thursdayShort": "T5",
+  "fridayShort": "T6",
+  "saturdayShort": "T7",
+  "stillActiveTitle": "Vẫn đang xảy ra",
+  "alertRecoveredTitle": "Đã khôi phục",
+  "alertResolvedMessage": "{device}: {alert} đã được xử lý.",
+  "@alertResolvedMessage": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      },
+      "alert": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceAlertsTitle": "Cảnh báo · {value0}",
+  "@deviceAlertsTitle": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "markAllAlertsRead": "Đánh dấu tất cả đã đọc",
+  "todayLabel": "Hôm nay",
+  "earlierLabel": "Trước đó",
+  "criticalSeverity": "Nghiêm trọng",
+  "unreadFilter": "Chưa đọc",
+  "activeAlertStatus": "Đang xảy ra",
+  "alertDetailsTitle": "Chi tiết cảnh báo",
+  "timeLabel": "Thời gian",
+  "statusLabel": "Trạng thái",
+  "openAlertDevice": "Đi tới thiết bị",
+  "alertsQuietTitle": "Mọi thứ yên tĩnh",
+  "noMatchingAlerts": "Không có cảnh báo phù hợp với bộ lọc.",
+  "invalidAlertThreshold": "Ngưỡng phải là số hợp lệ; mực nước từ 0–100%.",
+  "alertThresholdsSaved": "Đã lưu ngưỡng cảnh báo",
+  "deviceSettingsUpdated": "Cài đặt cho {value0} đã được cập nhật.",
+  "@deviceSettingsUpdated": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "alertThresholdsTitle": "Ngưỡng cảnh báo",
+  "supportedSensorsOnly": "Chỉ những cảm biến thiết bị hiện hỗ trợ mới được hiển thị.",
+  "resetRecommendedThresholds": "Đặt lại khuyến nghị",
+  "notificationPreferencesTitle": "Tùy chọn thông báo",
+  "notificationsToggleHint": "Bật hoặc tắt toàn bộ thông báo",
+  "severityHeading": "MỨC ĐỘ",
+  "criticalNotificationsHint": "Lỗi bơm, hết nước, mất kết nối",
+  "warningNotificationsHint": "Chỉ số cảm biến ngoài ngưỡng",
+  "infoSeverity": "Thông tin",
+  "infoNotificationsHint": "Đã lưu lịch, online lại, cập nhật firmware",
+  "quietHoursTitle": "Giờ yên tĩnh",
+  "criticalIgnoresQuietHours": "Cảnh báo nghiêm trọng bỏ qua giờ yên tĩnh.",
+  "deviceHistoryTitle": "Lịch sử · {value0}",
+  "@deviceHistoryTitle": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "hourlyAverages": "Hiển thị trung bình theo giờ",
+  "historyFiltersTitle": "Bộ lọc lịch sử",
+  "showPumpEvents": "Hiển thị sự kiện bơm",
+  "resetAction": "Đặt lại",
+  "applyAction": "Áp dụng",
+  "fromDateLabel": "Từ ngày",
+  "toDateLabel": "Đến ngày",
+  "customHistoryRangeInvalid": "Khoảng tùy chọn phải từ 1 đến 31 ngày.",
+  "exportDataTitle": "Xuất dữ liệu",
+  "exportDataFailed": "Không thể tạo tệp. Hãy thử khoảng ngắn hơn.",
+  "createFileAction": "Tạo tệp",
+  "pumpEventsCount": "Sự kiện bơm · {value0}",
+  "@pumpEventsCount": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "minimumLabel": "Thấp nhất",
+  "maximumLabel": "Cao nhất",
+  "historyLoadFailed": "Không thể tải lịch sử",
+  "newDeviceInsufficientData": "Thiết bị mới chưa có đủ dữ liệu",
+  "historyRangeEmpty": "Không có dữ liệu trong khoảng này",
+  "changeHistoryRange": "Đổi khoảng thời gian",
+  "viewSensorDetails": "Xem chi tiết {value0}",
+  "@viewSensorDetails": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "genericErrorTitle": "Đã xảy ra lỗi",
+  "requestValidationFailed": "Kiểm tra thông tin đã nhập và thử lại.",
+  "historySevenDays": "7 ngày",
+  "historyThirtyDays": "30 ngày",
+  "averageLabel": "Trung bình"
 }

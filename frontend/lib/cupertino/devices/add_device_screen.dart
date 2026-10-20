@@ -61,7 +61,7 @@ class _AddDeviceScreenState extends State<AddDeviceScreen> {
     return switch (error.kind) {
       ApiErrorKind.authentication => context.l10n.sessionExpired,
       ApiErrorKind.authorization => context.l10n.deviceActionForbidden,
-      ApiErrorKind.validation => error.message,
+      ApiErrorKind.validation => context.l10n.requestValidationFailed,
       ApiErrorKind.rateLimited => context.l10n.tooManyRequests,
       ApiErrorKind.server => context.l10n.serverUnavailable,
       _ => context.l10n.deviceCreateFailed,

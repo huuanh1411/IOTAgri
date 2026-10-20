@@ -1,3 +1,4 @@
+import '../../utils/l10n.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../../models/notification_preferences.dart';
@@ -43,8 +44,8 @@ class _NotificationPreferencesScreenState
 
   @override
   Widget build(BuildContext context) => CupertinoPageScaffold(
-    navigationBar: const CupertinoNavigationBar(
-      middle: Text('Tùy chọn thông báo'),
+    navigationBar: CupertinoNavigationBar(
+      middle: Text(context.l10n.notificationPreferencesTitle),
     ),
     child: SafeArea(
       child: _loading
@@ -54,15 +55,15 @@ class _NotificationPreferencesScreenState
               children: [
                 _section([
                   _toggleRow(
-                    'Thông báo',
-                    'Bật hoặc tắt toàn bộ thông báo',
+                    context.l10n.notifications,
+                    context.l10n.notificationsToggleHint,
                     _preferences.enabled,
                     (value) => _save(_preferences.copyWith(enabled: value)),
                   ),
                 ]),
                 const SizedBox(height: 18),
-                const Text(
-                  'MỨC ĐỘ',
+                Text(
+                  context.l10n.severityHeading,
                   style: TextStyle(
                     color: CupertinoColors.secondaryLabel,
                     fontSize: 12,
@@ -72,22 +73,22 @@ class _NotificationPreferencesScreenState
                 const SizedBox(height: 8),
                 _section([
                   _toggleRow(
-                    'Nghiêm trọng',
-                    'Lỗi bơm, hết nước, mất kết nối',
+                    context.l10n.criticalSeverity,
+                    context.l10n.criticalNotificationsHint,
                     _preferences.critical,
                     (value) => _save(_preferences.copyWith(critical: value)),
                   ),
                   _divider(),
                   _toggleRow(
-                    'Cảnh báo',
-                    'Chỉ số cảm biến ngoài ngưỡng',
+                    context.l10n.alerts,
+                    context.l10n.warningNotificationsHint,
                     _preferences.warning,
                     (value) => _save(_preferences.copyWith(warning: value)),
                   ),
                   _divider(),
                   _toggleRow(
-                    'Thông tin',
-                    'Đã lưu lịch, online lại, cập nhật firmware',
+                    context.l10n.infoSeverity,
+                    context.l10n.infoNotificationsHint,
                     _preferences.info,
                     (value) => _save(_preferences.copyWith(info: value)),
                   ),
@@ -95,7 +96,7 @@ class _NotificationPreferencesScreenState
                 const SizedBox(height: 18),
                 _section([
                   _toggleRow(
-                    'Giờ yên tĩnh',
+                    context.l10n.quietHoursTitle,
                     _quietLabel,
                     _preferences.quietHoursEnabled,
                     (value) =>
@@ -104,7 +105,7 @@ class _NotificationPreferencesScreenState
                   if (_preferences.quietHoursEnabled) ...[
                     _divider(),
                     _timeRow(
-                      'Bắt đầu',
+                      context.l10n.scheduleStart,
                       _preferences.quietStartMinutes,
                       (value) => _save(
                         _preferences.copyWith(quietStartMinutes: value),
@@ -112,7 +113,7 @@ class _NotificationPreferencesScreenState
                     ),
                     _divider(),
                     _timeRow(
-                      'Kết thúc',
+                      context.l10n.scheduleEnd,
                       _preferences.quietEndMinutes,
                       (value) =>
                           _save(_preferences.copyWith(quietEndMinutes: value)),
@@ -120,8 +121,8 @@ class _NotificationPreferencesScreenState
                   ],
                 ]),
                 const SizedBox(height: 10),
-                const Text(
-                  'Cảnh báo nghiêm trọng bỏ qua giờ yên tĩnh.',
+                Text(
+                  context.l10n.criticalIgnoresQuietHours,
                   style: TextStyle(
                     color: CupertinoColors.secondaryLabel,
                     fontSize: 12,

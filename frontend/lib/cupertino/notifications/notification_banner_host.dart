@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import '../../utils/l10n.dart';
 
 import '../../models/device_alert.dart';
 import '../../services/notification_service.dart';
@@ -104,14 +105,14 @@ class _NotificationBannerHostState extends State<NotificationBannerHost> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              message.title,
+                              message.localizedTitle(context.l10n),
                               style: const TextStyle(
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              message.body,
+                              message.localizedBody(context.l10n),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(

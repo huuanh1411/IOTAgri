@@ -1,3 +1,4 @@
+import '../../utils/display_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
@@ -12,6 +13,13 @@ enum SchedulePreset {
   leafy('Rau lá', 20, 30),
   herbs('Thảo mộc', 15, 20),
   custom('Tùy chỉnh', 30, 30);
+
+  String localizedLabel(BuildContext context) => switch (this) {
+    SchedulePreset.seedlings => context.l10n.seedlingsPreset,
+    SchedulePreset.leafy => context.l10n.leafyPreset,
+    SchedulePreset.herbs => context.l10n.herbsPreset,
+    SchedulePreset.custom => context.l10n.customize,
+  };
 
   final String label;
   final int defaultMistLength;
@@ -39,7 +47,7 @@ class _CupertinoPumpSchedulesScreenState
   final ApiService _apiService = ApiService();
   List<PumpSchedule> _schedules = [];
   bool _isLoading = true;
-  String? _errorMessage;
+  String Function()? _errorMessage;
 
   @override
   void initState() {
@@ -65,7 +73,7 @@ class _CupertinoPumpSchedulesScreenState
       });
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = () => localizedApiError(e, context.l10n);
         _isLoading = false;
       });
     }
@@ -113,7 +121,11 @@ class _CupertinoPumpSchedulesScreenState
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: Text(context.l10n.error),
-              content: Text(context.l10n.deleteScheduleFailed(e.toString())),
+              content: Text(
+                context.l10n.deleteScheduleFailed(
+                  localizedApiError(e, context.l10n),
+                ),
+              ),
               actions: [
                 CupertinoDialogAction(
                   onPressed: () => Navigator.of(context).pop(),
@@ -185,7 +197,7 @@ class _CupertinoPumpSchedulesScreenState
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _errorMessage!,
+                        _errorMessage!(),
                         style: TextStyle(color: AppColors.secondaryText),
                       ),
                       const SizedBox(height: 16),
@@ -310,19 +322,25 @@ class _ScheduleCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Thời gian phun: ${schedule.durationSeconds} giây',
+            context.l10n.sprayDurationSummary(
+              (schedule.durationSeconds).toString(),
+            ),
             style: TextStyle(color: AppColors.primaryText, fontSize: 15),
           ),
           if (schedule.intervalMinutes != null) ...[
             const SizedBox(height: 4),
             Text(
-              'Lặp lại mỗi ${schedule.intervalMinutes} phút',
+              context.l10n.sprayIntervalSummary(
+                (schedule.intervalMinutes).toString(),
+              ),
               style: TextStyle(color: AppColors.secondaryText, fontSize: 13),
             ),
           ],
           const SizedBox(height: 8),
           Text(
-            'Ngày: ${_formatDays(schedule.weekdayMask)}',
+            context.l10n.scheduleDaysSummary(
+              (_formatDays(context, schedule.weekdayMask)).toString(),
+            ),
             style: TextStyle(color: AppColors.secondaryText, fontSize: 13),
           ),
         ],
@@ -338,13 +356,13 @@ class _ScheduleCard extends StatelessWidget {
     return timeString;
   }
 
-  String _formatDays(int mask) {
-    const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+  String _formatDays(BuildContext context, int mask) {
+    final days = context.localizedWeekdays;
     final selected = [
       for (var day = 0; day < days.length; day++)
         if ((mask & (1 << day)) != 0) days[day],
     ];
-    return selected.isEmpty ? 'chưa chọn ngày' : selected.join(', ');
+    return selected.isEmpty ? context.l10n.noDaysSelected : selected.join(', ');
   }
 }
 
@@ -368,7 +386,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
   final List<int> _selectedDays = [1, 2, 3, 4, 5];
 
   bool _isSaving = false;
-  String? _errorMessage;
+  String Function()? _errorMessage;
   bool _hasUnsavedChanges = false;
 
   @override
@@ -400,26 +418,26 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
 
   String? _validateMistLength(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Vui lòng nhập thời gian phun';
+      return context.l10n.sprayDurationRequired;
     }
     final length = int.tryParse(value);
     if (length == null || length < 1 || length > 120) {
-      return 'Thời gian phun từ 1-120 giây';
+      return context.l10n.sprayDurationRange;
     }
     return null;
   }
 
   String? _validateInterval(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Vui lòng nhập khoảng cách';
+      return context.l10n.scheduleIntervalRequired;
     }
     final interval = int.tryParse(value);
     if (interval == null || interval < 1 || interval > 60) {
-      return 'Khoảng cách từ 1-60 phút';
+      return context.l10n.scheduleIntervalRange;
     }
     final mistLength = int.tryParse(_mistLengthController.text);
     if (mistLength != null && mistLength >= interval * 60) {
-      return 'Thời gian phun phải nhỏ hơn khoảng cách';
+      return context.l10n.sprayDurationLessThanInterval;
     }
     return null;
   }
@@ -429,7 +447,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
     final endMinutes = _endTime.hour * 60 + _endTime.minute;
 
     if (endMinutes <= startMinutes && endMinutes < startMinutes + 60) {
-      return 'Giờ kết thúc phải sau giờ bắt đầu (trừ khi qua đêm)';
+      return context.l10n.scheduleEndAfterStart;
     }
     return null;
   }
@@ -438,10 +456,16 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
     final mistLength = _mistLengthController.text;
     final interval = _intervalController.text;
     final days = _selectedDays
-        .map((d) => ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][d])
+        .map((d) => context.localizedWeekdays[d])
         .join(', ');
 
-    return 'Phun $mistLength giây mỗi $interval phút, ${_startTime.format(context)}-${_endTime.format(context)}, $days';
+    return context.l10n.schedulePreview(
+      (mistLength).toString(),
+      (interval).toString(),
+      (_startTime.format(context)).toString(),
+      (_endTime.format(context)).toString(),
+      (days).toString(),
+    );
   }
 
   Future<void> _save() async {
@@ -453,13 +477,17 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
         intervalError != null ||
         timeWindowError != null) {
       setState(() {
-        _errorMessage = mistLengthError ?? intervalError ?? timeWindowError;
+        _errorMessage = () =>
+            _validateMistLength(_mistLengthController.text) ??
+            _validateInterval(_intervalController.text) ??
+            _validateTimeWindow() ??
+            '';
       });
       return;
     }
 
     if (_selectedDays.isEmpty) {
-      setState(() => _errorMessage = 'Vui lòng chọn ít nhất một ngày');
+      setState(() => _errorMessage = () => context.l10n.selectScheduleDay);
       return;
     }
 
@@ -488,8 +516,8 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
         showCupertinoDialog(
           context: context,
           builder: (dialogContext) => CupertinoAlertDialog(
-            title: const Text('Đã lưu'),
-            content: const Text('Đã lưu vào thiết bị'),
+            title: Text(context.l10n.savedTitle),
+            content: Text(context.l10n.savedToDevice),
             actions: [
               CupertinoDialogAction(
                 onPressed: () {
@@ -506,7 +534,8 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
       if (mounted) {
         setState(() {
           _isSaving = false;
-          _errorMessage = 'Không thể lưu: $e';
+          _errorMessage = () =>
+              context.l10n.saveFailed(localizedApiError(e, context.l10n));
         });
       }
     }
@@ -518,19 +547,17 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
     final shouldDiscard = await showCupertinoDialog<bool>(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Chưa lưu'),
-        content: const Text(
-          'Bạn có thay đổi chưa được lưu. Bạn có muốn rời đi?',
-        ),
+        title: Text(context.l10n.unsavedTitle),
+        content: Text(context.l10n.unsavedChangesConfirmation),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Giữ lại'),
+            child: Text(context.l10n.keepEditing),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Bỏ thay đổi'),
+            child: Text(context.l10n.discardChanges),
           ),
         ],
       ),
@@ -552,13 +579,13 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
       },
       child: CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
-          middle: const Text('Thêm lịch trình'),
+          middle: Text(context.l10n.addScheduleTitle),
           trailing: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: _isSaving ? null : _save,
             child: _isSaving
                 ? const CupertinoActivityIndicator(radius: 12)
-                : const Text('Lưu'),
+                : Text(context.l10n.save),
           ),
         ),
         child: SafeArea(
@@ -570,13 +597,11 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                 padding: const EdgeInsets.fromLTRB(18, 12, 18, 32),
                 sliver: SliverList.list(
                   children: [
-                    const Text(
-                      'Giờ thiết bị: Asia/Ho_Chi_Minh. Lịch ưu tiên hơn điều khiển thủ công.',
-                    ),
+                    Text(context.l10n.deviceScheduleTimezoneHint),
                     const SizedBox(height: 12),
                     // Preset chips
-                    const Text(
-                      'Mẫu cài đặt',
+                    Text(
+                      context.l10n.schedulePreset,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -599,7 +624,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                           borderRadius: BorderRadius.circular(20),
                           onPressed: () => _applyPreset(preset),
                           child: Text(
-                            preset.label,
+                            preset.localizedLabel(context),
                             style: TextStyle(
                               color: _selectedPreset == preset
                                   ? CupertinoColors.white
@@ -615,7 +640,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
 
                     // Mist length
                     _ScheduleField(
-                      label: 'Thời gian phun (giây)',
+                      label: context.l10n.sprayDurationSeconds,
                       controller: _mistLengthController,
                       keyboardType: TextInputType.number,
                       placeholder: '1-120',
@@ -627,7 +652,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
 
                     // Interval
                     _ScheduleField(
-                      label: 'Khoảng cách (phút)',
+                      label: context.l10n.scheduleIntervalMinutes,
                       controller: _intervalController,
                       keyboardType: TextInputType.number,
                       placeholder: '1-60',
@@ -636,8 +661,8 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                     const SizedBox(height: 16),
 
                     // Active hours
-                    const Text(
-                      'Khung giờ hoạt động',
+                    Text(
+                      context.l10n.scheduleTimeWindow,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -648,7 +673,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                       children: [
                         Expanded(
                           child: _TimeButton(
-                            label: 'Bắt đầu',
+                            label: context.l10n.scheduleStart,
                             time: _startTime,
                             onTap: () => _selectTime(true),
                           ),
@@ -656,7 +681,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _TimeButton(
-                            label: 'Kết thúc',
+                            label: context.l10n.scheduleEnd,
                             time: _endTime,
                             onTap: () => _selectTime(false),
                           ),
@@ -676,8 +701,8 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                     const SizedBox(height: 24),
 
                     // Days of week
-                    const Text(
-                      'Ngày lặp lại',
+                    Text(
+                      context.l10n.scheduleRepeatDays,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -688,15 +713,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                       spacing: 8,
                       runSpacing: 8,
                       children: List.generate(7, (index) {
-                        final dayNames = [
-                          'CN',
-                          'T2',
-                          'T3',
-                          'T4',
-                          'T5',
-                          'T6',
-                          'T7',
-                        ];
+                        final dayNames = context.localizedWeekdays;
                         return CupertinoButton(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 14,
@@ -780,7 +797,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                _errorMessage!,
+                                _errorMessage!(),
                                 style: const TextStyle(
                                   color: CupertinoColors.systemRed,
                                   fontSize: 12,
@@ -790,7 +807,7 @@ class _AddScheduleDialogState extends State<AddScheduleDialog> {
                             CupertinoButton(
                               padding: EdgeInsets.zero,
                               onPressed: _save,
-                              child: const Text('Thử lại'),
+                              child: Text(context.l10n.retry),
                             ),
                           ],
                         ),

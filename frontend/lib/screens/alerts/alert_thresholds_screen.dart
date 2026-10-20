@@ -1,3 +1,5 @@
+import '../../utils/display_localizations.dart';
+import '../../utils/l10n.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../../models/device.dart';
@@ -27,7 +29,7 @@ class _AlertThresholdsScreenState extends State<AlertThresholdsScreen> {
   bool _waterEnabled = true;
   bool _loading = true;
   bool _saving = false;
-  String? _error;
+  String Function()? _error;
 
   @override
   void initState() {
@@ -61,7 +63,7 @@ class _AlertThresholdsScreenState extends State<AlertThresholdsScreen> {
     } catch (error) {
       if (mounted) {
         setState(() {
-          _error = error.toString();
+          _error = () => localizedApiError(error, context.l10n);
           _loading = false;
         });
       }
@@ -86,7 +88,7 @@ class _AlertThresholdsScreenState extends State<AlertThresholdsScreen> {
     if ((_temperatureEnabled &&
             (temperature == null || temperature <= 0 || temperature > 80)) ||
         (_waterEnabled && (water == null || water < 0 || water > 100))) {
-      setState(() => _error = 'Ngưỡng phải là số hợp lệ; mực nước từ 0–100%.');
+      setState(() => _error = () => context.l10n.invalidAlertThreshold);
       return;
     }
     setState(() {
@@ -103,8 +105,10 @@ class _AlertThresholdsScreenState extends State<AlertThresholdsScreen> {
       await showCupertinoDialog<void>(
         context: context,
         builder: (dialogContext) => CupertinoAlertDialog(
-          title: const Text('Đã lưu ngưỡng cảnh báo'),
-          content: Text('Cài đặt cho ${widget.device.name} đã được cập nhật.'),
+          title: Text(context.l10n.alertThresholdsSaved),
+          content: Text(
+            context.l10n.deviceSettingsUpdated((widget.device.name).toString()),
+          ),
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.of(dialogContext).pop(),
@@ -114,7 +118,9 @@ class _AlertThresholdsScreenState extends State<AlertThresholdsScreen> {
         ),
       );
     } catch (error) {
-      if (mounted) setState(() => _error = error.toString());
+      if (mounted) {
+        setState(() => _error = () => localizedApiError(error, context.l10n));
+      }
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -123,11 +129,13 @@ class _AlertThresholdsScreenState extends State<AlertThresholdsScreen> {
   @override
   Widget build(BuildContext context) => CupertinoPageScaffold(
     navigationBar: CupertinoNavigationBar(
-      middle: const Text('Ngưỡng cảnh báo'),
+      middle: Text(context.l10n.alertThresholdsTitle),
       trailing: CupertinoButton(
         padding: EdgeInsets.zero,
         onPressed: _saving ? null : _save,
-        child: _saving ? const CupertinoActivityIndicator() : const Text('Lưu'),
+        child: _saving
+            ? const CupertinoActivityIndicator()
+            : Text(context.l10n.save),
       ),
     ),
     child: SafeArea(
@@ -144,13 +152,13 @@ class _AlertThresholdsScreenState extends State<AlertThresholdsScreen> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Chỉ những cảm biến thiết bị hiện hỗ trợ mới được hiển thị.',
+                Text(
+                  context.l10n.supportedSensorsOnly,
                   style: TextStyle(color: CupertinoColors.secondaryLabel),
                 ),
                 const SizedBox(height: 18),
                 _ThresholdCard(
-                  title: 'Nhiệt độ cao',
+                  title: context.l10n.highTemperatureTitle,
                   unit: '°C',
                   enabled: _temperatureEnabled,
                   value: _temperature,
@@ -166,7 +174,7 @@ class _AlertThresholdsScreenState extends State<AlertThresholdsScreen> {
                 ),
                 const SizedBox(height: 14),
                 _ThresholdCard(
-                  title: 'Mực nước thấp',
+                  title: context.l10n.lowWaterTitle,
                   unit: '%',
                   enabled: _waterEnabled,
                   value: _water,
@@ -183,14 +191,14 @@ class _AlertThresholdsScreenState extends State<AlertThresholdsScreen> {
                 if (_error != null) ...[
                   const SizedBox(height: 12),
                   Text(
-                    _error!,
+                    _error!(),
                     style: const TextStyle(color: CupertinoColors.systemRed),
                   ),
                 ],
                 const SizedBox(height: 18),
                 CupertinoButton(
                   onPressed: _resetRecommended,
-                  child: const Text('Đặt lại khuyến nghị'),
+                  child: Text(context.l10n.resetRecommendedThresholds),
                 ),
               ],
             ),

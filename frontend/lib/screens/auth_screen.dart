@@ -79,12 +79,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         case AuthErrorType.network:
           return context.l10n.authNetworkError;
         case AuthErrorType.unknown:
-          return auth.error?.isNotEmpty == true
-              ? auth.error!
-              : context.l10n.authGenericError;
+          return context.l10n.authGenericError;
       }
     }
-    return auth.error ?? context.l10n.authGenericError;
+    return context.l10n.authGenericError;
   }
 
   void _onSocialTap(String label) {

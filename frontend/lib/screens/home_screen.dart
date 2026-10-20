@@ -1,3 +1,4 @@
+import '../utils/display_localizations.dart';
 // lib/screens/home_screen.dart
 
 import 'package:flutter/material.dart';
@@ -57,16 +58,20 @@ class HomeScreen extends ConsumerWidget {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 24,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     PageHeader(
                       leadingContent: Text(
                         _greeting(context),
-                        style: AppText.body(context, fontSize: 14).copyWith(
-                          color: AppColors.mutedSage,
-                        ),
+                        style: AppText.body(
+                          context,
+                          fontSize: 14,
+                        ).copyWith(color: AppColors.mutedSage),
                       ),
                       title: _gardenTitle(context, user.fullName),
                       subtitle: context.l10n.gardenSubtitle,
@@ -162,11 +167,7 @@ class _HeroCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.auto_awesome,
-                      color: Colors.white70,
-                      size: 16,
-                    ),
+                    const Icon(Icons.auto_awesome, color: Colors.white70, size: 16),
                     const SizedBox(width: 4),
                     Text(
                       context.l10n.growing,
@@ -186,7 +187,7 @@ class _HeroCard extends StatelessWidget {
                   const Icon(Icons.eco, color: Colors.white70, size: 20),
                   const SizedBox(width: 8),
                   Text(
-                    plant.name,
+                    plant.localizedName(context.l10n),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 28,
@@ -376,7 +377,9 @@ class _CareScheduleCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    context.l10n.careScheduleFor(plant.name),
+                    context.l10n.careScheduleFor(
+                      plant.localizedName(context.l10n),
+                    ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: const TextStyle(

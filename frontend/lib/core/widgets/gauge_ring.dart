@@ -1,3 +1,4 @@
+import '../../utils/l10n.dart';
 // lib/core/widgets/gauge_ring.dart
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
@@ -24,10 +25,7 @@ class GaugeRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Normalize value for 0‑100 percentage for the radial progress.
-    final double progress = ((value ?? 0) / 100).clamp(
-      0.0,
-      1.0,
-    );
+    final double progress = ((value ?? 0) / 100).clamp(0.0, 1.0);
     final gauge = Column(
       children: [
         SizedBox(
@@ -89,7 +87,7 @@ class GaugeRing extends StatelessWidget {
     if (onTap == null) return gauge;
     return Semantics(
       button: true,
-      label: 'Xem chi tiết $label',
+      label: context.l10n.viewSensorDetails((label).toString()),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),

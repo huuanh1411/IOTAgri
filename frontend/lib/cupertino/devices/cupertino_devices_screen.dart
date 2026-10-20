@@ -1,3 +1,4 @@
+import '../../utils/display_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
@@ -25,7 +26,7 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
   bool _isLoading = true;
   bool _isCreating = false;
   String? _deletingDeviceId;
-  String? _errorMessage;
+  String Function()? _errorMessage;
   String _searchQuery = '';
 
   @override
@@ -56,7 +57,7 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = error.toString();
+        _errorMessage = () => localizedApiError(error, context.l10n);
       });
     }
   }
@@ -80,22 +81,24 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
     final shouldDelete = await showCupertinoDialog<bool>(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
-        title: const Text('Xóa thiết bị?'),
+        title: Text(context.l10n.deleteDeviceTitle),
         content: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
-            'Bạn có chắc muốn xóa "${device.name}"? Thao tác này không thể hoàn tác.',
+            context.l10n.deleteNamedDeviceConfirmation(
+              (device.name).toString(),
+            ),
           ),
         ),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Hủy'),
+            child: Text(context.l10n.cancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Xóa'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -107,7 +110,13 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
       await _apiService.deleteDevice(device.id);
       if (mounted) await _loadDevices(showLoading: false);
     } catch (error) {
-      if (mounted) _showError('Không thể xóa thiết bị: $error');
+      if (mounted) {
+        _showError(
+          context.l10n.cannotDeleteDevice(
+            localizedApiError(error, context.l10n),
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _deletingDeviceId = null);
     }
@@ -142,7 +151,7 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
     showCupertinoDialog<void>(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
-        title: const Text('Không thể hoàn tất'),
+        title: Text(context.l10n.actionFailed),
         content: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(message),
@@ -150,7 +159,7 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Đã hiểu'),
+            child: Text(context.l10n.dismiss),
           ),
         ],
       ),
@@ -206,7 +215,7 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
                     const _DevicesLoadingState()
                   else if (_errorMessage != null)
                     _DevicesErrorState(
-                      message: _errorMessage!,
+                      message: _errorMessage!(),
                       onRetry: _loadDevices,
                     )
                   else if (_devices.isEmpty)
@@ -214,16 +223,18 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
                   else ...[
                     if (hasSearch) ...[
                       CupertinoSearchTextField(
-                        placeholder: 'Tìm theo tên hoặc vị trí',
+                        placeholder: context.l10n.searchDevicesHint,
                         onChanged: (value) =>
                             setState(() => _searchQuery = value),
                       ),
                       const SizedBox(height: 14),
                     ],
                     if (hasNoResults)
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(top: 32),
-                        child: Center(child: Text('Không tìm thấy thiết bị.')),
+                        child: Center(
+                          child: Text(context.l10n.noMatchingDevices),
+                        ),
                       )
                     else
                       for (final device in filtered) ...[
@@ -268,7 +279,7 @@ class _DeviceRow extends StatelessWidget {
         ? const Color(0xFF248A4B)
         : CupertinoColors.systemGrey;
     final lastSeen = DateTime.tryParse(device.lastSeenAt ?? '');
-    final location = device.location ?? 'Vị trí chưa gán';
+    final location = device.location ?? context.l10n.unassignedLocation;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 15, 12, 12),
       decoration: BoxDecoration(
@@ -308,8 +319,15 @@ class _DeviceRow extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         lastSeen == null
-                            ? 'Chưa có kết nối · $location'
-                            : 'Lần cuối ${DateFormat('dd/MM HH:mm').format(lastSeen.toLocal())} · $location',
+                            ? context.l10n.deviceNeverConnected(
+                                (location).toString(),
+                              )
+                            : context.l10n.deviceLastSeen(
+                                (DateFormat(
+                                  'dd/MM HH:mm',
+                                ).format(lastSeen.toLocal())).toString(),
+                                (location).toString(),
+                              ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -340,17 +358,17 @@ class _DeviceRow extends StatelessWidget {
               CupertinoButton(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 onPressed: onProvision,
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(CupertinoIcons.qrcode, size: 17),
                     SizedBox(width: 7),
-                    Text('Thiết lập thiết bị'),
+                    Text(context.l10n.deviceSetup),
                   ],
                 ),
               ),
               Semantics(
-                label: 'Xóa thiết bị',
+                label: context.l10n.deleteDevice,
                 button: true,
                 child: CupertinoButton(
                   padding: const EdgeInsets.all(10),
@@ -420,7 +438,7 @@ class _DevicesEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            'Chưa có thiết bị nào',
+            context.l10n.devicesEmptyTitle,
             style: TextStyle(
               color: CupertinoColors.label.resolveFrom(context),
               fontSize: 18,
@@ -429,7 +447,7 @@ class _DevicesEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Tạo thiết bị để bắt đầu thiết lập kết nối.',
+            context.l10n.devicesEmptyExplanation,
             style: TextStyle(
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
               fontSize: 13,
@@ -438,7 +456,7 @@ class _DevicesEmptyState extends StatelessWidget {
           const SizedBox(height: 18),
           CupertinoButton.filled(
             onPressed: onAdd,
-            child: const Text('Thêm thiết bị'),
+            child: Text(context.l10n.addDevice),
           ),
         ],
       ),
@@ -475,7 +493,7 @@ class _DevicesErrorState extends StatelessWidget {
             size: 34,
           ),
           const SizedBox(height: 12),
-          const Text('Không thể tải danh sách thiết bị.'),
+          Text(context.l10n.devicesLoadFailed),
           const SizedBox(height: 6),
           Text(
             message,
@@ -490,7 +508,7 @@ class _DevicesErrorState extends StatelessWidget {
           const SizedBox(height: 12),
           CupertinoButton.filled(
             onPressed: onRetry,
-            child: const Text('Thử lại'),
+            child: Text(context.l10n.retry),
           ),
         ],
       ),

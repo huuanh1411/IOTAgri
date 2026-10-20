@@ -1,3 +1,4 @@
+import '../../utils/display_localizations.dart';
   import 'dart:async';
   import 'dart:math' as math;
 
@@ -55,7 +56,7 @@
     bool _isSendingCommand = false;
     bool _isLightOn = false;
     bool _isSendingLightCommand = false;
-    String? _errorMessage;
+    String Function()? _errorMessage;
     DateTime? _lastUpdated;
     Timer? _refreshTimer;
     PumpMode _pumpMode = PumpMode.auto;
@@ -147,7 +148,7 @@
         if (!mounted) return;
         setState(() {
           _isLoading = false;
-          _errorMessage = error.toString();
+          _errorMessage = () => localizedApiError(error, context.l10n);
         });
       }
     }
@@ -226,7 +227,9 @@
           content: Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              '${_device.name} đang ở chế độ Thủ công và chưa phun. Chuyển về Tự động?',
+              context.l10n.switchDeviceToAutoConfirmation(
+                (_device.name).toString(),
+              ),
             ),
           ),
           actions: [
@@ -294,7 +297,11 @@
         }
       } catch (error) {
         if (mounted) {
-          _showMessage(context.l10n.cannotSendCommand(error.toString()));
+          _showMessage(
+            context.l10n.cannotSendCommand(
+              localizedApiError(error, context.l10n),
+            ),
+          );
         }
       } finally {
         if (mounted) setState(() => _isSendingCommand = false);
@@ -313,7 +320,11 @@
         if (mounted) setState(() => _isLightOn = isOn);
       } catch (error) {
         if (mounted) {
-          _showMessage('Không thể gửi lệnh đèn: $error');
+          _showMessage(
+            context.l10n.lightCommandFailed(
+              localizedApiError(error, context.l10n),
+            ),
+          );
         }
       } finally {
         if (mounted) setState(() => _isSendingLightCommand = false);
@@ -338,7 +349,7 @@
               CupertinoDialogAction(
                 onPressed: () => Navigator.of(dialogContext).pop(true),
                 isDestructiveAction: true,
-                child: const Text('Chuyển'),
+                child: Text(context.l10n.switchMode),
               ),
             ],
           ),
@@ -370,7 +381,11 @@
             } catch (_) {}
           }
           if (mounted) {
-            _showMessage('Không thể tạm dừng lịch tự động: $error');
+            _showMessage(
+              context.l10n.cannotPauseAutoSchedule(
+                localizedApiError(error, context.l10n),
+              ),
+            );
           }
           return;
         }
@@ -391,7 +406,13 @@
             );
           }
         } catch (error) {
-          if (mounted) _showMessage('Không thể khôi phục lịch tự động: $error');
+          if (mounted) {
+            _showMessage(
+              context.l10n.cannotRestoreAutoSchedule(
+                localizedApiError(error, context.l10n),
+              ),
+            );
+          }
           return;
         }
         _pausedScheduleIds.clear();
@@ -482,9 +503,14 @@
               child: SafeArea(
                 child: Center(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
-                      color: CupertinoColors.darkBackgroundGray.withValues(alpha: 0.9),
+                      color: CupertinoColors.darkBackgroundGray.withValues(
+                        alpha: 0.9,
+                      ),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: const [
                         BoxShadow(
@@ -495,7 +521,7 @@
                       ],
                     ),
                     child: Text(
-                      'Đã xóa thiết bị thành công',
+                      context.l10n.deviceDeleted,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: CupertinoColors.white,
@@ -533,7 +559,7 @@
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Đã hiểu'),
+              child: Text(context.l10n.dismiss),
             ),
           ],
         ),
@@ -569,7 +595,7 @@
           ),
           child: SafeArea(
             child: _DetailError(
-              message: _errorMessage!,
+              message: _errorMessage!(),
               onRetry: _loadDeviceData,
             ),
           ),
@@ -615,7 +641,9 @@
                     const SizedBox(height: 24),
                     _DetailSectionTitle(
                       title: context.l10n.sensors,
-                      subtitle: reading == null ? context.l10n.noRecentData : null,
+                      subtitle: reading == null
+                          ? context.l10n.noRecentData
+                          : null,
                     ),
                     const SizedBox(height: 12),
                     SensorGrid(
@@ -702,9 +730,7 @@
       final tint = online
           ? AppColors.forestGreen.withValues(alpha: 0.11)
           : CupertinoColors.systemGrey5.resolveFrom(context);
-      final accent = online
-          ? AppColors.forestGreen
-          : CupertinoColors.systemGrey;
+      final accent = online ? AppColors.forestGreen : CupertinoColors.systemGrey;
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -755,8 +781,12 @@
                 Flexible(
                   child: Text(
                     lastUpdated == null
-                        ? 'Chưa có dữ liệu'
-                        : 'Cập nhật ${DateFormat('HH:mm').format(lastUpdated!.toLocal())}',
+                        ? context.l10n.noReadingsYet
+                        : context.l10n.updatedAt(
+                            (DateFormat(
+                              'HH:mm',
+                            ).format(lastUpdated!.toLocal())).toString(),
+                          ),
                     textAlign: TextAlign.right,
                     style: const TextStyle(
                       color: AppColors.secondaryText,
@@ -768,12 +798,9 @@
             ),
             if (scheduleContinuesOffline) ...[
               const SizedBox(height: 12),
-              const Text(
-                'Lịch tự động vẫn tiếp tục chạy khi thiết bị ngoại tuyến.',
-                style: TextStyle(
-                  color: AppColors.secondaryText,
-                  fontSize: 12,
-                ),
+              Text(
+                context.l10n.schedulesContinueOffline,
+                style: TextStyle(color: AppColors.secondaryText, fontSize: 12),
               ),
             ],
           ],
@@ -789,9 +816,7 @@
 
     @override
     Widget build(BuildContext context) {
-      final color = isOnline
-          ? AppColors.forestGreen
-          : CupertinoColors.systemGrey;
+      final color = isOnline ? AppColors.forestGreen : CupertinoColors.systemGrey;
       return AnimatedContainer(
         duration: AppMotion.duration(context, AppMotion.status),
         curve: AppMotion.easeInOut,
@@ -833,7 +858,7 @@
       final specs = [
         _SensorSpec(
           keyName: 'temperature',
-          label: 'Nhiệt độ không khí',
+          label: context.l10n.airTemperature,
           value: reading?.temperature,
           unit: '°C',
           icon: CupertinoIcons.thermometer,
@@ -842,7 +867,7 @@
         ),
         _SensorSpec(
           keyName: 'humidity',
-          label: 'Độ ẩm',
+          label: context.l10n.humidity,
           value: reading?.humidity,
           unit: '%',
           icon: CupertinoIcons.drop_fill,
@@ -851,7 +876,7 @@
         ),
         _SensorSpec(
           keyName: 'solutionTemperature',
-          label: 'Nhiệt độ dung dịch',
+          label: context.l10n.solutionTemperature,
           value: reading?.solutionTemperature,
           unit: '°C',
           icon: CupertinoIcons.thermometer,
@@ -869,7 +894,7 @@
         ),
         _SensorSpec(
           keyName: 'waterLevel',
-          label: 'Mực nước',
+          label: context.l10n.waterLevel,
           value: reading?.waterLevel,
           unit: '%',
           icon: CupertinoIcons.drop_triangle_fill,
@@ -980,7 +1005,7 @@
                       hasValue
                           ? '${spec.value!.toStringAsFixed(1)} ${spec.unit}'
                                 .trim()
-                          : 'Không có dữ liệu',
+                          : context.l10n.noData,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1067,16 +1092,16 @@
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _DetailSectionTitle(title: 'Điều khiển bơm'),
+                    _DetailSectionTitle(title: context.l10n.pumpControl),
                     const SizedBox(height: 3),
                     Text(
                       !isOnline
-                          ? 'Không khả dụng khi ngoại tuyến'
+                          ? context.l10n.unavailableOffline
                           : isSending
-                          ? 'Đang gửi lệnh…'
+                          ? context.l10n.sendingCommand
                           : isRunning
-                          ? 'Bơm đang chạy'
-                          : 'Bơm đang tắt',
+                          ? context.l10n.pumpRunning
+                          : context.l10n.pumpStopped,
                       style: const TextStyle(
                         color: AppColors.secondaryText,
                         fontSize: 12,
@@ -1090,14 +1115,14 @@
           const SizedBox(height: 16),
           CupertinoSlidingSegmentedControl<PumpMode>(
             groupValue: pumpMode,
-            children: const {
+            children: {
               PumpMode.auto: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Text('Tự động'),
+                child: Text(context.l10n.automaticMode),
               ),
               PumpMode.manual: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Text('Thủ công'),
+                child: Text(context.l10n.manualMode),
               ),
             },
             onValueChanged: (value) {
@@ -1117,7 +1142,12 @@
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Lần phun tiếp theo sau ${_formatTimeRemaining(nextScheduleTime)}',
+                      context.l10n.nextSprayIn(
+                        (_formatTimeRemaining(
+                          context,
+                          nextScheduleTime,
+                        )).toString(),
+                      ),
                       style: const TextStyle(
                         color: AppColors.secondaryText,
                         fontSize: 13,
@@ -1127,12 +1157,9 @@
                 ],
               )
             else
-              const Text(
-                'Không có lịch phun được kích hoạt',
-                style: TextStyle(
-                  color: AppColors.secondaryText,
-                  fontSize: 13,
-                ),
+              Text(
+                context.l10n.noActiveSpraySchedule,
+                style: TextStyle(color: AppColors.secondaryText, fontSize: 13),
               ),
           ] else ...[
             if (isRunning) ...[
@@ -1146,7 +1173,9 @@
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Bơm đang chạy - còn ${_formatCountdown(remainingSeconds)}',
+                    context.l10n.pumpRunningCountdown(
+                      (_formatCountdown(remainingSeconds)).toString(),
+                    ),
                     style: const TextStyle(
                       color: CupertinoColors.systemOrange,
                       fontSize: 13,
@@ -1169,7 +1198,7 @@
                             color: CupertinoColors.white,
                             radius: 8,
                           )
-                        : const Text('Dừng', style: TextStyle(fontSize: 13)),
+                        : Text(context.l10n.stop, style: TextStyle(fontSize: 13)),
                   ),
                 ],
               ),
@@ -1183,8 +1212,8 @@
                     ? const CupertinoActivityIndicator(
                         color: CupertinoColors.white,
                       )
-                    : const Text(
-                        'BẬT BƠM',
+                    : Text(
+                        context.l10n.startPump,
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
               ),
@@ -1201,12 +1230,12 @@
       return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
     }
 
-    String _formatTimeRemaining(DateTime? time) {
-      if (time == null) return 'Không có lịch';
+    String _formatTimeRemaining(BuildContext context, DateTime? time) {
+      if (time == null) return context.l10n.noScheduledTime;
       final now = DateTime.now();
       final difference = time.difference(now);
 
-      if (difference.isNegative) return 'Đã qua';
+      if (difference.isNegative) return context.l10n.scheduledTimePassed;
 
       final hours = difference.inHours;
       final minutes = difference.inMinutes % 60;
@@ -1214,7 +1243,9 @@
       if (hours > 0) {
         return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
       }
-      return '${minutes.toString().padLeft(2, '0')} phút';
+      return context.l10n.minutesRemaining(
+        (minutes.toString().padLeft(2, '0')).toString(),
+      );
     }
   }
 
@@ -1246,9 +1277,7 @@
               shape: BoxShape.circle,
             ),
             child: Icon(
-              isOn
-                  ? CupertinoIcons.lightbulb_fill
-                  : CupertinoIcons.lightbulb,
+              isOn ? CupertinoIcons.lightbulb_fill : CupertinoIcons.lightbulb,
               color: isOn
                   ? CupertinoColors.systemYellow
                   : CupertinoColors.systemGrey,
@@ -1260,16 +1289,16 @@
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _DetailSectionTitle(title: 'Điều khiển đèn'),
+                _DetailSectionTitle(title: context.l10n.lightControl),
                 const SizedBox(height: 3),
                 Text(
                   !isOnline
-                      ? 'Không khả dụng khi ngoại tuyến'
+                      ? context.l10n.unavailableOffline
                       : isSending
-                      ? 'Đang gửi lệnh…'
+                      ? context.l10n.sendingCommand
                       : isOn
-                      ? 'Đèn đang bật'
-                      : 'Đèn đang tắt',
+                      ? context.l10n.lightIsOn
+                      : context.l10n.lightIsOff,
                   style: const TextStyle(
                     color: CupertinoColors.secondaryLabel,
                     fontSize: 12,
@@ -1281,10 +1310,7 @@
           if (isSending)
             const CupertinoActivityIndicator(radius: 9)
           else
-            CupertinoSwitch(
-              value: isOn,
-              onChanged: isOnline ? onChanged : null,
-            ),
+            CupertinoSwitch(value: isOn, onChanged: isOnline ? onChanged : null),
         ],
       ),
     );
@@ -1311,17 +1337,21 @@
           children: [
             Row(
               children: [
-                const Expanded(child: _DetailSectionTitle(title: 'Lịch tưới')),
+                Expanded(
+                  child: _DetailSectionTitle(
+                    title: context.l10n.wateringSchedule,
+                  ),
+                ),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   onPressed: onEdit,
-                  child: const Text('Sửa'),
+                  child: Text(context.l10n.edit),
                 ),
               ],
             ),
             if (enabled.isEmpty)
-              const Text(
-                'Chưa có lịch tự động.',
+              Text(
+                context.l10n.noAutomaticSchedules,
                 style: TextStyle(color: CupertinoColors.secondaryLabel),
               )
             else ...[
@@ -1329,18 +1359,23 @@
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
-                    'Phun ${schedule.durationSeconds} giây mỗi ${schedule.intervalMinutes ?? 5} phút, ${_scheduleTime(schedule.startTime)}-${_scheduleEndTime(schedule.startTime, schedule.durationSeconds)}',
-                    style: TextStyle(
-                      color: AppColors.primaryText,
-                      fontSize: 13,
+                    context.l10n.sprayScheduleSummary(
+                      (schedule.durationSeconds).toString(),
+                      (schedule.intervalMinutes ?? 5).toString(),
+                      (_scheduleTime(schedule.startTime)).toString(),
+                      (_scheduleEndTime(
+                        schedule.startTime,
+                        schedule.durationSeconds,
+                      )).toString(),
                     ),
+                    style: TextStyle(color: AppColors.primaryText, fontSize: 13),
                   ),
                 ),
             ],
             if (isOffline && enabled.isNotEmpty) ...[
               const SizedBox(height: 8),
-              const Text(
-                'Lịch đã lưu tiếp tục chạy tự động khi có kết nối.',
+              Text(
+                context.l10n.savedSchedulesContinue,
                 style: TextStyle(
                   color: CupertinoColors.systemOrange,
                   fontSize: 12,
@@ -1382,14 +1417,14 @@
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _DetailSectionTitle(title: 'Lịch sử 24 giờ'),
+              _DetailSectionTitle(title: context.l10n.history24Hours),
               const SizedBox(height: 12),
               if (points.length < 2)
-                const SizedBox(
+                SizedBox(
                   height: 70,
                   child: Center(
                     child: Text(
-                      'Chưa đủ dữ liệu để tạo biểu đồ.',
+                      context.l10n.notEnoughChartData,
                       style: TextStyle(color: CupertinoColors.secondaryLabel),
                     ),
                   ),
@@ -1430,8 +1465,7 @@
                           dotData: const FlDotData(show: false),
                           belowBarData: BarAreaData(
                             show: true,
-                            color: AppColors.forestGreen
-                                .withValues(alpha: 0.1),
+                            color: AppColors.forestGreen.withValues(alpha: 0.1),
                           ),
                         ),
                       ],
@@ -1443,11 +1477,8 @@
                 ),
               const SizedBox(height: 6),
               Text(
-                '${points.length} lần ghi · Nhiệt độ',
-                style: TextStyle(
-                  color: AppColors.secondaryText,
-                  fontSize: 11,
-                ),
+                context.l10n.temperatureRecordCount((points.length).toString()),
+                style: TextStyle(color: AppColors.secondaryText, fontSize: 11),
               ),
             ],
           ),
@@ -1488,12 +1519,12 @@
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const _DetailSectionTitle(title: 'Cảnh báo'),
+                  _DetailSectionTitle(title: context.l10n.alerts),
                   const SizedBox(height: 3),
                   Text(
                     alerts.isEmpty
-                        ? 'Không có cảnh báo đang mở.'
-                        : '${alerts.length} cảnh báo đang mở',
+                        ? context.l10n.noOpenAlerts
+                        : context.l10n.alertsOpen(alerts.length),
                     style: const TextStyle(
                       color: AppColors.secondaryText,
                       fontSize: 12,
@@ -1505,8 +1536,8 @@
             if (alerts.isNotEmpty)
               Text(
                 alerts.first.type == 'LOW_WATER_LEVEL'
-                    ? 'Mực nước thấp'
-                    : 'Nhiệt độ cao',
+                    ? context.l10n.lowWaterTitle
+                    : context.l10n.highTemperatureTitle,
                 style: const TextStyle(
                   color: CupertinoColors.systemOrange,
                   fontSize: 11,
@@ -1540,7 +1571,7 @@
     bool _isLoading = true;
     bool _isSaving = false;
     bool _isRemoving = false;
-    String? _errorMessage;
+    String Function()? _errorMessage;
     Timer? _toastTimer;
     OverlayEntry? _toastEntry;
 
@@ -1576,7 +1607,7 @@
       } catch (error) {
         if (!mounted) return;
         setState(() {
-          _errorMessage = error.toString();
+          _errorMessage = () => localizedApiError(error, context.l10n);
           _isLoading = false;
         });
       }
@@ -1590,7 +1621,7 @@
         context: context,
         builder: (dialogContext) => StatefulBuilder(
           builder: (context, setDialogState) => CupertinoAlertDialog(
-            title: const Text('Đổi tên thiết bị'),
+            title: Text(context.l10n.renameDevice),
             content: Padding(
               padding: const EdgeInsets.only(top: 12),
               child: Column(
@@ -1599,7 +1630,7 @@
                   CupertinoTextField(
                     controller: nameController,
                     autofocus: true,
-                    placeholder: 'Tên thiết bị',
+                    placeholder: context.l10n.deviceName,
                     onChanged: (_) {
                       if (dialogError != null) {
                         setDialogState(() => dialogError = null);
@@ -1622,7 +1653,7 @@
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Hủy'),
+                child: Text(context.l10n.cancel),
               ),
               CupertinoDialogAction(
                 isDefaultAction: true,
@@ -1630,13 +1661,13 @@
                   final trimmed = nameController.text.trim();
                   if (trimmed.isEmpty) {
                     setDialogState(() {
-                      dialogError = 'Tên thiết bị không được để trống';
+                      dialogError = context.l10n.deviceNameRequired;
                     });
                     return;
                   }
                   Navigator.of(dialogContext).pop(trimmed);
                 },
-                child: const Text('Lưu'),
+                child: Text(context.l10n.save),
               ),
             ],
           ),
@@ -1658,12 +1689,14 @@
             _currentDevice = Device.fromJson(updatedData);
             _isLoading = false;
           });
-          _showToast(context, 'Đã đổi tên thiết bị');
+          _showToast(context, context.l10n.deviceRenamed);
         } catch (e) {
           if (!mounted) return;
           setState(() {
             _isLoading = false;
-            _errorMessage = 'Không thể đổi tên: $e';
+            _errorMessage = () => context.l10n.cannotRenameDevice(
+              localizedApiError(e, context.l10n),
+            );
           });
         }
       }
@@ -1681,7 +1714,7 @@
           (_waterController.text.trim().isNotEmpty && water == null) ||
           (water != null && (water < 0 || water > 100))) {
         setState(
-          () => _errorMessage = 'Kiểm tra lại ngưỡng nhiệt độ và mực nước.',
+          () => _errorMessage = () => context.l10n.invalidDeviceThresholds,
         );
         return;
       }
@@ -1700,7 +1733,7 @@
         if (mounted) {
           setState(() {
             _isSaving = false;
-            _errorMessage = error.toString();
+            _errorMessage = () => localizedApiError(error, context.l10n);
           });
         }
       }
@@ -1710,22 +1743,20 @@
       final confirmed = await showCupertinoDialog<bool>(
         context: context,
         builder: (dialogContext) => CupertinoAlertDialog(
-          title: const Text('Xóa thiết bị?'),
-          content: const Padding(
+          title: Text(context.l10n.deleteDeviceTitle),
+          content: Padding(
             padding: EdgeInsets.only(top: 8),
-            child: Text(
-              'Thiết bị sẽ được đặt lại và ngừng báo cáo. Lịch phun đã lưu có thể dừng. Hãy chắc chắn cây đã được chăm sóc.',
-            ),
+            child: Text(context.l10n.deleteDeviceWarning),
           ),
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Hủy'),
+              child: Text(context.l10n.cancel),
             ),
             CupertinoDialogAction(
               isDestructiveAction: true,
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Xóa thiết bị'),
+              child: Text(context.l10n.deleteDevice),
             ),
           ],
         ),
@@ -1746,7 +1777,8 @@
         if (!mounted) return;
         setState(() {
           _isRemoving = false;
-          _errorMessage = 'Không thể xóa thiết bị: $e';
+          _errorMessage = () =>
+              context.l10n.cannotDeleteDevice(localizedApiError(e, context.l10n));
         });
       }
     }
@@ -1766,7 +1798,9 @@
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: CupertinoColors.darkBackgroundGray.withValues(alpha: 0.9),
+                  color: CupertinoColors.darkBackgroundGray.withValues(
+                    alpha: 0.9,
+                  ),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: const [
                     BoxShadow(
@@ -1820,7 +1854,7 @@
       navigationBar: CupertinoNavigationBar(
         backgroundColor: AppColors.background,
         border: null,
-        middle: const Text('Cài đặt thiết bị'),
+        middle: Text(context.l10n.deviceSettings),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => Navigator.of(context).pop(_currentDevice),
@@ -1843,18 +1877,18 @@
 
                   // 3. Alert thresholds
                   _SettingsField(
-                    label: 'Cảnh báo nhiệt độ cao (°C)',
+                    label: context.l10n.highTemperatureAlert,
                     controller: _temperatureController,
                   ),
                   const SizedBox(height: 16),
                   _SettingsField(
-                    label: 'Cảnh báo mực nước thấp (%)',
+                    label: context.l10n.lowWaterAlertThreshold,
                     controller: _waterController,
                   ),
                   if (_errorMessage != null) ...[
                     const SizedBox(height: 12),
                     Text(
-                      _errorMessage!,
+                      _errorMessage!(),
                       style: const TextStyle(color: CupertinoColors.systemRed),
                     ),
                   ],
@@ -1865,19 +1899,21 @@
                         ? const CupertinoActivityIndicator(
                             color: CupertinoColors.white,
                           )
-                        : const Text('Lưu cài đặt'),
+                        : Text(context.l10n.saveSettings),
                   ),
                   const SizedBox(height: 32),
 
                   // 4. Destructive Remove Device button at the bottom
                   CupertinoButton(
                     color: CupertinoColors.systemRed.withValues(alpha: 0.12),
-                    onPressed: (_isSaving || _isRemoving) ? null : _confirmRemoveDevice,
+                    onPressed: (_isSaving || _isRemoving)
+                        ? null
+                        : _confirmRemoveDevice,
                     child: _isRemoving
                         ? const CupertinoActivityIndicator(
                             color: CupertinoColors.systemRed,
                           )
-                        : const Row(
+                        : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
@@ -1887,7 +1923,7 @@
                               ),
                               SizedBox(width: 8),
                               Text(
-                                'Xóa thiết bị',
+                                context.l10n.deleteDevice,
                                 style: TextStyle(
                                   color: CupertinoColors.systemRed,
                                   fontWeight: FontWeight.w600,
@@ -1915,7 +1951,7 @@
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Tên thiết bị',
+                  context.l10n.deviceName,
                   style: TextStyle(
                     color: AppColors.secondaryText,
                     fontSize: 12,
@@ -1939,13 +1975,17 @@
             color: CupertinoColors.activeBlue.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10),
             onPressed: _showRenameDialog,
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(CupertinoIcons.pencil, size: 16, color: CupertinoColors.activeBlue),
+                Icon(
+                  CupertinoIcons.pencil,
+                  size: 16,
+                  color: CupertinoColors.activeBlue,
+                ),
                 SizedBox(width: 4),
                 Text(
-                  'Đổi tên',
+                  context.l10n.renameAction,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -1962,8 +2002,12 @@
     Widget _buildInfoCard() {
       final isOnline = _currentDevice.isOnline;
       final wifiIcon = isOnline ? CupertinoIcons.wifi : CupertinoIcons.wifi_slash;
-      final wifiColor = isOnline ? const Color(0xFF248A4B) : CupertinoColors.systemGrey;
-      final wifiText = isOnline ? 'Tốt (-65 dBm)' : 'Không có tín hiệu';
+      final wifiColor = isOnline
+          ? const Color(0xFF248A4B)
+          : CupertinoColors.systemGrey;
+      final wifiText = isOnline
+          ? context.l10n.wifiSignalGood
+          : context.l10n.wifiSignalMissing;
 
       return Container(
         padding: const EdgeInsets.all(16),
@@ -1975,7 +2019,7 @@
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Thông tin thiết bị',
+              context.l10n.deviceInformation,
               style: TextStyle(
                 color: AppColors.secondaryText,
                 fontSize: 13,
@@ -2007,11 +2051,8 @@
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Tín hiệu Wi-Fi',
-                    style: TextStyle(
-                      color: AppColors.primaryText,
-                      fontSize: 14,
-                    ),
+                    context.l10n.wifiSignal,
+                    style: TextStyle(color: AppColors.primaryText, fontSize: 14),
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -2043,10 +2084,7 @@
         children: [
           Text(
             label,
-            style: TextStyle(
-              color: AppColors.primaryText,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: AppColors.primaryText, fontSize: 14),
           ),
           Text(
             value,
@@ -2117,10 +2155,7 @@
         if (subtitle != null)
           Text(
             subtitle!,
-            style: TextStyle(
-              color: AppColors.secondaryText,
-              fontSize: 11,
-            ),
+            style: TextStyle(color: AppColors.secondaryText, fontSize: 11),
           ),
       ],
     );
@@ -2162,7 +2197,7 @@
               size: 32,
             ),
             const SizedBox(height: 12),
-            const Text('Không thể tải chi tiết thiết bị'),
+            Text(context.l10n.cannotLoadDeviceDetails),
             const SizedBox(height: 6),
             Text(
               message,
@@ -2174,7 +2209,7 @@
             const SizedBox(height: 12),
             CupertinoButton.filled(
               onPressed: onRetry,
-              child: const Text('Thử lại'),
+              child: Text(context.l10n.retry),
             ),
           ],
         ),

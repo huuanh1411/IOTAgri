@@ -1,7 +1,9 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/device.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/display_localizations.dart';
 import '../models/device_alert.dart';
 import '../services/api_service.dart';
 import '../services/notification_preferences_store.dart';
@@ -200,6 +202,15 @@ class AlertCenterProvider extends ChangeNotifier {
   ) async {
     final now = DateTime.now();
     final preferences = await _preferencesStore.load();
+    String? language;
+    try {
+      language = (await SharedPreferences.getInstance()).getString(
+        'app_locale',
+      );
+    } catch (_) {
+      // Notification delivery must also work when local storage is unavailable.
+    }
+    final l10n = lookupAppLocalizations(Locale(language == 'en' ? 'en' : 'vi'));
     for (final item in next) {
       final old = previous[item.alert.id];
       final active = item.alert.resolvedAt == null;
@@ -210,8 +221,11 @@ class AlertCenterProvider extends ChangeNotifier {
         await _notificationService.show(
           NotificationMessage(
             id: item.alert.id,
-            title: deliverSystem ? item.alert.title : 'Vẫn đang xảy ra',
-            body: item.alert.message,
+            title: deliverSystem
+                ? item.alert.localizedTitle(l10n)
+                : l10n.stillActiveTitle,
+            body: item.alert.localizedMessage(l10n),
+            alert: item.alert,
             level: item.alert.severity,
             device: item.device,
             sensor: item.alert.sensorKey,
@@ -227,8 +241,12 @@ class AlertCenterProvider extends ChangeNotifier {
         await _notificationService.show(
           NotificationMessage(
             id: '${item.alert.id}:resolved',
-            title: 'Đã khôi phục',
-            body: '${item.device.name}: ${item.alert.title} đã được xử lý.',
+            title: l10n.alertRecoveredTitle,
+            body: l10n.alertResolvedMessage(
+              item.device.name,
+              item.alert.localizedTitle(l10n),
+            ),
+            alert: item.alert,
             level: AlertLevel.info,
             device: item.device,
             sensor: item.alert.sensorKey,

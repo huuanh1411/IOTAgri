@@ -248,5 +248,471 @@
   "regenerateCodeTitle": "Generate a new code?",
   "regenerateCodeWarning": "The current code will stop working immediately.",
   "generateNewCode": "Generate new code",
-  "networkError": "Check your network connection and try again."
+  "networkError": "Check your network connection and try again.",
+  "deleteDeviceTitle": "Delete device?",
+  "deleteNamedDeviceConfirmation": "Are you sure you want to delete \"{value0}\"? This cannot be undone.",
+  "@deleteNamedDeviceConfirmation": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "actionFailed": "Unable to complete the action",
+  "searchDevicesHint": "Search by name or location",
+  "noMatchingDevices": "No devices found.",
+  "unassignedLocation": "Location not assigned",
+  "deviceNeverConnected": "No connection yet · {value0}",
+  "@deviceNeverConnected": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceLastSeen": "Last seen {value0} · {value1}",
+  "@deviceLastSeen": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      },
+      "value1": {
+        "type": "String"
+      }
+    }
+  },
+  "devicesEmptyTitle": "No devices yet",
+  "devicesEmptyExplanation": "Create a device to start setting up its connection.",
+  "devicesLoadFailed": "Unable to load devices.",
+  "switchDeviceToAutoConfirmation": "{value0} is in Manual mode and is not spraying. Switch to Automatic?",
+  "@switchDeviceToAutoConfirmation": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "lightCommandFailed": "Unable to send light command: {value0}",
+  "@lightCommandFailed": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "switchMode": "Switch",
+  "deviceDeleted": "Device deleted successfully",
+  "noReadingsYet": "No data yet",
+  "automaticMode": "Automatic",
+  "pumpRunningCountdown": "Pump is running - {value0} remaining",
+  "@pumpRunningCountdown": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "noScheduledTime": "No schedule",
+  "scheduledTimePassed": "Passed",
+  "minutesRemaining": "{value0} min",
+  "@minutesRemaining": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "lightControl": "Light control",
+  "lightIsOn": "Light is on",
+  "lightIsOff": "Light is off",
+  "sprayScheduleSummary": "Spray for {value0} seconds every {value1} minutes, {value2}-{value3}",
+  "@sprayScheduleSummary": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      },
+      "value1": {
+        "type": "String"
+      },
+      "value2": {
+        "type": "String"
+      },
+      "value3": {
+        "type": "String"
+      }
+    }
+  },
+  "savedSchedulesContinue": "Saved schedules continue automatically while connected.",
+  "temperatureRecordCount": "{value0} readings · Temperature",
+  "@temperatureRecordCount": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "lowWaterTitle": "Low water level",
+  "highTemperatureTitle": "High temperature",
+  "invalidDeviceThresholds": "Check the temperature and water level thresholds.",
+  "renameAction": "Rename",
+  "wifiSignalGood": "Good (-65 dBm)",
+  "wifiSignalMissing": "No signal",
+  "espFoundNoNetworks": "ESP detected, but no 2.4 GHz Wi-Fi networks were found.",
+  "espConnectedChooseNetwork": "Connected to ESP. Choose a Wi-Fi network below.",
+  "espConnectionFailed": "Unable to connect to ESP. Connect this device to IOTAgri-Setup Wi-Fi and try again.",
+  "wifiSsidRequired": "Enter or choose a 2.4 GHz Wi-Fi network name.",
+  "wifiPasswordRequired": "Enter the Wi-Fi password.",
+  "espSendingConfiguration": "Sending configuration directly to ESP...",
+  "setupCodeValidity": "Valid for 15 minutes",
+  "setupCodeExpired": "Code expired",
+  "setupCodeSecondsRemaining": "{value0} seconds remaining",
+  "@setupCodeSecondsRemaining": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "setupCodeExpiresAt": "Expires at {value0}",
+  "@setupCodeExpiresAt": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "setupCodeMissing": "The server has not returned a setup code.",
+  "setupCodeLabel": "Setup code",
+  "copyCodeAgain": "Copy code again",
+  "copySetupCode": "Copy code",
+  "espSetupStepOne": "Keep the laptop running the app and server on your main Wi-Fi. Open this screen on your phone first.",
+  "espSetupStepTwo": "Connect your phone to IOTAgri-Setup Wi-Fi, return to this screen, and tap Check ESP connection.",
+  "espSetupStepThree": "Choose a 2.4 GHz Wi-Fi network, enter its password, and tap Connect ESP. The app sends the setup code and server address automatically.",
+  "espSetupStepFour": "Once setup succeeds, reconnect your phone to your main Wi-Fi and wait for the device to come online.",
+  "espBackendAddress": "Server address for ESP: {value0}",
+  "@espBackendAddress": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "regenerateSetupCode": "Generate a new code (the old code will stop working)",
+  "directEspSetup": "Connect directly to ESP",
+  "directEspSetupHint": "No need to open Swagger or the 192.168.4.1 configuration page.",
+  "checkEspConnection": "Check ESP connection",
+  "espDetected": "ESP detected: {value0}",
+  "@espDetected": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "espAvailableNetworks": "2.4 GHz Wi-Fi networks detected by ESP:",
+  "wifiSsidHint": "2.4 GHz Wi-Fi name (SSID)",
+  "wifiPasswordHint": "Wi-Fi password",
+  "connectedStatus": "Connected",
+  "connectEsp": "Connect ESP",
+  "seedlingsPreset": "Seedlings",
+  "leafyPreset": "Leafy greens",
+  "herbsPreset": "Herbs",
+  "sprayDurationSummary": "Spray duration: {value0} seconds",
+  "@sprayDurationSummary": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "sprayIntervalSummary": "Repeat every {value0} minutes",
+  "@sprayIntervalSummary": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduleDaysSummary": "Days: {value0}",
+  "@scheduleDaysSummary": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "noDaysSelected": "no days selected",
+  "sprayDurationRequired": "Enter a spray duration",
+  "sprayDurationRange": "Spray duration must be 1-120 seconds",
+  "scheduleIntervalRequired": "Enter an interval",
+  "scheduleIntervalRange": "Interval must be 1-60 minutes",
+  "sprayDurationLessThanInterval": "Spray duration must be shorter than the interval",
+  "scheduleEndAfterStart": "End time must be after start time (unless overnight)",
+  "schedulePreview": "Spray for {value0} seconds every {value1} minutes, {value2}-{value3}, {value4}",
+  "@schedulePreview": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      },
+      "value1": {
+        "type": "String"
+      },
+      "value2": {
+        "type": "String"
+      },
+      "value3": {
+        "type": "String"
+      },
+      "value4": {
+        "type": "String"
+      }
+    }
+  },
+  "selectScheduleDay": "Select at least one day",
+  "savedTitle": "Saved",
+  "savedToDevice": "Saved to device",
+  "saveFailed": "Unable to save: {value0}",
+  "@saveFailed": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "unsavedTitle": "Unsaved changes",
+  "unsavedChangesConfirmation": "You have unsaved changes. Do you want to leave?",
+  "keepEditing": "Keep editing",
+  "discardChanges": "Discard changes",
+  "deviceScheduleTimezoneHint": "Device time: Asia/Ho_Chi_Minh. Schedules take priority over manual controls.",
+  "schedulePreset": "Preset",
+  "sprayDurationSeconds": "Spray duration (seconds)",
+  "scheduleIntervalMinutes": "Interval (minutes)",
+  "scheduleTimeWindow": "Active time window",
+  "scheduleStart": "Start",
+  "scheduleEnd": "End",
+  "scheduleRepeatDays": "Repeat on",
+  "pumpLabel": "Pump",
+  "lightLabel": "Light",
+  "turnLightOn": "Turn on light",
+  "localScheduleSummary": "{value0} for {value1} seconds every {value2} minutes · {value3}\n{value4} · display only",
+  "@localScheduleSummary": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      },
+      "value1": {
+        "type": "String"
+      },
+      "value2": {
+        "type": "String"
+      },
+      "value3": {
+        "type": "String"
+      },
+      "value4": {
+        "type": "String"
+      }
+    }
+  },
+  "actionDurationSeconds": "{value0} duration (seconds)",
+  "@actionDurationSeconds": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "timezoneLabel": "Time zone",
+  "vietnamTimezone": "Vietnam · GMT+07:00",
+  "localScheduleNotice": "This schedule is displayed in the app only; it has not been sent to the device or server.",
+  "waterSensorTitle": "Water level",
+  "waterSensorLabel": "WATER LEVEL",
+  "waterSensorDescription": "Monitor the water level to keep your plants properly watered.",
+  "waterSensorHistory": "Water level history",
+  "waterSensorLow": "Low water level",
+  "waterSensorStable": "Water level is stable",
+  "notConfigured": "Not configured",
+  "nutrientSensorDescription": "Monitor nutrient levels to support even plant growth.",
+  "nutrientSensorHistory": "Nutrient level history",
+  "dataReceived": "Data received",
+  "temperatureSensorTitle": "Temperature",
+  "temperatureSensorLabel": "TEMPERATURE",
+  "temperatureSensorDescription": "Monitor the ambient temperature around your plants.",
+  "temperatureSensorHistory": "Temperature history",
+  "temperatureSensorAttention": "Temperature needs attention",
+  "temperatureSensorHealthy": "Temperature is suitable",
+  "waterTemperatureSensorTitle": "Water temperature",
+  "waterTemperatureSensorDescription": "Monitor the nutrient solution with the water temperature sensor.",
+  "waterTemperatureSensorHistory": "Water temperature history",
+  "humiditySensorTitle": "Air humidity",
+  "humiditySensorDescription": "Monitor air humidity with the AHT20 sensor.",
+  "humiditySensorHistory": "Air humidity history",
+  "lightSensorTitle": "Light",
+  "lightSensorDescription": "Monitor light intensity to support plant photosynthesis.",
+  "lightSensorHistory": "Light history",
+  "resolveNow": "Resolve now",
+  "plantLettuce": "Lettuce",
+  "plantBasil": "Basil",
+  "plantSpinach": "Spinach",
+  "plantMint": "Mint",
+  "plantKale": "Kale",
+  "plantCoriander": "Coriander",
+  "difficultyEasy": "Easy",
+  "difficultyMedium": "Medium",
+  "lowNutrientTitle": "Low nutrients",
+  "lowWaterMessage": "Water level is below 30% – please refill.",
+  "lowNutrientMessage": "Nutrient level is below 45% – please add nutrients.",
+  "refillWater": "Refill water",
+  "addNutrients": "Add nutrients",
+  "lowTemperatureTitle": "Low temperature",
+  "waterEmptyTitle": "Water tank empty",
+  "humidityAlertTitle": "Humidity out of range",
+  "pumpFaultTitle": "Pump fault",
+  "deviceOfflineTitle": "Device offline",
+  "deviceOnlineTitle": "Device back online",
+  "nutrientAlertTitle": "Nutrient level out of range",
+  "phAlertTitle": "pH out of range",
+  "sensorAlertTitle": "Sensor alert",
+  "highTemperatureMessage": "Temperature {value}°C exceeds the {threshold}°C threshold.",
+  "@highTemperatureMessage": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "lowWaterThresholdMessage": "Water level {value}% is below the {threshold}% threshold.",
+  "@lowWaterThresholdMessage": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "sensorThresholdMessage": "Value {value} · Threshold {threshold}.",
+  "@sensorThresholdMessage": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "sprayAction": "Spray",
+  "sundayShort": "Sun",
+  "mondayShort": "Mon",
+  "tuesdayShort": "Tue",
+  "wednesdayShort": "Wed",
+  "thursdayShort": "Thu",
+  "fridayShort": "Fri",
+  "saturdayShort": "Sat",
+  "stillActiveTitle": "Still active",
+  "alertRecoveredTitle": "Recovered",
+  "alertResolvedMessage": "{device}: {alert} has been resolved.",
+  "@alertResolvedMessage": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      },
+      "alert": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceAlertsTitle": "Alerts · {value0}",
+  "@deviceAlertsTitle": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "markAllAlertsRead": "Mark all as read",
+  "todayLabel": "Today",
+  "earlierLabel": "Earlier",
+  "criticalSeverity": "Critical",
+  "unreadFilter": "Unread",
+  "activeAlertStatus": "Active",
+  "alertDetailsTitle": "Alert details",
+  "timeLabel": "Time",
+  "statusLabel": "Status",
+  "openAlertDevice": "Go to device",
+  "alertsQuietTitle": "All quiet",
+  "noMatchingAlerts": "No alerts match this filter.",
+  "invalidAlertThreshold": "Thresholds must be valid numbers; water level must be 0–100%.",
+  "alertThresholdsSaved": "Alert thresholds saved",
+  "deviceSettingsUpdated": "Settings for {value0} have been updated.",
+  "@deviceSettingsUpdated": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "alertThresholdsTitle": "Alert thresholds",
+  "supportedSensorsOnly": "Only sensors supported by this device are shown.",
+  "resetRecommendedThresholds": "Reset to recommended values",
+  "notificationPreferencesTitle": "Notification preferences",
+  "notificationsToggleHint": "Enable or disable all notifications",
+  "severityHeading": "SEVERITY",
+  "criticalNotificationsHint": "Pump faults, empty water tank, connection loss",
+  "warningNotificationsHint": "Sensor readings outside their thresholds",
+  "infoSeverity": "Information",
+  "infoNotificationsHint": "Schedules saved, devices back online, firmware updates",
+  "quietHoursTitle": "Quiet hours",
+  "criticalIgnoresQuietHours": "Critical alerts bypass quiet hours.",
+  "deviceHistoryTitle": "History · {value0}",
+  "@deviceHistoryTitle": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "hourlyAverages": "Show hourly averages",
+  "historyFiltersTitle": "History filters",
+  "showPumpEvents": "Show pump events",
+  "resetAction": "Reset",
+  "applyAction": "Apply",
+  "fromDateLabel": "From date",
+  "toDateLabel": "To date",
+  "customHistoryRangeInvalid": "The custom range must be between 1 and 31 days.",
+  "exportDataTitle": "Export data",
+  "exportDataFailed": "Unable to create the file. Try a shorter range.",
+  "createFileAction": "Create file",
+  "pumpEventsCount": "Pump events · {value0}",
+  "@pumpEventsCount": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "minimumLabel": "Minimum",
+  "maximumLabel": "Maximum",
+  "historyLoadFailed": "Unable to load history",
+  "newDeviceInsufficientData": "This new device does not have enough data yet",
+  "historyRangeEmpty": "No data in this range",
+  "changeHistoryRange": "Change time range",
+  "viewSensorDetails": "View {value0} details",
+  "@viewSensorDetails": {
+    "placeholders": {
+      "value0": {
+        "type": "String"
+      }
+    }
+  },
+  "genericErrorTitle": "An error occurred",
+  "requestValidationFailed": "Check the entered information and try again.",
+  "historySevenDays": "7 days",
+  "historyThirtyDays": "30 days",
+  "averageLabel": "Average"
 }

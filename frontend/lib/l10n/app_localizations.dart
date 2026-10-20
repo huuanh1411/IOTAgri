@@ -1417,6 +1417,1313 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check your network connection and try again.'**
   String get networkError;
+
+  /// No description provided for @deleteDeviceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete device?'**
+  String get deleteDeviceTitle;
+
+  /// No description provided for @deleteNamedDeviceConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{value0}\"? This cannot be undone.'**
+  String deleteNamedDeviceConfirmation(String value0);
+
+  /// No description provided for @actionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to complete the action'**
+  String get actionFailed;
+
+  /// No description provided for @searchDevicesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or location'**
+  String get searchDevicesHint;
+
+  /// No description provided for @noMatchingDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'No devices found.'**
+  String get noMatchingDevices;
+
+  /// No description provided for @unassignedLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location not assigned'**
+  String get unassignedLocation;
+
+  /// No description provided for @deviceNeverConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection yet · {value0}'**
+  String deviceNeverConnected(String value0);
+
+  /// No description provided for @deviceLastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Last seen {value0} · {value1}'**
+  String deviceLastSeen(String value0, String value1);
+
+  /// No description provided for @devicesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No devices yet'**
+  String get devicesEmptyTitle;
+
+  /// No description provided for @devicesEmptyExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a device to start setting up its connection.'**
+  String get devicesEmptyExplanation;
+
+  /// No description provided for @devicesLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load devices.'**
+  String get devicesLoadFailed;
+
+  /// No description provided for @switchDeviceToAutoConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'{value0} is in Manual mode and is not spraying. Switch to Automatic?'**
+  String switchDeviceToAutoConfirmation(String value0);
+
+  /// No description provided for @lightCommandFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to send light command: {value0}'**
+  String lightCommandFailed(String value0);
+
+  /// No description provided for @switchMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch'**
+  String get switchMode;
+
+  /// No description provided for @deviceDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Device deleted successfully'**
+  String get deviceDeleted;
+
+  /// No description provided for @noReadingsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get noReadingsYet;
+
+  /// No description provided for @automaticMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get automaticMode;
+
+  /// No description provided for @pumpRunningCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Pump is running - {value0} remaining'**
+  String pumpRunningCountdown(String value0);
+
+  /// No description provided for @noScheduledTime.
+  ///
+  /// In en, this message translates to:
+  /// **'No schedule'**
+  String get noScheduledTime;
+
+  /// No description provided for @scheduledTimePassed.
+  ///
+  /// In en, this message translates to:
+  /// **'Passed'**
+  String get scheduledTimePassed;
+
+  /// No description provided for @minutesRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{value0} min'**
+  String minutesRemaining(String value0);
+
+  /// No description provided for @lightControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Light control'**
+  String get lightControl;
+
+  /// No description provided for @lightIsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Light is on'**
+  String get lightIsOn;
+
+  /// No description provided for @lightIsOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Light is off'**
+  String get lightIsOff;
+
+  /// No description provided for @sprayScheduleSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Spray for {value0} seconds every {value1} minutes, {value2}-{value3}'**
+  String sprayScheduleSummary(
+    String value0,
+    String value1,
+    String value2,
+    String value3,
+  );
+
+  /// No description provided for @savedSchedulesContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved schedules continue automatically while connected.'**
+  String get savedSchedulesContinue;
+
+  /// No description provided for @temperatureRecordCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{value0} readings · Temperature'**
+  String temperatureRecordCount(String value0);
+
+  /// No description provided for @lowWaterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Low water level'**
+  String get lowWaterTitle;
+
+  /// No description provided for @highTemperatureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'High temperature'**
+  String get highTemperatureTitle;
+
+  /// No description provided for @invalidDeviceThresholds.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the temperature and water level thresholds.'**
+  String get invalidDeviceThresholds;
+
+  /// No description provided for @renameAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get renameAction;
+
+  /// No description provided for @wifiSignalGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good (-65 dBm)'**
+  String get wifiSignalGood;
+
+  /// No description provided for @wifiSignalMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No signal'**
+  String get wifiSignalMissing;
+
+  /// No description provided for @espFoundNoNetworks.
+  ///
+  /// In en, this message translates to:
+  /// **'ESP detected, but no 2.4 GHz Wi-Fi networks were found.'**
+  String get espFoundNoNetworks;
+
+  /// No description provided for @espConnectedChooseNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to ESP. Choose a Wi-Fi network below.'**
+  String get espConnectedChooseNetwork;
+
+  /// No description provided for @espConnectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to connect to ESP. Connect this device to IOTAgri-Setup Wi-Fi and try again.'**
+  String get espConnectionFailed;
+
+  /// No description provided for @wifiSsidRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter or choose a 2.4 GHz Wi-Fi network name.'**
+  String get wifiSsidRequired;
+
+  /// No description provided for @wifiPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the Wi-Fi password.'**
+  String get wifiPasswordRequired;
+
+  /// No description provided for @espSendingConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending configuration directly to ESP...'**
+  String get espSendingConfiguration;
+
+  /// No description provided for @setupCodeValidity.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid for 15 minutes'**
+  String get setupCodeValidity;
+
+  /// No description provided for @setupCodeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Code expired'**
+  String get setupCodeExpired;
+
+  /// No description provided for @setupCodeSecondsRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{value0} seconds remaining'**
+  String setupCodeSecondsRemaining(String value0);
+
+  /// No description provided for @setupCodeExpiresAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires at {value0}'**
+  String setupCodeExpiresAt(String value0);
+
+  /// No description provided for @setupCodeMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The server has not returned a setup code.'**
+  String get setupCodeMissing;
+
+  /// No description provided for @setupCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup code'**
+  String get setupCodeLabel;
+
+  /// No description provided for @copyCodeAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code again'**
+  String get copyCodeAgain;
+
+  /// No description provided for @copySetupCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get copySetupCode;
+
+  /// No description provided for @espSetupStepOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the laptop running the app and server on your main Wi-Fi. Open this screen on your phone first.'**
+  String get espSetupStepOne;
+
+  /// No description provided for @espSetupStepTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect your phone to IOTAgri-Setup Wi-Fi, return to this screen, and tap Check ESP connection.'**
+  String get espSetupStepTwo;
+
+  /// No description provided for @espSetupStepThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a 2.4 GHz Wi-Fi network, enter its password, and tap Connect ESP. The app sends the setup code and server address automatically.'**
+  String get espSetupStepThree;
+
+  /// No description provided for @espSetupStepFour.
+  ///
+  /// In en, this message translates to:
+  /// **'Once setup succeeds, reconnect your phone to your main Wi-Fi and wait for the device to come online.'**
+  String get espSetupStepFour;
+
+  /// No description provided for @espBackendAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Server address for ESP: {value0}'**
+  String espBackendAddress(String value0);
+
+  /// No description provided for @regenerateSetupCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a new code (the old code will stop working)'**
+  String get regenerateSetupCode;
+
+  /// No description provided for @directEspSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect directly to ESP'**
+  String get directEspSetup;
+
+  /// No description provided for @directEspSetupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No need to open Swagger or the 192.168.4.1 configuration page.'**
+  String get directEspSetupHint;
+
+  /// No description provided for @checkEspConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Check ESP connection'**
+  String get checkEspConnection;
+
+  /// No description provided for @espDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'ESP detected: {value0}'**
+  String espDetected(String value0);
+
+  /// No description provided for @espAvailableNetworks.
+  ///
+  /// In en, this message translates to:
+  /// **'2.4 GHz Wi-Fi networks detected by ESP:'**
+  String get espAvailableNetworks;
+
+  /// No description provided for @wifiSsidHint.
+  ///
+  /// In en, this message translates to:
+  /// **'2.4 GHz Wi-Fi name (SSID)'**
+  String get wifiSsidHint;
+
+  /// No description provided for @wifiPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Wi-Fi password'**
+  String get wifiPasswordHint;
+
+  /// No description provided for @connectedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get connectedStatus;
+
+  /// No description provided for @connectEsp.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect ESP'**
+  String get connectEsp;
+
+  /// No description provided for @seedlingsPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Seedlings'**
+  String get seedlingsPreset;
+
+  /// No description provided for @leafyPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Leafy greens'**
+  String get leafyPreset;
+
+  /// No description provided for @herbsPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Herbs'**
+  String get herbsPreset;
+
+  /// No description provided for @sprayDurationSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Spray duration: {value0} seconds'**
+  String sprayDurationSummary(String value0);
+
+  /// No description provided for @sprayIntervalSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat every {value0} minutes'**
+  String sprayIntervalSummary(String value0);
+
+  /// No description provided for @scheduleDaysSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Days: {value0}'**
+  String scheduleDaysSummary(String value0);
+
+  /// No description provided for @noDaysSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'no days selected'**
+  String get noDaysSelected;
+
+  /// No description provided for @sprayDurationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a spray duration'**
+  String get sprayDurationRequired;
+
+  /// No description provided for @sprayDurationRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Spray duration must be 1-120 seconds'**
+  String get sprayDurationRange;
+
+  /// No description provided for @scheduleIntervalRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an interval'**
+  String get scheduleIntervalRequired;
+
+  /// No description provided for @scheduleIntervalRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval must be 1-60 minutes'**
+  String get scheduleIntervalRange;
+
+  /// No description provided for @sprayDurationLessThanInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Spray duration must be shorter than the interval'**
+  String get sprayDurationLessThanInterval;
+
+  /// No description provided for @scheduleEndAfterStart.
+  ///
+  /// In en, this message translates to:
+  /// **'End time must be after start time (unless overnight)'**
+  String get scheduleEndAfterStart;
+
+  /// No description provided for @schedulePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Spray for {value0} seconds every {value1} minutes, {value2}-{value3}, {value4}'**
+  String schedulePreview(
+    String value0,
+    String value1,
+    String value2,
+    String value3,
+    String value4,
+  );
+
+  /// No description provided for @selectScheduleDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one day'**
+  String get selectScheduleDay;
+
+  /// No description provided for @savedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get savedTitle;
+
+  /// No description provided for @savedToDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to device'**
+  String get savedToDevice;
+
+  /// No description provided for @saveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to save: {value0}'**
+  String saveFailed(String value0);
+
+  /// No description provided for @unsavedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get unsavedTitle;
+
+  /// No description provided for @unsavedChangesConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes. Do you want to leave?'**
+  String get unsavedChangesConfirmation;
+
+  /// No description provided for @keepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes'**
+  String get discardChanges;
+
+  /// No description provided for @deviceScheduleTimezoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Device time: Asia/Ho_Chi_Minh. Schedules take priority over manual controls.'**
+  String get deviceScheduleTimezoneHint;
+
+  /// No description provided for @schedulePreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset'**
+  String get schedulePreset;
+
+  /// No description provided for @sprayDurationSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Spray duration (seconds)'**
+  String get sprayDurationSeconds;
+
+  /// No description provided for @scheduleIntervalMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval (minutes)'**
+  String get scheduleIntervalMinutes;
+
+  /// No description provided for @scheduleTimeWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Active time window'**
+  String get scheduleTimeWindow;
+
+  /// No description provided for @scheduleStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get scheduleStart;
+
+  /// No description provided for @scheduleEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get scheduleEnd;
+
+  /// No description provided for @scheduleRepeatDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat on'**
+  String get scheduleRepeatDays;
+
+  /// No description provided for @pumpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pump'**
+  String get pumpLabel;
+
+  /// No description provided for @lightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get lightLabel;
+
+  /// No description provided for @turnLightOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on light'**
+  String get turnLightOn;
+
+  /// No description provided for @localScheduleSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{value0} for {value1} seconds every {value2} minutes · {value3}\n{value4} · display only'**
+  String localScheduleSummary(
+    String value0,
+    String value1,
+    String value2,
+    String value3,
+    String value4,
+  );
+
+  /// No description provided for @actionDurationSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{value0} duration (seconds)'**
+  String actionDurationSeconds(String value0);
+
+  /// No description provided for @timezoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time zone'**
+  String get timezoneLabel;
+
+  /// No description provided for @vietnamTimezone.
+  ///
+  /// In en, this message translates to:
+  /// **'Vietnam · GMT+07:00'**
+  String get vietnamTimezone;
+
+  /// No description provided for @localScheduleNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This schedule is displayed in the app only; it has not been sent to the device or server.'**
+  String get localScheduleNotice;
+
+  /// No description provided for @waterSensorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Water level'**
+  String get waterSensorTitle;
+
+  /// No description provided for @waterSensorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'WATER LEVEL'**
+  String get waterSensorLabel;
+
+  /// No description provided for @waterSensorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor the water level to keep your plants properly watered.'**
+  String get waterSensorDescription;
+
+  /// No description provided for @waterSensorHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Water level history'**
+  String get waterSensorHistory;
+
+  /// No description provided for @waterSensorLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low water level'**
+  String get waterSensorLow;
+
+  /// No description provided for @waterSensorStable.
+  ///
+  /// In en, this message translates to:
+  /// **'Water level is stable'**
+  String get waterSensorStable;
+
+  /// No description provided for @notConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured'**
+  String get notConfigured;
+
+  /// No description provided for @nutrientSensorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor nutrient levels to support even plant growth.'**
+  String get nutrientSensorDescription;
+
+  /// No description provided for @nutrientSensorHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrient level history'**
+  String get nutrientSensorHistory;
+
+  /// No description provided for @dataReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Data received'**
+  String get dataReceived;
+
+  /// No description provided for @temperatureSensorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature'**
+  String get temperatureSensorTitle;
+
+  /// No description provided for @temperatureSensorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TEMPERATURE'**
+  String get temperatureSensorLabel;
+
+  /// No description provided for @temperatureSensorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor the ambient temperature around your plants.'**
+  String get temperatureSensorDescription;
+
+  /// No description provided for @temperatureSensorHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature history'**
+  String get temperatureSensorHistory;
+
+  /// No description provided for @temperatureSensorAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature needs attention'**
+  String get temperatureSensorAttention;
+
+  /// No description provided for @temperatureSensorHealthy.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature is suitable'**
+  String get temperatureSensorHealthy;
+
+  /// No description provided for @waterTemperatureSensorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Water temperature'**
+  String get waterTemperatureSensorTitle;
+
+  /// No description provided for @waterTemperatureSensorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor the nutrient solution with the water temperature sensor.'**
+  String get waterTemperatureSensorDescription;
+
+  /// No description provided for @waterTemperatureSensorHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Water temperature history'**
+  String get waterTemperatureSensorHistory;
+
+  /// No description provided for @humiditySensorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Air humidity'**
+  String get humiditySensorTitle;
+
+  /// No description provided for @humiditySensorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor air humidity with the AHT20 sensor.'**
+  String get humiditySensorDescription;
+
+  /// No description provided for @humiditySensorHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Air humidity history'**
+  String get humiditySensorHistory;
+
+  /// No description provided for @lightSensorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get lightSensorTitle;
+
+  /// No description provided for @lightSensorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor light intensity to support plant photosynthesis.'**
+  String get lightSensorDescription;
+
+  /// No description provided for @lightSensorHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Light history'**
+  String get lightSensorHistory;
+
+  /// No description provided for @resolveNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve now'**
+  String get resolveNow;
+
+  /// No description provided for @plantLettuce.
+  ///
+  /// In en, this message translates to:
+  /// **'Lettuce'**
+  String get plantLettuce;
+
+  /// No description provided for @plantBasil.
+  ///
+  /// In en, this message translates to:
+  /// **'Basil'**
+  String get plantBasil;
+
+  /// No description provided for @plantSpinach.
+  ///
+  /// In en, this message translates to:
+  /// **'Spinach'**
+  String get plantSpinach;
+
+  /// No description provided for @plantMint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mint'**
+  String get plantMint;
+
+  /// No description provided for @plantKale.
+  ///
+  /// In en, this message translates to:
+  /// **'Kale'**
+  String get plantKale;
+
+  /// No description provided for @plantCoriander.
+  ///
+  /// In en, this message translates to:
+  /// **'Coriander'**
+  String get plantCoriander;
+
+  /// No description provided for @difficultyEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get difficultyEasy;
+
+  /// No description provided for @difficultyMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get difficultyMedium;
+
+  /// No description provided for @lowNutrientTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Low nutrients'**
+  String get lowNutrientTitle;
+
+  /// No description provided for @lowWaterMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Water level is below 30% – please refill.'**
+  String get lowWaterMessage;
+
+  /// No description provided for @lowNutrientMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrient level is below 45% – please add nutrients.'**
+  String get lowNutrientMessage;
+
+  /// No description provided for @refillWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Refill water'**
+  String get refillWater;
+
+  /// No description provided for @addNutrients.
+  ///
+  /// In en, this message translates to:
+  /// **'Add nutrients'**
+  String get addNutrients;
+
+  /// No description provided for @lowTemperatureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Low temperature'**
+  String get lowTemperatureTitle;
+
+  /// No description provided for @waterEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Water tank empty'**
+  String get waterEmptyTitle;
+
+  /// No description provided for @humidityAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Humidity out of range'**
+  String get humidityAlertTitle;
+
+  /// No description provided for @pumpFaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pump fault'**
+  String get pumpFaultTitle;
+
+  /// No description provided for @deviceOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Device offline'**
+  String get deviceOfflineTitle;
+
+  /// No description provided for @deviceOnlineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Device back online'**
+  String get deviceOnlineTitle;
+
+  /// No description provided for @nutrientAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrient level out of range'**
+  String get nutrientAlertTitle;
+
+  /// No description provided for @phAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'pH out of range'**
+  String get phAlertTitle;
+
+  /// No description provided for @sensorAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor alert'**
+  String get sensorAlertTitle;
+
+  /// No description provided for @highTemperatureMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature {value}°C exceeds the {threshold}°C threshold.'**
+  String highTemperatureMessage(String value, String threshold);
+
+  /// No description provided for @lowWaterThresholdMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Water level {value}% is below the {threshold}% threshold.'**
+  String lowWaterThresholdMessage(String value, String threshold);
+
+  /// No description provided for @sensorThresholdMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Value {value} · Threshold {threshold}.'**
+  String sensorThresholdMessage(String value, String threshold);
+
+  /// No description provided for @sprayAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Spray'**
+  String get sprayAction;
+
+  /// No description provided for @sundayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get sundayShort;
+
+  /// No description provided for @mondayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get mondayShort;
+
+  /// No description provided for @tuesdayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get tuesdayShort;
+
+  /// No description provided for @wednesdayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get wednesdayShort;
+
+  /// No description provided for @thursdayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get thursdayShort;
+
+  /// No description provided for @fridayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get fridayShort;
+
+  /// No description provided for @saturdayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get saturdayShort;
+
+  /// No description provided for @stillActiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Still active'**
+  String get stillActiveTitle;
+
+  /// No description provided for @alertRecoveredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovered'**
+  String get alertRecoveredTitle;
+
+  /// No description provided for @alertResolvedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{device}: {alert} has been resolved.'**
+  String alertResolvedMessage(String device, String alert);
+
+  /// No description provided for @deviceAlertsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts · {value0}'**
+  String deviceAlertsTitle(String value0);
+
+  /// No description provided for @markAllAlertsRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get markAllAlertsRead;
+
+  /// No description provided for @todayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todayLabel;
+
+  /// No description provided for @earlierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier'**
+  String get earlierLabel;
+
+  /// No description provided for @criticalSeverity.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical'**
+  String get criticalSeverity;
+
+  /// No description provided for @unreadFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get unreadFilter;
+
+  /// No description provided for @activeAlertStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activeAlertStatus;
+
+  /// No description provided for @alertDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert details'**
+  String get alertDetailsTitle;
+
+  /// No description provided for @timeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get timeLabel;
+
+  /// No description provided for @statusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get statusLabel;
+
+  /// No description provided for @openAlertDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to device'**
+  String get openAlertDevice;
+
+  /// No description provided for @alertsQuietTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All quiet'**
+  String get alertsQuietTitle;
+
+  /// No description provided for @noMatchingAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'No alerts match this filter.'**
+  String get noMatchingAlerts;
+
+  /// No description provided for @invalidAlertThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Thresholds must be valid numbers; water level must be 0–100%.'**
+  String get invalidAlertThreshold;
+
+  /// No description provided for @alertThresholdsSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert thresholds saved'**
+  String get alertThresholdsSaved;
+
+  /// No description provided for @deviceSettingsUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings for {value0} have been updated.'**
+  String deviceSettingsUpdated(String value0);
+
+  /// No description provided for @alertThresholdsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert thresholds'**
+  String get alertThresholdsTitle;
+
+  /// No description provided for @supportedSensorsOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only sensors supported by this device are shown.'**
+  String get supportedSensorsOnly;
+
+  /// No description provided for @resetRecommendedThresholds.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to recommended values'**
+  String get resetRecommendedThresholds;
+
+  /// No description provided for @notificationPreferencesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification preferences'**
+  String get notificationPreferencesTitle;
+
+  /// No description provided for @notificationsToggleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable or disable all notifications'**
+  String get notificationsToggleHint;
+
+  /// No description provided for @severityHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'SEVERITY'**
+  String get severityHeading;
+
+  /// No description provided for @criticalNotificationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pump faults, empty water tank, connection loss'**
+  String get criticalNotificationsHint;
+
+  /// No description provided for @warningNotificationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor readings outside their thresholds'**
+  String get warningNotificationsHint;
+
+  /// No description provided for @infoSeverity.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get infoSeverity;
+
+  /// No description provided for @infoNotificationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedules saved, devices back online, firmware updates'**
+  String get infoNotificationsHint;
+
+  /// No description provided for @quietHoursTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet hours'**
+  String get quietHoursTitle;
+
+  /// No description provided for @criticalIgnoresQuietHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical alerts bypass quiet hours.'**
+  String get criticalIgnoresQuietHours;
+
+  /// No description provided for @deviceHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'History · {value0}'**
+  String deviceHistoryTitle(String value0);
+
+  /// No description provided for @hourlyAverages.
+  ///
+  /// In en, this message translates to:
+  /// **'Show hourly averages'**
+  String get hourlyAverages;
+
+  /// No description provided for @historyFiltersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'History filters'**
+  String get historyFiltersTitle;
+
+  /// No description provided for @showPumpEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Show pump events'**
+  String get showPumpEvents;
+
+  /// No description provided for @resetAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get resetAction;
+
+  /// No description provided for @applyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get applyAction;
+
+  /// No description provided for @fromDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'From date'**
+  String get fromDateLabel;
+
+  /// No description provided for @toDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'To date'**
+  String get toDateLabel;
+
+  /// No description provided for @customHistoryRangeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The custom range must be between 1 and 31 days.'**
+  String get customHistoryRangeInvalid;
+
+  /// No description provided for @exportDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export data'**
+  String get exportDataTitle;
+
+  /// No description provided for @exportDataFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to create the file. Try a shorter range.'**
+  String get exportDataFailed;
+
+  /// No description provided for @createFileAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create file'**
+  String get createFileAction;
+
+  /// No description provided for @pumpEventsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pump events · {value0}'**
+  String pumpEventsCount(String value0);
+
+  /// No description provided for @minimumLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum'**
+  String get minimumLabel;
+
+  /// No description provided for @maximumLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum'**
+  String get maximumLabel;
+
+  /// No description provided for @historyLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load history'**
+  String get historyLoadFailed;
+
+  /// No description provided for @newDeviceInsufficientData.
+  ///
+  /// In en, this message translates to:
+  /// **'This new device does not have enough data yet'**
+  String get newDeviceInsufficientData;
+
+  /// No description provided for @historyRangeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No data in this range'**
+  String get historyRangeEmpty;
+
+  /// No description provided for @changeHistoryRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change time range'**
+  String get changeHistoryRange;
+
+  /// No description provided for @viewSensorDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View {value0} details'**
+  String viewSensorDetails(String value0);
+
+  /// No description provided for @genericErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred'**
+  String get genericErrorTitle;
+
+  /// No description provided for @requestValidationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the entered information and try again.'**
+  String get requestValidationFailed;
+
+  /// No description provided for @historySevenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days'**
+  String get historySevenDays;
+
+  /// No description provided for @historyThirtyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'30 days'**
+  String get historyThirtyDays;
+
+  /// No description provided for @averageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Average'**
+  String get averageLabel;
 }
 
 class _AppLocalizationsDelegate

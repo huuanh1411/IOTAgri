@@ -2,6 +2,8 @@ import 'dart:async';
 
 import '../models/device.dart';
 import '../models/device_alert.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/display_localizations.dart';
 
 class NotificationMessage {
   const NotificationMessage({
@@ -13,6 +15,7 @@ class NotificationMessage {
     this.sensor,
     this.isResolved = false,
     this.isStillActive = false,
+    this.alert,
   });
 
   final String id;
@@ -23,6 +26,25 @@ class NotificationMessage {
   final String? sensor;
   final bool isResolved;
   final bool isStillActive;
+  final DeviceAlert? alert;
+
+  String localizedTitle(AppLocalizations l10n) {
+    if (alert == null) return title;
+    if (isResolved) return l10n.alertRecoveredTitle;
+    if (isStillActive) return l10n.stillActiveTitle;
+    return alert!.localizedTitle(l10n);
+  }
+
+  String localizedBody(AppLocalizations l10n) {
+    if (alert == null) return body;
+    if (isResolved) {
+      return l10n.alertResolvedMessage(
+        device?.name ?? '',
+        alert!.localizedTitle(l10n),
+      );
+    }
+    return alert!.localizedMessage(l10n);
+  }
 }
 
 abstract interface class NotificationService {
