@@ -92,7 +92,7 @@ services:
       PumpScheduling__PollSeconds: ${PUMP_SCHEDULING_POLL_SECONDS:-30}
       PumpScheduling__DueWindowSeconds: ${PUMP_SCHEDULING_DUE_WINDOW_SECONDS:-90}
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail --silent http://localhost:8080/health >/dev/null"]
+      test: ["CMD-SHELL", "curl --fail --silent -H 'Host: api.aerogreen.vn' http://localhost:8080/health >/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 6
