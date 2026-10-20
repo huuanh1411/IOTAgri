@@ -819,6 +819,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get automaticMode => 'Automatic';
 
   @override
+  String get manualControlModeLabel => 'Manual';
+
+  @override
   String pumpRunningCountdown(String value0) {
     return 'Pump is running - $value0 remaining';
   }

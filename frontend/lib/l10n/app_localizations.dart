@@ -1520,6 +1520,12 @@ abstract class AppLocalizations {
   /// **'Automatic'**
   String get automaticMode;
 
+  /// No description provided for @manualControlModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get manualControlModeLabel;
+
   /// No description provided for @pumpRunningCountdown.
   ///
   /// In en, this message translates to:

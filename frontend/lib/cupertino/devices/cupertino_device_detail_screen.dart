@@ -1122,7 +1122,7 @@ import '../../utils/display_localizations.dart';
               ),
               PumpMode.manual: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Text(context.l10n.manualMode),
+                child: Text(context.l10n.manualControlModeLabel),
               ),
             },
             onValueChanged: (value) {

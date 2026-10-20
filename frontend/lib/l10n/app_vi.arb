@@ -304,6 +304,7 @@
   "deviceDeleted": "Đã xóa thiết bị thành công",
   "noReadingsYet": "Chưa có dữ liệu",
   "automaticMode": "Tự động",
+  "manualControlModeLabel": "Thủ công",
   "pumpRunningCountdown": "Bơm đang chạy - còn {value0}",
   "@pumpRunningCountdown": {
     "placeholders": {

@@ -815,6 +815,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get automaticMode => 'Tự động';
 
   @override
+  String get manualControlModeLabel => 'Thủ công';
+
+  @override
   String pumpRunningCountdown(String value0) {
     return 'Bơm đang chạy - còn $value0';
   }

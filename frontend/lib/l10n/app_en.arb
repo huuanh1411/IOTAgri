@@ -304,6 +304,7 @@
   "deviceDeleted": "Device deleted successfully",
   "noReadingsYet": "No data yet",
   "automaticMode": "Automatic",
+  "manualControlModeLabel": "Manual",
   "pumpRunningCountdown": "Pump is running - {value0} remaining",
   "@pumpRunningCountdown": {
     "placeholders": {
