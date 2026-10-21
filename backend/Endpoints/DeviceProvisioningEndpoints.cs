@@ -3,6 +3,7 @@ using IOTAgriBackend.Data;
 using IOTAgriBackend.Dtos.Devices;
 using IOTAgriBackend.Services;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace IOTAgriBackend.Endpoints;
 
@@ -74,6 +75,14 @@ public static class DeviceProvisioningEndpoints
 
         var device = await db.Devices.SingleAsync(d => d.ProvisioningClaimLeaseId == leaseId, cancellationToken);
 
+        if (await db.Devices.AnyAsync(
+                d => d.Id != device.Id && d.ProvisionedHardwareId == hardwareId,
+                cancellationToken))
+        {
+            await ClearLeaseAsync(db, leaseId, cancellationToken);
+            return HardwareAlreadyProvisioned();
+        }
+
         ProvisionedMqttDevice credentials;
         try
         {
@@ -85,19 +94,30 @@ public static class DeviceProvisioningEndpoints
             return Results.Problem("Device broker provisioning is unavailable.", statusCode: StatusCodes.Status503ServiceUnavailable);
         }
 
-        var claimed = await db.Devices
-            .Where(d => d.Id == device.Id && d.ProvisioningClaimLeaseId == leaseId && d.ProvisionedAt == null)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(d => d.ProvisionedAt, now)
-                .SetProperty(d => d.ProvisionedHardwareId, hardwareId)
-                .SetProperty(d => d.ProvisioningCodeHash, (string?)null)
-                .SetProperty(d => d.ProvisioningCodeExpiresAt, (DateTime?)null)
-                .SetProperty(d => d.ProvisioningClaimLeaseId, (Guid?)null)
-                .SetProperty(d => d.ProvisioningClaimLeaseExpiresAt, (DateTime?)null), cancellationToken);
+        int claimed;
+        try
+        {
+            claimed = await db.Devices
+                .Where(d => d.Id == device.Id && d.ProvisioningClaimLeaseId == leaseId && d.ProvisionedAt == null)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(d => d.ProvisionedAt, now)
+                    .SetProperty(d => d.ProvisionedHardwareId, hardwareId)
+                    .SetProperty(d => d.ProvisioningCodeHash, (string?)null)
+                    .SetProperty(d => d.ProvisioningCodeExpiresAt, (DateTime?)null)
+                    .SetProperty(d => d.ProvisioningClaimLeaseId, (Guid?)null)
+                    .SetProperty(d => d.ProvisioningClaimLeaseExpiresAt, (DateTime?)null), cancellationToken);
+        }
+        catch (PostgresException exception) when (
+            exception.SqlState == PostgresErrorCodes.UniqueViolation &&
+            exception.ConstraintName == "IX_Devices_ProvisionedHardwareId")
+        {
+            await RemoveBrokerDeviceAndClearLeaseAsync(db, brokerAdmin, device.DeviceKey, leaseId);
+            return HardwareAlreadyProvisioned();
+        }
+
         if (claimed != 1)
         {
-            try { await brokerAdmin.RemoveDeviceAsync(device.DeviceKey, CancellationToken.None); }
-            finally { await ClearLeaseAsync(db, leaseId, CancellationToken.None); }
+            await RemoveBrokerDeviceAndClearLeaseAsync(db, brokerAdmin, device.DeviceKey, leaseId);
             return Results.Conflict(new { error = "Provisioning code was already claimed." });
         }
 
@@ -116,4 +136,17 @@ public static class DeviceProvisioningEndpoints
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(d => d.ProvisioningClaimLeaseId, (Guid?)null)
                 .SetProperty(d => d.ProvisioningClaimLeaseExpiresAt, (DateTime?)null), cancellationToken);
+
+    private static IResult HardwareAlreadyProvisioned() =>
+        Results.Conflict(new { error = "This hardware is already provisioned to another device." });
+
+    private static async Task RemoveBrokerDeviceAndClearLeaseAsync(
+        ApplicationDbContext db,
+        IMqttBrokerAdminService brokerAdmin,
+        string deviceKey,
+        Guid leaseId)
+    {
+        try { await brokerAdmin.RemoveDeviceAsync(deviceKey, CancellationToken.None); }
+        finally { await ClearLeaseAsync(db, leaseId, CancellationToken.None); }
+    }
 }

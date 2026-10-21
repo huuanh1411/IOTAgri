@@ -45,6 +45,8 @@ jobs:
             'set -euo pipefail
             cd /opt/iotagri
             git pull --ff-only origin main
+            test -s deploy/mosquitto-certs/server.crt
+            test -s deploy/mosquitto-certs/server.key
             docker compose --env-file .env.production -f compose.production.yaml up -d --build --remove-orphans
             docker compose --env-file .env.production -f compose.production.yaml ps
             for attempt in $(seq 1 12); do

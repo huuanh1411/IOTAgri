@@ -35,7 +35,7 @@ jobs:
         run: docker compose --env-file .env.production.example -f compose.production.yaml config
 
       - name: Validate deployment scripts
-        run: bash -n deploy/backup-postgres.sh deploy/bootstrap-mqtt-dynsec.sh deploy/verify-mqtt-security.sh
+        run: bash -n deploy/backup-postgres.sh deploy/bootstrap-mqtt-dynsec.sh deploy/sync-mqtt-certs.sh deploy/verify-mqtt-security.sh
 
   frontend:
     runs-on: ubuntu-latest

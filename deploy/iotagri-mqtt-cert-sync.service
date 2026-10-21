@@ -1,0 +1,8 @@
+[Unit]
+Description=Synchronize Caddy MQTT certificate into Mosquitto
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash /opt/iotagri/deploy/sync-mqtt-certs.sh

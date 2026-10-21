@@ -46,6 +46,42 @@ public class DeviceProvisioningTests : IClassFixture<PostgresTestFixture>
         Assert.Equal("ABCDEF0123456789", saved.ProvisionedHardwareId);
     }
 
+    [Fact]
+    public async Task Hardware_already_bound_to_another_device_is_rejected_before_broker_provisioning()
+    {
+        await using var db = await _fixture.CreateDatabaseAsync();
+        var existingOwner = new ApplicationUser { Id = "existing-owner", UserName = "existing@example.test", Email = "existing@example.test" };
+        var targetOwner = new ApplicationUser { Id = "target-owner", UserName = "target@example.test", Email = "target@example.test" };
+        var existing = new Device
+        {
+            Name = "Existing device",
+            DeviceKey = "existing-device-key",
+            OwnerId = existingOwner.Id,
+            ProvisionedAt = DateTime.UtcNow,
+            ProvisionedHardwareId = "ABCDEF0123456789"
+        };
+        var target = new Device { Name = "Target device", DeviceKey = "target-device-key", OwnerId = targetOwner.Id };
+        db.AddRange(existingOwner, targetOwner, existing, target);
+        await db.SaveChangesAsync();
+        var code = await IssueCodeAsync(db, target);
+        var broker = new TestMqttBrokerAdminService();
+        await using var app = await BackendHttpTestHost.CreateAsync(db, brokerAdmin: broker);
+        using var client = app.GetTestClient();
+
+        using var response = await client.PostAsJsonAsync("/api/device-provisioning/claims",
+            new ClaimDeviceRequest(code, "abcdef0123456789"));
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Empty(broker.ReplacedDeviceKeys);
+        Assert.Empty(broker.RemovedDeviceKeys);
+        db.ChangeTracker.Clear();
+        var saved = await db.Devices.SingleAsync(device => device.Id == target.Id);
+        Assert.NotNull(saved.ProvisioningCodeHash);
+        Assert.Null(saved.ProvisionedAt);
+        Assert.Null(saved.ProvisioningClaimLeaseId);
+        Assert.Null(saved.ProvisioningClaimLeaseExpiresAt);
+    }
+
     private static async Task<Device> SeedProvisionableDeviceAsync(Data.ApplicationDbContext db)
     {
         var user = new ApplicationUser { Id = "provisioning-user", UserName = "provisioning@example.test", Email = "provisioning@example.test" };

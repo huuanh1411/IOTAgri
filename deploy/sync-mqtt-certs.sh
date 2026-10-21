@@ -13,11 +13,16 @@ trap 'rm -rf "$tmp"' EXIT
 "${compose[@]}" cp "caddy:$src.crt" "$tmp/server.crt"
 "${compose[@]}" cp "caddy:$src.key" "$tmp/server.key"
 
-cmp -s "$tmp/server.crt" "$dst/server.crt" 2>/dev/null && exit 0
+if cmp -s "$tmp/server.crt" "$dst/server.crt" 2>/dev/null &&
+   cmp -s "$tmp/server.key" "$dst/server.key" 2>/dev/null; then
+  exit 0
+fi
 
 mkdir -p "$dst"
 install -m 600 -o 1883 -g 1883 "$tmp/server.key" "$dst/server.key"
 install -m 644 -o 1883 -g 1883 "$tmp/server.crt" "$dst/server.crt"
+test -s "$dst/server.key"
+test -s "$dst/server.crt"
 "${compose[@]}" up -d mosquitto
 "${compose[@]}" restart mosquitto
 echo "mqtt cert synced"

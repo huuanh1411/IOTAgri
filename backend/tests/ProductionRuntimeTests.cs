@@ -51,6 +51,39 @@ public class ProductionRuntimeTests
         Assert.Contains("USER app", dockerfile);
     }
 
+    [Fact]
+    public void Continuous_deployment_requires_mqtt_certificate_and_key_before_compose_reconciliation()
+    {
+        var workflow = File.ReadAllText(RepoFile(".github/workflows/cd.yml"));
+        var certificateIndex = workflow.IndexOf("test -s deploy/mosquitto-certs/server.crt", StringComparison.Ordinal);
+        var keyIndex = workflow.IndexOf("test -s deploy/mosquitto-certs/server.key", StringComparison.Ordinal);
+        var composeIndex = workflow.IndexOf("up -d --build --remove-orphans", StringComparison.Ordinal);
+
+        Assert.True(certificateIndex >= 0, "CD must require the MQTT certificate before touching Mosquitto.");
+        Assert.True(keyIndex > certificateIndex, "CD must require the matching MQTT private key.");
+        Assert.True(composeIndex > keyIndex, "Certificate checks must run before Compose reconciliation.");
+    }
+
+    [Fact]
+    public void Mqtt_certificate_sync_requires_both_certificate_and_private_key_to_match()
+    {
+        var script = File.ReadAllText(RepoFile("deploy/sync-mqtt-certs.sh"));
+
+        Assert.Contains("cmp -s \"$tmp/server.crt\" \"$dst/server.crt\"", script);
+        Assert.Contains("cmp -s \"$tmp/server.key\" \"$dst/server.key\"", script);
+    }
+
+    [Fact]
+    public void Mqtt_certificate_sync_timer_is_persistent_and_runs_daily()
+    {
+        var service = File.ReadAllText(RepoFile("deploy/iotagri-mqtt-cert-sync.service"));
+        var timer = File.ReadAllText(RepoFile("deploy/iotagri-mqtt-cert-sync.timer"));
+
+        Assert.Contains("ExecStart=/usr/bin/bash /opt/iotagri/deploy/sync-mqtt-certs.sh", service);
+        Assert.Contains("OnCalendar=*-*-* 03:17:00", timer);
+        Assert.Contains("Persistent=true", timer);
+    }
+
     private static string RepoFile(string relativePath) => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../..", relativePath));
 
     private static int Count(string text, string value)

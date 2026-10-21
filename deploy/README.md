@@ -11,7 +11,18 @@ chmod +x deploy/deploy-production.sh deploy/bootstrap-mqtt-dynsec.sh deploy/sync
 ./deploy/deploy-production.sh
 ```
 
-After Caddy issues the `mqtt.aerogreen.vn` certificate, run `./deploy/sync-mqtt-certs.sh`, then `./deploy/bootstrap-mqtt-dynsec.sh`, then `docker compose --env-file .env.production -f compose.production.yaml up -d`.
+After Caddy issues the `mqtt.aerogreen.vn` certificate, run `bash ./deploy/sync-mqtt-certs.sh`, then `./deploy/bootstrap-mqtt-dynsec.sh`, then `docker compose --env-file .env.production -f compose.production.yaml up -d`.
+
+Install the persistent daily certificate synchronization timer as root:
+
+```
+cp deploy/iotagri-mqtt-cert-sync.service deploy/iotagri-mqtt-cert-sync.timer /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable --now iotagri-mqtt-cert-sync.timer
+systemctl start iotagri-mqtt-cert-sync.service
+```
+
+The root-owned service copies both the certificate and private key from Caddy and restarts Mosquitto only when either file changed or is missing. Continuous deployment verifies that both files exist before Compose reconciliation, so the unprivileged deploy user fails safely instead of touching Mosquitto with an incomplete TLS mount.
 
 ## Continuous deployment
 
