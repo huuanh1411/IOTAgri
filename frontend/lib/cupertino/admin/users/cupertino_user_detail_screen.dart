@@ -122,7 +122,7 @@ class _CupertinoUserDetailScreenState extends State<CupertinoUserDetailScreen> {
           decoration: BoxDecoration(
             color: isAdmin
                 ? AerogreenCupertinoTheme.aerogreenPrimary
-                : CupertinoColors.systemBlue,
+                : AerogreenCupertinoTheme.primaryBlue,
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -180,7 +180,7 @@ class _CupertinoUserDetailScreenState extends State<CupertinoUserDetailScreen> {
                   : CupertinoIcons.checkmark_circle_fill,
               label: isLocked ? 'Đã khóa' : 'Hoạt động',
               color: isLocked
-                  ? CupertinoColors.systemRed
+                  ? AerogreenCupertinoTheme.errorRed
                   : AerogreenCupertinoTheme.aerogreenPrimary,
             ),
           ],
@@ -351,7 +351,7 @@ class _CupertinoUserDetailScreenState extends State<CupertinoUserDetailScreen> {
     final isOnline = device['isOnline'] as bool? ?? false;
     final color = isOnline
         ? AerogreenCupertinoTheme.aerogreenPrimary
-        : CupertinoColors.systemRed;
+        : AerogreenCupertinoTheme.errorRed;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -435,9 +435,9 @@ class _CupertinoUserDetailScreenState extends State<CupertinoUserDetailScreen> {
   Widget _buildTicketTile(BuildContext context, Map<String, dynamic> ticket) {
     final status = ticket['status'] as String? ?? 'open';
     final color = status == 'open'
-        ? CupertinoColors.systemRed
+        ? AerogreenCupertinoTheme.errorRed
         : status == 'in_progress'
-        ? CupertinoColors.systemOrange
+        ? AerogreenCupertinoTheme.warningOrange
         : AerogreenCupertinoTheme.aerogreenPrimary;
 
     return Container(
@@ -513,7 +513,7 @@ class _CupertinoUserDetailScreenState extends State<CupertinoUserDetailScreen> {
               : CupertinoIcons.shield_lefthalf_fill,
           label: isAdmin ? 'Chuyển thành người dùng' : 'Cấp quyền Admin',
           color: isAdmin
-              ? CupertinoColors.systemOrange
+              ? AerogreenCupertinoTheme.warningOrange
               : AerogreenCupertinoTheme.aerogreenPrimary,
           onPressed: _toggleRole,
         ),
@@ -528,7 +528,7 @@ class _CupertinoUserDetailScreenState extends State<CupertinoUserDetailScreen> {
             label: isLocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản',
             color: isLocked
                 ? AerogreenCupertinoTheme.aerogreenPrimary
-                : CupertinoColors.systemOrange,
+                : AerogreenCupertinoTheme.warningOrange,
             onPressed: _toggleLock,
           ),
       ],

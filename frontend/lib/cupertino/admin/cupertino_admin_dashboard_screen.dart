@@ -230,12 +230,12 @@ class _CupertinoAdminDashboardScreenState
                 Icon(
                   CupertinoIcons.square_arrow_right,
                   size: 17,
-                  color: CupertinoColors.systemRed,
+                  color: AerogreenCupertinoTheme.errorRed,
                 ),
                 SizedBox(width: 8),
                 Text(
                   'Đăng xuất',
-                  style: TextStyle(color: CupertinoColors.systemRed),
+                  style: TextStyle(color: AerogreenCupertinoTheme.errorRed),
                 ),
               ],
             ),
@@ -316,7 +316,7 @@ class _CupertinoAdminDashboardScreenState
                 Icon(
                   CupertinoIcons.chart_bar_alt_fill,
                   size: 18,
-                  color: CupertinoColors.systemBlue,
+                  color: AerogreenCupertinoTheme.primaryBlue,
                 ),
                 SizedBox(width: 8),
                 Text('Giám sát hệ thống'),
@@ -334,7 +334,7 @@ class _CupertinoAdminDashboardScreenState
                 Icon(
                   CupertinoIcons.doc_text_fill,
                   size: 18,
-                  color: CupertinoColors.systemOrange,
+                  color: AerogreenCupertinoTheme.warningOrange,
                 ),
                 SizedBox(width: 8),
                 Text('Nhật ký hoạt động'),
@@ -352,7 +352,7 @@ class _CupertinoAdminDashboardScreenState
                 Icon(
                   CupertinoIcons.settings,
                   size: 18,
-                  color: CupertinoColors.systemGrey,
+                  color: AerogreenCupertinoTheme.textSecondary,
                 ),
                 SizedBox(width: 8),
                 Text('Cấu hình hệ thống'),
@@ -370,7 +370,7 @@ class _CupertinoAdminDashboardScreenState
                 Icon(
                   CupertinoIcons.graph_square_fill,
                   size: 18,
-                  color: CupertinoColors.systemPurple,
+                  color: AerogreenCupertinoTheme.primaryPurple,
                 ),
                 SizedBox(width: 8),
                 Text('Báo cáo & Thống kê'),

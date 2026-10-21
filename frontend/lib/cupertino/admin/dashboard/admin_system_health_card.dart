@@ -29,7 +29,7 @@ class AdminSystemHealthCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: allOnline
             ? AerogreenCupertinoTheme.aerogreenPrimary.withValues(alpha: 0.12)
-            : CupertinoColors.systemRed.withValues(alpha: 0.12),
+            : AerogreenCupertinoTheme.errorRed.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -44,7 +44,7 @@ class AdminSystemHealthCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: allOnline
                       ? AerogreenCupertinoTheme.aerogreenPrimary
-                      : CupertinoColors.systemRed,
+                      : AerogreenCupertinoTheme.errorRed,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -144,7 +144,7 @@ class _HealthRow extends StatelessWidget {
     final isOnline = status == 'online';
     final statusColor = isOnline
         ? AerogreenCupertinoTheme.aerogreenPrimary
-        : CupertinoColors.systemRed;
+        : AerogreenCupertinoTheme.errorRed;
 
     return Row(
       children: [

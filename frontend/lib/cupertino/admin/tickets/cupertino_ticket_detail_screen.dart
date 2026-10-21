@@ -156,13 +156,13 @@ class _CupertinoTicketDetailScreenState
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: CupertinoColors.systemBlue.withValues(alpha: 0.15),
+              color: AerogreenCupertinoTheme.primaryBlue.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: const Center(
               child: Icon(
                 CupertinoIcons.person_fill,
-                color: CupertinoColors.systemBlue,
+                color: AerogreenCupertinoTheme.primaryBlue,
                 size: 20,
               ),
             ),
@@ -236,7 +236,7 @@ class _CupertinoTicketDetailScreenState
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
+        color: AerogreenCupertinoTheme.backgroundLight,
         border: Border(
           top: BorderSide(
             color: CupertinoColors.separator.resolveFrom(context),
@@ -433,13 +433,13 @@ class _CupertinoTicketDetailScreenState
   Color _statusColor(String status) {
     switch (status) {
       case 'open':
-        return CupertinoColors.systemRed;
+        return AerogreenCupertinoTheme.errorRed;
       case 'in_progress':
-        return CupertinoColors.systemOrange;
+        return AerogreenCupertinoTheme.warningOrange;
       case 'closed':
         return AerogreenCupertinoTheme.aerogreenPrimary;
       default:
-        return CupertinoColors.systemGrey;
+        return AerogreenCupertinoTheme.textSecondary;
     }
   }
 
@@ -459,13 +459,13 @@ class _CupertinoTicketDetailScreenState
   Color _priorityColor(String priority) {
     switch (priority) {
       case 'high':
-        return CupertinoColors.systemRed;
+        return AerogreenCupertinoTheme.errorRed;
       case 'medium':
-        return CupertinoColors.systemOrange;
+        return AerogreenCupertinoTheme.warningOrange;
       case 'low':
-        return CupertinoColors.systemBlue;
+        return AerogreenCupertinoTheme.primaryBlue;
       default:
-        return CupertinoColors.systemGrey;
+        return AerogreenCupertinoTheme.textSecondary;
     }
   }
 
@@ -514,13 +514,13 @@ class _MessageBubble extends StatelessWidget {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: CupertinoColors.systemBlue.withValues(alpha: 0.2),
+                color: AerogreenCupertinoTheme.primaryBlue.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 CupertinoIcons.person_fill,
                 size: 13,
-                color: CupertinoColors.systemBlue,
+                color: AerogreenCupertinoTheme.primaryBlue,
               ),
             ),
             const SizedBox(width: 8),

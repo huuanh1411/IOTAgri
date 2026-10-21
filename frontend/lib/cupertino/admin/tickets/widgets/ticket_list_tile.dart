@@ -187,13 +187,13 @@ class TicketListTile extends StatelessWidget {
   Color _statusColor(String status) {
     switch (status) {
       case 'open':
-        return CupertinoColors.systemRed;
+        return AerogreenCupertinoTheme.errorRed;
       case 'in_progress':
-        return CupertinoColors.systemOrange;
+        return AerogreenCupertinoTheme.warningOrange;
       case 'closed':
         return AerogreenCupertinoTheme.aerogreenPrimary;
       default:
-        return CupertinoColors.systemGrey;
+        return AerogreenCupertinoTheme.textSecondary;
     }
   }
 
@@ -226,13 +226,13 @@ class TicketListTile extends StatelessWidget {
   Color _priorityColor(String priority) {
     switch (priority) {
       case 'high':
-        return CupertinoColors.systemRed;
+        return AerogreenCupertinoTheme.errorRed;
       case 'medium':
-        return CupertinoColors.systemOrange;
+        return AerogreenCupertinoTheme.warningOrange;
       case 'low':
-        return CupertinoColors.systemBlue;
+        return AerogreenCupertinoTheme.primaryBlue;
       default:
-        return CupertinoColors.systemGrey;
+        return AerogreenCupertinoTheme.textSecondary;
     }
   }
 

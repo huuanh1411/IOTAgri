@@ -74,7 +74,7 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
                 _buildStatCard(
                   context,
                   icon: CupertinoIcons.person_2_fill,
-                  color: CupertinoColors.systemBlue,
+                  color: AerogreenCupertinoTheme.primaryBlue,
                   title: 'Người dùng',
                   stats: _stats!['users'] as Map<String, dynamic>,
                   metrics: [
@@ -101,7 +101,7 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
                 _buildStatCard(
                   context,
                   icon: CupertinoIcons.exclamationmark_triangle_fill,
-                  color: CupertinoColors.systemOrange,
+                  color: AerogreenCupertinoTheme.warningOrange,
                   title: 'Cảnh báo',
                   stats: _stats!['alerts'] as Map<String, dynamic>,
                   metrics: [
@@ -114,7 +114,7 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
                 _buildStatCard(
                   context,
                   icon: CupertinoIcons.chat_bubble_2_fill,
-                  color: CupertinoColors.systemPurple,
+                  color: AerogreenCupertinoTheme.primaryPurple,
                   title: 'Tickets',
                   stats: _stats!['tickets'] as Map<String, dynamic>,
                   metrics: [
@@ -254,7 +254,7 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
                   context,
                   icon: CupertinoIcons.doc_fill,
                    label: 'PDF',
-                  color: CupertinoColors.systemRed,
+                  color: AerogreenCupertinoTheme.errorRed,
                 ),
               ),
               const SizedBox(width: 10),
@@ -263,7 +263,7 @@ class _CupertinoReportsScreenState extends State<CupertinoReportsScreen> {
                   context,
                   icon: CupertinoIcons.table,
                    label: 'CSV',
-                  color: CupertinoColors.systemGreen,
+                  color: AerogreenCupertinoTheme.aerogreenPrimary,
                 ),
               ),
             ],

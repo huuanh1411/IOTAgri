@@ -25,6 +25,7 @@ import '../../../services/api_service.dart';
 import 'cupertino_user_detail_screen.dart';
 import 'widgets/user_filter_chips.dart';
 import 'widgets/user_list_tile.dart';
+import '../../theme/cupertino_theme.dart';
 
 class CupertinoUsersScreen extends StatefulWidget {
   const CupertinoUsersScreen({super.key});
@@ -343,12 +344,12 @@ class _CupertinoUsersScreenState extends State<CupertinoUsersScreen> {
       _showToast(
         !isLocked ? 'Đã khóa tài khoản' : 'Đã mở khóa tài khoản',
         color: !isLocked
-            ? CupertinoColors.systemRed
-            : CupertinoColors.systemGreen,
+            ? AerogreenCupertinoTheme.errorRed
+            : AerogreenCupertinoTheme.aerogreenPrimary,
       );
     } catch (error) {
       if (mounted) {
-        _showToast(error.toString(), color: CupertinoColors.systemRed);
+        _showToast(error.toString(), color: AerogreenCupertinoTheme.errorRed);
       }
     }
   }

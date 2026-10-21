@@ -113,7 +113,7 @@ class _StatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final healthy = status == 'healthy' || status == 'connected';
-    final color = healthy ? AerogreenCupertinoTheme.aerogreenPrimary : CupertinoColors.systemRed;
+    final color = healthy ? AerogreenCupertinoTheme.aerogreenPrimary : AerogreenCupertinoTheme.errorRed;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

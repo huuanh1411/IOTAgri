@@ -127,7 +127,7 @@ class _CupertinoAdminDeviceDetailScreenState
           decoration: BoxDecoration(
             color: isOnline
                 ? AerogreenCupertinoTheme.aerogreenPrimary
-                : CupertinoColors.systemRed,
+                : AerogreenCupertinoTheme.errorRed,
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -175,7 +175,7 @@ class _CupertinoAdminDeviceDetailScreenState
               label: isOnline ? 'Online' : 'Offline',
               color: isOnline
                   ? AerogreenCupertinoTheme.aerogreenPrimary
-                  : CupertinoColors.systemRed,
+                  : AerogreenCupertinoTheme.errorRed,
             ),
             if (_isPumping) ...[
               const SizedBox(width: 8),
@@ -183,7 +183,7 @@ class _CupertinoAdminDeviceDetailScreenState
                 context,
                 icon: CupertinoIcons.cloud_fog_fill,
                 label: 'Đang phun',
-                color: CupertinoColors.systemTeal,
+                color: AerogreenCupertinoTheme.primaryTeal,
               ),
             ],
           ],
@@ -243,7 +243,7 @@ class _CupertinoAdminDeviceDetailScreenState
                 label: 'Nhiệt độ',
                 value: temperature?.toStringAsFixed(1) ?? '--',
                 unit: '°C',
-                color: CupertinoColors.systemOrange,
+                color: AerogreenCupertinoTheme.warningOrange,
               ),
             ),
             const SizedBox(width: 10),
@@ -253,7 +253,7 @@ class _CupertinoAdminDeviceDetailScreenState
                 label: 'Độ ẩm',
                 value: humidity?.toStringAsFixed(0) ?? '--',
                 unit: '%',
-                color: CupertinoColors.systemBlue,
+                color: AerogreenCupertinoTheme.primaryBlue,
               ),
             ),
             const SizedBox(width: 10),
@@ -284,13 +284,13 @@ class _CupertinoAdminDeviceDetailScreenState
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: _isPumping
-                ? CupertinoColors.systemTeal.withValues(alpha: 0.1)
+                ? AerogreenCupertinoTheme.primaryTeal.withValues(alpha: 0.1)
                 : CupertinoColors.secondarySystemBackground
                 .resolveFrom(context),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: _isPumping
-                  ? CupertinoColors.systemTeal
+                  ? AerogreenCupertinoTheme.primaryTeal
                   : CupertinoColors.separator.resolveFrom(context),
               width: _isPumping ? 1.5 : 0.5,
             ),
@@ -304,7 +304,7 @@ class _CupertinoAdminDeviceDetailScreenState
                     height: 44,
                     decoration: BoxDecoration(
                       color: _isPumping
-                          ? CupertinoColors.systemTeal.withValues(alpha: 0.2)
+                          ? AerogreenCupertinoTheme.primaryTeal.withValues(alpha: 0.2)
                           : CupertinoColors.tertiarySystemBackground
                           .resolveFrom(context),
                       borderRadius: BorderRadius.circular(12),
@@ -314,7 +314,7 @@ class _CupertinoAdminDeviceDetailScreenState
                           ? CupertinoIcons.cloud_fog_fill
                           : CupertinoIcons.cloud_fog,
                       color: _isPumping
-                          ? CupertinoColors.systemTeal
+                          ? AerogreenCupertinoTheme.primaryTeal
                           : CupertinoColors.secondaryLabel
                           .resolveFrom(context),
                       size: 22,
@@ -359,7 +359,7 @@ class _CupertinoAdminDeviceDetailScreenState
                   height: 48,
                   decoration: BoxDecoration(
                     color: _isPumping
-                        ? CupertinoColors.systemRed
+                        ? AerogreenCupertinoTheme.errorRed
                         : AerogreenCupertinoTheme.aerogreenPrimary,
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -522,12 +522,12 @@ class _CupertinoAdminDeviceDetailScreenState
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: CupertinoColors.systemTeal.withValues(alpha: 0.15),
+              color: AerogreenCupertinoTheme.primaryTeal.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(
               CupertinoIcons.cloud_fog_fill,
-              color: CupertinoColors.systemTeal,
+              color: AerogreenCupertinoTheme.primaryTeal,
               size: 18,
             ),
           ),
@@ -569,7 +569,7 @@ class _CupertinoAdminDeviceDetailScreenState
           context,
           icon: CupertinoIcons.person_crop_circle_badge_checkmark,
           label: _device['ownerId'] == null ? 'Gán cho user' : 'Đổi owner',
-          color: CupertinoColors.systemBlue,
+          color: AerogreenCupertinoTheme.primaryBlue,
           onPressed: _assignDevice,
         ),
         if (_device['ownerId'] != null) ...[
@@ -578,7 +578,7 @@ class _CupertinoAdminDeviceDetailScreenState
             context,
             icon: CupertinoIcons.person_crop_circle_badge_xmark,
             label: 'Hủy gán owner',
-            color: CupertinoColors.systemRed,
+            color: AerogreenCupertinoTheme.errorRed,
             onPressed: _unassignDevice,
           ),
         ],

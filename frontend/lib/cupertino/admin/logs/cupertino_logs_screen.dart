@@ -453,15 +453,15 @@ class _LogTile extends StatelessWidget {
   Color _severityColor(String severity) {
     switch (severity) {
       case 'info':
-        return CupertinoColors.systemBlue;
+        return AerogreenCupertinoTheme.primaryBlue;
       case 'warning':
-        return CupertinoColors.systemOrange;
+        return AerogreenCupertinoTheme.warningOrange;
       case 'error':
-        return CupertinoColors.systemRed;
+        return AerogreenCupertinoTheme.errorRed;
       case 'critical':
-        return CupertinoColors.systemPurple;
+        return AerogreenCupertinoTheme.primaryPurple;
       default:
-        return CupertinoColors.systemGrey;
+        return AerogreenCupertinoTheme.textSecondary;
     }
   }
 

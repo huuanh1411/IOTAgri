@@ -29,7 +29,7 @@ class AdminDeviceCard extends StatelessWidget {
 
     final statusColor = isOnline
         ? AerogreenCupertinoTheme.aerogreenPrimary
-        : CupertinoColors.systemRed;
+        : AerogreenCupertinoTheme.errorRed;
 
     return GestureDetector(
       onTap: onTap,
@@ -74,7 +74,7 @@ class AdminDeviceCard extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: CupertinoColors.systemTeal.withValues(alpha: 0.15),
+                      color: AerogreenCupertinoTheme.primaryTeal.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -83,13 +83,13 @@ class AdminDeviceCard extends StatelessWidget {
                         Icon(
                           CupertinoIcons.cloud_fog_fill,
                           size: 10,
-                          color: CupertinoColors.systemTeal,
+                          color: AerogreenCupertinoTheme.primaryTeal,
                         ),
                         SizedBox(width: 3),
                         Text(
                           'Đang phun',
                           style: TextStyle(
-                            color: CupertinoColors.systemTeal,
+                            color: AerogreenCupertinoTheme.primaryTeal,
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                           ),
@@ -150,7 +150,7 @@ class AdminDeviceCard extends StatelessWidget {
                     value: temperature == null
                         ? '--°'
                         : '${temperature.toStringAsFixed(1)}°',
-                    color: CupertinoColors.systemOrange,
+                    color: AerogreenCupertinoTheme.warningOrange,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -160,7 +160,7 @@ class AdminDeviceCard extends StatelessWidget {
                     value: humidity == null
                         ? '--%'
                         : '${humidity.toStringAsFixed(0)}%',
-                    color: CupertinoColors.systemBlue,
+                    color: AerogreenCupertinoTheme.primaryBlue,
                   ),
                 ),
                 const SizedBox(width: 8),

@@ -30,7 +30,7 @@ class UserListTile extends StatelessWidget {
     // Màu avatar dựa trên role
     final avatarColor = isAdmin
         ? AerogreenCupertinoTheme.aerogreenPrimary
-        : CupertinoColors.systemBlue;
+        : AerogreenCupertinoTheme.primaryBlue;
 
     return GestureDetector(
       onTap: onTap,
@@ -170,7 +170,7 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isLocked
-        ? CupertinoColors.systemRed
+        ? AerogreenCupertinoTheme.errorRed
         : AerogreenCupertinoTheme.aerogreenPrimary;
     final label = isLocked ? 'Đã khóa' : 'Hoạt động';
 
