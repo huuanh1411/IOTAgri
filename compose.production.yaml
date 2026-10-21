@@ -88,7 +88,7 @@ services:
       MqttBrokerAdmin__ClientId: iotagribackend-dynsec
       MqttBrokerAdmin__DeviceRole: device
       DeviceProvisioning__MqttHost: mqtt.aerogreen.vn
-      PumpScheduling__Enabled: "false"
+      PumpScheduling__Enabled: "true"
       PumpScheduling__PollSeconds: ${PUMP_SCHEDULING_POLL_SECONDS:-30}
       PumpScheduling__DueWindowSeconds: ${PUMP_SCHEDULING_DUE_WINDOW_SECONDS:-90}
     healthcheck:
