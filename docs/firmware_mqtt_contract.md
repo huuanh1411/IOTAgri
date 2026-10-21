@@ -20,7 +20,7 @@ state and currently declares lighting unavailable.
 | Scheduled pump | Existing schedule UI | Dispatcher creates the same persisted command lifecycle | Executes the same MQTT command only |
 | Alerts | Alert UI reads/resolves persisted alerts | Reading thresholds create/resolve device alerts | Valid temperature/water telemetry drives alerts |
 | Connectivity | Device status/last seen | Presence is stale after backend timeout | Any accepted reading is the heartbeat |
-| Lighting | Explicitly unavailable | No HTTP/MQTT/database contract | GPIO is held off; no light topic is used |
+| Lighting | Manual control and schedule UI | Publishes commands and tracks reported state | Subscribe to `commands/light`; publish `light-status` |
 
 ## MQTT payloads
 
@@ -29,22 +29,29 @@ Telemetry schema is `SensorReadingRequest`: `temperature`,
 JSON number or `null`. `waterLevel` is a percentage. Unknown fields are not part
 of the contract and must not be relied on.
 
-Pump command: `{ "commandId": "GUID", "isOn": true, "durationSeconds": 1..600 }`.
+Pump command: `{ "commandId": "GUID", "isOn": true, "durationSeconds": 1..600,
+"source": "manual|scheduled", "issuedAtUtc": "ISO-8601 UTC",
+"scheduledEndUtc": "ISO-8601 UTC|null" }`.
 Turning off accepts `isOn: false`; no duration is required. Commands are QoS 1
 from the backend. The firmware suppresses duplicate command IDs during its
-current uptime and rejects duplicate IDs with changed contents.
+current uptime and rejects duplicate IDs with changed contents. Scheduled ON
+commands are rejected after `scheduledEndUtc`; late valid delivery is shortened
+to the remaining UTC window.
 
 Pump status: `{ "commandId": "GUID?", "isOn": bool, "success": bool,
 "reason": "string?" }`. A status without `commandId` synchronizes device state
 only. The backend treats a status with `success: false` as a failed command and
 persists its reason.
 
+Light command: `{ "commandId": "GUID", "isOn": bool }`. Light status uses the
+same status shape as the pump without duration fields.
+
 ## Configuration/security status
 
-Development Compose uses plaintext port 1883 and an anonymous local broker;
-`DeviceProvisioning:MqttHost` is supplied from `MQTT_PUBLIC_HOST`. Production
-Compose advertises TLS. The claim response currently has no CA certificate or
-per-device MQTT credentials, so the firmware safely rejects `useTls: true` and
-does not disable certificate validation. A production release requires a
-certificate-distribution and broker-ACL design; this is a known deployment
-blocker, not a firmware workaround.
+Development Compose uses plaintext port 1883 and an anonymous local broker.
+Production provisioning returns one-time per-device MQTT username, password,
+and fixed client ID. Production firmware requires `useTls: true`, pins the
+expected API and MQTT hostnames, validates both services through the embedded
+ISRG Root X1 trust anchor, and stores only complete credentials using a two-slot
+NVS commit. The production sketch intentionally does not support the plaintext
+development broker.

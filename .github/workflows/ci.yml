@@ -37,6 +37,9 @@ jobs:
       - name: Validate deployment scripts
         run: bash -n deploy/backup-postgres.sh deploy/bootstrap-mqtt-dynsec.sh deploy/sync-mqtt-certs.sh deploy/verify-mqtt-security.sh
 
+      - name: Validate production firmware contract
+        run: python3 -m unittest firmware.ESP32DeviceSetup.tests.test_production_contract -v
+
   frontend:
     runs-on: ubuntu-latest
 

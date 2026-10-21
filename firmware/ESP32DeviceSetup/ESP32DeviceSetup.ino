@@ -7,7 +7,11 @@
 #include <PubSubClient.h>
 #include <WebServer.h>
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <Wire.h>
+#include <time.h>
+
+#include "ProductionRootCa.h"
 
 // AEROGREEN / MKE-K01 ESP32-S3 N16 pin map.
 // Both relay inputs must be driven through an NPN transistor. At the ESP pin,
@@ -28,6 +32,14 @@ constexpr float TDS_CALIBRATION_FACTOR = 1.0f;
 constexpr float ADC_REFERENCE_V = 3.3f;
 constexpr uint16_t ADC_MAX_VALUE = 4095;
 constexpr uint16_t MAX_PUMP_DURATION_SECONDS = 600;
+constexpr char API_BASE_URL[] = "https://api.aerogreen.vn";
+constexpr char MQTT_PRODUCTION_HOST[] = "mqtt.aerogreen.vn";
+constexpr uint16_t MQTT_PRODUCTION_PORT = 8883;
+constexpr char SETTINGS_CONTROL_NAMESPACE[] = "iotagri_ctl";
+constexpr char SETTINGS_SLOT_A_NAMESPACE[] = "iotagri_a";
+constexpr char SETTINGS_SLOT_B_NAMESPACE[] = "iotagri_b";
+constexpr time_t MIN_VALID_UTC_EPOCH = 1704067200;  // 2024-01-01T00:00:00Z
+constexpr time_t MAX_CLOCK_SKEW_SECONDS = 300;
 
 constexpr unsigned long ULTRASONIC_TIMEOUT_US = 30000;
 constexpr unsigned long WATER_LEVEL_INTERVAL_MS = 500;
@@ -39,6 +51,8 @@ constexpr unsigned long TDS_SAMPLE_INTERVAL_MS = 40;
 constexpr unsigned long TELEMETRY_INTERVAL_MS = 10000;
 constexpr unsigned long WIFI_RECONNECT_INTERVAL_MS = 10000;
 constexpr unsigned long MQTT_RECONNECT_INTERVAL_MS = 5000;
+constexpr unsigned long NTP_RETRY_INTERVAL_MS = 30000;
+constexpr unsigned long NTP_SYNC_TIMEOUT_MS = 15000;
 constexpr size_t MQTT_BUFFER_BYTES = 768;
 constexpr size_t MAX_COMMAND_PAYLOAD_BYTES = 512;
 constexpr uint8_t TDS_SAMPLE_COUNT = 30;
@@ -70,12 +84,14 @@ struct LastCommand {
   uint32_t durationSeconds = 0;
   bool success = false;
   String reason;
+  String source;
+  String issuedAtUtc;
+  String scheduledEndUtc;
 };
 
 DNSServer dns;
 WebServer server(80);
-Preferences settings;
-WiFiClient network;
+WiFiClientSecure network;
 PubSubClient mqtt(network);
 Adafruit_AHTX0 dht20;
 OneWire oneWire(DS18B20_PIN);
@@ -88,6 +104,9 @@ LastCommand lastLightCommand;
 String apiUrl;
 String mqttHost;
 String deviceKey;
+String mqttUsername;
+String mqttPassword;
+String mqttClientId;
 String savedSsid;
 String savedPassword;
 String readingsTopic;
@@ -96,12 +115,14 @@ String pumpStatusTopic;
 String lightCommandTopic;
 String lightStatusTopic;
 int mqttPort = 0;
+bool mqttUseTls = false;
 bool setupMode = false;
 bool dht20Available = false;
 bool bh1750Available = false;
 bool pumpOn = false;
 bool lightOn = false;
 bool pumpTimerActive = false;
+time_t pumpScheduledEndEpoch = 0;
 bool ds18b20ConversionPending = false;
 uint32_t pumpOffAtMs = 0;
 uint32_t ds18b20RequestedAtMs = 0;
@@ -113,6 +134,7 @@ uint32_t lastTdsSampleMs = 0;
 uint32_t lastTelemetryMs = 0;
 uint32_t lastWifiReconnectMs = 0;
 uint32_t lastMqttReconnectMs = 0;
+uint32_t lastNtpRetryMs = 0;
 uint16_t tdsSamples[TDS_SAMPLE_COUNT] = {};
 uint8_t tdsSampleIndex = 0;
 uint8_t tdsSamplesCollected = 0;
@@ -193,12 +215,189 @@ bool jsonUnsigned(const String& json, const char* key, uint32_t& value) {
   return true;
 }
 
+bool clockIsSynchronized() {
+  return time(nullptr) >= MIN_VALID_UTC_EPOCH;
+}
+
+bool syncClockBlocking() {
+  if (clockIsSynchronized()) return true;
+
+  lastNtpRetryMs = millis();
+  configTime(0, 0, "time.cloudflare.com", "pool.ntp.org", "time.google.com");
+  const uint32_t startedAt = millis();
+  while (!clockIsSynchronized() && !elapsed(millis(), startedAt, NTP_SYNC_TIMEOUT_MS)) delay(200);
+
+  Serial.println(clockIsSynchronized() ? "UTC clock synchronized" : "UTC clock synchronization failed");
+  return clockIsSynchronized();
+}
+
+int64_t daysFromCivil(int year, unsigned month, unsigned day) {
+  year -= month <= 2;
+  const int era = (year >= 0 ? year : year - 399) / 400;
+  const unsigned yearOfEra = static_cast<unsigned>(year - era * 400);
+  const unsigned adjustedMonth = month > 2 ? month - 3 : month + 9;
+  const unsigned dayOfYear = (153 * adjustedMonth + 2) / 5 + day - 1;
+  const unsigned dayOfEra = yearOfEra * 365 + yearOfEra / 4 - yearOfEra / 100 + dayOfYear;
+  return static_cast<int64_t>(era) * 146097 + static_cast<int64_t>(dayOfEra) - 719468;
+}
+
+bool parseUtcTimestamp(const String& timestamp, time_t& result) {
+  if (timestamp.length() < 20 || timestamp[4] != '-' || timestamp[7] != '-' ||
+      timestamp[10] != 'T' || timestamp[13] != ':' || timestamp[16] != ':' ||
+      timestamp[timestamp.length() - 1] != 'Z') {
+    return false;
+  }
+
+  if (timestamp.length() > 20) {
+    if (timestamp[19] != '.' || timestamp.length() == 21) return false;
+    for (size_t i = 20; i + 1 < timestamp.length(); i++) {
+      if (!isdigit(static_cast<unsigned char>(timestamp[i]))) return false;
+    }
+  }
+
+  int year = 0;
+  int month = 0;
+  int day = 0;
+  int hour = 0;
+  int minute = 0;
+  int second = 0;
+  if (sscanf(timestamp.c_str(), "%4d-%2d-%2dT%2d:%2d:%2d",
+             &year, &month, &day, &hour, &minute, &second) != 6 ||
+      year < 2024 || month < 1 || month > 12 || day < 1 || day > 31 ||
+      hour > 23 || minute > 59 || second > 59) {
+    return false;
+  }
+
+  const int64_t epochSeconds = daysFromCivil(year, static_cast<unsigned>(month),
+                                             static_cast<unsigned>(day)) * 86400LL +
+                               hour * 3600LL + minute * 60LL + second;
+  const time_t parsed = static_cast<time_t>(epochSeconds);
+  if (parsed < MIN_VALID_UTC_EPOCH) return false;
+
+  struct tm roundTrip = {};
+  gmtime_r(&parsed, &roundTrip);
+  if (roundTrip.tm_year != year - 1900 || roundTrip.tm_mon != month - 1 ||
+      roundTrip.tm_mday != day || roundTrip.tm_hour != hour ||
+      roundTrip.tm_min != minute || roundTrip.tm_sec != second) {
+    return false;
+  }
+
+  result = parsed;
+  return true;
+}
+
+String normalizedApiUrl(String value) {
+  value.trim();
+  while (value.endsWith("/")) value.remove(value.length() - 1);
+  return value;
+}
+
+bool credentialsComplete() {
+  const String expectedClientId = "iotagr-" + hardwareId();
+  return apiUrl == API_BASE_URL && mqttUseTls && mqttHost == MQTT_PRODUCTION_HOST &&
+         mqttPort == MQTT_PRODUCTION_PORT && !deviceKey.isEmpty() &&
+         mqttUsername == deviceKey && !mqttPassword.isEmpty() &&
+         mqttClientId == expectedClientId;
+}
+
+const char* settingsSlotNamespace(uint8_t slot) {
+  return slot == 0 ? SETTINGS_SLOT_A_NAMESPACE : SETTINGS_SLOT_B_NAMESPACE;
+}
+
+uint8_t activeSettingsSlot() {
+  Preferences control;
+  if (!control.begin(SETTINGS_CONTROL_NAMESPACE, true)) return 0xFF;
+  const uint8_t active = control.getUChar("active", 0xFF);
+  control.end();
+  return active <= 1 ? active : 0xFF;
+}
+
+bool loadSettingsSlot(uint8_t slot) {
+  Preferences stored;
+  if (!stored.begin(settingsSlotNamespace(slot), true)) return false;
+  if (!stored.getBool("ready", false)) {
+    stored.end();
+    return false;
+  }
+
+  const String loadedSsid = stored.getString("ssid");
+  const String loadedPassword = stored.getString("wifi_pass");
+  const String loadedApiUrl = stored.getString("api");
+  const String loadedMqttHost = stored.getString("mqtt_host");
+  const String loadedDeviceKey = stored.getString("device_key");
+  const int loadedMqttPort = stored.getInt("mqtt_port", 0);
+  const bool loadedUseTls = stored.getBool("tls", false);
+  const String loadedMqttUsername = stored.getString("mqtt_user");
+  const String loadedMqttPassword = stored.getString("mqtt_pass");
+  const String loadedMqttClientId = stored.getString("client_id");
+  stored.end();
+
+  const String expectedClientId = "iotagr-" + hardwareId();
+  if (loadedSsid.isEmpty() || loadedApiUrl != API_BASE_URL || !loadedUseTls ||
+      loadedMqttHost != MQTT_PRODUCTION_HOST || loadedMqttPort != MQTT_PRODUCTION_PORT ||
+      loadedDeviceKey.isEmpty() || loadedMqttUsername != loadedDeviceKey ||
+      loadedMqttPassword.isEmpty() || loadedMqttClientId != expectedClientId) {
+    return false;
+  }
+
+  savedSsid = loadedSsid;
+  savedPassword = loadedPassword;
+  apiUrl = loadedApiUrl;
+  mqttHost = loadedMqttHost;
+  deviceKey = loadedDeviceKey;
+  mqttPort = loadedMqttPort;
+  mqttUseTls = loadedUseTls;
+  mqttUsername = loadedMqttUsername;
+  mqttPassword = loadedMqttPassword;
+  mqttClientId = loadedMqttClientId;
+  return true;
+}
+
+bool loadSettings() {
+  const uint8_t active = activeSettingsSlot();
+  if (active <= 1 && loadSettingsSlot(active)) return true;
+  if (active <= 1) return loadSettingsSlot(1 - active);
+  return loadSettingsSlot(0) || loadSettingsSlot(1);
+}
+
+bool saveSettingsAtomically(const String& ssid, const String& password) {
+  if (ssid.isEmpty() || !credentialsComplete()) return false;
+
+  const uint8_t active = activeSettingsSlot();
+  const uint8_t targetSlot = active <= 1 ? 1 - active : 0;
+  Preferences target;
+  if (!target.begin(settingsSlotNamespace(targetSlot), false) || !target.clear()) {
+    target.end();
+    return false;
+  }
+
+  bool stored = true;
+  stored &= target.putString("ssid", ssid) == ssid.length();
+  target.putString("wifi_pass", password);
+  stored &= target.putString("api", apiUrl) == apiUrl.length();
+  stored &= target.putString("mqtt_host", mqttHost) == mqttHost.length();
+  stored &= target.putString("device_key", deviceKey) == deviceKey.length();
+  stored &= target.putInt("mqtt_port", mqttPort) > 0;
+  stored &= target.putBool("tls", mqttUseTls) > 0;
+  stored &= target.putString("mqtt_user", mqttUsername) == mqttUsername.length();
+  stored &= target.putString("mqtt_pass", mqttPassword) == mqttPassword.length();
+  stored &= target.putString("client_id", mqttClientId) == mqttClientId.length();
+  if (stored) stored = target.putBool("ready", true) > 0;  // Slot commit marker is written last.
+  target.end();
+  if (!stored || !loadSettingsSlot(targetSlot)) return false;
+
+  Preferences control;
+  if (!control.begin(SETTINGS_CONTROL_NAMESPACE, false)) return false;
+  const bool selected = control.putUChar("active", targetSlot) > 0;  // Atomic slot switch.
+  control.end();
+  return selected;
+}
+
 void configureMqttTopics() {
   const String prefix = "devices/" + deviceKey;
   readingsTopic = prefix + "/readings";
   pumpCommandTopic = prefix + "/commands/pump";
   pumpStatusTopic = prefix + "/pump-status";
-  // Additive firmware extension. The current backend only owns the pump topics.
   lightCommandTopic = prefix + "/commands/light";
   lightStatusTopic = prefix + "/light-status";
 }
@@ -206,7 +405,10 @@ void configureMqttTopics() {
 void setPumpOutput(bool on) {
   pumpOn = on;
   digitalWrite(PUMP_RELAY_PIN, on ? HIGH : LOW);
-  if (!on) pumpTimerActive = false;
+  if (!on) {
+    pumpTimerActive = false;
+    pumpScheduledEndEpoch = 0;
+  }
 }
 
 void setLightOutput(bool on) {
@@ -256,29 +458,42 @@ void publishLightStatus(const String& commandId, bool success, const char* reaso
 }
 
 void rememberCommand(LastCommand& record, const String& id, bool requestedState,
-                     uint32_t durationSeconds, bool success, const char* reason) {
+                     uint32_t durationSeconds, bool success, const char* reason,
+                     const String& source = "", const String& issuedAtUtc = "",
+                     const String& scheduledEndUtc = "") {
   record.id = id;
   record.requestedState = requestedState;
   record.durationSeconds = durationSeconds;
   record.success = success;
   record.reason = reason == nullptr ? "" : reason;
+  record.source = source;
+  record.issuedAtUtc = issuedAtUtc;
+  record.scheduledEndUtc = scheduledEndUtc;
 }
 
 void handlePumpCommand(const String& payload) {
   const String commandId = jsonString(payload, "commandId");
+  const String source = jsonString(payload, "source");
+  const String issuedAtUtc = jsonString(payload, "issuedAtUtc");
+  const String scheduledEndUtc = jsonString(payload, "scheduledEndUtc");
   bool requestedOn = false;
   uint32_t durationSeconds = 0;
   const bool hasState = jsonBool(payload, "isOn", requestedOn);
   const bool hasDuration = jsonUnsigned(payload, "durationSeconds", durationSeconds);
+  time_t issuedAtEpoch = 0;
 
-  if (commandId.isEmpty() || commandId.length() > 64 || !hasState) {
+  if (commandId.isEmpty() || commandId.length() > 64 || !hasState ||
+      (source != "manual" && source != "scheduled") ||
+      !parseUtcTimestamp(issuedAtUtc, issuedAtEpoch)) {
     publishPumpStatus(commandId, false, "INVALID_COMMAND");
     return;
   }
 
   if (lastPumpCommand.id == commandId) {
     if (lastPumpCommand.requestedState != requestedOn ||
-        (requestedOn && lastPumpCommand.durationSeconds != durationSeconds)) {
+        (requestedOn && lastPumpCommand.durationSeconds != durationSeconds) ||
+        lastPumpCommand.source != source || lastPumpCommand.issuedAtUtc != issuedAtUtc ||
+        lastPumpCommand.scheduledEndUtc != scheduledEndUtc) {
       publishPumpStatus(commandId, false, "COMMAND_ID_CONFLICT");
       return;
     }
@@ -288,15 +503,65 @@ void handlePumpCommand(const String& payload) {
   }
 
   if (requestedOn && (!hasDuration || durationSeconds == 0 || durationSeconds > MAX_PUMP_DURATION_SECONDS)) {
-    rememberCommand(lastPumpCommand, commandId, requestedOn, durationSeconds, false, "INVALID_DURATION");
+    rememberCommand(lastPumpCommand, commandId, requestedOn, durationSeconds, false, "INVALID_DURATION",
+                    source, issuedAtUtc, scheduledEndUtc);
     publishPumpStatus(commandId, false, "INVALID_DURATION");
+    return;
+  }
+
+  if (!clockIsSynchronized()) {
+    rememberCommand(lastPumpCommand, commandId, requestedOn, durationSeconds, false, "CLOCK_NOT_SYNCED",
+                    source, issuedAtUtc, scheduledEndUtc);
+    publishPumpStatus(commandId, false, "CLOCK_NOT_SYNCED");
+    return;
+  }
+
+  const time_t nowUtc = time(nullptr);
+  if (issuedAtEpoch > nowUtc + MAX_CLOCK_SKEW_SECONDS) {
+    rememberCommand(lastPumpCommand, commandId, requestedOn, durationSeconds, false, "INVALID_COMMAND_TIME",
+                    source, issuedAtUtc, scheduledEndUtc);
+    publishPumpStatus(commandId, false, "INVALID_COMMAND_TIME");
+    return;
+  }
+
+  uint32_t effectiveDurationSeconds = durationSeconds;
+  time_t scheduledEndEpoch = 0;
+  if (source == "scheduled") {
+    if (!requestedOn || !parseUtcTimestamp(scheduledEndUtc, scheduledEndEpoch) ||
+        scheduledEndEpoch <= issuedAtEpoch) {
+      rememberCommand(lastPumpCommand, commandId, requestedOn, durationSeconds, false, "INVALID_SCHEDULE_WINDOW",
+                      source, issuedAtUtc, scheduledEndUtc);
+      publishPumpStatus(commandId, false, "INVALID_SCHEDULE_WINDOW");
+      return;
+    }
+    if (scheduledEndEpoch <= nowUtc) {
+      rememberCommand(lastPumpCommand, commandId, requestedOn, durationSeconds, false, "SCHEDULE_EXPIRED",
+                      source, issuedAtUtc, scheduledEndUtc);
+      publishPumpStatus(commandId, false, "SCHEDULE_EXPIRED");
+      return;
+    }
+    const time_t remainingSeconds = scheduledEndEpoch - nowUtc;
+    if (remainingSeconds < static_cast<time_t>(effectiveDurationSeconds)) {
+      effectiveDurationSeconds = static_cast<uint32_t>(remainingSeconds);
+    }
+    if (effectiveDurationSeconds == 0) {
+      rememberCommand(lastPumpCommand, commandId, requestedOn, durationSeconds, false, "SCHEDULE_EXPIRED",
+                      source, issuedAtUtc, scheduledEndUtc);
+      publishPumpStatus(commandId, false, "SCHEDULE_EXPIRED");
+      return;
+    }
+  } else if (!scheduledEndUtc.isEmpty()) {
+    rememberCommand(lastPumpCommand, commandId, requestedOn, durationSeconds, false, "INVALID_SCHEDULE_WINDOW",
+                    source, issuedAtUtc, scheduledEndUtc);
+    publishPumpStatus(commandId, false, "INVALID_SCHEDULE_WINDOW");
     return;
   }
 
   const char* safetyReason = requestedOn ? waterSafetyReason() : nullptr;
   if (safetyReason != nullptr) {
     setPumpOutput(false);
-    rememberCommand(lastPumpCommand, commandId, requestedOn, durationSeconds, false, safetyReason);
+    rememberCommand(lastPumpCommand, commandId, requestedOn, durationSeconds, false, safetyReason,
+                    source, issuedAtUtc, scheduledEndUtc);
     publishPumpStatus(commandId, false, safetyReason);
     return;
   }
@@ -304,9 +569,11 @@ void handlePumpCommand(const String& payload) {
   setPumpOutput(requestedOn);
   if (requestedOn) {
     pumpTimerActive = true;
-    pumpOffAtMs = millis() + durationSeconds * 1000UL;
+    pumpOffAtMs = millis() + effectiveDurationSeconds * 1000UL;
+    pumpScheduledEndEpoch = source == "scheduled" ? scheduledEndEpoch : 0;
   }
-  rememberCommand(lastPumpCommand, commandId, requestedOn, durationSeconds, true, nullptr);
+  rememberCommand(lastPumpCommand, commandId, requestedOn, durationSeconds, true, nullptr,
+                  source, issuedAtUtc, scheduledEndUtc);
   publishPumpStatus(commandId, true, nullptr);
 }
 
@@ -358,8 +625,12 @@ bool connectWifiBlocking(const String& ssid, const String& password) {
 }
 
 bool claimDevice(const String& code) {
+  if (apiUrl != API_BASE_URL || !syncClockBlocking()) return false;
+
   HTTPClient http;
-  http.begin(apiUrl + "/api/device-provisioning/claims");
+  const String claimUrl = apiUrl + "/api/device-provisioning/claims";
+  network.stop();
+  if (!http.begin(network, claimUrl)) return false;
   http.addHeader("Content-Type", "application/json");
   const String body = "{\"code\":\"" + code + "\",\"hardwareId\":\"" + hardwareId() + "\"}";
   const int status = http.POST(body);
@@ -368,23 +639,29 @@ bool claimDevice(const String& code) {
   if (status != HTTP_CODE_OK) return false;
 
   bool useTls = false;
-  if (!jsonBool(response, "useTls", useTls) || useTls) return false;
-  deviceKey = jsonString(response, "deviceKey");
-  mqttHost = jsonString(response, "mqttHost");
-  mqttPort = jsonInt(response, "mqttPort");
-  configureMqttTopics();
-  return !deviceKey.isEmpty() && !mqttHost.isEmpty() && mqttPort > 0;
-}
+  if (!jsonBool(response, "useTls", useTls) || !useTls) return false;
+  const String claimedDeviceKey = jsonString(response, "deviceKey");
+  const String claimedMqttHost = jsonString(response, "mqttHost");
+  const int claimedMqttPort = jsonInt(response, "mqttPort");
+  const String claimedMqttUsername = jsonString(response, "mqttUsername");
+  const String claimedMqttPassword = jsonString(response, "mqttPassword");
+  const String claimedMqttClientId = jsonString(response, "mqttClientId");
+  const String expectedClientId = "iotagr-" + hardwareId();
+  if (claimedDeviceKey.isEmpty() || claimedMqttHost != MQTT_PRODUCTION_HOST ||
+      claimedMqttPort != MQTT_PRODUCTION_PORT || claimedMqttUsername != claimedDeviceKey ||
+      claimedMqttPassword.isEmpty() || claimedMqttClientId != expectedClientId) {
+    return false;
+  }
 
-void saveSettings(const String& ssid, const String& password) {
-  settings.begin("iotagri", false);
-  settings.putString("ssid", ssid);
-  settings.putString("pass", password);
-  settings.putString("api", apiUrl);
-  settings.putString("host", mqttHost);
-  settings.putString("key", deviceKey);
-  settings.putInt("port", mqttPort);
-  settings.end();
+  deviceKey = claimedDeviceKey;
+  mqttHost = claimedMqttHost;
+  mqttPort = claimedMqttPort;
+  mqttUseTls = useTls;
+  mqttUsername = claimedMqttUsername;
+  mqttPassword = claimedMqttPassword;
+  mqttClientId = claimedMqttClientId;
+  configureMqttTopics();
+  return credentialsComplete();
 }
 
 String jsonEscape(const String& value) {
@@ -457,13 +734,13 @@ void handleNetworkScan() {
 void handleProvisionRequest(bool jsonResponse) {
   const String ssid = server.arg("wifi");
   const String password = server.arg("pass");
-  apiUrl = server.arg("api");
+  apiUrl = normalizedApiUrl(server.arg("api"));
   const String code = server.arg("code");
-  apiUrl.trim();
 
-  if (ssid.isEmpty() || apiUrl.isEmpty() || code.isEmpty()) {
-    if (jsonResponse) sendSetupJson(400, "{\"error\":\"Missing Wi-Fi, backend URL, or claim code.\"}");
-    else server.send(400, "text/plain", "Missing Wi-Fi, backend URL, or claim code.");
+  if (ssid.isEmpty() || code.isEmpty() || apiUrl != API_BASE_URL) {
+    const String message = "Wi-Fi, claim code, and the production HTTPS API are required.";
+    if (jsonResponse) sendSetupJson(400, "{\"error\":\"" + message + "\"}");
+    else server.send(400, "text/plain", message);
     return;
   }
 
@@ -485,7 +762,12 @@ void handleProvisionRequest(bool jsonResponse) {
     return;
   }
 
-  saveSettings(ssid, password);
+  if (!saveSettingsAtomically(ssid, password)) {
+    const String message = "Credentials were received but could not be committed safely. Re-provision the device.";
+    if (jsonResponse) sendSetupJson(500, "{\"error\":\"" + message + "\"}");
+    else server.send(500, "text/plain", message);
+    return;
+  }
   if (jsonResponse) sendSetupJson(200, "{\"ok\":true,\"message\":\"Connected. Device will restart now.\"}");
   else server.send(200, "text/plain", "Connected. Device will restart now.");
   delay(1000);
@@ -503,7 +785,7 @@ void startPortal() {
     server.send(200, "text/html", R"html(
       <h2>IOTAgri device setup</h2><form method='post' action='/save'>
       Wi-Fi name <input name='wifi' required><br>Wi-Fi password <input name='pass' type='password'><br>
-      Backend URL <input name='api' value='http://192.168.1.100:8080' required><br>
+      Backend URL <input name='api' value='https://api.aerogreen.vn' readonly required><br>
       Claim code <input name='code' required><br><button>Connect</button></form>)html");
   });
   server.on("/save", HTTP_POST, [] { handleProvisionRequest(false); });
@@ -533,12 +815,14 @@ void serviceMqtt(uint32_t now) {
     mqtt.loop();
     return;
   }
+  if (!clockIsSynchronized()) {
+    if (elapsed(now, lastNtpRetryMs, NTP_RETRY_INTERVAL_MS)) syncClockBlocking();
+    return;
+  }
   if (!elapsed(now, lastMqttReconnectMs, MQTT_RECONNECT_INTERVAL_MS)) return;
 
   lastMqttReconnectMs = now;
-  char clientId[32];
-  snprintf(clientId, sizeof(clientId), "iotagr-%s", hardwareId().c_str());
-  if (!mqtt.connect(clientId)) {
+  if (!mqtt.connect(mqttClientId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
     Serial.printf("MQTT retry later (%d)\n", mqtt.state());
     return;
   }
@@ -722,7 +1006,11 @@ void serviceTds(uint32_t now) {
 }
 
 void servicePumpTimer(uint32_t now) {
-  if (!pumpTimerActive || !deadlineReached(now, pumpOffAtMs)) return;
+  if (!pumpTimerActive) return;
+  const bool scheduledWindowEnded = pumpScheduledEndEpoch > 0 &&
+                                    clockIsSynchronized() &&
+                                    time(nullptr) >= pumpScheduledEndEpoch;
+  if (!deadlineReached(now, pumpOffAtMs) && !scheduledWindowEnded) return;
   setPumpOutput(false);
   Serial.println("Pump duration completed; pump is OFF");
   publishPumpStatus("", true, "DURATION_COMPLETE");
@@ -785,15 +1073,10 @@ void setup() {
   ds18b20.setWaitForConversion(false);
   requestWaterTemperature(millis());
 
-  settings.begin("iotagri", true);
-  savedSsid = settings.getString("ssid");
-  savedPassword = settings.getString("pass");
-  apiUrl = settings.getString("api");
-  mqttHost = settings.getString("host");
-  deviceKey = settings.getString("key");
-  mqttPort = settings.getInt("port");
-  settings.end();
-  configureMqttTopics();
+  network.setCACert(ISRG_ROOT_X1);
+  network.setHandshakeTimeout(15);
+  const bool settingsLoaded = loadSettings();
+  if (settingsLoaded) configureMqttTopics();
 
   mqtt.setServer(mqttHost.c_str(), mqttPort);
   mqtt.setCallback(onMqttMessage);
@@ -802,11 +1085,11 @@ void setup() {
   mqtt.setSocketTimeout(5);
 
   WiFi.mode(WIFI_STA);
-  if (savedSsid.isEmpty() || deviceKey.isEmpty() || mqttHost.isEmpty() || mqttPort <= 0 ||
-      !connectWifiBlocking(savedSsid, savedPassword)) {
+  if (!settingsLoaded || !connectWifiBlocking(savedSsid, savedPassword)) {
     startPortal();
   } else {
     Serial.printf("Wi-Fi connected: %s\n", WiFi.localIP().toString().c_str());
+    syncClockBlocking();
   }
 }
 
