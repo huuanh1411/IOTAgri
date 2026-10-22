@@ -15,7 +15,7 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onOpenAdminModal, onOpenOrderModal }) => {
   return (
-    <footer id="contact" className="border-t border-border bg-secondary/50">
+    <footer id="contact" className="scroll-mt-24 border-t border-border bg-secondary/50">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 lg:grid-cols-3 lg:px-10">
         <div>
           <a href="#top" className="flex items-center gap-2 font-display text-lg font-semibold">
@@ -42,12 +42,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdminModal, onOpenOrderMod
             <h4 className="font-display text-sm font-semibold text-foreground">Sản phẩm</h4>
             <ul className="mt-3 space-y-2 text-muted-foreground">
               <li>
-                <a href="#solutions" className="transition hover:text-foreground">
-                  Giải pháp
+                <a href="#product" className="transition hover:text-foreground">
+                  Thiết bị & refill
                 </a>
               </li>
               <li>
-                <a href="#product" className="transition hover:text-foreground">
+                <a href="#solutions" className="transition hover:text-foreground">
                   Tính năng
                 </a>
               </li>

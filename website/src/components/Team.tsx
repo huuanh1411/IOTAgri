@@ -25,7 +25,7 @@ function getInitials(name: string): string {
 
 export const Team: React.FC = () => {
   return (
-    <section id="team" className="scroll-mt-20 border-t border-border bg-secondary/30 py-24 md:py-32">
+    <section id="team" className="scroll-mt-24 border-t border-border bg-secondary/30 py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
         <div className="mx-auto max-w-2xl text-center">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">

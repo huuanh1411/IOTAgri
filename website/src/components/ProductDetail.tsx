@@ -21,7 +21,7 @@ const features = [
 
 export const ProductDetail: React.FC = () => {
   return (
-    <section id="product" className="scroll-mt-20 py-24 md:py-32">
+    <section id="solutions" className="scroll-mt-24 py-24 md:py-32">
       <div className="mx-auto grid max-w-7xl items-center gap-14 px-6 lg:grid-cols-2 lg:gap-20 lg:px-10">
         <div className="relative order-last lg:order-first">
           <div className="overflow-hidden rounded-3xl shadow-soft ring-1 ring-black/5">
