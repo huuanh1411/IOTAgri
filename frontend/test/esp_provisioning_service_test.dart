@@ -89,4 +89,42 @@ void main() {
       ),
     );
   });
+
+  test('classifies Wi-Fi failures without exposing the password', () async {
+    final service = EspProvisioningService(
+      client: MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'error':
+                'Wi-Fi connection failed. Check SSID, password, and 2.4 GHz availability.',
+            'wifiStatus': 4,
+          }),
+          400,
+        ),
+      ),
+      baseUrl: 'http://192.168.4.1',
+    );
+
+    await expectLater(
+      service.provision(
+        ssid: 'BETEA',
+        password: 'never-log-this',
+        backendUrl: 'https://api.aerogreen.vn',
+        claimCode: 'ABC123',
+      ),
+      throwsA(
+        isA<EspProvisioningException>()
+            .having(
+              (error) => error.failure,
+              'failure',
+              EspProvisioningFailure.wifiCredentials,
+            )
+            .having(
+              (error) => error.message,
+              'message',
+              isNot(contains('never-log-this')),
+            ),
+      ),
+    );
+  });
 }

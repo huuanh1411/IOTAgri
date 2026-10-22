@@ -32,11 +32,24 @@ class EspWifiNetwork {
 
 class EspProvisioningException implements Exception {
   final String message;
+  final EspProvisioningFailure failure;
 
-  const EspProvisioningException(this.message);
+  const EspProvisioningException(
+    this.message, {
+    this.failure = EspProvisioningFailure.unknown,
+  });
 
   @override
   String toString() => message;
+}
+
+enum EspProvisioningFailure {
+  espUnavailable,
+  networkUnavailable,
+  wifiCredentials,
+  claimRejected,
+  persistence,
+  unknown,
 }
 
 class EspProvisioningService {
@@ -55,7 +68,11 @@ class EspProvisioningService {
     final response = await _client
         .get(_uri('/api/status'))
         .timeout(const Duration(seconds: 8));
-    _requireSuccess(response, 'Không tìm thấy ESP tại ${_baseUri.host}.');
+    _requireSuccess(
+      response,
+      'Không tìm thấy ESP tại ${_baseUri.host}.',
+      fallbackFailure: EspProvisioningFailure.espUnavailable,
+    );
     return EspDeviceStatus.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
@@ -65,7 +82,11 @@ class EspProvisioningService {
     final response = await _client
         .get(_uri('/api/networks'))
         .timeout(const Duration(seconds: 15));
-    _requireSuccess(response, 'ESP không quét được mạng Wi-Fi.');
+    _requireSuccess(
+      response,
+      'ESP không quét được mạng Wi-Fi.',
+      fallbackFailure: EspProvisioningFailure.espUnavailable,
+    );
 
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
     final networks = (decoded['networks'] as List<dynamic>? ?? const [])
@@ -96,16 +117,48 @@ class EspProvisioningService {
     _requireSuccess(response, 'ESP không thể hoàn tất thiết lập.');
   }
 
-  void _requireSuccess(http.Response response, String fallback) {
+  void _requireSuccess(
+    http.Response response,
+    String fallback, {
+    EspProvisioningFailure fallbackFailure = EspProvisioningFailure.unknown,
+  }) {
     if (response.statusCode >= 200 && response.statusCode < 300) return;
     try {
       final body = jsonDecode(response.body) as Map<String, dynamic>;
-      throw EspProvisioningException(body['error'] as String? ?? fallback);
+      final message = body['error'] as String? ?? fallback;
+      throw EspProvisioningException(
+        message,
+        failure: _classifyFailure(message, body['wifiStatus'] as num?),
+      );
     } on FormatException {
       throw EspProvisioningException(
         response.body.trim().isEmpty ? fallback : response.body.trim(),
+        failure: fallbackFailure,
       );
     }
+  }
+
+  EspProvisioningFailure _classifyFailure(String message, num? wifiStatus) {
+    final normalized = message.toLowerCase();
+    if (wifiStatus == 1) {
+      return EspProvisioningFailure.networkUnavailable;
+    }
+    if (wifiStatus == 4) {
+      return EspProvisioningFailure.wifiCredentials;
+    }
+    if (normalized.contains('claim')) {
+      return EspProvisioningFailure.claimRejected;
+    }
+    if (normalized.contains('committed') || normalized.contains('persist')) {
+      return EspProvisioningFailure.persistence;
+    }
+    if (normalized.contains('2.4 ghz')) {
+      return EspProvisioningFailure.networkUnavailable;
+    }
+    if (normalized.contains('password')) {
+      return EspProvisioningFailure.wifiCredentials;
+    }
+    return EspProvisioningFailure.unknown;
   }
 
   void close() {

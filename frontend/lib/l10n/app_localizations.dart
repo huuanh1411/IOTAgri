@@ -2730,6 +2730,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Average'**
   String get averageLabel;
+
+  /// No description provided for @prepareDeviceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare the Device'**
+  String get prepareDeviceTitle;
+
+  /// No description provided for @prepareDevicePower.
+  ///
+  /// In en, this message translates to:
+  /// **'Power on the ESP device.'**
+  String get prepareDevicePower;
+
+  /// No description provided for @prepareDeviceWaitForNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for the IOTAgri-Setup Wi-Fi network to appear.'**
+  String get prepareDeviceWaitForNetwork;
+
+  /// No description provided for @noInternetIsNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'A No Internet warning is normal during setup.'**
+  String get noInternetIsNormal;
+
+  /// No description provided for @deviceIsReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Is Ready'**
+  String get deviceIsReady;
+
+  /// No description provided for @connectToEspTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the ESP'**
+  String get connectToEspTitle;
+
+  /// No description provided for @webWifiSwitchInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Wi-Fi settings, select IOTAgri-Setup, ignore the No Internet warning, and return to this page.'**
+  String get webWifiSwitchInstructions;
+
+  /// No description provided for @connectToEspAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to ESP'**
+  String get connectToEspAction;
+
+  /// No description provided for @espNotFoundRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect this device to IOTAgri-Setup, check that the ESP has power, then try again.'**
+  String get espNotFoundRecovery;
+
+  /// No description provided for @selectWifiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Your Wi-Fi Network'**
+  String get selectWifiTitle;
+
+  /// No description provided for @deviceFoundHardware.
+  ///
+  /// In en, this message translates to:
+  /// **'✓ Device Found\nHardware ID: …{suffix}'**
+  String deviceFoundHardware(String suffix);
+
+  /// No description provided for @enterAnotherNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter another network…'**
+  String get enterAnotherNetwork;
+
+  /// No description provided for @chooseScannedNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a scanned network'**
+  String get chooseScannedNetwork;
+
+  /// No description provided for @manualWifiCompatibilityWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden networks must use the 2.4 GHz band. This device cannot connect to 5 GHz-only networks.'**
+  String get manualWifiCompatibilityWarning;
+
+  /// No description provided for @setUpDeviceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Up Device'**
+  String get setUpDeviceAction;
+
+  /// No description provided for @incorrectWifiPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'The ESP found the network but could not connect. Check the password and try again.'**
+  String get incorrectWifiPassword;
+
+  /// No description provided for @incompatibleWifiNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'This device only supports 2.4 GHz Wi-Fi. Select a compatible network and try again.'**
+  String get incompatibleWifiNetwork;
+
+  /// No description provided for @expiredCodeRegenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'Your setup code expired. Generating a new code…'**
+  String get expiredCodeRegenerating;
+
+  /// No description provided for @expiredCodeRegenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'A new setup code is ready. Your Wi-Fi details were preserved; select Set Up Device again.'**
+  String get expiredCodeRegenerated;
+
+  /// No description provided for @espCouldNotSaveConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'The ESP connected but could not save the configuration. Please try again.'**
+  String get espCouldNotSaveConfiguration;
+
+  /// No description provided for @provisioningOutcomeChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'The device may have received the configuration. Checking its status with the server…'**
+  String get provisioningOutcomeChecking;
+
+  /// No description provided for @deviceSwitchingNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'The device is switching to your main Wi-Fi network. This may take 30–60 seconds.'**
+  String get deviceSwitchingNetwork;
+
+  /// No description provided for @deviceWifiButNotOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'The device connected to Wi-Fi but cannot reach the server yet. Check the Internet connection and wait a little longer.'**
+  String get deviceWifiButNotOnline;
+
+  /// No description provided for @settingUpDeviceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting Up'**
+  String get settingUpDeviceTitle;
+
+  /// No description provided for @progressEspConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'ESP connected'**
+  String get progressEspConnected;
+
+  /// No description provided for @progressCredentialsSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Wi-Fi credentials sent'**
+  String get progressCredentialsSent;
+
+  /// No description provided for @progressConnectingWifi.
+  ///
+  /// In en, this message translates to:
+  /// **'ESP connecting to {ssid}'**
+  String progressConnectingWifi(String ssid);
+
+  /// No description provided for @progressRegisteringServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Registering with the server'**
+  String get progressRegisteringServer;
+
+  /// No description provided for @progressConnectingMqtt.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting device services'**
+  String get progressConnectingMqtt;
+
+  /// No description provided for @espConnectedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'ESP Connected Successfully'**
+  String get espConnectedSuccessfully;
+
+  /// No description provided for @wifiLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wi-Fi'**
+  String get wifiLabel;
+
+  /// No description provided for @onlineStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get onlineStatus;
+
+  /// No description provided for @sensorDataLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor Data'**
+  String get sensorDataLabel;
+
+  /// No description provided for @sensorDataReceivedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get sensorDataReceivedStatus;
+
+  /// No description provided for @sensorDataWaitingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for first reading'**
+  String get sensorDataWaitingStatus;
+
+  /// No description provided for @viewDeviceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View Device'**
+  String get viewDeviceAction;
+
+  /// No description provided for @technicalInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical Information'**
+  String get technicalInformation;
+
+  /// No description provided for @hardwareIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hardware ID'**
+  String get hardwareIdLabel;
+
+  /// No description provided for @backendUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Backend URL'**
+  String get backendUrlLabel;
+
+  /// No description provided for @backAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get backAction;
+
+  /// No description provided for @setupStepProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String setupStepProgress(int current, int total);
 }
 
 class _AppLocalizationsDelegate

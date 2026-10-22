@@ -1503,4 +1503,146 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get averageLabel => 'Trung bình';
+
+  @override
+  String get prepareDeviceTitle => 'Chuẩn bị thiết bị';
+
+  @override
+  String get prepareDevicePower => 'Bật nguồn thiết bị ESP.';
+
+  @override
+  String get prepareDeviceWaitForNetwork =>
+      'Chờ mạng Wi-Fi IOTAgri-Setup xuất hiện.';
+
+  @override
+  String get noInternetIsNormal =>
+      'Cảnh báo Không có Internet là bình thường trong khi thiết lập.';
+
+  @override
+  String get deviceIsReady => 'Thiết bị đã sẵn sàng';
+
+  @override
+  String get connectToEspTitle => 'Kết nối với ESP';
+
+  @override
+  String get webWifiSwitchInstructions =>
+      'Mở cài đặt Wi-Fi, chọn IOTAgri-Setup, bỏ qua cảnh báo Không có Internet rồi quay lại trang này.';
+
+  @override
+  String get connectToEspAction => 'Kết nối với ESP';
+
+  @override
+  String get espNotFoundRecovery =>
+      'Hãy kết nối thiết bị này với IOTAgri-Setup, kiểm tra nguồn ESP rồi thử lại.';
+
+  @override
+  String get selectWifiTitle => 'Chọn mạng Wi-Fi chính';
+
+  @override
+  String deviceFoundHardware(String suffix) {
+    return '✓ Đã tìm thấy thiết bị\nID phần cứng: …$suffix';
+  }
+
+  @override
+  String get enterAnotherNetwork => 'Nhập mạng khác…';
+
+  @override
+  String get chooseScannedNetwork => 'Chọn mạng đã quét';
+
+  @override
+  String get manualWifiCompatibilityWarning =>
+      'Mạng ẩn phải sử dụng băng tần 2.4 GHz. Thiết bị không thể kết nối với mạng chỉ hỗ trợ 5 GHz.';
+
+  @override
+  String get setUpDeviceAction => 'Thiết lập thiết bị';
+
+  @override
+  String get incorrectWifiPassword =>
+      'ESP đã tìm thấy mạng nhưng không thể kết nối. Hãy kiểm tra mật khẩu rồi thử lại.';
+
+  @override
+  String get incompatibleWifiNetwork =>
+      'Thiết bị chỉ hỗ trợ Wi-Fi 2.4 GHz. Hãy chọn mạng tương thích rồi thử lại.';
+
+  @override
+  String get expiredCodeRegenerating =>
+      'Mã thiết lập đã hết hạn. Đang tạo mã mới…';
+
+  @override
+  String get expiredCodeRegenerated =>
+      'Mã thiết lập mới đã sẵn sàng. Thông tin Wi-Fi vẫn được giữ; hãy chọn Thiết lập thiết bị lần nữa.';
+
+  @override
+  String get espCouldNotSaveConfiguration =>
+      'ESP đã kết nối nhưng không thể lưu cấu hình. Vui lòng thử lại.';
+
+  @override
+  String get provisioningOutcomeChecking =>
+      'Thiết bị có thể đã nhận cấu hình. Đang kiểm tra trạng thái với máy chủ…';
+
+  @override
+  String get deviceSwitchingNetwork =>
+      'Thiết bị đang chuyển sang mạng Wi-Fi chính. Quá trình này có thể mất 30–60 giây.';
+
+  @override
+  String get deviceWifiButNotOnline =>
+      'Thiết bị đã kết nối Wi-Fi nhưng chưa thể truy cập máy chủ. Hãy kiểm tra Internet và chờ thêm một chút.';
+
+  @override
+  String get settingUpDeviceTitle => 'Đang thiết lập';
+
+  @override
+  String get progressEspConnected => 'Đã kết nối ESP';
+
+  @override
+  String get progressCredentialsSent => 'Đã gửi thông tin Wi-Fi';
+
+  @override
+  String progressConnectingWifi(String ssid) {
+    return 'ESP đang kết nối với $ssid';
+  }
+
+  @override
+  String get progressRegisteringServer => 'Đang đăng ký với máy chủ';
+
+  @override
+  String get progressConnectingMqtt => 'Đang kết nối dịch vụ thiết bị';
+
+  @override
+  String get espConnectedSuccessfully => 'ESP đã kết nối thành công';
+
+  @override
+  String get wifiLabel => 'Wi-Fi';
+
+  @override
+  String get onlineStatus => 'Trực tuyến';
+
+  @override
+  String get sensorDataLabel => 'Dữ liệu cảm biến';
+
+  @override
+  String get sensorDataReceivedStatus => 'Đã nhận';
+
+  @override
+  String get sensorDataWaitingStatus => 'Đang chờ dữ liệu đầu tiên';
+
+  @override
+  String get viewDeviceAction => 'Xem thiết bị';
+
+  @override
+  String get technicalInformation => 'Thông tin kỹ thuật';
+
+  @override
+  String get hardwareIdLabel => 'ID phần cứng';
+
+  @override
+  String get backendUrlLabel => 'URL máy chủ';
+
+  @override
+  String get backAction => 'Quay lại';
+
+  @override
+  String setupStepProgress(int current, int total) {
+    return 'Bước $current/$total';
+  }
 }

@@ -1513,4 +1513,146 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get averageLabel => 'Average';
+
+  @override
+  String get prepareDeviceTitle => 'Prepare the Device';
+
+  @override
+  String get prepareDevicePower => 'Power on the ESP device.';
+
+  @override
+  String get prepareDeviceWaitForNetwork =>
+      'Wait for the IOTAgri-Setup Wi-Fi network to appear.';
+
+  @override
+  String get noInternetIsNormal =>
+      'A No Internet warning is normal during setup.';
+
+  @override
+  String get deviceIsReady => 'Device Is Ready';
+
+  @override
+  String get connectToEspTitle => 'Connect to the ESP';
+
+  @override
+  String get webWifiSwitchInstructions =>
+      'Open Wi-Fi settings, select IOTAgri-Setup, ignore the No Internet warning, and return to this page.';
+
+  @override
+  String get connectToEspAction => 'Connect to ESP';
+
+  @override
+  String get espNotFoundRecovery =>
+      'Connect this device to IOTAgri-Setup, check that the ESP has power, then try again.';
+
+  @override
+  String get selectWifiTitle => 'Select Your Wi-Fi Network';
+
+  @override
+  String deviceFoundHardware(String suffix) {
+    return '✓ Device Found\nHardware ID: …$suffix';
+  }
+
+  @override
+  String get enterAnotherNetwork => 'Enter another network…';
+
+  @override
+  String get chooseScannedNetwork => 'Choose a scanned network';
+
+  @override
+  String get manualWifiCompatibilityWarning =>
+      'Hidden networks must use the 2.4 GHz band. This device cannot connect to 5 GHz-only networks.';
+
+  @override
+  String get setUpDeviceAction => 'Set Up Device';
+
+  @override
+  String get incorrectWifiPassword =>
+      'The ESP found the network but could not connect. Check the password and try again.';
+
+  @override
+  String get incompatibleWifiNetwork =>
+      'This device only supports 2.4 GHz Wi-Fi. Select a compatible network and try again.';
+
+  @override
+  String get expiredCodeRegenerating =>
+      'Your setup code expired. Generating a new code…';
+
+  @override
+  String get expiredCodeRegenerated =>
+      'A new setup code is ready. Your Wi-Fi details were preserved; select Set Up Device again.';
+
+  @override
+  String get espCouldNotSaveConfiguration =>
+      'The ESP connected but could not save the configuration. Please try again.';
+
+  @override
+  String get provisioningOutcomeChecking =>
+      'The device may have received the configuration. Checking its status with the server…';
+
+  @override
+  String get deviceSwitchingNetwork =>
+      'The device is switching to your main Wi-Fi network. This may take 30–60 seconds.';
+
+  @override
+  String get deviceWifiButNotOnline =>
+      'The device connected to Wi-Fi but cannot reach the server yet. Check the Internet connection and wait a little longer.';
+
+  @override
+  String get settingUpDeviceTitle => 'Setting Up';
+
+  @override
+  String get progressEspConnected => 'ESP connected';
+
+  @override
+  String get progressCredentialsSent => 'Wi-Fi credentials sent';
+
+  @override
+  String progressConnectingWifi(String ssid) {
+    return 'ESP connecting to $ssid';
+  }
+
+  @override
+  String get progressRegisteringServer => 'Registering with the server';
+
+  @override
+  String get progressConnectingMqtt => 'Connecting device services';
+
+  @override
+  String get espConnectedSuccessfully => 'ESP Connected Successfully';
+
+  @override
+  String get wifiLabel => 'Wi-Fi';
+
+  @override
+  String get onlineStatus => 'Online';
+
+  @override
+  String get sensorDataLabel => 'Sensor Data';
+
+  @override
+  String get sensorDataReceivedStatus => 'Received';
+
+  @override
+  String get sensorDataWaitingStatus => 'Waiting for first reading';
+
+  @override
+  String get viewDeviceAction => 'View Device';
+
+  @override
+  String get technicalInformation => 'Technical Information';
+
+  @override
+  String get hardwareIdLabel => 'Hardware ID';
+
+  @override
+  String get backendUrlLabel => 'Backend URL';
+
+  @override
+  String get backAction => 'Back';
+
+  @override
+  String setupStepProgress(int current, int total) {
+    return 'Step $current of $total';
+  }
 }
