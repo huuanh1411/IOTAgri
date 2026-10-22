@@ -1,340 +1,184 @@
-# IOTAgri
+# Aerogreen Website
 
-IoT hydroponics/agriculture monitoring system with an ASP.NET Core backend and Flutter frontend.
+Website giới thiệu Aerogreen, bán thiết bị phần cứng và gói refill rau ăn.
+README này dành cho website trên nhánh `Website`.
 
-The `Website` branch also includes a React storefront in [`website/`](website/README.md)
-for hardware and prepaid refill packages, using this same backend, PostgreSQL database,
-and Identity accounts. MoMo configuration and the commerce API are documented there.
+## Chức năng
 
-## Tech Stack
+- Giới thiệu sản phẩm, giải pháp và đội ngũ.
+- Điều hướng cố định ở đầu màn hình khi cuộn trang.
+- Đăng ký, đăng nhập và xem lịch sử đơn hàng.
+- Chọn thiết bị hoặc gói refill, số lượng và địa chỉ nhận hàng.
+- Thanh toán một lần qua MoMo; theo dõi trạng thái thanh toán và giao hàng.
+- Quản trị danh mục, giá, gói nhiều chu kỳ và trạng thái giao hàng.
 
-- **ASP.NET Core 10** (Minimal API)
-- **PostgreSQL** via Entity Framework Core (`Npgsql.EntityFrameworkCore.PostgreSQL`)
-- **ASP.NET Core Identity** + JWT bearer authentication (access + refresh tokens)
-- **MQTT** (MQTTnet) for real-time sensor ingestion from ESP32 devices, via a local Mosquitto broker in dev
-- **Swagger / OpenAPI** for API exploration in Development
-- **GitHub Actions CI** for tests, Release builds, and Docker image builds
-- **Flutter Frontend** - Mobile app for device management and monitoring
+## Công nghệ
 
-## Features Implemented So Far
+| Thành phần | Công nghệ |
+| --- | --- |
+| Giao diện | React 18, TypeScript, Vite 6 |
+| CSS và icon | Tailwind CSS 3, Lucide React |
+| Backend | ASP.NET Core 10, C# |
+| Cơ sở dữ liệu | PostgreSQL 17, Entity Framework Core |
+| Tài khoản | ASP.NET Core Identity, JWT access/refresh token |
+| Thanh toán | MoMo `captureWallet`, xác minh kết quả qua IPN |
 
-### Auth
-- `POST /api/auth/register`, `/login`, `/refresh`, `/logout`
-- Email-based accounts, `User`/`Admin` roles, DB-backed refresh token rotation
+Frontend gọi API; backend chịu trách nhiệm tính tiền và lưu đơn hàng.
 
-### Device Management
-- `POST /GET /PUT /DELETE /api/devices` (+ `/api/devices/{id}`)
-- Each device gets a unique `DeviceKey` used to authenticate its MQTT publishes
-- Devices are scoped per owning user
+## Sản phẩm và cách bán
 
-### Sensor Ingestion (MQTT)
-- ESP32 devices publish JSON readings to `devices/{deviceKey}/readings` on the MQTT broker
-- A background service (`MqttIngestionService`) subscribes, validates the device key, and persists readings
-- `GET /api/devices/{deviceId}/readings` — reading history for a device
+| Sản phẩm | Giá khởi tạo | Nội dung |
+| --- | --- | --- |
+| Thiết bị Aerogreen | 2.950.000đ | Bộ thiết bị Aerogreen |
+| Gói rau ăn 1 chu kỳ | 299.000đ | Cây con và dung dịch dinh dưỡng |
+| Gói nhiều chu kỳ | Admin cấu hình | Số chu kỳ, vật tư và giá của toàn gói |
 
-### Pump Control, Scheduling, and Alerts
-- Authenticated owners can issue pump commands, view command history, and manage pump schedules.
-- Sensor readings evaluate configured temperature and water-level thresholds, with active and resolved alert history.
+Toàn bộ thiết bị và vật tư trong đơn được giao một lần. Gói refill được thanh toán
+trước, không tự động gia hạn hoặc trừ tiền định kỳ. Thông tin gói và giá được lưu
+theo thời điểm tạo đơn; thay đổi danh mục không làm đổi đơn đã tạo.
 
-### Dashboard / Aggregation
-- `GET /api/dashboard/overview` — all of a user's devices with latest reading + online status
-- `GET /api/devices/{deviceId}/readings/aggregated?interval=hour|day|...` — time-bucketed min/avg/max per metric, computed in PostgreSQL
+Phí giao hàng cấu hình bằng `STORE_SHIPPING_FEE_VND`, mặc định **0đ**.
 
-### Administration
-- Admins can manage user roles, view all devices/readings, reassign device ownership, and review audit logs.
+## Chạy website bằng Docker
 
-## Local Development
+Yêu cầu Docker Desktop đang chạy với Linux containers. Thực hiện từ thư mục gốc repo.
 
-Run the following commands in **PowerShell** from the project root (the directory containing `compose.yaml`).
-
-**Requirements:** Docker Desktop running with Linux containers and Docker Compose. The Compose stack includes the API, PostgreSQL 17, and Mosquitto. You do not need a local .NET SDK to run the backend through Docker.
-
-### 1. Configure the environment
+### 1. Tạo cấu hình local
 
 ```powershell
-# Create the configuration only if it does not already exist.
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
-notepad .env
-
-# Find this PC's LAN IPv4 address.
-ipconfig
 ```
 
-Update these values in `.env` before starting:
+Chỉnh các giá trị trong `.env`:
 
-| Variable | Description |
+| Biến | Mục đích |
 | --- | --- |
-| `POSTGRES_DB` | Database name; the example uses `iotagri` |
-| `POSTGRES_USER` | PostgreSQL username |
-| `POSTGRES_PASSWORD` | Set a unique database password |
-| `POSTGRES_PORT` | Local-only PostgreSQL host port; default `5432` |
-| `PGADMIN_PORT` | Local-only pgAdmin host port; default `5050` |
-| `PGADMIN_DEFAULT_EMAIL` / `PGADMIN_DEFAULT_PASSWORD` | pgAdmin sign-in credentials |
-| `JWT_KEY` | Set a unique signing key with at least 32 characters |
-| `ADMIN_BOOTSTRAP_EMAIL` / `ADMIN_BOOTSTRAP_PASSWORD` | Credentials for the initial administrator; replace sample values |
-| `ADMIN_BOOTSTRAP_FULL_NAME` | Display name for the initial administrator |
-| `API_PORT` | Host API port; the example uses `8080` |
-| `MQTT_PORT` | Host MQTT port; the example uses `1883` |
-| `MQTT_PUBLIC_HOST` | This PC's LAN IPv4, reachable by the ESP32 |
+| `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Database của website |
+| `POSTGRES_PORT` | Cổng PostgreSQL trên máy, mặc định 5432 |
+| `JWT_KEY` | Khóa ký token, ít nhất 32 ký tự |
+| `ADMIN_BOOTSTRAP_EMAIL`, `ADMIN_BOOTSTRAP_PASSWORD` | Tài khoản admin được tạo khi backend khởi động |
+| `ADMIN_BOOTSTRAP_FULL_NAME` | Tên hiển thị admin |
+| `API_PORT` | Cổng backend, mặc định 8080 |
+| `WEBSITE_PORT` | Cổng website Docker, mặc định 5180 |
+| `STORE_SHIPPING_FEE_VND` | Phí giao hàng cố định |
+| `PGADMIN_DEFAULT_EMAIL`, `PGADMIN_DEFAULT_PASSWORD` | Cần có để Compose đọc cấu hình gốc; không khởi động pgAdmin trong lệnh bên dưới |
 
-For example, if your PC's IPv4 is `192.168.1.100`, set `MQTT_PUBLIC_HOST=192.168.1.100`. Replace example IP addresses in this README with your PC's actual address.
+Giữ các biến hạ tầng còn lại từ file mẫu. Backend hiện có phụ thuộc service
+`mosquitto`; Compose tự khởi động dependency này khi chạy website.
 
-The root `.env` configures Docker Compose. Flutter's API URL is configured separately with `--dart-define=API_BASE_URL=...`.
-
-The API seeds roles and the configured administrator on startup. The administrator
-account is created only if its email does not already exist, and its Admin role is
-ensured on each startup. Replace all sample credentials, especially outside local
-development.
-
-### 2. Start the backend stack
+### 2. Khởi động
 
 ```powershell
-docker compose up -d --build
-docker compose ps
-docker compose logs -f api
+docker compose -p aerogreen-website-local -f compose.yaml -f compose.website.yaml up -d --build website
 ```
 
-The first build can take several minutes to download images and restore dependencies. Press `Ctrl+C` to stop following logs; the containers keep running.
+Lệnh chỉ chạy website và các dependency cần thiết. Backend tự áp dụng migration
+và khởi tạo danh mục khi chạy lần đầu.
 
-The API applies Entity Framework Core migrations and seeds roles and the configured
-administrator during startup. No manual database table creation is needed.
+Mở **http://127.0.0.1:5180/**, hoặc cổng đã đặt trong `WEBSITE_PORT`.
+Đăng nhập bằng tài khoản admin cấu hình trong `.env`.
 
-### 3. Verify the API
-
-Once the API has started:
+### 3. Kiểm tra và dừng
 
 ```powershell
-Invoke-RestMethod http://localhost:8080/health
+docker compose -p aerogreen-website-local -f compose.yaml -f compose.website.yaml ps
+docker compose -p aerogreen-website-local -f compose.yaml -f compose.website.yaml logs --tail 100 website api
+docker compose -p aerogreen-website-local -f compose.yaml -f compose.website.yaml stop
 ```
 
-Expected response: `status` is `ready`.
+Dừng service không xóa dữ liệu database.
 
-| Service | Address with the example configuration |
-| --- | --- |
-| API | `http://localhost:8080` |
-| Swagger UI | `http://localhost:8080/swagger` |
-| Health check | `http://localhost:8080/health` |
-| MQTT from your LAN | `<PC-LAN-IP>:1883` |
-| PostgreSQL from this PC | `127.0.0.1:5432` |
-| pgAdmin | `http://127.0.0.1:5050` |
+## Phát triển giao diện với Vite
 
-PostgreSQL and pgAdmin ports are bound to this PC only. If you change `API_PORT`,
-`MQTT_PORT`, `POSTGRES_PORT`, or `PGADMIN_PORT`, use the updated port in client
-connections. PostgreSQL remains available to containers at `postgres:5432`.
+Chạy backend và database:
 
-### 4. Register and create a device
+```powershell
+docker compose -p aerogreen-website-local -f compose.yaml -f compose.website.yaml up -d --build api
+```
 
-Register and sign in through the Flutter app or Swagger (`POST /api/auth/register`, `POST /api/auth/login`). In Swagger, authorize with the returned access token before calling authenticated endpoints. Create a device with `POST /api/devices`, then connect an ESP32 or use the optional simulator below.
+Mở terminal khác từ thư mục gốc repo:
 
-### Optional: test without an ESP32
+```powershell
+cd website
+npm ci
+npm run dev
+```
 
-The `pump-simulator` service acknowledges pump commands and can publish sample sensor
-readings every 10 seconds. After creating a device, retrieve its `deviceKey` from the
-device API and add it to `.env`:
+Mở **http://localhost:5173/**. Vite mặc định proxy `/api` đến
+`http://localhost:8080`.
+
+Nếu đổi `API_PORT` thành 5088, đặt proxy tương ứng trước khi chạy Vite:
+
+```powershell
+$env:API_PROXY_TARGET = "http://127.0.0.1:5088"
+npm run dev
+```
+
+Dùng `Ctrl+C` trong terminal Vite để dừng giao diện.
+
+## Thanh toán MoMo
+
+Mặc định thanh toán **chưa mở**. Website vẫn hiển thị sản phẩm và cho đăng nhập;
+tạo đơn và thanh toán chỉ hoạt động khi cấu hình MoMo đầy đủ.
+
+Thêm vào `.env`:
 
 ```dotenv
-PUMP_SIMULATOR_DEVICE_KEY=your-device-key
+MOMO_ENABLED=true
+MOMO_PARTNER_CODE=<merchant-partner-code>
+MOMO_ACCESS_KEY=<merchant-access-key>
+MOMO_SECRET_KEY=<merchant-secret-key>
+MOMO_ENDPOINT=https://test-payment.momo.vn/v2/gateway/api/create
+MOMO_REDIRECT_URL=https://<website-domain>/
+MOMO_IPN_URL=https://<api-domain>/api/store/payments/momo/ipn
 ```
 
-Start the simulator from the project root:
+Khởi động lại service `api` sau khi đổi cấu hình. Khóa merchant chỉ dùng ở backend.
+Cần kiểm thử sandbox với bộ khóa MoMo và URL IPN HTTPS công khai trước khi mở bán.
 
-```powershell
-docker compose --profile pump-simulator up -d pump-simulator
-docker compose logs -f pump-simulator
-```
+Xem [tài liệu kỹ thuật website](website/README.md) để biết luồng xác minh thanh toán,
+các API và cấu hình production.
 
-Without `PUMP_SIMULATOR_DEVICE_KEY`, the simulator only acknowledges pump commands.
-It does not publish sample readings or control physical hardware.
-
-Scheduled pump dispatch is disabled by default. To enable it, add
-`PUMP_SCHEDULING_ENABLED=true` to `.env` and restart the API with
-`docker compose up -d api`.
-
-### Stop, restart, and inspect logs
-
-Run these commands from the project root:
-
-```powershell
-# Stop all services, including the optional simulator; retain database volumes.
-docker compose --profile pump-simulator down
-
-# Start the main stack again.
-docker compose up -d
-
-# Rebuild the API after changing backend code.
-docker compose up -d --build api
-
-# Inspect recent logs.
-docker compose logs --tail 100 api postgres mosquitto
-```
-
-Avoid `docker compose down -v` if you want to retain database data.
-
-### Connecting with pgAdmin
-
-The PostgreSQL service is published only to this computer at `127.0.0.1`.
-The Compose stack also includes a browser-based pgAdmin at `http://127.0.0.1:5050`.
-Sign in with `PGADMIN_DEFAULT_EMAIL` and `PGADMIN_DEFAULT_PASSWORD` from `.env`, then
-register a server using these connection fields:
-
-- **Host name/address:** `postgres` (the Docker service name)
-- **Port:** `5432`
-- **Maintenance database:** value of `POSTGRES_DB` in `.env`
-- **Username:** value of `POSTGRES_USER` in `.env`
-- **Password:** value of `POSTGRES_PASSWORD` in `.env`
-
-The standalone Windows pgAdmin app can use `127.0.0.1` and `POSTGRES_PORT` instead,
-but the bundled pgAdmin avoids the Windows desktop runtime issue.
-
-## Continuous Integration
-
-GitHub Actions runs on pull requests and pushes to `main`. It restores dependencies, runs the test project, builds the API in Release mode, and builds the Docker image. It does not deploy to a VPS.
-
-### Connecting an ESP32
-
-1. Register and sign in through Swagger, then create a device with `POST /api/devices`.
-2. Create its 15-minute, one-use setup code with authenticated `POST /api/devices/{deviceId}/provisioning-code`.
-3. Upload [`firmware/ESP32DeviceSetup/ESP32DeviceSetup.ino`](firmware/ESP32DeviceSetup/ESP32DeviceSetup.ino), join Wi-Fi network `IOTAgri-Setup`, and open the shown setup page.
-4. See [`firmware/ESP32DeviceSetup/README.md`](firmware/ESP32DeviceSetup/README.md) for the current ESP32-S3 libraries, pin map, build prerequisites, electrical constraints, and MQTT contract. Do not use the obsolete DHT11/BH1750 wiring previously documented here.
-5. Measure and set the actual tank height and TDS calibration before enabling the pump. Enter Wi-Fi details, `http://<PC-LAN-IP>:8080`, and the setup code. The ESP32 saves its settings and publishes supported sensor readings every 10 seconds.
-
-The local Mosquitto broker is anonymous and plaintext for trusted LAN development only. Do not expose port 1883 to the internet. A future production broker must use per-device credentials and TLS.
-
-## Planned / Not Yet Implemented
-
-- Production Compose hardening: reverse-proxy HTTPS, private API/PostgreSQL ports, restart policies, and off-server database backups
-- Production MQTT: TLS, per-device credentials, and topic ACLs (the current broker is intentionally anonymous and plaintext for local development)
-- ESP32 HTTPS and MQTT TLS support
-- VPS deployment and continuous deployment after the production stack is verified
-
-## Frontend Application
-
-### Flutter Mobile App
-
-A Flutter frontend application is included in the `frontend/` directory with the following features:
-
-- **Authentication**: Login and registration with JWT token management
-- **Dashboard**: Overview of all devices with sensor readings and status
-- **Device Management**: Add, edit, delete devices, view device details
-- **Sensor Monitoring**: Real-time temperature, humidity, pH, TDS, and water level readings
-- **Pump Control**: Manual pump control and scheduling
-- **Alerts**: Threshold-based notifications for temperature and water level
-
-### Frontend Tech Stack
-
-- **Framework**: Flutter with Dart SDK compatible with `^3.10.7` (see `frontend/pubspec.yaml`)
-- **Language**: Dart
-- **State Management**: Provider
-- **HTTP Client**: http package
-- **Secure Storage**: flutter_secure_storage
-- **Date Formatting**: intl
-- **Charts**: fl_chart
-
-### Running the Frontend
-
-Install Flutter and check the available development tools:
-
-```powershell
-flutter --version
-flutter doctor
-```
-
-Open a second terminal at the project root, then install frontend dependencies:
-
-```powershell
-cd frontend
-flutter pub get
-flutter devices
-```
-
-#### Web (Chrome)
-
-With the Docker backend running:
-
-```powershell
-flutter run -d chrome --web-hostname localhost --web-port 8081 --dart-define=API_BASE_URL=http://localhost:8080
-```
-
-Open `http://localhost:8081`. This origin is already allowed by the API's Compose CORS configuration.
-
-#### Android Emulator
-
-Start an Android Emulator and use its ID from `flutter devices` (replace `emulator-5554` if different):
-
-```powershell
-flutter run -d emulator-5554 --dart-define=API_BASE_URL=http://10.0.2.2:8080
-```
-
-`10.0.2.2` reaches the development PC from Android Emulator. `localhost` inside the emulator refers to the emulator itself.
-
-#### Physical Android device
-
-Enable USB debugging, connect the phone, and replace `YOUR_DEVICE_ID` with its ID from `flutter devices`:
-
-```powershell
-flutter run -d YOUR_DEVICE_ID --dart-define=API_BASE_URL=http://192.168.1.100:8080
-```
-
-Replace the IP with your PC's LAN IPv4. The phone and PC must be on the same LAN. Allow the API port through Windows Firewall on your private network if needed. Test connectivity from the phone's browser at `http://<PC-LAN-IP>:8080/health`.
-
-**API URL:** The source default is `http://localhost:5261`, while Docker exposes port `8080` with the example configuration. Pass `API_BASE_URL` explicitly when using Docker. Stop and rerun Flutter after changing `--dart-define`; creating a Flutter `.env` file does not set this value.
-
-Press `Ctrl+C` in the Flutter terminal to stop the app.
-
-### Frontend Platforms
-
-- Android
-- iOS
-- Web
-- Windows
-- macOS
-- Linux
-
-The application UI is in Vietnamese and uses Arial.
-
-## Troubleshooting
-
-| Issue | Check / solution |
-| --- | --- |
-| Docker daemon unavailable | Open Docker Desktop, wait for the engine, and use Linux containers |
-| API or MQTT port already in use | Change `API_PORT` or `MQTT_PORT` in `.env`, rerun Compose, and update client URLs |
-| API startup or health check fails | Inspect `docker compose ps` and `docker compose logs --tail 100 api postgres` |
-| PostgreSQL password fails after editing `.env` | An existing database volume retains its original password; restore the old setting or update the database account |
-| Web CORS error | Use `http://localhost:8081`; for another origin, update `Cors__AllowedOrigins__...` on the API service and rerun Compose |
-| Frontend cannot reach the API | Check the platform-specific URL, port, and `/health`; rerun Flutter after changing `API_BASE_URL` |
-| Phone or ESP32 cannot connect | Check LAN access, the PC's current IPv4, firewall, and `MQTT_PUBLIC_HOST` |
-| ESP32 does not publish readings | Inspect Serial Monitor, API/Mosquitto logs, provisioning, and sensor wiring |
-| Flutter SDK constraint error | Ensure the bundled Dart SDK satisfies `^3.10.7`, then rerun `flutter pub get` |
-
-## Development Checks
-
-For backend tests and builds, install .NET SDK 10 and run from the project root:
-
-```powershell
-dotnet test backend/tests/IOTAgriBackend.Tests.csproj --configuration Release
-dotnet build backend/IOTAgriBackend.csproj --configuration Release
-```
-
-For frontend checks:
-
-```powershell
-cd frontend
-flutter analyze
-flutter test
-```
-
-## Project Structure
+## Cấu trúc source liên quan đến website
 
 ```text
-IOTAgri/
-├── backend/                 # ASP.NET Core API, migrations, and tests
-├── frontend/                # Flutter application
-├── firmware/                # ESP32 sketch
-├── mosquitto/               # MQTT broker configuration
-├── tools/                   # Simulator scripts
-├── .env.example             # Example Compose environment
-├── compose.yaml             # API, PostgreSQL, MQTT, optional simulator
-└── Dockerfile               # Backend container build
+website/                  Giao diện React, assets, cấu hình Vite và Nginx
+backend/Endpoints/        API tài khoản, danh mục, đơn hàng và thanh toán
+backend/Models/           Model dữ liệu
+backend/Data/             DbContext và cấu hình dữ liệu
+backend/Migrations/       Migration PostgreSQL
+backend/Services/         Nghiệp vụ đơn hàng và tích hợp MoMo
+backend/tests/            Kiểm thử backend
+compose.website.yaml      Cấu hình chạy website bằng Docker
 ```
 
-Do not commit `.env` or real credentials. The current Compose stack runs the API in Development and is intended for local development.
+## Kiểm tra source
+
+Từ thư mục gốc:
+
+```powershell
+npm --prefix website run build
+dotnet test backend/tests/IOTAgriBackend.Tests.csproj
+```
+
+Build frontend cần Node.js 22 và dependency đã cài. Kiểm thử backend cần .NET SDK 10;
+các bài integration PostgreSQL cần Docker đang chạy.
+
+## Lưu ý khi triển khai
+
+- Cấu hình HTTPS cho domain website và API; Compose local không tự xuất bản website.
+- Chốt giá các gói nhiều chu kỳ và phí giao hàng trước khi mở bán.
+- Chưa có quản lý tồn kho, mã giảm giá, hóa đơn điện tử, hoàn tiền tự động
+  hoặc tích hợp hãng vận chuyển.
+- Không commit `.env`, khóa MoMo, dữ liệu khách hàng, `node_modules` hoặc bản build.
+
+## Xử lý lỗi thường gặp
+
+| Hiện tượng | Cách kiểm tra |
+| --- | --- |
+| Docker chưa sẵn sàng | Mở Docker Desktop và chờ engine chạy |
+| Cổng bị chiếm | Đổi cổng trong `.env`; nếu dùng Vite, cập nhật `API_PROXY_TARGET` theo backend |
+| Không tải được sản phẩm | Kiểm tra service `api`, log và `/api/store/products` |
+| Không kết nối được DB sau khi đổi mật khẩu | Volume cũ giữ mật khẩu đã khởi tạo; dùng lại cấu hình đúng của database |
+| Nút thanh toán chưa mở | Kiểm tra cấu hình merchant MoMo, redirect và IPN HTTPS |
+| Giá đổi khi đặt hàng | Tải lại danh mục để xác nhận tổng tiền mới |
