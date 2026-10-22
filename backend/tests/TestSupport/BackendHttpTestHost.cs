@@ -22,7 +22,8 @@ internal static class BackendHttpTestHost
     internal static async Task<WebApplication> CreateAsync(
         ApplicationDbContext db,
         string environmentName = "Testing",
-        IMqttBrokerAdminService? brokerAdmin = null)
+        IMqttBrokerAdminService? brokerAdmin = null,
+        Action<IServiceCollection>? configureServices = null)
     {
         // Reconstruct the production authentication/authorization/CORS/rate-limit
         // pipeline with real endpoint mappings. Do not run Program.cs or hosted jobs.
@@ -54,6 +55,10 @@ internal static class BackendHttpTestHost
         builder.Services.AddAuthorization(o => o.AddPolicy("AdminOnly", p => p.RequireRole("Admin")));
         builder.Services.AddApplicationWebSecurity(builder.Configuration, builder.Environment);
         builder.Services.AddScoped<ITokenService, TokenService>();
+        builder.Services.Configure<MomoOptions>(builder.Configuration.GetSection("Momo"));
+        builder.Services.Configure<CommerceOptions>(builder.Configuration.GetSection("Store"));
+        builder.Services.AddHttpClient<MomoPaymentService>();
+        configureServices?.Invoke(builder.Services);
         builder.Services.AddSingleton<IMqttBrokerAdminService>(brokerAdmin ?? new TestMqttBrokerAdminService());
         builder.Services.AddSingleton<MqttIngestionService>();
         var app = builder.Build();
@@ -62,6 +67,7 @@ internal static class BackendHttpTestHost
         app.UseAuthorization();
         app.UseRateLimiter();
         app.MapAuthEndpoints();
+        app.MapCommerceEndpoints();
         app.MapAdminEndpoints();
         app.MapTicketEndpoints();
         app.MapDeviceEndpoints();

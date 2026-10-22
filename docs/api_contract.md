@@ -1,5 +1,12 @@
 # Aerogreen API contract
 
+## Website commerce extension
+
+The `Website` branch adds `/api/store/*` and `/api/admin/store/*` for hardware,
+prepaid refill packages and MoMo payments. See [`website/README.md`](../website/README.md)
+for request/response shapes, payment verification, configuration and limitations.
+The captured OpenAPI snapshot below predates these routes; live Swagger includes them.
+
 `docs/openapi.v1.json` is the generated OpenAPI 3.0 document captured from the
 running API on 2026-10-16. This document supplies the response, ownership, and
 error conventions which cannot yet be inferred by the Minimal API's `IResult`

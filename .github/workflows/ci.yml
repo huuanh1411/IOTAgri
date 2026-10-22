@@ -2,14 +2,30 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, Website]
   push:
-    branches: [main]
+    branches: [main, Website]
 
 permissions:
   contents: read
 
 jobs:
+  website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - name: Install storefront dependencies
+        working-directory: website
+        run: npm ci
+      - name: Build storefront
+        working-directory: website
+        run: npm run build
+
   verify:
     runs-on: ubuntu-latest
 

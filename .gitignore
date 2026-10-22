@@ -15,3 +15,9 @@ deploy/mosquitto-certs/*.key
 .pio/
 *.bin
 *.elf
+.tools/
+**/node_modules/
+website/dist/
+*.tsbuildinfo
+website/.env*
+!website/.env.example

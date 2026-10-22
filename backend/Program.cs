@@ -77,6 +77,10 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddApplicationWebSecurity(builder.Configuration, builder.Environment);
 
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.Configure<MomoOptions>(builder.Configuration.GetSection("Momo"));
+builder.Services.AddOptions<CommerceOptions>().Bind(builder.Configuration.GetSection("Store"))
+    .Validate(options => options.ShippingFeeVnd is >= 0 and <= 1000000, "Store:ShippingFeeVnd must be in 0..1000000.").ValidateOnStart();
+builder.Services.AddHttpClient<MomoPaymentService>(client => client.Timeout = TimeSpan.FromSeconds(8));
 builder.Services.AddSingleton<IMqttDynsecTransport, MqttDynsecTransport>();
 builder.Services.AddSingleton<IMqttBrokerAdminService>(services => new MqttBrokerAdminService(
     services.GetRequiredService<IMqttDynsecTransport>(),
@@ -113,6 +117,7 @@ app.UseAuthorization();
 app.UseRateLimiter();
 
 app.MapAuthEndpoints();
+app.MapCommerceEndpoints();
 app.MapAdminEndpoints();
 app.MapTicketEndpoints();
 app.MapDeviceEndpoints();

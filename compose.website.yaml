@@ -1,0 +1,20 @@
+# Optional overlay: docker compose -f compose.yaml -f compose.website.yaml up -d --build
+# The existing Flutter frontend remains available on its original port.
+services:
+  api:
+    environment:
+      Momo__Enabled: ${MOMO_ENABLED:-false}
+      Momo__PartnerCode: ${MOMO_PARTNER_CODE:-}
+      Momo__AccessKey: ${MOMO_ACCESS_KEY:-}
+      Momo__SecretKey: ${MOMO_SECRET_KEY:-}
+      Momo__Endpoint: ${MOMO_ENDPOINT:-https://test-payment.momo.vn/v2/gateway/api/create}
+      Momo__RedirectUrl: ${MOMO_REDIRECT_URL:-}
+      Momo__IpnUrl: ${MOMO_IPN_URL:-}
+      Store__ShippingFeeVnd: ${STORE_SHIPPING_FEE_VND:-0}
+  website:
+    build: ./website
+    ports:
+      - "127.0.0.1:${WEBSITE_PORT:-5180}:80"
+    depends_on:
+      - api
+    restart: unless-stopped

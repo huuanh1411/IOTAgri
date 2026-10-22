@@ -488,6 +488,247 @@ namespace IOTAgriBackend.Migrations
                     b.ToTable("SensorReadings");
                 });
 
+            modelBuilder.Entity("IOTAgriBackend.Models.StoreOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("CheckoutKey")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("FulfillmentStatus")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<long>("ShippingFeeVnd")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TotalVnd")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TrackingNumber")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("UserId", "CheckoutKey")
+                        .IsUnique();
+
+                    b.ToTable("StoreOrders", t =>
+                        {
+                            t.HasCheckConstraint("CK_StoreOrder_Total", "\"TotalVnd\" BETWEEN 1000 AND 50000000 AND \"ShippingFeeVnd\" BETWEEN 0 AND 1000000");
+                        });
+                });
+
+            modelBuilder.Entity("IOTAgriBackend.Models.StoreOrderItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Contents")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<int>("CycleCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<long>("UnitPriceVnd")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("StoreOrderItems", t =>
+                        {
+                            t.HasCheckConstraint("CK_StoreOrderItem_Quantity", "\"Quantity\" BETWEEN 1 AND 20 AND \"UnitPriceVnd\" >= 1000");
+                        });
+                });
+
+            modelBuilder.Entity("IOTAgriBackend.Models.StorePayment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("GatewayOrderId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PayUrl")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<string>("RequestId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("ResultCode")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<long?>("TransactionId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GatewayOrderId")
+                        .IsUnique();
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("RequestId")
+                        .IsUnique();
+
+                    b.HasIndex("TransactionId")
+                        .IsUnique();
+
+                    b.ToTable("StorePayments");
+                });
+
+            modelBuilder.Entity("IOTAgriBackend.Models.StoreProduct", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Contents")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<int>("CycleCount")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<long>("PriceVnd")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Sku")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Sku")
+                        .IsUnique();
+
+                    b.ToTable("StoreProducts", t =>
+                        {
+                            t.HasCheckConstraint("CK_StoreProduct_Kind", "(\"Kind\" = 'hardware' AND \"CycleCount\" = 0) OR (\"Kind\" = 'refill' AND \"CycleCount\" BETWEEN 1 AND 100)");
+
+                            t.HasCheckConstraint("CK_StoreProduct_Price", "\"PriceVnd\" >= 0 AND (NOT \"IsActive\" OR \"PriceVnd\" >= 1000)");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("9a0449ed-6608-4486-b329-1292e9225001"),
+                            Contents = "Bộ thiết bị Aerogreen",
+                            CycleCount = 0,
+                            IsActive = true,
+                            Kind = "hardware",
+                            Name = "Hệ Thống Khí Canh Tự Động Aerogreen",
+                            PriceVnd = 2950000L,
+                            Sku = "AEROGREEN-CORE"
+                        },
+                        new
+                        {
+                            Id = new Guid("9a0449ed-6608-4486-b329-1292e9225002"),
+                            Contents = "Cây con và dung dịch dinh dưỡng cho 1 chu kỳ",
+                            CycleCount = 1,
+                            IsActive = true,
+                            Kind = "refill",
+                            Name = "Gói rau ăn — 1 chu kỳ",
+                            PriceVnd = 299000L,
+                            Sku = "REFILL-1"
+                        });
+                });
+
             modelBuilder.Entity("IOTAgriBackend.Models.SupportTicket", b =>
                 {
                     b.Property<Guid>("Id")
@@ -820,6 +1061,45 @@ namespace IOTAgriBackend.Migrations
                     b.Navigation("Device");
                 });
 
+            modelBuilder.Entity("IOTAgriBackend.Models.StoreOrder", b =>
+                {
+                    b.HasOne("IOTAgriBackend.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("IOTAgriBackend.Models.StoreOrderItem", b =>
+                {
+                    b.HasOne("IOTAgriBackend.Models.StoreOrder", "Order")
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("IOTAgriBackend.Models.StoreProduct", null)
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("IOTAgriBackend.Models.StorePayment", b =>
+                {
+                    b.HasOne("IOTAgriBackend.Models.StoreOrder", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("IOTAgriBackend.Models.SupportTicket", b =>
                 {
                     b.HasOne("IOTAgriBackend.Models.ApplicationUser", "User")
@@ -922,6 +1202,11 @@ namespace IOTAgriBackend.Migrations
             modelBuilder.Entity("IOTAgriBackend.Models.PumpSchedule", b =>
                 {
                     b.Navigation("Occurrences");
+                });
+
+            modelBuilder.Entity("IOTAgriBackend.Models.StoreOrder", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("IOTAgriBackend.Models.SupportTicket", b =>

@@ -2,6 +2,10 @@
 
 IoT hydroponics/agriculture monitoring system with an ASP.NET Core backend and Flutter frontend.
 
+The `Website` branch also includes a React storefront in [`website/`](website/README.md)
+for hardware and prepaid refill packages, using this same backend, PostgreSQL database,
+and Identity accounts. MoMo configuration and the commerce API are documented there.
+
 ## Tech Stack
 
 - **ASP.NET Core 10** (Minimal API)

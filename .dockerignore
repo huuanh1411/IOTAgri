@@ -4,6 +4,8 @@
 .agents
 graphify-out
 frontend
+website
+.tools
 **/bin
 **/obj
 .env
