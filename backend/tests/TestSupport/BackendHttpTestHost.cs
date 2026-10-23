@@ -35,11 +35,12 @@ internal static class BackendHttpTestHost
             ["Jwt:Key"] = key, ["Jwt:Issuer"] = "qa-http", ["Jwt:Audience"] = "qa-clients",
             ["DeviceProvisioning:MqttHost"] = "qa-broker",
             ["Cors:AllowedOrigins:0"] = "https://app.aerogreen.vn",
+            ["Cors:AllowedOrigins:1"] = "https://aerogreen.vn",
             ["Cors:AllowPrivateLanOrigins"] = "true"
         };
         if (!string.Equals(environmentName, "Production", StringComparison.OrdinalIgnoreCase))
         {
-            configuration["Cors:AllowedOrigins:1"] = "http://localhost:8081";
+            configuration["Cors:AllowedOrigins:2"] = "http://localhost:8081";
         }
         builder.Configuration.AddInMemoryCollection(configuration);
         builder.Services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(db.Database.GetConnectionString()));

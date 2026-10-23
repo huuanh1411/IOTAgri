@@ -8,6 +8,10 @@ app.aerogreen.vn aerogreen.vn {
 	reverse_proxy frontend:80
 }
 
+www.aerogreen.vn {
+	redir https://aerogreen.vn{uri} permanent
+}
+
 # Caddy only obtains and renews this certificate; deploy/sync-mqtt-certs.sh hands it to Mosquitto.
 mqtt.aerogreen.vn {
 	respond 404

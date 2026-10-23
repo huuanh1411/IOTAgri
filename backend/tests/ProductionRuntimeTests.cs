@@ -28,8 +28,27 @@ public class ProductionRuntimeTests
         Assert.Contains("  frontend:", compose);
         Assert.Contains("context: ./frontend", compose);
         Assert.Contains("app.aerogreen.vn", caddyfile);
+        Assert.Contains("aerogreen.vn", caddyfile);
         Assert.Contains("reverse_proxy frontend:80", caddyfile);
         Assert.Contains("--dart-define=API_BASE_URL=$API_BASE_URL", frontendDockerfile);
+    }
+
+    [Fact]
+    public void Production_stack_redirects_www_to_the_apex_homepage()
+    {
+        var caddyfile = File.ReadAllText(RepoFile("deploy/Caddyfile"));
+
+        Assert.Contains("www.aerogreen.vn", caddyfile);
+        Assert.Contains("redir https://aerogreen.vn{uri} permanent", caddyfile);
+    }
+
+    [Fact]
+    public void Production_compose_allows_both_served_frontend_origins()
+    {
+        var compose = File.ReadAllText(RepoFile("compose.production.yaml"));
+
+        Assert.Contains("Cors__AllowedOrigins__0: https://app.aerogreen.vn", compose);
+        Assert.Contains("Cors__AllowedOrigins__1: https://aerogreen.vn", compose);
     }
 
     [Fact]
