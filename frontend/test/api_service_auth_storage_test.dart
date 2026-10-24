@@ -47,6 +47,52 @@ class _UnavailableSecureStorage extends FlutterSecureStorage {
   }) async => _unavailable();
 }
 
+class _MemorySecureStorage extends FlutterSecureStorage {
+  final Map<String, String> values;
+
+  _MemorySecureStorage(this.values);
+
+  @override
+  Future<String?> read({
+    required String key,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async => values[key];
+
+  @override
+  Future<void> write({
+    required String key,
+    required String? value,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    if (value == null) {
+      values.remove(key);
+    } else {
+      values[key] = value;
+    }
+  }
+
+  @override
+  Future<void> delete({
+    required String key,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async => values.remove(key);
+}
+
 String _accessToken({int expiresInHours = 1}) {
   final payload = base64UrlEncode(
     utf8.encode(
@@ -71,7 +117,7 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   test(
-    'login falls back when secure storage is unavailable on LAN web',
+    'login fails closed when secure storage is unavailable on web',
     () async {
       final token = _accessToken();
       final service = ApiService(
@@ -85,14 +131,13 @@ void main() {
         allowWebStorageFallback: true,
       );
 
-      final result = await service.login('user@example.com', 'Password123');
-      final restored = await service.restoreSession();
-
-      expect(result['accessToken'], token);
-      expect(restored?.id, 'user-1');
+      await expectLater(
+        service.login('user@example.com', 'Password123'),
+        throwsA(isA<StateError>()),
+      );
       final preferences = await SharedPreferences.getInstance();
-      expect(preferences.getString('iotagri.auth.access_token'), token);
-      expect(preferences.getString('iotagri.auth.refresh_token'), 'refresh-1');
+      expect(preferences.getString('iotagri.auth.access_token'), isNull);
+      expect(preferences.getString('iotagri.auth.refresh_token'), isNull);
     },
   );
 
@@ -120,11 +165,11 @@ void main() {
   });
 
   test('refresh accepts 200 and retries an authenticated request', () async {
-    SharedPreferences.setMockInitialValues({
-      'iotagri.auth.access_token': _accessToken(expiresInHours: -1),
-      'iotagri.auth.refresh_token': 'refresh-1',
-    });
     var deviceRequests = 0;
+    final storage = _MemorySecureStorage({
+      'access_token': _accessToken(expiresInHours: -1),
+      'refresh_token': 'refresh-1',
+    });
     final service = ApiService(
       client: MockClient((request) async {
         if (request.url.path.endsWith('/api/auth/refresh')) {
@@ -141,8 +186,7 @@ void main() {
             ? http.Response('', 401)
             : http.Response('[]', 200);
       }),
-      storage: const _UnavailableSecureStorage(),
-      allowWebStorageFallback: true,
+      storage: storage,
     );
 
     expect(await service.getDevices(), isEmpty);

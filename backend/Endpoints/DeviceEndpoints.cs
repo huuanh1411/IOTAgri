@@ -142,7 +142,12 @@ public static class DeviceEndpoints
         return Results.Ok(new DeviceResponse(device.Id, device.Name, device.IsOnline, device.LastSeenAt, device.CreatedAt));
     }
 
-    private static async Task<IResult> DeleteAsync(Guid id, ClaimsPrincipal principal, ApplicationDbContext db)
+    private static async Task<IResult> DeleteAsync(
+        Guid id,
+        ClaimsPrincipal principal,
+        ApplicationDbContext db,
+        IMqttBrokerAdminService brokerAdmin,
+        CancellationToken cancellationToken)
     {
         var userId = GetUserId(principal);
         if (userId is null)
@@ -150,14 +155,43 @@ public static class DeviceEndpoints
             return Results.Unauthorized();
         }
 
-        var device = await db.Devices.FirstOrDefaultAsync(d => d.Id == id && d.OwnerId == userId);
+        var device = await db.Devices.FirstOrDefaultAsync(
+            d => d.Id == id && d.OwnerId == userId,
+            cancellationToken);
         if (device is null)
         {
             return Results.NotFound();
         }
 
+        try
+        {
+            // Broker deletion is idempotent. Revoke first so an API success can
+            // never leave usable device credentials behind. If the following
+            // database save fails, retrying safely repeats this revocation.
+            await brokerAdmin.RemoveDeviceAsync(device.DeviceKey, cancellationToken);
+        }
+        catch (MqttBrokerAdminException)
+        {
+            return Results.Problem(
+                "Device credentials could not be revoked. The device was not deleted; retry later.",
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
+
+        device.ProvisioningCodeHash = null;
+        device.ProvisioningCodeExpiresAt = null;
+        device.ProvisioningClaimLeaseId = null;
+        device.ProvisioningClaimLeaseExpiresAt = null;
+        db.AdminAuditLogs.Add(new AdminAuditLog
+        {
+            ActorUserId = userId,
+            Action = "device.deleted",
+            TargetType = "device",
+            TargetId = device.Id.ToString(),
+            PreviousValue = device.Name,
+            NewValue = "mqtt credentials revoked"
+        });
         db.Devices.Remove(device);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(cancellationToken);
 
         return Results.NoContent();
     }
@@ -194,9 +228,66 @@ public static class DeviceEndpoints
             return Results.BadRequest(new { error = "commandId, on duration, and a valid duration are required." });
         }
 
+        var freshnessSeconds = configuration.GetValue<int?>("PumpControl:TelemetryFreshnessSeconds")
+            ?? (int)DevicePresence.OfflineAfter.TotalSeconds;
+        if (freshnessSeconds <= 0)
+        {
+            return Results.Problem(
+                "PumpControl:TelemetryFreshnessSeconds must be positive.",
+                statusCode: StatusCodes.Status503ServiceUnavailable);
+        }
+
+        var now = DateTime.UtcNow;
+        var freshnessCutoff = now.AddSeconds(-freshnessSeconds);
+        if (!device.IsOnline || device.LastSeenAt is null || device.LastSeenAt <= freshnessCutoff)
+        {
+            return Results.Conflict(new
+            {
+                error = "Pump commands require a device with fresh telemetry.",
+                code = "DEVICE_OFFLINE_OR_STALE"
+            });
+        }
+
+        if (request.IsOn == device.IsPumpOn)
+        {
+            return Results.Conflict(new
+            {
+                error = request.IsOn ? "Pump is already on." : "Pump is already off.",
+                code = request.IsOn ? "PUMP_ALREADY_ON" : "PUMP_ALREADY_OFF"
+            });
+        }
+
+        if (request.IsOn)
+        {
+            var latestReading = await db.SensorReadings.AsNoTracking()
+                .Where(reading => reading.DeviceId == device.Id)
+                .OrderByDescending(reading => reading.RecordedAt)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (latestReading is null || latestReading.RecordedAt <= freshnessCutoff || latestReading.WaterLevel is null)
+            {
+                return Results.Conflict(new
+                {
+                    error = "Pump start requires a fresh water-level reading.",
+                    code = "WATER_LEVEL_UNAVAILABLE"
+                });
+            }
+
+            var defaults = await db.SystemAlertDefaults.AsNoTracking().SingleOrDefaultAsync(cancellationToken);
+            var lowWaterThreshold = device.LowWaterLevelAlertPercent
+                ?? defaults?.LowWaterLevelPercent
+                ?? SystemAlertDefaults.DefaultLowWaterLevelPercent;
+            if (latestReading.WaterLevel <= lowWaterThreshold)
+            {
+                return Results.Conflict(new
+                {
+                    error = "Pump start was blocked because the water level is at or below the safety threshold.",
+                    code = "LOW_WATER_LEVEL"
+                });
+            }
+        }
+
         // Recurrence owns the interval even before the dispatch poll or acknowledgement.
         // Persisted commands retain ownership if their schedule is subsequently edited/deleted.
-        var now = DateTime.UtcNow;
         var schedules = await db.PumpSchedules.AsNoTracking()
             .Where(schedule => schedule.DeviceId == id && schedule.IsEnabled)
             .ToListAsync(cancellationToken);
@@ -248,8 +339,11 @@ public static class DeviceEndpoints
         }
         catch (InvalidOperationException)
         {
+            command.Status = PumpCommandStatus.Failed;
+            command.FailureReason = "MQTT_UNAVAILABLE";
+            await db.SaveChangesAsync(cancellationToken);
             return Results.Problem(
-                "Pump command is pending because MQTT is unavailable.",
+                "Pump command failed because MQTT is unavailable.",
                 statusCode: StatusCodes.Status503ServiceUnavailable);
         }
 

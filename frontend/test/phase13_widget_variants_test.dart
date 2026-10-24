@@ -438,10 +438,12 @@ void main() {
       await pumpDeviceDetail(tester);
 
       expect(find.text('Bơm đang chạy'), findsOneWidget);
+      await scrollToPumpControl(tester);
       await tester.tap(find.text('Thủ công'));
       await pumpDeviceDetail(tester);
       await tester.tap(find.text('Chuyển'));
       await pumpDeviceDetail(tester);
+      expect(find.textContaining('Bơm đang chạy - còn'), findsOneWidget);
       expect(find.text('Dừng'), findsOneWidget);
     });
 

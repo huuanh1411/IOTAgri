@@ -22,6 +22,18 @@ const _plantImageAssets = <String, String>{
   '6': 'assets/images/plants/coriander.png',
 };
 
+const _plantCardSpacing = 16.0;
+const _minimumPlantCardWidth = 144.0;
+const _maximumPlantColumns = 3;
+
+int _plantColumnCount(double availableWidth) {
+  final fittingColumns =
+      ((availableWidth + _plantCardSpacing) /
+              (_minimumPlantCardWidth + _plantCardSpacing))
+          .floor();
+  return fittingColumns.clamp(1, _maximumPlantColumns);
+}
+
 /// Plant Picker tab – matches the design in Phase 5.
 class PlantPickerScreen extends ConsumerWidget {
   const PlantPickerScreen({super.key});
@@ -48,11 +60,7 @@ class PlantPickerScreen extends ConsumerWidget {
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final columnCount = constraints.maxWidth >= 620
-                        ? 3
-                        : constraints.maxWidth >= 330
-                        ? 2
-                        : 1;
+                    final columnCount = _plantColumnCount(constraints.maxWidth);
                     return ListView.separated(
                       padding: const EdgeInsets.only(bottom: 96),
                       itemCount: (mockPlants.length / columnCount).ceil(),
@@ -61,8 +69,13 @@ class PlantPickerScreen extends ConsumerWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            for (var column = 0; column < columnCount; column++) ...[
-                              if (column > 0) const SizedBox(width: 16),
+                            for (
+                              var column = 0;
+                              column < columnCount;
+                              column++
+                            ) ...[
+                              if (column > 0)
+                                const SizedBox(width: _plantCardSpacing),
                               Expanded(
                                 child: _plantCardFor(
                                   ref,
@@ -85,11 +98,7 @@ class PlantPickerScreen extends ConsumerWidget {
     );
   }
 
-  Widget _plantCardFor(
-    WidgetRef ref,
-    ActivePlant activePlant,
-    int index,
-  ) {
+  Widget _plantCardFor(WidgetRef ref, ActivePlant activePlant, int index) {
     if (index >= mockPlants.length) return const SizedBox.shrink();
     final plant = mockPlants[index];
     final isCurrent = plant.id == activePlant.plant.id;
@@ -178,7 +187,10 @@ class _PlantCard extends StatelessWidget {
                       child: Text(
                         context.l10n.weeks(plant.durationWeeks),
                         softWrap: true,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   ],
@@ -186,13 +198,20 @@ class _PlantCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.emoji_nature, size: 16, color: Colors.grey),
+                    const Icon(
+                      Icons.emoji_nature,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         plant.localizedDifficulty(context.l10n),
                         softWrap: true,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   ],

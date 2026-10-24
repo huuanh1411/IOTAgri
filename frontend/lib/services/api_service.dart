@@ -58,12 +58,13 @@ class ApiService {
     } catch (error) {
       if (!_allowWebStorageFallback) rethrow;
       debugPrint(
-        'Secure token storage unavailable; using web fallback: $error',
+        'Secure token storage unavailable; authentication is disabled: $error',
       );
     }
 
-    final preferences = await SharedPreferences.getInstance();
-    return preferences.getString(_webFallbackKey(key));
+    throw StateError(
+      'Secure authentication storage is unavailable. Sign-in cannot continue safely.',
+    );
   }
 
   Future<void> _removeWebFallbackTokens() async {
@@ -84,13 +85,10 @@ class ApiService {
     } catch (error) {
       if (!_allowWebStorageFallback) rethrow;
       debugPrint(
-        'Secure token storage unavailable; using web fallback: $error',
+        'Secure token storage unavailable; authentication is disabled: $error',
       );
-      final preferences = await SharedPreferences.getInstance();
-      await preferences.setString(_webFallbackKey('access_token'), accessToken);
-      await preferences.setString(
-        _webFallbackKey('refresh_token'),
-        refreshToken,
+      throw StateError(
+        'Secure authentication storage is unavailable. Sign-in cannot continue safely.',
       );
     }
     _accessToken = accessToken;

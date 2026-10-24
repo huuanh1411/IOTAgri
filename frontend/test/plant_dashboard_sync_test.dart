@@ -55,7 +55,22 @@ DeviceOverview _deviceWithReadings({
 }
 
 void main() {
-  for (final width in <double>[320, 360, 393, 430]) {
+  const responsiveCases = <({double width, int columns})>[
+    (width: 320, columns: 1),
+    (width: 340, columns: 1),
+    (width: 360, columns: 2),
+    (width: 375, columns: 2),
+    (width: 390, columns: 2),
+    (width: 393, columns: 2),
+    (width: 411, columns: 2),
+    (width: 430, columns: 2),
+    (width: 480, columns: 2),
+    (width: 600, columns: 3),
+    (width: 768, columns: 3),
+    (width: 1024, columns: 3),
+  ];
+  for (final responsiveCase in responsiveCases) {
+    final width = responsiveCase.width;
     testWidgets('plant cards fit at ${width.toInt()}px with larger text', (
       tester,
     ) async {
@@ -88,6 +103,14 @@ void main() {
       final startText = find.text('Bắt đầu trồng').first;
       expect(startText, findsOneWidget);
       expect(tester.widget<Text>(startText).textAlign, TextAlign.center);
+      final firstCard = tester.getTopLeft(find.text('Xà lách'));
+      final secondCard = tester.getTopLeft(find.text('Húng quế'));
+      expect(
+        (firstCard.dy - secondCard.dy).abs() < 1,
+        responsiveCase.columns >= 2,
+        reason:
+            'Expected ${responsiveCase.columns} columns at ${width.toInt()}px',
+      );
     });
   }
 

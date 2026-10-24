@@ -16,10 +16,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Bơm đang bật'), findsOneWidget);
-    expect(
-      find.text('Chỉ mô phỏng trên giao diện frontend'),
-      findsOneWidget,
-    );
+    expect(find.text('Chỉ mô phỏng trên giao diện frontend'), findsOneWidget);
   });
 
   testWidgets('blocks starting the pump when water is below 30 percent', (
@@ -31,10 +28,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Bơm đang tắt'), findsOneWidget);
-    expect(
-      find.text('Không thể bật bơm khi mực nước thấp.'),
-      findsOneWidget,
-    );
+    expect(find.text('Không thể bật bơm khi mực nước thấp.'), findsOneWidget);
   });
 
   testWidgets('shows the full Vietnam-time schedule form locally', (
@@ -51,4 +45,25 @@ void main() {
     expect(find.text('Múi giờ'), findsOneWidget);
     expect(find.text('Việt Nam · GMT+07:00'), findsOneWidget);
   });
+
+  for (final width in <double>[320, 340, 360, 393, 430]) {
+    testWidgets('schedule action fits at ${width.toInt()}px with larger text', (
+      tester,
+    ) async {
+      tester.view.physicalSize = Size(width, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.3)),
+          child: buildPanel(65),
+        ),
+      );
+
+      expect(find.text('Thêm lịch'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

@@ -76,9 +76,32 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
         Assert.Equal("Updated", Assert.IsType<DeviceResponse>(Value(update)).Name);
         db.ChangeTracker.Clear();
         Assert.Equal("Updated", (await db.Devices.SingleAsync()).Name);
-        var delete = await BackendTestDoubles.InvokeHandler(typeof(DeviceEndpoints), "DeleteAsync", device.Id, Principal(), db);
+        var broker = new TestMqttBrokerAdminService();
+        var delete = await BackendTestDoubles.InvokeHandler(
+            typeof(DeviceEndpoints), "DeleteAsync", device.Id, Principal(), db, broker, CancellationToken.None);
         Assert.Equal(204, Status(delete));
+        Assert.Equal(device.DeviceKey, Assert.Single(broker.RemovedDeviceKeys));
         Assert.Empty(await db.Devices.ToListAsync());
+        Assert.Contains(await db.AdminAuditLogs.ToListAsync(), log =>
+            log.Action == "device.deleted" && log.TargetId == device.Id.ToString());
+    }
+
+    [Fact]
+    public async Task Device_delete_keeps_database_record_when_broker_revocation_fails()
+    {
+        await using var db = await _fixture.CreateDatabaseAsync();
+        var device = await SeedDevice(db);
+        var broker = new Mock<IMqttBrokerAdminService>();
+        broker.Setup(service => service.RemoveDeviceAsync(device.DeviceKey, It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new MqttBrokerAdminException("broker unavailable"));
+
+        var result = await BackendTestDoubles.InvokeHandler(
+            typeof(DeviceEndpoints), "DeleteAsync", device.Id, Principal(), db, broker.Object, CancellationToken.None);
+
+        Assert.Equal(503, Status(result));
+        Assert.True(await db.Devices.AnyAsync(candidate => candidate.Id == device.Id));
+        Assert.DoesNotContain(await db.AdminAuditLogs.ToListAsync(), log =>
+            log.Action == "device.deleted" && log.TargetId == device.Id.ToString());
     }
 
     [Fact]

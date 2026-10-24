@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:iotagri_app/cupertino/auth/cupertino_login_screen.dart';
 import 'package:iotagri_app/cupertino/devices/cupertino_device_detail_screen.dart';
 import 'package:iotagri_app/models/device.dart';
 import 'package:iotagri_app/models/history_data.dart';
+import 'package:iotagri_app/models/user.dart';
 import 'package:iotagri_app/providers/auth_provider.dart';
 import 'package:iotagri_app/screens/sensors/sensor_history_screen.dart';
 import 'package:iotagri_app/services/api_service.dart';
@@ -18,10 +21,27 @@ class _FakeIntegrationApiService extends ApiService {
   bool commandCalled = false;
 
   @override
+  Future<User?> restoreSession() async => null;
+
+  @override
   Future<Map<String, dynamic>> login(String email, String password) async {
     loginCalled = true;
+    final payload = base64UrlEncode(
+      utf8.encode(
+        jsonEncode({
+          'sub': 'user_e2e',
+          'email': email,
+          'name': 'Tran Thi B',
+          'exp':
+              DateTime.now()
+                  .add(const Duration(hours: 1))
+                  .millisecondsSinceEpoch ~/
+              1000,
+        }),
+      ),
+    ).replaceAll('=', '');
     return {
-      'accessToken': 'jwt_mock_token',
+      'accessToken': 'header.$payload.signature',
       'refreshToken': 'refresh_mock_token',
       'user': {
         'id': 'user_e2e',
@@ -208,6 +228,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(api.loginCalled, isTrue);
+      expect(authProvider.isAuthenticated, isTrue);
 
       // STEP 2: Device entity available (from simulated add device)
       final device = Device(
@@ -235,6 +256,7 @@ void main() {
       expect(find.text('25.5 °C'), findsOneWidget);
 
       // STEP 4: Manual Pump Run
+      await scrollToPumpControl(tester);
       await tester.tap(find.text('Thủ công'));
       await pumpDeviceDetail(tester);
 

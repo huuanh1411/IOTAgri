@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:iotagri_app/cupertino/devices/cupertino_device_detail_screen.dart';
 import 'package:iotagri_app/l10n/app_localizations.dart';
 
 /// Flushes immediate API futures and completes device-detail entrance motion
@@ -10,6 +11,20 @@ Future<void> pumpDeviceDetail(WidgetTester tester) async {
   for (var frame = 0; frame < 10; frame++) {
     await tester.pump(const Duration(milliseconds: 100));
   }
+}
+
+/// Scrolls the lazily built detail content until the real pump controls exist.
+Future<void> scrollToPumpControl(WidgetTester tester) async {
+  final detailScrollable = find.descendant(
+    of: find.byType(CustomScrollView),
+    matching: find.byType(Scrollable),
+  );
+  await tester.scrollUntilVisible(
+    find.byType(PumpControlCard),
+    400,
+    scrollable: detailScrollable.first,
+  );
+  await pumpDeviceDetail(tester);
 }
 
 Widget buildLocalizedCupertinoApp({required Widget home}) => CupertinoApp(

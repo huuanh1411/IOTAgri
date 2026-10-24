@@ -75,14 +75,6 @@ class SensorDetailScreen extends ConsumerWidget {
                   metric: metric,
                   color: detail.color,
                 ),
-                if (metric == 'water') ...[
-                  const SizedBox(height: 24),
-                  WaterPumpControlPanel(waterLevel: value ?? 0),
-                ],
-                if (metric == 'light') ...[
-                  const SizedBox(height: 24),
-                  const LightControlPanel(),
-                ],
               ],
             ),
           ),
@@ -171,6 +163,7 @@ class _SensorHistoryCardState extends State<_SensorHistoryCard> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      key: const ValueKey('sensor-history-card'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
@@ -219,9 +212,11 @@ class _SensorHistoryCardState extends State<_SensorHistoryCard> {
           children: [
             Icon(Icons.trending_up, size: 17, color: widget.color),
             const SizedBox(width: 6),
-            Text(
-              context.l10n.trendDescription,
-              style: const TextStyle(color: AppColors.secondaryText),
+            Expanded(
+              child: Text(
+                context.l10n.trendDescription,
+                style: const TextStyle(color: AppColors.secondaryText),
+              ),
             ),
           ],
         ),
@@ -636,8 +631,11 @@ class _ActuatorControlPanelState extends State<_ActuatorControlPanel> {
                 ),
               ),
             const Divider(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 Text(context.l10n.automaticScheduleSimulation),
                 TextButton.icon(
@@ -936,8 +934,20 @@ class _DetailRow extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(label, style: const TextStyle(color: AppColors.secondaryText)),
-      Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
+      Expanded(
+        child: Text(
+          label,
+          style: const TextStyle(color: AppColors.secondaryText),
+        ),
+      ),
+      const SizedBox(width: 12),
+      Flexible(
+        child: Text(
+          value,
+          textAlign: TextAlign.end,
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+      ),
     ],
   );
 }

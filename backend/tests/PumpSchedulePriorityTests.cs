@@ -33,8 +33,9 @@ public class PumpSchedulePriorityTests : IClassFixture<PostgresTestFixture>
     public async Task Manual_conflicts_from_start_before_dispatch_and_during_pending_or_active_run(bool isOn, int status)
     {
         await using var db = await _fixture.CreateDatabaseAsync();
-        var device = new Device { Name = "Vietnam", DeviceKey = Guid.NewGuid().ToString(), Owner = new ApplicationUser { Id = "owner" } };
+        var device = OnlineDevice(isPumpOn: !isOn);
         db.Devices.Add(device);
+        db.SensorReadings.Add(FreshSafeReading(device));
         var start = DateTime.UtcNow.AddSeconds(-10);
         var local = TimeZoneInfo.ConvertTimeFromUtc(start, TimeZoneInfo.FindSystemTimeZoneById("Asia/Ho_Chi_Minh"));
         db.PumpSchedules.Add(new PumpSchedule { Device = device, IsEnabled = status < 0, WeekdayMask = 127, StartTime = TimeOnly.FromDateTime(local), DurationSeconds = 600, TimeZone = "Asia/Ho_Chi_Minh" });
@@ -50,8 +51,9 @@ public class PumpSchedulePriorityTests : IClassFixture<PostgresTestFixture>
     public async Task Future_schedule_does_not_block_manual_or_change_recurrence()
     {
         await using var db = await _fixture.CreateDatabaseAsync();
-        var device = new Device { Name = "Vietnam", DeviceKey = Guid.NewGuid().ToString(), Owner = new ApplicationUser { Id = "owner" } };
+        var device = OnlineDevice();
         db.Devices.Add(device);
+        db.SensorReadings.Add(FreshSafeReading(device));
         var local = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow.AddHours(1), TimeZoneInfo.FindSystemTimeZoneById("Asia/Ho_Chi_Minh"));
         var schedule = new PumpSchedule { Device = device, IsEnabled = true, WeekdayMask = 127, StartTime = TimeOnly.FromDateTime(local), DurationSeconds = 60, TimeZone = "Asia/Ho_Chi_Minh" };
         db.PumpSchedules.Add(schedule);
@@ -60,12 +62,67 @@ public class PumpSchedulePriorityTests : IClassFixture<PostgresTestFixture>
         var result = await Send(db, device, true);
         // Disconnected MQTT proves request passed admission and persisted, not transport success.
         Assert.Equal(503, Assert.IsAssignableFrom<IStatusCodeHttpResult>(result).StatusCode);
-        Assert.Single(await db.PumpCommands.ToListAsync());
+        var command = Assert.Single(await db.PumpCommands.ToListAsync());
+        Assert.Equal(PumpCommandStatus.Failed, command.Status);
+        Assert.Equal("MQTT_UNAVAILABLE", command.FailureReason);
         await db.Entry(schedule).ReloadAsync();
         Assert.Equal(start.Ticks / 10, schedule.StartTime.Ticks / 10);
         Assert.True(schedule.IsEnabled);
         Assert.Null(schedule.LastDispatchedOccurrenceUtc);
     }
+
+    [Fact]
+    public async Task Offline_or_stale_device_is_rejected_before_command_is_persisted()
+    {
+        await using var db = await _fixture.CreateDatabaseAsync();
+        var device = OnlineDevice();
+        device.LastSeenAt = DateTime.UtcNow.AddMinutes(-2);
+        db.Devices.Add(device);
+        db.SensorReadings.Add(FreshSafeReading(device));
+        await db.SaveChangesAsync();
+
+        var result = await Send(db, device, true);
+
+        Assert.Equal(409, Assert.IsAssignableFrom<IStatusCodeHttpResult>(result).StatusCode);
+        Assert.Empty(await db.PumpCommands.ToListAsync());
+    }
+
+    [Fact]
+    public async Task Low_water_is_rejected_before_command_is_persisted()
+    {
+        await using var db = await _fixture.CreateDatabaseAsync();
+        var device = OnlineDevice();
+        db.Devices.Add(device);
+        db.SensorReadings.Add(new SensorReading
+        {
+            Device = device,
+            RecordedAt = DateTime.UtcNow,
+            WaterLevel = SystemAlertDefaults.DefaultLowWaterLevelPercent
+        });
+        await db.SaveChangesAsync();
+
+        var result = await Send(db, device, true);
+
+        Assert.Equal(409, Assert.IsAssignableFrom<IStatusCodeHttpResult>(result).StatusCode);
+        Assert.Empty(await db.PumpCommands.ToListAsync());
+    }
+
+    private static Device OnlineDevice(bool isPumpOn = false) => new()
+    {
+        Name = "Vietnam",
+        DeviceKey = Guid.NewGuid().ToString(),
+        Owner = new ApplicationUser { Id = "owner" },
+        IsOnline = true,
+        LastSeenAt = DateTime.UtcNow,
+        IsPumpOn = isPumpOn
+    };
+
+    private static SensorReading FreshSafeReading(Device device) => new()
+    {
+        Device = device,
+        RecordedAt = DateTime.UtcNow,
+        WaterLevel = 80
+    };
 
     private static async Task<IResult> Send(ApplicationDbContext db, Device device, bool isOn)
     {
