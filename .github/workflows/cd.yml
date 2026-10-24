@@ -47,10 +47,9 @@ jobs:
             set -euo pipefail
             deploy_sha=$1
             cd /opt/iotagri
-            git diff --quiet && git diff --cached --quiet || {
-              echo 'Tracked VPS checkout changes must be preserved before deployment.' >&2
-              exit 1
-            }
+            if [ -n "$(git status --porcelain --untracked-files=normal)" ]; then
+              git stash push --include-untracked -m "pre-deploy-$deploy_sha"
+            fi
             git fetch --prune origin main
             git merge-base --is-ancestor "$deploy_sha" FETCH_HEAD || {
               echo 'Requested deployment commit is not on origin/main.' >&2
@@ -68,4 +67,4 @@ jobs:
               sleep 5
             done
             exit 1
-            REMOTE_SCRIPT
+          REMOTE_SCRIPT
