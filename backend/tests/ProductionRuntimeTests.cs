@@ -89,8 +89,9 @@ public class ProductionRuntimeTests
         var workflow = File.ReadAllText(RepoFile(".github/workflows/cd.yml"));
 
         Assert.Contains("DEPLOY_SHA: ${{ github.sha }}", workflow);
-        Assert.Contains("git status --porcelain --untracked-files=normal", workflow);
-        Assert.Contains("git stash push --include-untracked -m \"pre-deploy-$deploy_sha\"", workflow);
+        Assert.Contains("git status --porcelain --untracked-files=no", workflow);
+        Assert.Contains("git stash push -m \"pre-deploy-$deploy_sha\"", workflow);
+        Assert.DoesNotContain("git stash push --include-untracked", workflow);
         Assert.Contains("git merge-base --is-ancestor \"$deploy_sha\" FETCH_HEAD", workflow);
         Assert.Contains("git switch --detach \"$deploy_sha\"", workflow);
         Assert.DoesNotContain("git pull --ff-only", workflow);
