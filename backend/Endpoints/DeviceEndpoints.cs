@@ -8,6 +8,7 @@ using IOTAgriBackend.Dtos.Pumps;
 using IOTAgriBackend.Models;
 using IOTAgriBackend.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace IOTAgriBackend.Endpoints;
@@ -146,7 +147,7 @@ public static class DeviceEndpoints
         Guid id,
         ClaimsPrincipal principal,
         ApplicationDbContext db,
-        IMqttBrokerAdminService brokerAdmin,
+        [FromServices] IMqttBrokerAdminService brokerAdmin,
         CancellationToken cancellationToken)
     {
         var userId = GetUserId(principal);
