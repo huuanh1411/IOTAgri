@@ -84,6 +84,18 @@ public class ProductionRuntimeTests
     }
 
     [Fact]
+    public void Continuous_deployment_checks_out_the_exact_main_commit_without_discarding_vps_changes()
+    {
+        var workflow = File.ReadAllText(RepoFile(".github/workflows/cd.yml"));
+
+        Assert.Contains("DEPLOY_SHA: ${{ github.sha }}", workflow);
+        Assert.Contains("git diff --quiet && git diff --cached --quiet", workflow);
+        Assert.Contains("git merge-base --is-ancestor \"$deploy_sha\" FETCH_HEAD", workflow);
+        Assert.Contains("git switch --detach \"$deploy_sha\"", workflow);
+        Assert.DoesNotContain("git pull --ff-only", workflow);
+    }
+
+    [Fact]
     public void Mqtt_certificate_sync_requires_both_certificate_and_private_key_to_match()
     {
         var script = File.ReadAllText(RepoFile("deploy/sync-mqtt-certs.sh"));
