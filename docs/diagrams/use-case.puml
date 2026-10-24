@@ -1,0 +1,72 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+title IOTAgri - Use Case (hiện trạng mã nguồn)
+actor "Khách" as Guest
+actor "Người dùng\nđã đăng nhập" as User
+actor "Quản trị viên" as Admin
+actor "Thiết bị ESP32" as ESP
+
+rectangle "Hệ thống IOTAgri" {
+  usecase "Đăng ký / Đăng nhập" as Auth
+  usecase "Quản lý hồ sơ / Đổi mật khẩu\nĐăng xuất" as Profile
+  usecase "Thêm / Xem / Sửa / Xóa\nthiết bị sở hữu" as Devices
+  usecase "Tạo mã ghép nối" as Provision
+  usecase "Ghép nối phần cứng bằng mã" as Claim
+  usecase "Xem dashboard / Trạng thái online" as Monitor
+  usecase "Xem lịch sử / Biểu đồ\nTổng hợp cảm biến" as History
+  usecase "Điều khiển bơm\nXem lịch sử lệnh" as Pump
+  usecase "Điều khiển đèn / Xem trạng thái" as Light
+  usecase "Quản lý lịch bơm / Lịch đèn" as Schedule
+  usecase "Cấu hình ngưỡng\nXem và xử lý cảnh báo" as Alerts
+  usecase "Tạo / Xem / Trao đổi phiếu hỗ trợ" as Tickets
+  usecase "Chọn cây / Theo dõi ngày trồng" as Plants #FFF7DB
+  usecase "Cài đặt ứng dụng\nThông báo cục bộ" as Preferences #FFF7DB
+  usecase "Xem tài khoản / Phân quyền\nKhóa và mở khóa" as Accounts
+  usecase "Xem mọi thiết bị / Dữ liệu\nChuyển chủ sở hữu" as Fleet
+  usecase "Xem tổng quan / Báo cáo / Xuất CSV" as Reports
+  usecase "Xem trạng thái hệ thống\nCấu hình ngưỡng mặc định" as System
+  usecase "Xem nhật ký quản trị" as Audit
+  usecase "Phản hồi / Đổi trạng thái\nvà ưu tiên phiếu hỗ trợ" as Support
+  usecase "Gửi và lưu số liệu cảm biến" as Telemetry
+  usecase "Nhận lệnh bơm, đèn\nGửi trạng thái" as Actuate
+}
+Guest -- Auth
+User -- Profile
+User -- Devices
+User -- Provision
+User -- Monitor
+User -- History
+User -- Pump
+User -- Light
+User -- Schedule
+User -- Alerts
+User -- Tickets
+User -- Plants
+User -- Preferences
+Admin -- Profile
+Admin -- Accounts
+Admin -- Fleet
+Admin -- Reports
+Admin -- System
+Admin -- Audit
+Admin -- Support
+ESP -- Claim
+ESP -- Telemetry
+ESP -- Actuate
+note bottom of Plants
+  Danh mục cây dùng mock_data.dart.
+  Cây đang trồng lưu trên thiết bị người dùng.
+end note
+note bottom of Schedule
+  Tự chạy lịch là xử lý nội bộ của hệ thống.
+  Cần bật cấu hình scheduling tương ứng.
+end note
+legend bottom
+  Điều kiện chung: API nghiệp vụ yêu cầu đăng nhập.
+  API chủ thiết bị kiểm tra OwnerId; API quản trị yêu cầu AdminOnly.
+  Hai vai trò không có quan hệ kế thừa được khai báo trong Identity.
+  Màu vàng: chức năng dùng dữ liệu cục bộ trên ứng dụng.
+endlegend
+@enduml

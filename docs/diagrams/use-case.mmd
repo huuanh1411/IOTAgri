@@ -1,0 +1,58 @@
+flowchart LR
+    Guest["Khách"]
+    User["Người dùng đã đăng nhập"]
+    Admin["Quản trị viên"]
+    ESP["Thiết bị ESP32"]
+
+    subgraph IOTAgri["Hệ thống IOTAgri"]
+        direction TB
+        Auth([Đăng ký / Đăng nhập])
+        Profile([Quản lý hồ sơ / Đổi mật khẩu / Đăng xuất])
+        Devices([Thêm / Xem / Sửa / Xóa thiết bị sở hữu])
+        Provision([Tạo mã ghép nối thiết bị])
+        Claim([Ghép nối phần cứng bằng mã])
+        Monitor([Xem dashboard / Trạng thái online])
+        History([Xem lịch sử / Biểu đồ / Tổng hợp cảm biến])
+        Pump([Điều khiển bơm / Xem lịch sử lệnh])
+        Light([Điều khiển đèn / Xem trạng thái])
+        Schedule([Quản lý lịch bơm / Lịch đèn])
+        Alerts([Cấu hình ngưỡng / Xem và xử lý cảnh báo])
+        Tickets([Tạo / Xem / Trao đổi phiếu hỗ trợ])
+        LocalPlant([Chọn cây / Theo dõi ngày trồng trên ứng dụng])
+        LocalSettings([Cài đặt ứng dụng / Thông báo cục bộ])
+        Accounts([Xem tài khoản / Phân quyền / Khóa và mở khóa])
+        Fleet([Xem mọi thiết bị / Dữ liệu / Chuyển chủ sở hữu])
+        Reports([Xem tổng quan / Báo cáo / Xuất CSV])
+        System([Xem trạng thái hệ thống / Cấu hình ngưỡng mặc định])
+        Audit([Xem nhật ký quản trị])
+        Support([Phản hồi / Đổi trạng thái và ưu tiên phiếu hỗ trợ])
+        Telemetry([Gửi và lưu số liệu cảm biến])
+        Actuate([Nhận lệnh bơm, đèn / Gửi trạng thái])
+    end
+
+    Guest --- Auth
+    User --- Profile
+    User --- Devices
+    User --- Provision
+    User --- Monitor
+    User --- History
+    User --- Pump
+    User --- Light
+    User --- Schedule
+    User --- Alerts
+    User --- Tickets
+    User --- LocalPlant
+    User --- LocalSettings
+    Admin --- Accounts
+    Admin --- Fleet
+    Admin --- Reports
+    Admin --- System
+    Admin --- Audit
+    Admin --- Support
+    Admin --- Profile
+    ESP --- Claim
+    ESP --- Telemetry
+    ESP --- Actuate
+
+    classDef local fill:#fff7db,stroke:#b78103,color:#332500;
+    class LocalPlant,LocalSettings local;
