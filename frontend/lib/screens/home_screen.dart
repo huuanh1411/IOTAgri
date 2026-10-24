@@ -186,12 +186,16 @@ class _HeroCard extends StatelessWidget {
                 children: [
                   const Icon(Icons.eco, color: Colors.white70, size: 20),
                   const SizedBox(width: 8),
-                  Text(
-                    plant.localizedName(context.l10n),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Text(
+                      plant.localizedName(context.l10n),
+                      maxLines: 2,
+                      overflow: TextOverflow.fade,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -218,19 +222,30 @@ class _HeroCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    context.l10n.germination,
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  Expanded(
+                    child: Text(
+                      context.l10n.germination,
+                      maxLines: 2,
+                      textAlign: TextAlign.start,
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
                   ),
-                  Text(
-                    context.l10n.growth,
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  Expanded(
+                    child: Text(
+                      context.l10n.growth,
+                      maxLines: 2,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
                   ),
-                  Text(
-                    context.l10n.harvest,
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  Expanded(
+                    child: Text(
+                      context.l10n.harvest,
+                      maxLines: 2,
+                      textAlign: TextAlign.end,
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
                   ),
                 ],
               ),
@@ -260,10 +275,14 @@ class _LiveSensorCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  context.l10n.liveSensors,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                Expanded(
+                  child: Text(
+                    context.l10n.liveSensors,
+                    maxLines: 2,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
                 ),
+                const SizedBox(width: 8),
                 StatusPill(
                   label: context.l10n.synced,
                   color: AppColors.primaryText,
@@ -325,22 +344,24 @@ class _LiveSensorCard extends StatelessWidget {
                     onTap: () => context.push('/home/sensor/humidity'),
                   ),
                 ];
-                if (constraints.maxWidth >= 680) {
-                  return Row(
-                    children: [
-                      for (final gauge in gauges)
-                        Expanded(child: Center(child: gauge)),
-                    ],
-                  );
-                }
-
-                return SizedBox(
-                  width: double.infinity,
-                  child: Wrap(
-                    alignment: WrapAlignment.spaceEvenly,
-                    spacing: 12,
-                    runSpacing: 14,
-                    children: gauges,
+                final columns = constraints.maxWidth >= 840
+                    ? 6
+                    : constraints.maxWidth >= 560
+                    ? 3
+                    : 2;
+                return GridView.builder(
+                  key: const ValueKey('home-sensor-grid'),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: gauges.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 14,
+                    mainAxisExtent: 126,
+                  ),
+                  itemBuilder: (context, index) => SizedBox.expand(
+                    child: Center(child: gauges[index]),
                   ),
                 );
               },

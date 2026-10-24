@@ -901,12 +901,21 @@ import '../../utils/display_localizations.dart';
           warning: (reading?.waterLevel ?? 100) < waterLevelThreshold,
           color: CupertinoColors.systemTeal,
         ),
+        _SensorSpec(
+          keyName: 'lux',
+          label: context.l10n.lightSensorTitle,
+          value: reading?.lux,
+          unit: 'lx',
+          icon: CupertinoIcons.sun_max_fill,
+          warning: false,
+          color: CupertinoColors.systemYellow,
+        ),
       ];
       return LayoutBuilder(
         builder: (context, constraints) {
           final columns = constraints.maxWidth >= 1000
               ? 3
-              : constraints.maxWidth >= 580
+              : constraints.maxWidth >= 300
               ? 2
               : 1;
           return GridView.builder(
@@ -917,7 +926,7 @@ import '../../utils/display_localizations.dart';
               crossAxisCount: columns,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              mainAxisExtent: 112,
+              mainAxisExtent: 124,
             ),
             itemBuilder: (context, index) => AppMotionEntrance(
               index: index,
@@ -980,47 +989,55 @@ import '../../utils/display_localizations.dart';
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(17),
           ),
-          child: Row(
+          child: Stack(
+            alignment: Alignment.center,
             children: [
-              Icon(
-                hasValue ? spec.icon : CupertinoIcons.exclamationmark_circle,
-                color: color,
-                size: 23,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      spec.label,
-                      style: TextStyle(
-                        color: AppColors.secondaryText,
-                        fontSize: 12,
-                      ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    hasValue
+                        ? spec.icon
+                        : CupertinoIcons.exclamationmark_circle,
+                    color: color,
+                    size: 23,
+                  ),
+                  const SizedBox(height: 7),
+                  Text(
+                    spec.label,
+                    maxLines: 2,
+                    overflow: TextOverflow.fade,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.secondaryText,
+                      fontSize: 12,
                     ),
-                    const SizedBox(height: 5),
-                    Text(
+                  ),
+                  const SizedBox(height: 5),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
                       hasValue
                           ? '${spec.value!.toStringAsFixed(1)} ${spec.unit}'
                                 .trim()
                           : context.l10n.noData,
                       maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: color,
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const Icon(
-                CupertinoIcons.chevron_right,
-                color: CupertinoColors.tertiaryLabel,
-                size: 13,
+              const Positioned(
+                right: 0,
+                child: Icon(
+                  CupertinoIcons.chevron_right,
+                  color: CupertinoColors.tertiaryLabel,
+                  size: 13,
+                ),
               ),
             ],
           ),

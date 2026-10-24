@@ -718,7 +718,7 @@ void main() {
     await pumpDeviceDetail(tester);
 
     expect(find.text('Không có dữ liệu mới'), findsOneWidget);
-    expect(find.text('Không có dữ liệu'), findsNWidgets(5));
+    expect(find.text('Không có dữ liệu'), findsNWidgets(6));
   });
 
   testWidgets('sensor grid marks values below configured threshold', (
@@ -733,6 +733,7 @@ void main() {
       ph: 6.2,
       tds: 520,
       waterLevel: 12,
+      lux: 840,
       recordedAt: '2026-10-02T00:00:00Z',
     );
     await tester.pumpWidget(
@@ -758,6 +759,7 @@ void main() {
     expect(waterValue.style?.color, CupertinoColors.systemOrange);
     expect(find.text('24.5 °C'), findsOneWidget);
     expect(find.text('520.0 ppm'), findsOneWidget);
+    expect(find.text('840.0 lx'), findsOneWidget);
   });
 
   testWidgets('pump control shows command-sending state', (

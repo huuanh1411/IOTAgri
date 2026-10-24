@@ -27,6 +27,7 @@ class GaugeRing extends StatelessWidget {
     // Normalize value for 0‑100 percentage for the radial progress.
     final double progress = ((value ?? 0) / 100).clamp(0.0, 1.0);
     final gauge = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(
           width: 72,
@@ -78,9 +79,20 @@ class GaugeRing extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: AppColors.secondaryText),
+        SizedBox(
+          height: 34,
+          child: Center(
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.fade,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.secondaryText,
+              ),
+            ),
+          ),
         ),
       ],
     );

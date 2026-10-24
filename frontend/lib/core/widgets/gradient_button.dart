@@ -26,7 +26,9 @@ class GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveOnPressed = (isLoading || onPressed == null) ? null : onPressed;
+    final effectiveOnPressed = (isLoading || onPressed == null)
+        ? null
+        : onPressed;
     return InkWell(
       onTap: effectiveOnPressed,
       borderRadius: BorderRadius.circular(30),
@@ -37,7 +39,9 @@ class GradientButton extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(30),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        constraints: const BoxConstraints(minHeight: 48),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        alignment: Alignment.center,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -56,11 +60,18 @@ class GradientButton extends StatelessWidget {
                 ),
               ),
             ] else ...[
-              Text(
-                label,
-                style: AppText.body(context).copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: AppText.body(context).copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],

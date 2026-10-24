@@ -46,27 +46,34 @@ class PlantPickerScreen extends ConsumerWidget {
               const SizedBox(height: 28),
               // 2‑column grid of plant cards
               Expanded(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 280,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    mainAxisExtent: 360,
-                  ),
-                  itemCount: mockPlants.length,
-                  itemBuilder: (context, index) {
-                    final plant = mockPlants[index];
-                    final isCurrent = plant.id == activePlant.plant.id;
-                    return _PlantCard(
-                      plant: plant,
-                      isCurrent: isCurrent,
-                      onStart: isCurrent
-                          ? null
-                          : () async {
-                              await ref
-                                  .read(currentPlantProvider.notifier)
-                                  .startGrowing(plant);
-                            },
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final columnCount = constraints.maxWidth >= 620
+                        ? 3
+                        : constraints.maxWidth >= 330
+                        ? 2
+                        : 1;
+                    return ListView.separated(
+                      padding: const EdgeInsets.only(bottom: 96),
+                      itemCount: (mockPlants.length / columnCount).ceil(),
+                      separatorBuilder: (_, _) => const SizedBox(height: 16),
+                      itemBuilder: (context, rowIndex) => IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (var column = 0; column < columnCount; column++) ...[
+                              if (column > 0) const SizedBox(width: 16),
+                              Expanded(
+                                child: _plantCardFor(
+                                  ref,
+                                  activePlant,
+                                  rowIndex * columnCount + column,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
                     );
                   },
                 ),
@@ -75,6 +82,25 @@ class PlantPickerScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _plantCardFor(
+    WidgetRef ref,
+    ActivePlant activePlant,
+    int index,
+  ) {
+    if (index >= mockPlants.length) return const SizedBox.shrink();
+    final plant = mockPlants[index];
+    final isCurrent = plant.id == activePlant.plant.id;
+    return _PlantCard(
+      plant: plant,
+      isCurrent: isCurrent,
+      onStart: isCurrent
+          ? null
+          : () async {
+              await ref.read(currentPlantProvider.notifier).startGrowing(plant);
+            },
     );
   }
 }
@@ -100,7 +126,7 @@ class _PlantCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Transparent plant photography on the existing pastel tint.
             Container(
@@ -115,7 +141,9 @@ class _PlantCard extends StatelessWidget {
                 padding: const EdgeInsets.all(4),
                 child: Image.asset(
                   _plantImageAssets[plant.id]!,
-                  fit: BoxFit.contain,
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
                   filterQuality: FilterQuality.high,
                   semanticLabel: plant.localizedName(context.l10n),
                 ),
@@ -125,32 +153,49 @@ class _PlantCard extends StatelessWidget {
             // Plant name and variety.
             Text(
               plant.localizedName(context.l10n),
+              maxLines: 2,
+              textAlign: TextAlign.center,
               style: AppText.heading(context, fontSize: 18),
             ),
             Text(
               plant.variety,
+              maxLines: 2,
+              textAlign: TextAlign.center,
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: Colors.grey),
             ),
             const SizedBox(height: 8),
             // Meta row – duration & difficulty.
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.access_time, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  context.l10n.weeks(plant.durationWeeks),
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                Row(
+                  children: [
+                    const Icon(Icons.access_time, size: 16, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        context.l10n.weeks(plant.durationWeeks),
+                        softWrap: true,
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                const Icon(Icons.emoji_nature, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Flexible(
-                  child: Text(
-                    plant.localizedDifficulty(context.l10n),
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.emoji_nature, size: 16, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        plant.localizedDifficulty(context.l10n),
+                        softWrap: true,
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -212,11 +257,15 @@ class _PlantCard extends StatelessWidget {
             // Action button.
             SizedBox(
               width: double.infinity,
+              height: 48,
               child: isCurrent
                   ? ElevatedButton.icon(
                       onPressed: null,
                       icon: const Icon(Icons.check),
-                      label: Text(context.l10n.currentlyGrowing),
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(context.l10n.currentlyGrowing),
+                      ),
                       style: ElevatedButton.styleFrom(
                         disabledBackgroundColor:
                             AppColors.growingDisabledBackground,

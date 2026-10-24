@@ -55,6 +55,95 @@ DeviceOverview _deviceWithReadings({
 }
 
 void main() {
+  for (final width in <double>[320, 360, 393, 430]) {
+    testWidgets('plant cards fit at ${width.toInt()}px with larger text', (
+      tester,
+    ) async {
+      tester.view.physicalSize = Size(width, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final controller = ActivePlantController(
+        store: _MemoryActivePlantStore(),
+        now: () => DateTime(2026, 10, 24, 8),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [currentPlantProvider.overrideWith((ref) => controller)],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: MediaQuery(
+              data: const MediaQueryData(textScaler: TextScaler.linear(1.3)),
+              child: const PlantPickerScreen(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      final startText = find.text('Bắt đầu trồng').first;
+      expect(startText, findsOneWidget);
+      expect(tester.widget<Text>(startText).textAlign, TextAlign.center);
+    });
+  }
+
+  testWidgets('home sensor grid uses six equal-height responsive cells', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(393, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final readings = StreamController<List<DeviceOverview>>();
+    addTearDown(readings.close);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          dashboardDevicesProvider.overrideWith((ref) => readings.stream),
+          userProfileProvider.overrideWithValue(
+            const UserProfile(
+              fullName: 'Test',
+              email: 'test@example.com',
+              plan: 'Pro',
+            ),
+          ),
+        ],
+        child: const MaterialApp(
+          locale: Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: HomeScreen(),
+        ),
+      ),
+    );
+    readings.add([
+      _deviceWithReadings(
+        water: 68,
+        tds: 710,
+        airTemperature: 23,
+        light: 840,
+        waterTemperature: 24,
+        humidity: 62,
+      ),
+    ]);
+    await tester.pump();
+
+    final grid = tester.widget<GridView>(
+      find.byKey(const ValueKey('home-sensor-grid')),
+    );
+    final delegate =
+        grid.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+    expect(delegate.crossAxisCount, 2);
+    expect(delegate.mainAxisExtent, 126);
+    expect(grid.semanticChildCount, 6);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'start growing immediately selects the card without confirmation',
     (tester) async {

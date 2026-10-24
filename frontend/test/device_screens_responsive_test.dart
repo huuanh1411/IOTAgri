@@ -43,6 +43,7 @@ class MockNarrowApiService extends ApiService {
           'solutionTemperature': 22.0,
           'tds': 600.0,
           'waterLevel': 80.0,
+          'lux': 1234.0,
           'ph': 6.2,
           'recordedAt': '2026-10-16T08:30:00Z',
         }
@@ -118,6 +119,34 @@ void main() {
     lastSeenAt: '2026-10-16T08:30:00Z',
   );
 
+  for (final width in <double>[360, 393, 430]) {
+    testWidgets(
+      'CupertinoDeviceDetailScreen renders lux at ${width.toInt()}px',
+      (tester) async {
+        tester.view.physicalSize = Size(width, 900);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: CupertinoDeviceDetailScreen(
+              device: testDevice,
+              apiService: MockNarrowApiService(),
+              enableBackgroundRefresh: false,
+              disableAnimations: true,
+            ),
+          ),
+        );
+        await pumpDeviceDetail(tester);
+
+        expect(find.text('1234.0 lx'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets(
       'CupertinoDeviceDetailScreen renders at 320px width without overflow',
       (tester) async {
@@ -142,6 +171,7 @@ void main() {
 
     expect(find.text('Tháp Thử Nghiệm 320px'), findsWidgets);
     expect(find.text('Cảm biến'), findsOneWidget);
+    expect(find.text('1234.0 lx'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
