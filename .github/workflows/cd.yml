@@ -47,8 +47,10 @@ jobs:
             set -euo pipefail
             deploy_sha=$1
             cd /opt/iotagri
-            if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
-              git stash push -m "pre-deploy-$deploy_sha"
+            # Ensure the working tree is clean before deployment (including untracked, non‑ignored files).
+            if [ -n "$(git status --porcelain)" ]; then
+              echo "Uncommitted or untracked changes detected. Aborting deployment to avoid interfering with production." >&2
+              exit 1
             fi
             git fetch --prune origin main
             git merge-base --is-ancestor "$deploy_sha" FETCH_HEAD || {
