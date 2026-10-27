@@ -5,24 +5,24 @@
 // ============================================================
 
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../providers/auth_provider.dart';
+import '../../../providers/auth_controller.dart';
 
-class AdminLogoutButton extends StatelessWidget {
+class AdminLogoutButton extends ConsumerWidget {
   const AdminLogoutButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
       minimumSize: const Size(44, 44),
-      onPressed: () => _confirmLogout(context),
+      onPressed: () => _confirmLogout(context, ref),
       child: const Icon(CupertinoIcons.square_arrow_right),
     );
   }
 
-  void _confirmLogout(BuildContext context) {
+  void _confirmLogout(BuildContext context, WidgetRef ref) {
     showCupertinoDialog<void>(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
@@ -38,9 +38,9 @@ class AdminLogoutButton extends StatelessWidget {
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(dialogContext).pop();
-              context.read<AuthProvider>().logout();
+              await ref.read(authControllerProvider.notifier).logout();
             },
             child: const Text('Đăng xuất'),
           ),

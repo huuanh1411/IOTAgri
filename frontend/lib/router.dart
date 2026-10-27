@@ -3,7 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart' as provider;
 
+import 'cupertino/admin/cupertino_admin_dashboard_screen.dart';
 import 'screens/alert_center_tab_screen.dart';
 import 'screens/auth_screen.dart';
 import 'screens/harvest_screen.dart';
@@ -16,6 +18,8 @@ import 'screens/settings_screen.dart';
 import 'screens/splash_screen.dart';
 import 'cupertino/devices/cupertino_devices_screen.dart';
 import 'providers/auth_controller.dart';
+import 'providers/auth_provider.dart';
+import 'models/user.dart' as legacy_models;
 import 'core/animation/app_motion.dart';
 import 'core/theme/app_colors.dart';
 import 'core/widgets/floating_pill_nav_bar.dart';
@@ -39,10 +43,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     overridePlatformDefaultLocation: true,
     redirect: (BuildContext context, GoRouterState state) {
       if (state.matchedLocation == '/splash') return null;
-      final isLoggedIn = ref.read(authControllerProvider).user != null;
+      final user = ref.read(authControllerProvider).user;
+      final isLoggedIn = user != null;
       final isOnAuth = state.matchedLocation == '/auth';
       if (!isLoggedIn && !isOnAuth) return '/auth';
-      if (isLoggedIn && isOnAuth) return '/home';
+      if (user != null && isOnAuth) {
+        return user.role == 'admin' ? '/admin' : '/home';
+      }
+      if (user != null &&
+          state.matchedLocation == '/admin' &&
+          user.role != 'admin') {
+        return '/home';
+      }
       return null;
     },
     routes: [
@@ -52,6 +64,27 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
+      GoRoute(
+        path: '/admin',
+        builder: (context, state) {
+          final user = ref.read(authControllerProvider).user!;
+          return provider.ChangeNotifierProvider(
+            lazy: false,
+            create: (_) => AuthProvider(
+              initialUser: legacy_models.User(
+                id: user.id,
+                email: user.email,
+                fullName: user.fullName,
+                role: user.role,
+              ),
+              onSessionExpired: () => ref
+                  .read(authControllerProvider.notifier)
+                  .handleSessionExpired(),
+            ),
+            child: const CupertinoAdminDashboardScreen(),
+          );
+        },
+      ),
       // Shell route that holds the bottom navigation and preserves tab state.
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
