@@ -685,7 +685,12 @@ void main() {
     );
     await pumpDeviceDetail(tester);
 
-    await tester.ensureVisible(find.text('Thủ công'));
+    // Cuộn để SliverList dựng nút trước khi tìm và bấm ở viewport nhỏ.
+    await tester.scrollUntilVisible(
+      find.text('Thủ công'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     await pumpDeviceDetail(tester);
     await tester.tap(find.text('Thủ công'));
     await pumpDeviceDetail(tester);
