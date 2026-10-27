@@ -7,6 +7,7 @@ flowchart LR
     subgraph IOTAgri["Hệ thống IOTAgri"]
         direction TB
         Auth([Đăng ký / Đăng nhập])
+        Recovery([Quên mật khẩu / Đặt lại mật khẩu qua email])
         Profile([Quản lý hồ sơ / Đổi mật khẩu / Đăng xuất])
         Devices([Thêm / Xem / Sửa / Xóa thiết bị sở hữu])
         Provision([Tạo mã ghép nối thiết bị])
@@ -31,6 +32,8 @@ flowchart LR
     end
 
     Guest --- Auth
+    Guest --- Recovery
+    Recovery --- SMTP["Dịch vụ email SMTP"]
     User --- Profile
     User --- Devices
     User --- Provision

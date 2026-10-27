@@ -7,9 +7,11 @@ actor "Khách" as Guest
 actor "Người dùng\nđã đăng nhập" as User
 actor "Quản trị viên" as Admin
 actor "Thiết bị ESP32" as ESP
+actor "Dịch vụ email SMTP" as SMTP
 
 rectangle "Hệ thống IOTAgri" {
   usecase "Đăng ký / Đăng nhập" as Auth
+  usecase "Quên mật khẩu / Đặt lại mật khẩu" as Recovery
   usecase "Quản lý hồ sơ / Đổi mật khẩu\nĐăng xuất" as Profile
   usecase "Thêm / Xem / Sửa / Xóa\nthiết bị sở hữu" as Devices
   usecase "Tạo mã ghép nối" as Provision
@@ -33,6 +35,8 @@ rectangle "Hệ thống IOTAgri" {
   usecase "Nhận lệnh bơm, đèn\nGửi trạng thái" as Actuate
 }
 Guest -- Auth
+Guest -- Recovery
+SMTP -- Recovery
 User -- Profile
 User -- Devices
 User -- Provision

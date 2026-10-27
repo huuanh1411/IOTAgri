@@ -20,10 +20,11 @@ erDiagram
 
     AspNetUsers {
         string Id PK
-        string Email
-        string UserName
+        string Email "nullable trong Identity"
+        string UserName "nullable trong Identity"
         string FullName
-        string PasswordHash
+        string PhoneNumber "nullable"
+        string PasswordHash "nullable trong Identity"
         bool LockoutEnabled
         datetimeoffset LockoutEnd "nullable"
     }
