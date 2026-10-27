@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart' as provider;
 
+import '../cupertino/profile/cupertino_change_password_screen.dart';
 import '../core/widgets/page_header.dart';
 import '../core/widgets/section_chip.dart';
 import '../providers/app_settings_provider.dart';
@@ -106,6 +107,24 @@ class SettingsScreen extends ConsumerWidget {
                           alertNotifier.update(harvestReminder: value),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.lock_outline),
+                  title: Text(
+                    settings.locale.languageCode == 'en'
+                        ? 'Change password'
+                        : 'Đổi mật khẩu',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  // Mở màn đổi mật khẩu có sẵn, gọi API backend qua ApiService.
+                  onTap: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const CupertinoChangePasswordScreen(),
+                    ),
+                  ),
                 ),
               ),
             ],

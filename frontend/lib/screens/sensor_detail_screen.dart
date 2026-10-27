@@ -70,19 +70,12 @@ class SensorDetailScreen extends ConsumerWidget {
                   value: detail.idealRange,
                 ),
                 const Divider(height: 28),
+                // Giữ số liệu/lịch sử; bỏ khung điều khiển bơm và đèn mô phỏng.
                 _SensorHistoryCard(
                   title: detail.historyTitle,
                   metric: metric,
                   color: detail.color,
                 ),
-                if (metric == 'water') ...[
-                  const SizedBox(height: 24),
-                  WaterPumpControlPanel(waterLevel: value ?? 0),
-                ],
-                if (metric == 'light') ...[
-                  const SizedBox(height: 24),
-                  const LightControlPanel(),
-                ],
               ],
             ),
           ),

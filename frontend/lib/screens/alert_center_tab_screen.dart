@@ -8,44 +8,13 @@ import '../data/models.dart';
 import '../providers/data_providers.dart';
 import '../utils/l10n.dart';
 
-final resolvedAlertIdsProvider = StateProvider<Set<String>>(
-  (ref) => <String>{},
-);
-
-class AlertCenterTabScreen extends ConsumerStatefulWidget {
+class AlertCenterTabScreen extends ConsumerWidget {
   const AlertCenterTabScreen({super.key});
 
   @override
-  ConsumerState<AlertCenterTabScreen> createState() =>
-      _AlertCenterTabScreenState();
-}
-
-class _AlertCenterTabScreenState extends ConsumerState<AlertCenterTabScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Chỉ hiển thị cảnh báo; bỏ các tab và thao tác đánh dấu đã xử lý.
     final alerts = ref.watch(alertsProvider);
-    final resolvedIds = ref.watch(resolvedAlertIdsProvider);
-    final unresolved = alerts
-        .where((alert) => !resolvedIds.contains(alert.id))
-        .toList();
-    final resolved = alerts
-        .where((alert) => resolvedIds.contains(alert.id))
-        .toList();
 
     return ColoredBox(
       color: AppColors.background,
@@ -59,42 +28,12 @@ class _AlertCenterTabScreenState extends ConsumerState<AlertCenterTabScreen>
               child: PageHeader(
                 title: context.l10n.alerts,
                 subtitle: context.l10n.alertsSubtitle,
-                bottomContent: TabBar(
-                  controller: _tabController,
-                  labelColor: AppColors.forestGreen,
-                  unselectedLabelColor: AppColors.secondaryText,
-                  indicatorColor: AppColors.forestGreen,
-                  tabs: [
-                    Tab(text: context.l10n.all),
-                    Tab(text: context.l10n.unresolved),
-                    Tab(text: context.l10n.resolved),
-                  ],
-                ),
               ),
             ),
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _AlertList(
-                    alerts: alerts,
-                    resolvedIds: resolvedIds,
-                    onResolve: _resolve,
-                    emptyMessage: context.l10n.noAlerts,
-                  ),
-                  _AlertList(
-                    alerts: unresolved,
-                    resolvedIds: resolvedIds,
-                    onResolve: _resolve,
-                    emptyMessage: context.l10n.noUnresolvedAlerts,
-                  ),
-                  _AlertList(
-                    alerts: resolved,
-                    resolvedIds: resolvedIds,
-                    onResolve: _resolve,
-                    emptyMessage: context.l10n.noResolvedAlerts,
-                  ),
-                ],
+              child: _AlertList(
+                alerts: alerts,
+                emptyMessage: context.l10n.noAlerts,
               ),
             ),
           ],
@@ -102,24 +41,15 @@ class _AlertCenterTabScreenState extends ConsumerState<AlertCenterTabScreen>
       ),
     );
   }
-
-  void _resolve(String alertId) {
-    final current = ref.read(resolvedAlertIdsProvider);
-    ref.read(resolvedAlertIdsProvider.notifier).state = {...current, alertId};
-  }
 }
 
 class _AlertList extends StatelessWidget {
   const _AlertList({
     required this.alerts,
-    required this.resolvedIds,
-    required this.onResolve,
     required this.emptyMessage,
   });
 
   final List<AppAlert> alerts;
-  final Set<String> resolvedIds;
-  final ValueChanged<String> onResolve;
   final String emptyMessage;
 
   @override
@@ -139,7 +69,6 @@ class _AlertList extends StatelessWidget {
       separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final alert = alerts[index];
-        final isResolved = resolvedIds.contains(alert.id);
         final isWarning = alert.type == 'warning';
         final color = isWarning ? AppColors.alertRed : AppColors.forestGreen;
         return Card(
@@ -172,23 +101,6 @@ class _AlertList extends StatelessWidget {
                       Text(
                         alert.localizedMessage(context.l10n),
                         style: const TextStyle(color: AppColors.secondaryText),
-                      ),
-                      const SizedBox(height: 12),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: isResolved
-                            ? Chip(
-                                label: Text(context.l10n.resolved),
-                                avatar: Icon(
-                                  Icons.check_circle_outline,
-                                  size: 18,
-                                ),
-                              )
-                            : OutlinedButton.icon(
-                                onPressed: () => onResolve(alert.id),
-                                icon: const Icon(Icons.check, size: 18),
-                                label: Text(context.l10n.markResolved),
-                              ),
                       ),
                     ],
                   ),
