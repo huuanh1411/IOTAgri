@@ -33,6 +33,7 @@ internal static class BackendHttpTestHost
         var configuration = new Dictionary<string, string?>
         {
             ["Jwt:Key"] = key, ["Jwt:Issuer"] = "qa-http", ["Jwt:Audience"] = "qa-clients",
+            ["EmailVerification:Pepper"] = "qa-email-verification-pepper-0123456789abcdef",
             ["DeviceProvisioning:MqttHost"] = "qa-broker",
             ["Cors:AllowedOrigins:0"] = "https://app.aerogreen.vn",
             ["Cors:AllowedOrigins:1"] = "https://aerogreen.vn",
@@ -55,6 +56,8 @@ internal static class BackendHttpTestHost
         builder.Services.AddAuthorization(o => o.AddPolicy("AdminOnly", p => p.RequireRole("Admin")));
         builder.Services.AddApplicationWebSecurity(builder.Configuration, builder.Environment);
         builder.Services.AddScoped<ITokenService, TokenService>();
+        builder.Services.AddSingleton<IEmailSender, TestEmailSender>();
+        builder.Services.AddSingleton<IGoogleTokenValidator, TestGoogleTokenValidator>();
         builder.Services.AddSingleton<IMqttBrokerAdminService>(brokerAdmin ?? new TestMqttBrokerAdminService());
         builder.Services.AddSingleton<MqttIngestionService>();
         var app = builder.Build();

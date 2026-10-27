@@ -22,15 +22,23 @@ signatures.
 
 | Method | Route | Auth | Success | Body |
 |---|---|---:|---:|---|
-| POST | `/api/auth/register` | no | 201 | `email`, `password` (min 8), `fullName` |
+| POST | `/api/auth/register` | no | 202 | `email`, `password` (min 8), `fullName`; sends verification code |
+| POST | `/api/auth/verify-email` | no | 204 | `email`, six-digit `code` |
+| POST | `/api/auth/resend-verification-code` | no | 202 | `email`; same response for unknown/already-confirmed accounts |
+| POST | `/api/auth/google` | no | 200 | Google `idToken` |
 | POST | `/api/auth/login` | no | 200 | `email`, `password` |
 | POST | `/api/auth/refresh` | no | 200 | `refreshToken` |
 | POST | `/api/auth/logout` | yes | 204 | `refreshToken` |
 | POST | `/api/auth/change-password` | yes | 204 | `currentPassword`, `newPassword`, `logoutOtherDevices` |
 | GET / PUT | `/api/auth/profile` | yes | 200 | PUT: `fullName`, nullable `phoneNumber` |
 
-Login and refresh return `{ accessToken, refreshToken, expiresAt }`. Refresh
-rotates the prior refresh token. A password change validates the current
+Google sign-in validates the ID token server-side against configured client IDs,
+including distinct Android server-client and Web-client audiences, then returns `{ accessToken, refreshToken, expiresAt }`. Login and refresh return
+the same payload. Password login returns `403 { "error": "Email verification is
+required." }` after correct credentials for an unconfirmed non-admin account;
+clients must show verification rather than retrying login. Invalid credentials and
+invalid Google tokens return `401`. Email-code validation failures return `400`.
+Refresh rotates the prior refresh token. A password change validates the current
 password through Identity; when `logoutOtherDevices` is true, all active refresh
 tokens for that user are revoked because refresh tokens have no device identity.
 

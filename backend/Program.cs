@@ -76,6 +76,11 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddApplicationWebSecurity(builder.Configuration, builder.Environment);
 
+builder.Services.Configure<EmailVerificationOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.Configure<GoogleAuthOptions>(builder.Configuration.GetSection("GoogleAuth"));
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+builder.Services.AddSingleton<IGoogleIdTokenVerifier, GoogleIdTokenVerifier>();
+builder.Services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddSingleton<IMqttDynsecTransport, MqttDynsecTransport>();
 builder.Services.AddSingleton<IMqttBrokerAdminService>(services => new MqttBrokerAdminService(

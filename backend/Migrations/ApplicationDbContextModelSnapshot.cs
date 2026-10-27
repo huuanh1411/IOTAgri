@@ -236,6 +236,45 @@ namespace IOTAgriBackend.Migrations
                     b.ToTable("DeviceAlerts");
                 });
 
+            modelBuilder.Entity("IOTAgriBackend.Models.EmailVerificationCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime?>("ConsumedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "ConsumedAt");
+
+                    b.ToTable("EmailVerificationCodes");
+                });
+
             modelBuilder.Entity("IOTAgriBackend.Models.LightSchedule", b =>
                 {
                     b.Property<Guid>("Id")
@@ -752,6 +791,17 @@ namespace IOTAgriBackend.Migrations
                         .IsRequired();
 
                     b.Navigation("Device");
+                });
+
+            modelBuilder.Entity("IOTAgriBackend.Models.EmailVerificationCode", b =>
+                {
+                    b.HasOne("IOTAgriBackend.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("IOTAgriBackend.Models.LightSchedule", b =>

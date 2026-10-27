@@ -5,11 +5,7 @@ import '../data/models/user.dart';
 
 const _keepAuthError = Object();
 
-enum AuthErrorType {
-  invalidCredentials,
-  network,
-  unknown,
-}
+enum AuthErrorType { invalidCredentials, network, unknown }
 
 /// State representing authentication status.
 class AuthState {
@@ -80,6 +76,46 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> loginWithGoogle() async {
+    state = state.copyWith(isLoading: true, error: null, errorType: null);
+    try {
+      final user = await _repo.loginWithGoogle();
+      if (user == null) {
+        state = state.copyWith(isLoading: false);
+        return;
+      }
+      _completeGoogleLogin(user);
+    } catch (e) {
+      _failGoogleLogin(e);
+    }
+  }
+
+  Future<void> loginWithGoogleIdToken(String idToken) async {
+    state = state.copyWith(isLoading: true, error: null, errorType: null);
+    try {
+      _completeGoogleLogin(await _repo.loginWithGoogleIdToken(idToken));
+    } catch (e) {
+      _failGoogleLogin(e);
+    }
+  }
+
+  void _completeGoogleLogin(User user) {
+    state = state.copyWith(
+      user: user,
+      isLoading: false,
+      error: null,
+      errorType: null,
+    );
+  }
+
+  void _failGoogleLogin(Object error) {
+    state = state.copyWith(
+      isLoading: false,
+      errorType: _classifyError(error),
+      error: _displayMessage(error),
+    );
+  }
+
   Future<void> signUp({
     required String fullName,
     required String email,
@@ -87,13 +123,12 @@ class AuthController extends StateNotifier<AuthState> {
   }) async {
     state = state.copyWith(isLoading: true, error: null, errorType: null);
     try {
-      final user = await _repo.signUp(
+      await _repo.signUp(
         fullName: fullName,
         email: email,
         password: password,
       );
       state = state.copyWith(
-        user: user,
         isLoading: false,
         error: null,
         errorType: null,
@@ -104,6 +139,38 @@ class AuthController extends StateNotifier<AuthState> {
         errorType: _classifyError(e),
         error: _displayMessage(e),
       );
+    }
+  }
+
+  Future<bool> verifyEmail({required String email, required String code}) async {
+    state = state.copyWith(isLoading: true, error: null, errorType: null);
+    try {
+      await _repo.verifyEmail(email: email, code: code);
+      state = state.copyWith(isLoading: false, error: null, errorType: null);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorType: _classifyError(e),
+        error: _displayMessage(e),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> resendVerificationCode({required String email}) async {
+    state = state.copyWith(isLoading: true, error: null, errorType: null);
+    try {
+      await _repo.resendVerificationCode(email: email);
+      state = state.copyWith(isLoading: false, error: null, errorType: null);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorType: _classifyError(e),
+        error: _displayMessage(e),
+      );
+      return false;
     }
   }
 

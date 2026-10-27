@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text.dart';
 import '../core/widgets/gradient_button.dart';
 import '../providers/auth_controller.dart';
+import '../providers/auth_provider.dart';
+import '../services/google_sign_in_button.dart';
 import '../utils/l10n.dart';
+import 'auth/verify_email_screen.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -63,10 +67,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         password: _password.text,
       );
     } else {
+      final email = _email.text.trim();
       await controller.signUp(
         fullName: _name.text.trim(),
-        email: _email.text.trim(),
+        email: email,
         password: _password.text,
+      );
+      if (!mounted || ref.read(authControllerProvider).error != null) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => provider.ChangeNotifierProvider(
+            create: (_) => AuthProvider(),
+            child: VerifyEmailScreen(email: email),
+          ),
+        ),
       );
     }
   }
@@ -85,12 +99,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     return context.l10n.authGenericError;
   }
 
+  Future<void> _onGoogleTap() async {
+    await ref.read(authControllerProvider.notifier).loginWithGoogle();
+  }
+
   void _onSocialTap(String label) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.socialSignInNotAvailable),
-      ),
+      SnackBar(content: Text(context.l10n.socialSignInNotAvailable)),
     );
   }
 
@@ -253,10 +269,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           Row(
                             children: [
                               Expanded(
-                                child: _SocialButton(
-                                  label: 'Google',
-                                  letter: 'G',
-                                  onPressed: () => _onSocialTap('Google'),
+                                child: GoogleSignInWebButton(
+                                  child: _SocialButton(
+                                    label: 'Google',
+                                    letter: 'G',
+                                    onPressed: auth.isLoading
+                                        ? null
+                                        : _onGoogleTap,
+                                  ),
+                                  onIdToken: (idToken) => ref
+                                      .read(authControllerProvider.notifier)
+                                      .loginWithGoogleIdToken(idToken),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -493,12 +516,7 @@ class _SocialButton extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        Flexible(
-          child: Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
+        Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
       ],
     ),
   );

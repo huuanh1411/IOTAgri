@@ -24,10 +24,34 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<SupportTicket> SupportTickets => Set<SupportTicket>();
     public DbSet<SupportTicketMessage> SupportTicketMessages => Set<SupportTicketMessage>();
     public DbSet<SystemAlertDefaults> SystemAlertDefaults => Set<SystemAlertDefaults>();
+    public DbSet<EmailVerificationCode> EmailVerificationCodes => Set<EmailVerificationCode>();
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        foreach (var entry in ChangeTracker.Entries<EmailVerificationCode>()
+                     .Where(entry => entry.State == EntityState.Modified))
+        {
+            entry.Entity.Version = Guid.NewGuid();
+        }
+
+        return base.SaveChangesAsync(cancellationToken);
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<EmailVerificationCode>(entity =>
+        {
+            entity.Property(code => code.UserId).HasMaxLength(450);
+            entity.Property(code => code.CodeHash).HasMaxLength(64);
+            entity.Property(code => code.Version).IsConcurrencyToken();
+            entity.HasIndex(code => new { code.UserId, code.ConsumedAt });
+            entity.HasOne(code => code.User)
+                .WithMany()
+                .HasForeignKey(code => code.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
         builder.Entity<RefreshToken>(entity =>
         {

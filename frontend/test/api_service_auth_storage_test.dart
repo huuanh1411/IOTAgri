@@ -119,6 +119,56 @@ void main() {
     expect(result['id'], 'user-1');
   });
 
+  test('verify email posts expected path and JSON payload on 204', () async {
+    late http.Request request;
+    final service = ApiService(
+      client: MockClient((received) async {
+        request = received;
+        return http.Response('', 204);
+      }),
+    );
+
+    await service.verifyEmail('user@example.com', '123456');
+
+    expect(request.method, 'POST');
+    expect(request.url.path, '/api/auth/verify-email');
+    expect(jsonDecode(request.body), {
+      'email': 'user@example.com',
+      'code': '123456',
+    });
+  });
+
+  test('resend verification posts expected path and JSON payload on 202', () async {
+    late http.Request request;
+    final service = ApiService(
+      client: MockClient((received) async {
+        request = received;
+        return http.Response('', 202);
+      }),
+    );
+
+    await service.resendVerificationCode('user@example.com');
+
+    expect(request.method, 'POST');
+    expect(request.url.path, '/api/auth/resend-verification-code');
+    expect(jsonDecode(request.body), {'email': 'user@example.com'});
+  });
+
+  test('verification endpoints reject unexpected response statuses', () async {
+    final service = ApiService(
+      client: MockClient((_) async => http.Response('', 400)),
+    );
+
+    await expectLater(
+      service.verifyEmail('user@example.com', '123456'),
+      throwsA(isA<Exception>()),
+    );
+    await expectLater(
+      service.resendVerificationCode('user@example.com'),
+      throwsA(isA<Exception>()),
+    );
+  });
+
   test('refresh accepts 200 and retries an authenticated request', () async {
     SharedPreferences.setMockInitialValues({
       'iotagri.auth.access_token': _accessToken(expiresInHours: -1),

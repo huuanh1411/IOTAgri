@@ -258,6 +258,30 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> loginWithGoogleIdToken(String idToken) async {
+    if (idToken.isEmpty) {
+      throw Exception('Google did not return an ID token.');
+    }
+
+    final response = await _client.post(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.google}'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'idToken': idToken}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final accessToken = data['accessToken'];
+      final refreshToken = data['refreshToken'];
+      if (accessToken is! String || refreshToken is! String) {
+        throw Exception('Google sign-in returned an invalid session.');
+      }
+      await _saveTokens(accessToken, refreshToken);
+      return data;
+    }
+    throw Exception('Google sign-in failed. Please try again.');
+  }
+
   Future<Map<String, dynamic>> register(
     String email,
     String password,
@@ -273,10 +297,11 @@ class ApiService {
       }),
     );
 
-    // The API returns 201 Created after a successful registration. Accept it
-    // so the repository can continue with its automatic login.
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return jsonDecode(response.body);
+    if (response.statusCode == 200 ||
+        response.statusCode == 201 ||
+        response.statusCode == 202) {
+      if (response.body.isEmpty) return <String, dynamic>{};
+      return jsonDecode(response.body) as Map<String, dynamic>;
     } else if (response.statusCode == 409) {
       throw Exception('Email này đã được đăng ký.');
     } else {
@@ -293,6 +318,41 @@ class ApiService {
       }
       throw Exception(message);
     }
+  }
+
+  Future<void> verifyEmail(String email, String code) async {
+    final response = await _client.post(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.verifyEmail}'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'code': code}),
+    );
+
+    if (response.statusCode == 204) return;
+    throw Exception(_verificationErrorMessage(response));
+  }
+
+  Future<void> resendVerificationCode(String email) async {
+    final response = await _client.post(
+      Uri.parse(
+        '${ApiConstants.baseUrl}${ApiConstants.resendVerificationCode}',
+      ),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    if (response.statusCode == 202) return;
+    throw Exception(_verificationErrorMessage(response));
+  }
+
+  String _verificationErrorMessage(http.Response response) {
+    try {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      final error = data['error'] ?? data['message'];
+      if (error is String && error.isNotEmpty) return error;
+    } catch (_) {
+      // Preserve a safe generic message for non-JSON responses.
+    }
+    return 'Không thể xác minh email. Vui lòng thử lại.';
   }
 
   Future<void> logout() async {

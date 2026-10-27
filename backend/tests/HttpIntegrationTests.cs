@@ -24,7 +24,10 @@ public class HttpIntegrationTests : IClassFixture<PostgresTestFixture>
     private static async Task<AuthResponse> RegisterLogin(HttpClient client, string email = "qa@example.test")
     {
         using var register = await client.PostAsJsonAsync("/api/auth/register", new RegisterRequest(email, "QaPassword1!", "QA User"));
-        Assert.Equal(HttpStatusCode.Created, register.StatusCode);
+        Assert.Equal(HttpStatusCode.Accepted, register.StatusCode);
+        var code = TestEmailSender.GetCode(email);
+        using var verify = await client.PostAsJsonAsync("/api/auth/verify-email", new VerifyEmailRequest(email, code));
+        Assert.Equal(HttpStatusCode.NoContent, verify.StatusCode);
         using var login = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest(email, "QaPassword1!"));
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
         return (await login.Content.ReadFromJsonAsync<AuthResponse>())!;
@@ -87,6 +90,46 @@ public class HttpIntegrationTests : IClassFixture<PostgresTestFixture>
         }
         using var rejected = await client.PostAsJsonAsync("/api/device-provisioning/claims", new { code = "", hardwareId = "" });
         Assert.Equal(HttpStatusCode.ServiceUnavailable, rejected.StatusCode);
+    }
+
+    [Fact]
+    public async Task Auth_sensitive_endpoints_reject_requests_over_their_fixed_ip_windows()
+    {
+        await using var db = await _fixture.CreateDatabaseAsync();
+        await using var app = await BackendHttpTestHost.CreateAsync(db);
+        using var client = app.GetTestClient();
+
+        for (var i = 0; i < 5; i++)
+        {
+            using var response = await client.PostAsJsonAsync("/api/auth/register", new RegisterRequest($"rate-register-{i}@example.test", "QaPassword1!", "QA User"));
+            Assert.NotEqual(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        }
+        using var registerRejected = await client.PostAsJsonAsync("/api/auth/register", new RegisterRequest("rate-register-over@example.test", "QaPassword1!", "QA User"));
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, registerRejected.StatusCode);
+
+        for (var i = 0; i < 10; i++)
+        {
+            using var response = await client.PostAsJsonAsync("/api/auth/verify-email", new VerifyEmailRequest("nobody@example.test", "000000"));
+            Assert.NotEqual(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        }
+        using var verificationRejected = await client.PostAsJsonAsync("/api/auth/verify-email", new VerifyEmailRequest("nobody@example.test", "000000"));
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, verificationRejected.StatusCode);
+
+        for (var i = 0; i < 3; i++)
+        {
+            using var response = await client.PostAsJsonAsync("/api/auth/resend-verification-code", new ResendVerificationCodeRequest("nobody@example.test"));
+            Assert.NotEqual(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        }
+        using var resendRejected = await client.PostAsJsonAsync("/api/auth/resend-verification-code", new ResendVerificationCodeRequest("nobody@example.test"));
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, resendRejected.StatusCode);
+
+        for (var i = 0; i < 10; i++)
+        {
+            using var response = await client.PostAsJsonAsync("/api/auth/google", new GoogleSignInRequest("invalid-token"));
+            Assert.NotEqual(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        }
+        using var googleRejected = await client.PostAsJsonAsync("/api/auth/google", new GoogleSignInRequest("invalid-token"));
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, googleRejected.StatusCode);
     }
 
     [Fact]
