@@ -85,9 +85,29 @@ void main() {
       await tester.pump();
 
       expect(tester.takeException(), isNull);
+      final firstCard = find.byKey(const ValueKey('plant-card-1'));
+      final secondCard = find.byKey(const ValueKey('plant-card-2'));
+      expect(firstCard, findsOneWidget);
+      expect(secondCard, findsOneWidget);
+      expect(tester.getTopLeft(firstCard).dy, tester.getTopLeft(secondCard).dy);
+      expect(tester.getSize(firstCard).width, greaterThanOrEqualTo(128));
+
+      final firstImage = tester.widget<Image>(
+        find.descendant(of: firstCard, matching: find.byType(Image)),
+      );
+      expect(firstImage.fit, BoxFit.contain);
+
       final startText = find.text('Bắt đầu trồng').first;
       expect(startText, findsOneWidget);
       expect(tester.widget<Text>(startText).textAlign, TextAlign.center);
+
+      await tester.dragUntilVisible(
+        find.byKey(const ValueKey('plant-card-6')),
+        find.byType(Scrollable).first,
+        const Offset(0, -200),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull);
     });
   }
 
