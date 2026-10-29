@@ -62,10 +62,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
     final controller = ref.read(authControllerProvider.notifier);
     if (ref.read(authTabProvider) == 0) {
-      await controller.login(
-        email: _email.text.trim(),
-        password: _password.text,
-      );
+      final email = _email.text.trim();
+      await controller.login(email: email, password: _password.text);
+      if (!mounted ||
+          ref.read(authControllerProvider).errorType !=
+              AuthErrorType.emailVerificationRequired) {
+        return;
+      }
+      await _openVerification(email);
     } else {
       final email = _email.text.trim();
       await controller.signUp(
@@ -73,23 +77,29 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         email: email,
         password: _password.text,
       );
-      if (!mounted || ref.read(authControllerProvider).error != null) return;
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => provider.ChangeNotifierProvider(
-            create: (_) => AuthProvider(),
-            child: VerifyEmailScreen(email: email),
-          ),
-        ),
-      );
+      if (!mounted) return;
+      if (ref.read(authControllerProvider).error == null) {
+        await _openVerification(email);
+      }
     }
   }
+
+  Future<void> _openVerification(String email) => Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => provider.ChangeNotifierProvider(
+        create: (_) => AuthProvider(),
+        child: VerifyEmailScreen(email: email),
+      ),
+    ),
+  );
 
   String _resolveErrorMessage(BuildContext context, AuthState auth) {
     if (auth.errorType != null) {
       switch (auth.errorType!) {
         case AuthErrorType.invalidCredentials:
           return context.l10n.authInvalidCredentials;
+        case AuthErrorType.emailVerificationRequired:
+          return 'Email verification is required.';
         case AuthErrorType.network:
           return context.l10n.authNetworkError;
         case AuthErrorType.unknown:
@@ -236,6 +246,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             _AuthError(
                               message: _resolveErrorMessage(context, auth),
                             ),
+                            if (!isLogin &&
+                                auth.error == 'Email này đã được đăng ký.')
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () =>
+                                      _openVerification(_email.text.trim()),
+                                  child: const Text('Verify email'),
+                                ),
+                              ),
                           ],
                           const SizedBox(height: 18),
                           SizedBox(

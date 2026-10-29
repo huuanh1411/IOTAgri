@@ -5,7 +5,7 @@ import '../data/models/user.dart';
 
 const _keepAuthError = Object();
 
-enum AuthErrorType { invalidCredentials, network, unknown }
+enum AuthErrorType { invalidCredentials, emailVerificationRequired, network, unknown }
 
 /// State representing authentication status.
 class AuthState {
@@ -186,6 +186,9 @@ class AuthController extends StateNotifier<AuthState> {
 
   AuthErrorType _classifyError(Object error) {
     final msg = error.toString().toLowerCase();
+    if (msg.contains('email verification is required')) {
+      return AuthErrorType.emailVerificationRequired;
+    }
     if (msg.contains('401') ||
         msg.contains('unauthorized') ||
         msg.contains('invalid email') ||

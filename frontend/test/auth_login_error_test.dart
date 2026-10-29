@@ -112,6 +112,30 @@ class _SuccessfulRegisterAuthRepository extends AuthRepository {
   }
 }
 
+class _UnverifiedEmailAuthRepository extends AuthRepository {
+  @override
+  Future<User?> getCurrentUser() async => null;
+
+  @override
+  Future<User> login({required String email, required String password}) async {
+    throw Exception('Email verification is required.');
+  }
+}
+
+class _ExistingUnverifiedEmailAuthRepository extends AuthRepository {
+  @override
+  Future<User?> getCurrentUser() async => null;
+
+  @override
+  Future<void> signUp({
+    required String fullName,
+    required String email,
+    required String password,
+  }) async {
+    throw Exception('Email này đã được đăng ký.');
+  }
+}
+
 Widget _buildAuthScreen(
   AuthRepository repo, {
   Locale locale = const Locale('vi'),
@@ -300,28 +324,60 @@ void main() {
     },
   );
 
-  test('successful sign up leaves the Riverpod controller unconfirmed and unauthenticated', () async {
-    final repository = _SuccessfulRegisterAuthRepository();
-    final container = ProviderContainer(
-      overrides: [authRepositoryProvider.overrideWithValue(repository)],
-    );
-    addTearDown(container.dispose);
+  test(
+    'successful sign up leaves the Riverpod controller unconfirmed and unauthenticated',
+    () async {
+      final repository = _SuccessfulRegisterAuthRepository();
+      final container = ProviderContainer(
+        overrides: [authRepositoryProvider.overrideWithValue(repository)],
+      );
+      addTearDown(container.dispose);
 
-    await container.read(authControllerProvider.notifier).signUp(
-      fullName: 'QA User',
-      email: 'qa@example.test',
-      password: 'QaPassword1!',
-    );
+      await container
+          .read(authControllerProvider.notifier)
+          .signUp(
+            fullName: 'QA User',
+            email: 'qa@example.test',
+            password: 'QaPassword1!',
+          );
 
-    final state = container.read(authControllerProvider);
-    expect(repository.signUpCalls, 1);
-    expect(repository.loginCalls, isZero);
-    expect(state.user, isNull);
-    expect(state.isLoading, isFalse);
-    expect(state.error, isNull);
-  });
+      final state = container.read(authControllerProvider);
+      expect(repository.signUpCalls, 1);
+      expect(repository.loginCalls, isZero);
+      expect(state.user, isNull);
+      expect(state.isLoading, isFalse);
+      expect(state.error, isNull);
+    },
+  );
 
-  testWidgets('successful AuthScreen registration routes to existing email verification UI', (
+  testWidgets(
+    'successful AuthScreen registration routes to existing email verification UI',
+    (tester) async {
+      tester.view.physicalSize = const Size(600, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final repository = _SuccessfulRegisterAuthRepository();
+      await tester.pumpWidget(_buildAuthScreen(repository));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Đăng ký'));
+      await tester.pumpAndSettle();
+      final fields = find.byType(TextFormField);
+      await tester.enterText(fields.at(0), 'QA User');
+      await tester.enterText(fields.at(1), 'qa@example.test');
+      await tester.enterText(fields.at(2), 'QaPassword1!');
+      await tester.enterText(fields.at(3), 'QaPassword1!');
+      await tester.tap(find.byType(GradientButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(VerifyEmailScreen), findsOneWidget);
+      expect(repository.loginCalls, isZero);
+    },
+  );
+
+  testWidgets('unverified login opens email verification screen', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(600, 1000);
@@ -329,22 +385,47 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    final repository = _SuccessfulRegisterAuthRepository();
-    await tester.pumpWidget(_buildAuthScreen(repository));
+    await tester.pumpWidget(_buildAuthScreen(_UnverifiedEmailAuthRepository()));
+    await tester.pumpAndSettle();
+
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), 'unverified@example.test');
+    await tester.enterText(fields.at(1), 'QaPassword1!');
+    await tester.tap(find.byType(GradientButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(VerifyEmailScreen), findsOneWidget);
+    expect(find.textContaining('unverified@example.test'), findsOneWidget);
+  });
+
+  testWidgets('existing unverified registration offers verification action', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      _buildAuthScreen(_ExistingUnverifiedEmailAuthRepository()),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Đăng ký'));
     await tester.pumpAndSettle();
     final fields = find.byType(TextFormField);
     await tester.enterText(fields.at(0), 'QA User');
-    await tester.enterText(fields.at(1), 'qa@example.test');
+    await tester.enterText(fields.at(1), 'unverified@example.test');
     await tester.enterText(fields.at(2), 'QaPassword1!');
     await tester.enterText(fields.at(3), 'QaPassword1!');
     await tester.tap(find.byType(GradientButton));
     await tester.pumpAndSettle();
 
+    await tester.tap(find.text('Verify email'));
+    await tester.pumpAndSettle();
+
     expect(find.byType(VerifyEmailScreen), findsOneWidget);
-    expect(repository.loginCalls, isZero);
+    expect(find.textContaining('unverified@example.test'), findsOneWidget);
   });
 
   testWidgets(

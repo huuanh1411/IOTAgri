@@ -96,6 +96,28 @@ void main() {
     },
   );
 
+  test('login preserves email-verification-required response', () async {
+    final service = ApiService(
+      client: MockClient(
+        (_) async => http.Response(
+          jsonEncode({'error': 'Email verification is required.'}),
+          403,
+        ),
+      ),
+    );
+
+    await expectLater(
+      service.login('user@example.com', 'Password123'),
+      throwsA(
+        isA<Exception>().having(
+          (error) => error.toString(),
+          'message',
+          contains('Email verification is required.'),
+        ),
+      ),
+    );
+  });
+
   test('register accepts the backend 201 response', () async {
     final service = ApiService(
       client: MockClient(
@@ -138,21 +160,24 @@ void main() {
     });
   });
 
-  test('resend verification posts expected path and JSON payload on 202', () async {
-    late http.Request request;
-    final service = ApiService(
-      client: MockClient((received) async {
-        request = received;
-        return http.Response('', 202);
-      }),
-    );
+  test(
+    'resend verification posts expected path and JSON payload on 202',
+    () async {
+      late http.Request request;
+      final service = ApiService(
+        client: MockClient((received) async {
+          request = received;
+          return http.Response('', 202);
+        }),
+      );
 
-    await service.resendVerificationCode('user@example.com');
+      await service.resendVerificationCode('user@example.com');
 
-    expect(request.method, 'POST');
-    expect(request.url.path, '/api/auth/resend-verification-code');
-    expect(jsonDecode(request.body), {'email': 'user@example.com'});
-  });
+      expect(request.method, 'POST');
+      expect(request.url.path, '/api/auth/resend-verification-code');
+      expect(jsonDecode(request.body), {'email': 'user@example.com'});
+    },
+  );
 
   test('verification endpoints reject unexpected response statuses', () async {
     final service = ApiService(

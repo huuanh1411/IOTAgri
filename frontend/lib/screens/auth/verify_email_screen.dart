@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
-import 'login_screen.dart';
+import '../auth_screen.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
   const VerifyEmailScreen({required this.email, super.key});
@@ -35,14 +35,15 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     if (!mounted) return;
     if (success) {
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        MaterialPageRoute(builder: (_) => const AuthScreen()),
         (_) => false,
       );
       return;
     }
 
     _showMessage(
-      authProvider.errorMessage ?? 'Không thể xác minh email. Vui lòng thử lại.',
+      authProvider.errorMessage ??
+          'Không thể xác minh email. Vui lòng thử lại.',
       Colors.red,
     );
   }
@@ -56,15 +57,15 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       success
           ? 'Đã gửi lại mã xác minh.'
           : authProvider.errorMessage ??
-              'Không thể gửi lại mã xác minh. Vui lòng thử lại.',
+                'Không thể gửi lại mã xác minh. Vui lòng thử lại.',
       success ? Colors.green : Colors.red,
     );
   }
 
   void _showMessage(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: color),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
   }
 
   @override
@@ -123,7 +124,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       prefixIcon: Icon(Icons.password),
                     ),
                     validator: (value) {
-                      if (value == null || !RegExp(r'^\d{6}$').hasMatch(value)) {
+                      if (value == null ||
+                          !RegExp(r'^\d{6}$').hasMatch(value)) {
                         return 'Vui lòng nhập mã xác minh gồm 6 chữ số';
                       }
                       return null;

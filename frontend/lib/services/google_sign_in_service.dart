@@ -23,6 +23,10 @@ class GoogleSignInService {
   Stream<GoogleSignInAccount?> get onCurrentUserChanged =>
       _googleSignIn.onCurrentUserChanged;
 
+  Future<void> initialize() async {
+    await _googleSignIn.isSignedIn();
+  }
+
   Future<String?> signInForIdToken() async {
     if (kIsWeb) return null;
     final account = await _googleSignIn.signIn();

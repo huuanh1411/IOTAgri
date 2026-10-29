@@ -87,6 +87,16 @@ services:
       Jwt__Issuer: IOTAgriBackend
       Jwt__Audience: IOTAgriBackendClients
       Jwt__Key: ${JWT_KEY}
+      GoogleAuth__AllowedClientIds__0: ${GOOGLE_WEB_CLIENT_ID:-}
+      GoogleAuth__AllowedClientIds__1: ${GOOGLE_ANDROID_SERVER_CLIENT_ID:-}
+      Smtp__Host: ${SMTP_HOST:-}
+      Smtp__Port: ${SMTP_PORT:-587}
+      Smtp__Username: ${SMTP_USERNAME:-}
+      Smtp__Password: ${SMTP_PASSWORD:-}
+      Smtp__SenderAddress: ${SMTP_FROM_EMAIL:-}
+      Smtp__SenderName: ${SMTP_FROM_NAME:-IOTAgri}
+      Smtp__UseStartTls: ${SMTP_USE_STARTTLS:-true}
+      EmailVerification__Pepper: ${EMAIL_VERIFICATION_PEPPER:-}
       AdminBootstrap__Email: ${ADMIN_BOOTSTRAP_EMAIL:-}
       AdminBootstrap__Password: ${ADMIN_BOOTSTRAP_PASSWORD:-}
       AdminBootstrap__FullName: ${ADMIN_BOOTSTRAP_FULL_NAME:-Administrator}

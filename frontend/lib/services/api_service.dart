@@ -254,6 +254,15 @@ class ApiService {
       if (response.statusCode == 401) {
         throw Exception('Email hoặc mật khẩu không đúng.');
       }
+      if (response.statusCode == 403) {
+        try {
+          final data = jsonDecode(response.body) as Map<String, dynamic>;
+          final error = data['error'];
+          if (error is String && error.isNotEmpty) throw Exception(error);
+        } catch (error) {
+          if (error is Exception) rethrow;
+        }
+      }
       throw Exception('Đăng nhập thất bại. Vui lòng thử lại.');
     }
   }

@@ -21,16 +21,17 @@ class GoogleSignInWebButton extends StatefulWidget {
 
 class _GoogleSignInWebButtonState extends State<GoogleSignInWebButton> {
   StreamSubscription? _subscription;
+  late final Future<void> _initialization;
 
   @override
   void initState() {
     super.initState();
-    _subscription = GoogleSignInService.instance.onCurrentUserChanged.listen((
-      account,
-    ) async {
-      final idToken = await GoogleSignInService.instance.idTokenFor(account);
+    final googleSignIn = GoogleSignInService.instance;
+    _subscription = googleSignIn.onCurrentUserChanged.listen((account) async {
+      final idToken = await googleSignIn.idTokenFor(account);
       if (idToken != null) await widget.onIdToken(idToken);
     });
+    _initialization = googleSignIn.initialize();
   }
 
   @override
@@ -40,5 +41,18 @@ class _GoogleSignInWebButtonState extends State<GoogleSignInWebButton> {
   }
 
   @override
-  Widget build(BuildContext context) => google_sign_in_web.renderButton();
+  Widget build(BuildContext context) => FutureBuilder<void>(
+    future: _initialization,
+    builder: (context, snapshot) {
+      if (snapshot.hasError) {
+        return ErrorWidget.withDetails(
+          message: 'Google Sign-In initialization failed: ${snapshot.error}',
+        );
+      }
+      if (snapshot.connectionState != ConnectionState.done) {
+        return const SizedBox(height: 40);
+      }
+      return google_sign_in_web.renderButton();
+    },
+  );
 }

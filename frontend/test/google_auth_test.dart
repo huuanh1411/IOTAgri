@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:iotagri_app/data/models/user.dart';
@@ -12,7 +14,17 @@ import 'package:iotagri_app/l10n/app_localizations.dart';
 import 'package:iotagri_app/providers/auth_controller.dart';
 import 'package:iotagri_app/screens/auth_screen.dart';
 import 'package:iotagri_app/services/api_service.dart';
+import 'package:iotagri_app/services/google_sign_in_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class _PendingGoogleSignIn extends Fake implements GoogleSignIn {
+  _PendingGoogleSignIn(this.initialization);
+
+  final Future<bool> initialization;
+
+  @override
+  Future<bool> isSignedIn() => initialization;
+}
 
 class _UnavailableSecureStorage extends FlutterSecureStorage {
   const _UnavailableSecureStorage();
@@ -89,6 +101,24 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  test('Google sign-in readiness waits for platform initialization', () async {
+    final initialization = Completer<bool>();
+    final service = GoogleSignInService(
+      googleSignIn: _PendingGoogleSignIn(initialization.future),
+    );
+    var ready = false;
+
+    final readyFuture = service.initialize().then((_) => ready = true);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(ready, isFalse);
+
+    initialization.complete(false);
+    await readyFuture;
+
+    expect(ready, isTrue);
+  });
 
   test(
     'Google sign-in exchanges ID token with API and stores returned IOTAgri tokens',
