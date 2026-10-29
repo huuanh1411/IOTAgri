@@ -10,10 +10,17 @@ class AuthProvider with ChangeNotifier {
   bool _isInitialized = false;
   bool _isDisposed = false;
   String? _errorMessage;
+  final VoidCallback? _onSessionExpired;
   late final VoidCallback _sessionExpiredHandler;
 
-  AuthProvider({ApiService? apiService})
-    : _apiService = apiService ?? ApiService() {
+  AuthProvider({
+    ApiService? apiService,
+    User? initialUser,
+    VoidCallback? onSessionExpired,
+  })
+    : _apiService = apiService ?? ApiService(),
+      _user = initialUser,
+      _onSessionExpired = onSessionExpired {
     _sessionExpiredHandler = _handleSessionExpired;
     ApiService.onSessionExpired = _sessionExpiredHandler;
     initialize();
@@ -27,9 +34,9 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> initialize() async {
     try {
-      _user = await _apiService.restoreSession();
+      _user = await _apiService.restoreSession() ?? _user;
     } catch (_) {
-      _user = null;
+      // Keep the authenticated Riverpod user when legacy session restore fails.
     } finally {
       _isInitialized = true;
       if (!_isDisposed) notifyListeners();
@@ -174,6 +181,7 @@ class AuthProvider with ChangeNotifier {
     if (_user == null) return;
     _user = null;
     notifyListeners();
+    _onSessionExpired?.call();
   }
 
   Future<void> logout() async {

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/models/user.dart';
@@ -176,7 +177,16 @@ class AuthController extends StateNotifier<AuthState> {
 
   Future<void> logout() async {
     state = state.copyWith(isLoading: true);
-    await _repo.logout();
+    try {
+      await _repo.logout();
+    } catch (error) {
+      debugPrint('Logout error: $error');
+    } finally {
+      state = const AuthState(isInitializing: false);
+    }
+  }
+
+  void handleSessionExpired() {
     state = const AuthState(isInitializing: false);
   }
 

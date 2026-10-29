@@ -126,7 +126,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     final isLogin = ref.watch(authTabProvider) == 0;
     ref.listen<AuthState>(authControllerProvider, (previous, next) {
       if (next.user != null && previous?.user?.id != next.user!.id && mounted) {
-        context.go('/home');
+        context.go(next.user!.role == 'admin' ? '/admin' : '/home');
       }
     });
     return Scaffold(

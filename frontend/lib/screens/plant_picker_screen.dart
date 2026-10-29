@@ -22,6 +22,19 @@ const _plantImageAssets = <String, String>{
   '6': 'assets/images/plants/coriander.png',
 };
 
+const _plantCardSpacing = 16.0;
+const _minimumReadablePlantCardWidth = 128.0;
+
+int _plantGridColumnCount(double availableWidth) {
+  final fittingColumns =
+      ((availableWidth + _plantCardSpacing) /
+              (_minimumReadablePlantCardWidth + _plantCardSpacing))
+          .floor();
+  if (fittingColumns < 1) return 1;
+  if (fittingColumns > 3) return 3;
+  return fittingColumns;
+}
+
 /// Plant Picker tab – matches the design in Phase 5.
 class PlantPickerScreen extends ConsumerWidget {
   const PlantPickerScreen({super.key});
@@ -48,11 +61,9 @@ class PlantPickerScreen extends ConsumerWidget {
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final columnCount = constraints.maxWidth >= 620
-                        ? 3
-                        : constraints.maxWidth >= 330
-                        ? 2
-                        : 1;
+                    final columnCount = _plantGridColumnCount(
+                      constraints.maxWidth,
+                    );
                     return ListView.separated(
                       padding: const EdgeInsets.only(bottom: 96),
                       itemCount: (mockPlants.length / columnCount).ceil(),
@@ -61,8 +72,13 @@ class PlantPickerScreen extends ConsumerWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            for (var column = 0; column < columnCount; column++) ...[
-                              if (column > 0) const SizedBox(width: 16),
+                            for (
+                              var column = 0;
+                              column < columnCount;
+                              column++
+                            ) ...[
+                              if (column > 0)
+                                const SizedBox(width: _plantCardSpacing),
                               Expanded(
                                 child: _plantCardFor(
                                   ref,
@@ -85,11 +101,7 @@ class PlantPickerScreen extends ConsumerWidget {
     );
   }
 
-  Widget _plantCardFor(
-    WidgetRef ref,
-    ActivePlant activePlant,
-    int index,
-  ) {
+  Widget _plantCardFor(WidgetRef ref, ActivePlant activePlant, int index) {
     if (index >= mockPlants.length) return const SizedBox.shrink();
     final plant = mockPlants[index];
     final isCurrent = plant.id == activePlant.plant.id;
@@ -121,6 +133,7 @@ class _PlantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      key: ValueKey('plant-card-${plant.id}'),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       elevation: 4,
       child: Padding(
@@ -143,7 +156,7 @@ class _PlantCard extends StatelessWidget {
                   _plantImageAssets[plant.id]!,
                   width: double.infinity,
                   height: double.infinity,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                   filterQuality: FilterQuality.high,
                   semanticLabel: plant.localizedName(context.l10n),
                 ),
@@ -153,13 +166,11 @@ class _PlantCard extends StatelessWidget {
             // Plant name and variety.
             Text(
               plant.localizedName(context.l10n),
-              maxLines: 2,
               textAlign: TextAlign.center,
               style: AppText.heading(context, fontSize: 18),
             ),
             Text(
               plant.variety,
-              maxLines: 2,
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -178,7 +189,10 @@ class _PlantCard extends StatelessWidget {
                       child: Text(
                         context.l10n.weeks(plant.durationWeeks),
                         softWrap: true,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   ],
@@ -186,13 +200,20 @@ class _PlantCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.emoji_nature, size: 16, color: Colors.grey),
+                    const Icon(
+                      Icons.emoji_nature,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         plant.localizedDifficulty(context.l10n),
                         softWrap: true,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   ],

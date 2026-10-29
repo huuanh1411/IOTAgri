@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart' as provider;
 
 import '../cupertino/profile/cupertino_change_password_screen.dart';
+import '../core/animation/app_motion.dart';
 import '../core/widgets/page_header.dart';
 import '../core/widgets/section_chip.dart';
 import '../providers/app_settings_provider.dart';
@@ -121,7 +122,8 @@ class SettingsScreen extends ConsumerWidget {
                   trailing: const Icon(Icons.chevron_right),
                   // Mở màn đổi mật khẩu có sẵn, gọi API backend qua ApiService.
                   onTap: () => Navigator.of(context).push<void>(
-                    MaterialPageRoute<void>(
+                    AppMotion.detailRoute<void>(
+                      context: context,
                       builder: (_) => const CupertinoChangePasswordScreen(),
                     ),
                   ),

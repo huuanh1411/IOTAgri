@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show FadeTransition, ListTile, MaterialApp;
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:iotagri_app/core/theme/app_colors.dart';
 import 'package:iotagri_app/cupertino/profile/cupertino_change_password_screen.dart';
 import 'package:iotagri_app/cupertino/profile/cupertino_profile_screen.dart';
 import 'package:iotagri_app/cupertino/tickets/cupertino_create_ticket_screen.dart';
@@ -7,9 +10,11 @@ import 'package:iotagri_app/cupertino/tickets/cupertino_support_tickets_screen.d
 import 'package:iotagri_app/cupertino/tickets/cupertino_ticket_detail_screen.dart';
 import 'package:iotagri_app/models/device.dart';
 import 'package:iotagri_app/models/support_ticket.dart';
+import 'package:iotagri_app/l10n/app_localizations.dart';
 import 'package:iotagri_app/providers/app_settings_provider.dart';
 import 'package:iotagri_app/providers/auth_provider.dart';
 import 'package:iotagri_app/services/api_service.dart';
+import 'package:iotagri_app/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -240,6 +245,17 @@ void main() {
 
       final textFields = find.byType(CupertinoTextField);
       expect(textFields, findsNWidgets(3));
+      final scaffold = tester.widget<CupertinoPageScaffold>(
+        find.byType(CupertinoPageScaffold),
+      );
+      expect(scaffold.backgroundColor, AppColors.background);
+      final firstField = tester.widget<CupertinoTextField>(textFields.first);
+      expect(firstField.decoration!.color, AppColors.surface);
+      expect(firstField.decoration!.borderRadius, BorderRadius.circular(20));
+      expect(
+        tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).activeTrackColor,
+        AppColors.forestGreen,
+      );
 
       // 1. Enter weak password
       await tester.enterText(textFields.at(1), 'abc');
@@ -262,6 +278,37 @@ void main() {
 
       expect(api.changePasswordCalled, isTrue);
       expect(find.text('Thành công'), findsOneWidget);
+    });
+
+    testWidgets('settings opens change password with shared smooth motion', (tester) async {
+      final settings = AppSettingsProvider();
+      await tester.pumpWidget(
+        ProviderScope(
+          child: ChangeNotifierProvider.value(
+            value: settings,
+            child: const MaterialApp(
+              locale: Locale('vi'),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: SettingsScreen(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final changePasswordRow = find.ancestor(
+        of: find.text('Đổi mật khẩu'),
+        matching: find.byType(ListTile),
+      );
+      await tester.ensureVisible(changePasswordRow);
+      await tester.pump();
+      tester.widget<ListTile>(changePasswordRow).onTap!();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoChangePasswordScreen), findsOneWidget);
+      expect(find.byType(FadeTransition), findsWidgets);
+      expect(tester.takeException(), isNull);
     });
   });
 

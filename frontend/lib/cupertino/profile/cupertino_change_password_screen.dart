@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text.dart';
 import '../../services/api_service.dart';
 
 enum PasswordStrength { none, weak, medium, strong }
@@ -144,9 +146,34 @@ class _CupertinoChangePasswordScreenState
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Đổi mật khẩu'),
+    final fieldDecoration = BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: const Color(0xFFEAE2D5)),
+    );
+    const labelStyle = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      color: AppColors.primaryText,
+    );
+    const placeholderStyle = TextStyle(color: AppColors.mutedSage);
+
+    return CupertinoTheme(
+      data: CupertinoTheme.of(context).copyWith(
+        primaryColor: AppColors.forestGreen,
+        scaffoldBackgroundColor: AppColors.background,
+      ),
+      child: CupertinoPageScaffold(
+      backgroundColor: AppColors.background,
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: AppColors.background,
+        border: null,
+        middle: Text(
+          'Đổi mật khẩu',
+          style: AppText.heading(context, fontSize: 20).copyWith(
+            color: AppColors.primaryText,
+          ),
+        ),
       ),
       child: SafeArea(
         child: ListView(
@@ -180,58 +207,46 @@ class _CupertinoChangePasswordScreenState
             ],
             const Text(
               'Mật khẩu hiện tại',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: CupertinoColors.secondaryLabel,
-              ),
+              style: labelStyle,
             ),
             const SizedBox(height: 6),
             CupertinoTextField(
               controller: _currentPasswordController,
               obscureText: _obscureCurrent,
               placeholder: 'Nhập mật khẩu hiện tại',
+              placeholderStyle: placeholderStyle,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
-                borderRadius: BorderRadius.circular(12),
-              ),
+              decoration: fieldDecoration,
               suffix: CupertinoButton(
                 padding: const EdgeInsets.only(right: 12),
                 onPressed: () => setState(() => _obscureCurrent = !_obscureCurrent), minimumSize: Size(0, 0),
                 child: Icon(
                   _obscureCurrent ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
                   size: 20,
-                  color: CupertinoColors.secondaryLabel,
+                  color: AppColors.mutedSage,
                 ),
               ),
             ),
             const SizedBox(height: 20),
             const Text(
               'Mật khẩu mới',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: CupertinoColors.secondaryLabel,
-              ),
+              style: labelStyle,
             ),
             const SizedBox(height: 6),
             CupertinoTextField(
               controller: _newPasswordController,
               obscureText: _obscureNew,
               placeholder: 'Tối thiểu 8 ký tự',
+              placeholderStyle: placeholderStyle,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
-                borderRadius: BorderRadius.circular(12),
-              ),
+              decoration: fieldDecoration,
               suffix: CupertinoButton(
                 padding: const EdgeInsets.only(right: 12),
                 onPressed: () => setState(() => _obscureNew = !_obscureNew), minimumSize: Size(0, 0),
                 child: Icon(
                   _obscureNew ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
                   size: 20,
-                  color: CupertinoColors.secondaryLabel,
+                  color: AppColors.mutedSage,
                 ),
               ),
             ),
@@ -240,29 +255,23 @@ class _CupertinoChangePasswordScreenState
             const SizedBox(height: 20),
             const Text(
               'Xác nhận mật khẩu mới',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: CupertinoColors.secondaryLabel,
-              ),
+              style: labelStyle,
             ),
             const SizedBox(height: 6),
             CupertinoTextField(
               controller: _confirmPasswordController,
               obscureText: _obscureConfirm,
               placeholder: 'Nhập lại mật khẩu mới',
+              placeholderStyle: placeholderStyle,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
-                borderRadius: BorderRadius.circular(12),
-              ),
+              decoration: fieldDecoration,
               suffix: CupertinoButton(
                 padding: const EdgeInsets.only(right: 12),
                 onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm), minimumSize: Size(0, 0),
                 child: Icon(
                   _obscureConfirm ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
                   size: 20,
-                  color: CupertinoColors.secondaryLabel,
+                  color: AppColors.mutedSage,
                 ),
               ),
             ),
@@ -270,8 +279,9 @@ class _CupertinoChangePasswordScreenState
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
-                borderRadius: BorderRadius.circular(14),
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFEAE2D5)),
               ),
               child: Row(
                 children: [
@@ -284,6 +294,7 @@ class _CupertinoChangePasswordScreenState
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
+                            color: AppColors.primaryText,
                           ),
                         ),
                         SizedBox(height: 2),
@@ -291,7 +302,7 @@ class _CupertinoChangePasswordScreenState
                           'Hủy phiên đăng nhập trên các máy khác để bảo mật',
                           style: TextStyle(
                             fontSize: 12,
-                            color: CupertinoColors.secondaryLabel,
+                            color: AppColors.mutedSage,
                           ),
                         ),
                       ],
@@ -299,20 +310,39 @@ class _CupertinoChangePasswordScreenState
                   ),
                   CupertinoSwitch(
                     value: _logoutOtherDevices,
+                    activeTrackColor: AppColors.forestGreen,
                     onChanged: (val) => setState(() => _logoutOtherDevices = val),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 32),
-            CupertinoButton.filled(
-              onPressed: _isSubmitting ? null : _submit,
-              child: _isSubmitting
-                  ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                  : const Text('Xác nhận đổi mật khẩu'),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                ),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: CupertinoButton(
+                color: const Color(0x00000000),
+                disabledColor: const Color(0x00000000),
+                borderRadius: BorderRadius.circular(20),
+                onPressed: _isSubmitting ? null : _submit,
+                child: _isSubmitting
+                    ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                    : const Text(
+                        'Xác nhận đổi mật khẩu',
+                        style: TextStyle(
+                          color: CupertinoColors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              ),
             ),
           ],
         ),
+      ),
       ),
     );
   }
