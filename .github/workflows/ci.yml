@@ -63,4 +63,7 @@ jobs:
 
       - name: Build web release
         working-directory: frontend
-        run: flutter build web --release --dart-define=API_BASE_URL=https://api.aerogreen.vn
+        env:
+          GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
+          GOOGLE_ANDROID_SERVER_CLIENT_ID: ${{ vars.GOOGLE_ANDROID_SERVER_CLIENT_ID }}
+        run: flutter build web --release --dart-define=API_BASE_URL=https://api.aerogreen.vn --dart-define=GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID --dart-define=GOOGLE_ANDROID_SERVER_CLIENT_ID=$GOOGLE_ANDROID_SERVER_CLIENT_ID

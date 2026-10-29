@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../services/api_service.dart';
+import '../services/google_sign_in_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final ApiService _apiService;
@@ -67,6 +68,36 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> loginWithGoogle() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final idToken = await GoogleSignInService().signInForIdToken();
+      if (idToken == null) {
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+      final data = await _apiService.loginWithGoogleIdToken(idToken);
+      final accessToken = data['accessToken'];
+      final user = accessToken is String
+          ? _apiService.userFromAccessToken(accessToken)
+          : null;
+      if (user == null) throw Exception('Invalid access token');
+      _user = user;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (error) {
+      _isLoading = false;
+      _errorMessage = _formatLoginError(error);
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> register(String email, String password, String fullName) async {
     _isLoading = true;
     _errorMessage = null;
@@ -74,10 +105,48 @@ class AuthProvider with ChangeNotifier {
 
     try {
       await _apiService.register(email, password, fullName);
-      return await login(email, password);
+      _isLoading = false;
+      notifyListeners();
+      return true;
     } catch (error) {
       _isLoading = false;
       _errorMessage = _formatLoginError(error);
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> verifyEmail(String email, String code) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _apiService.verifyEmail(email, code);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (error) {
+      _isLoading = false;
+      _errorMessage = error.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> resendVerificationCode(String email) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _apiService.resendVerificationCode(email);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (error) {
+      _isLoading = false;
+      _errorMessage = error.toString().replaceFirst('Exception: ', '');
       notifyListeners();
       return false;
     }

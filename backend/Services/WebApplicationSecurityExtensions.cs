@@ -29,16 +29,14 @@ public static class WebApplicationSecurityExtensions
             .AllowAnyHeader()
             .AllowAnyMethod()));
 
-        services.AddRateLimiter(options => options.AddPolicy("deviceClaims", context =>
-            RateLimitPartition.GetFixedWindowLimiter(
-                context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-                _ => new FixedWindowRateLimiterOptions
-                {
-                    PermitLimit = 10,
-                    Window = TimeSpan.FromMinutes(1),
-                    QueueLimit = 0,
-                    AutoReplenishment = true,
-                })));
+        services.AddRateLimiter(options =>
+        {
+            AddFixedWindowPolicy(options, "deviceClaims", permitLimit: 10, window: TimeSpan.FromMinutes(1));
+            AddFixedWindowPolicy(options, "authRegister", permitLimit: 5, window: TimeSpan.FromMinutes(15));
+            AddFixedWindowPolicy(options, "authVerifyEmail", permitLimit: 10, window: TimeSpan.FromMinutes(15));
+            AddFixedWindowPolicy(options, "authResendVerification", permitLimit: 3, window: TimeSpan.FromMinutes(15));
+            AddFixedWindowPolicy(options, "authGoogle", permitLimit: 10, window: TimeSpan.FromMinutes(1));
+        });
 
         services.Configure<ForwardedHeadersOptions>(options =>
         {
@@ -49,6 +47,19 @@ public static class WebApplicationSecurityExtensions
         });
 
         return services;
+    }
+
+    private static void AddFixedWindowPolicy(RateLimiterOptions options, string name, int permitLimit, TimeSpan window)
+    {
+        options.AddPolicy(name, context => RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = permitLimit,
+                Window = window,
+                QueueLimit = 0,
+                AutoReplenishment = true,
+            }));
     }
 
     public static WebApplication UseApplicationWebSecurity(this WebApplication app)

@@ -17,6 +17,10 @@ class ApiConstants {
   // Auth endpoints
   static const String login = '/api/auth/login';
   static const String register = '/api/auth/register';
+  static const String google = '/api/auth/google';
+  static const String verifyEmail = '/api/auth/verify-email';
+  static const String resendVerificationCode =
+      '/api/auth/resend-verification-code';
   static const String refresh = '/api/auth/refresh';
   static const String logout = '/api/auth/logout';
   static const String profile = '/api/auth/profile';

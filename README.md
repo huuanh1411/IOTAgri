@@ -15,8 +15,9 @@ IoT hydroponics/agriculture monitoring system with an ASP.NET Core backend and F
 ## Features Implemented So Far
 
 ### Auth
-- `POST /api/auth/register`, `/login`, `/refresh`, `/logout`
-- Email-based accounts, `User`/`Admin` roles, DB-backed refresh token rotation
+- `POST /api/auth/register`, `/verify-email`, `/resend-verification-code`, `/google`, `/login`, `/refresh`, `/logout`
+- Email/password accounts require SMTP-delivered verification before login; unverified non-admin accounts receive `403`
+- Google ID-token sign-in, `User`/`Admin` roles, DB-backed refresh token rotation
 
 ### Device Management
 - `POST /GET /PUT /DELETE /api/devices` (+ `/api/devices/{id}`)
@@ -196,10 +197,25 @@ GitHub Actions runs on pull requests and pushes to `main`. It restores dependenc
 
 The local Mosquitto broker is anonymous and plaintext for trusted LAN development only. Do not expose port 1883 to the internet. A future production broker must use per-device credentials and TLS.
 
+## Production email and Google sign-in
+
+Copy `.env.production.example` to a deployment-only `.env.production`, set every required value, and keep both deployment files out of source control. Example files contain names only; never commit SMTP credentials, verification pepper, OAuth secrets, or real client IDs.
+
+### SMTP verification relay
+
+Configure `SMTP_HOST`, `SMTP_PORT` (normally `587`), `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`, `SMTP_USE_STARTTLS`, and a unique `EMAIL_VERIFICATION_PEPPER`. The pepper is mandatory: production Compose rejects a missing or empty value, and code issuance rejects blank configuration. Production Compose maps these values to `Smtp` and `EmailVerification` backend settings. Use a transactional SMTP relay in production. Gmail SMTP with an app password is acceptable only for development or a low-volume pilot; it is not a production relay strategy. Allow outbound TCP port 587 from the VPS to the selected relay. This app does not operate a mail server.
+
+### Google Cloud OAuth
+
+In Google Cloud Console, create OAuth client IDs without committing their values:
+
+1. **Android:** create an Android client for every application ID/signing-certificate SHA-1 pair used for debug and release. Create or select the server OAuth client ID that Google should use as the Android ID-token audience. Set it as `GOOGLE_ANDROID_SERVER_CLIENT_ID`, pass it to Android with `--dart-define=GOOGLE_ANDROID_SERVER_CLIENT_ID=...`, and add that same ID to backend `GOOGLE_ALLOWED_CLIENT_ID_0` or `_1`.
+2. **Web:** create a Web client, add every exact browser origin (including scheme and port), set it as `GOOGLE_WEB_CLIENT_ID`, and add that same Web client ID to the backend `GOOGLE_ALLOWED_CLIENT_ID_0` or `_1` allow-list. It is a separate audience from the Android server client ID.
+
+For an Android build, run `flutter build appbundle --dart-define=GOOGLE_ANDROID_SERVER_CLIENT_ID=YOUR_ANDROID_SERVER_CLIENT_ID`. Production frontend Compose and CI propagate both defines; Web uses only `GOOGLE_WEB_CLIENT_ID`. Client IDs are public identifiers, but OAuth client secrets and SMTP credentials are not.
+
 ## Planned / Not Yet Implemented
 
-- Production Compose hardening: reverse-proxy HTTPS, private API/PostgreSQL ports, restart policies, and off-server database backups
-- Production MQTT: TLS, per-device credentials, and topic ACLs (the current broker is intentionally anonymous and plaintext for local development)
 - ESP32 HTTPS and MQTT TLS support
 - VPS deployment and continuous deployment after the production stack is verified
 
@@ -274,6 +290,7 @@ flutter run -d YOUR_DEVICE_ID --dart-define=API_BASE_URL=http://192.168.1.100:80
 Replace the IP with your PC's LAN IPv4. The phone and PC must be on the same LAN. Allow the API port through Windows Firewall on your private network if needed. Test connectivity from the phone's browser at `http://<PC-LAN-IP>:8080/health`.
 
 **API URL:** The source default is `http://localhost:5261`, while Docker exposes port `8080` with the example configuration. Pass `API_BASE_URL` explicitly when using Docker. Stop and rerun Flutter after changing `--dart-define`; creating a Flutter `.env` file does not set this value.
+
 
 Press `Ctrl+C` in the Flutter terminal to stop the app.
 

@@ -30,6 +30,7 @@ public static class AdminBootstrapper
                 UserName = settings.Email,
                 Email = settings.Email,
                 FullName = string.IsNullOrWhiteSpace(settings.FullName) ? "Administrator" : settings.FullName,
+                EmailConfirmed = true,
             };
             var result = await users.CreateAsync(user, settings.Password!);
             if (!result.Succeeded)

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart' as provider;
 
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_text.dart';
 import '../core/widgets/gradient_button.dart';
 import '../providers/auth_controller.dart';
+import '../providers/auth_provider.dart';
+import '../services/google_sign_in_button.dart';
 import '../utils/l10n.dart';
+import 'auth/verify_email_screen.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -58,24 +62,44 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
     final controller = ref.read(authControllerProvider.notifier);
     if (ref.read(authTabProvider) == 0) {
-      await controller.login(
-        email: _email.text.trim(),
-        password: _password.text,
-      );
+      final email = _email.text.trim();
+      await controller.login(email: email, password: _password.text);
+      if (!mounted ||
+          ref.read(authControllerProvider).errorType !=
+              AuthErrorType.emailVerificationRequired) {
+        return;
+      }
+      await _openVerification(email);
     } else {
+      final email = _email.text.trim();
       await controller.signUp(
         fullName: _name.text.trim(),
-        email: _email.text.trim(),
+        email: email,
         password: _password.text,
       );
+      if (!mounted) return;
+      if (ref.read(authControllerProvider).error == null) {
+        await _openVerification(email);
+      }
     }
   }
+
+  Future<void> _openVerification(String email) => Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => provider.ChangeNotifierProvider(
+        create: (_) => AuthProvider(),
+        child: VerifyEmailScreen(email: email),
+      ),
+    ),
+  );
 
   String _resolveErrorMessage(BuildContext context, AuthState auth) {
     if (auth.errorType != null) {
       switch (auth.errorType!) {
         case AuthErrorType.invalidCredentials:
           return context.l10n.authInvalidCredentials;
+        case AuthErrorType.emailVerificationRequired:
+          return 'Email verification is required.';
         case AuthErrorType.network:
           return context.l10n.authNetworkError;
         case AuthErrorType.unknown:
@@ -85,12 +109,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     return context.l10n.authGenericError;
   }
 
+  Future<void> _onGoogleTap() async {
+    await ref.read(authControllerProvider.notifier).loginWithGoogle();
+  }
+
   void _onSocialTap(String label) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.socialSignInNotAvailable),
-      ),
+      SnackBar(content: Text(context.l10n.socialSignInNotAvailable)),
     );
   }
 
@@ -220,6 +246,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                             _AuthError(
                               message: _resolveErrorMessage(context, auth),
                             ),
+                            if (!isLogin &&
+                                auth.error == 'Email này đã được đăng ký.')
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () =>
+                                      _openVerification(_email.text.trim()),
+                                  child: const Text('Verify email'),
+                                ),
+                              ),
                           ],
                           const SizedBox(height: 18),
                           SizedBox(
@@ -253,10 +289,17 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           Row(
                             children: [
                               Expanded(
-                                child: _SocialButton(
-                                  label: 'Google',
-                                  letter: 'G',
-                                  onPressed: () => _onSocialTap('Google'),
+                                child: GoogleSignInWebButton(
+                                  child: _SocialButton(
+                                    label: 'Google',
+                                    letter: 'G',
+                                    onPressed: auth.isLoading
+                                        ? null
+                                        : _onGoogleTap,
+                                  ),
+                                  onIdToken: (idToken) => ref
+                                      .read(authControllerProvider.notifier)
+                                      .loginWithGoogleIdToken(idToken),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -493,12 +536,7 @@ class _SocialButton extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        Flexible(
-          child: Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
+        Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
       ],
     ),
   );

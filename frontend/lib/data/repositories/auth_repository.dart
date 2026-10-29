@@ -1,5 +1,6 @@
 import '../models/user.dart';
 import '../../services/api_service.dart';
+import '../../services/google_sign_in_service.dart';
 import '../../models/user.dart' as api_models;
 
 /// Authentication boundary for the Material/Riverpod application shell.
@@ -25,9 +26,29 @@ class AuthRepository {
     return _loadCurrentProfile(session);
   }
 
-  Future<User> signUp({required String fullName, required String email, required String password}) async {
-    await _api.register(email, password, fullName);
-    return login(email: email, password: password);
+  Future<void> signUp({
+    required String fullName,
+    required String email,
+    required String password,
+  }) => _api.register(email, password, fullName);
+
+  Future<void> verifyEmail({required String email, required String code}) =>
+      _api.verifyEmail(email, code);
+
+  Future<void> resendVerificationCode({required String email}) =>
+      _api.resendVerificationCode(email);
+
+  Future<User?> loginWithGoogle() async {
+    final idToken = await GoogleSignInService.instance.signInForIdToken();
+    return idToken == null ? null : loginWithGoogleIdToken(idToken);
+  }
+
+  Future<User> loginWithGoogleIdToken(String idToken) async {
+    final response = await _api.loginWithGoogleIdToken(idToken);
+    final token = response['accessToken'];
+    final session = token is String ? _api.userFromAccessToken(token) : null;
+    if (session == null) throw Exception('Không đọc được phiên đăng nhập.');
+    return _loadCurrentProfile(session);
   }
 
   Future<void> logout() => _api.logout();
@@ -35,8 +56,9 @@ class AuthRepository {
   Future<User> _loadCurrentProfile(api_models.User session) async {
     try {
       final profile = await _api.getProfile();
-      final roles = (profile['roles'] as List<dynamic>? ?? const [])
-          .map((role) => role.toString());
+      final roles = (profile['roles'] as List<dynamic>? ?? const []).map(
+        (role) => role.toString(),
+      );
       return _toScreenUser(
         profile['id'] as String? ?? session.id,
         profile['fullName'] as String? ?? session.fullName,
@@ -54,11 +76,6 @@ class AuthRepository {
     }
   }
 
-  User _toScreenUser(String id, String fullName, String email, String role) => User(
-        id: id,
-        fullName: fullName,
-        email: email,
-        role: role,
-        plan: 'Pro',
-      );
+  User _toScreenUser(String id, String fullName, String email, String role) =>
+      User(id: id, fullName: fullName, email: email, role: role, plan: 'Pro');
 }

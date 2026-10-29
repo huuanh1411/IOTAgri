@@ -24,6 +24,7 @@ import 'package:iotagri_app/cupertino/devices/add_device_screen.dart';
 import 'package:iotagri_app/cupertino/devices/cupertino_devices_screen.dart';
 import 'package:iotagri_app/cupertino/profile/cupertino_profile_screen.dart';
 import 'package:iotagri_app/cupertino/auth/cupertino_register_screen.dart';
+import 'package:iotagri_app/cupertino/auth/cupertino_verify_email_screen.dart';
 import 'package:iotagri_app/models/user.dart';
 import 'package:iotagri_app/screens/pumps/pump_schedules_screen.dart';
 import 'package:iotagri_app/providers/auth_provider.dart';
@@ -289,7 +290,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('registration returns to the authenticated root screen', (
+  testWidgets('registration remains unauthenticated and shows verification', (
     WidgetTester tester,
   ) async {
     tester.view.physicalSize = const Size(800, 1200);
@@ -333,8 +334,46 @@ void main() {
     await tester.tap(submitButton);
     await tester.pumpAndSettle();
 
-    expect(authProvider.isAuthenticated, isTrue);
+    expect(authProvider.isAuthenticated, isFalse);
+    expect(find.byType(CupertinoVerifyEmailScreen), findsOneWidget);
     expect(find.byType(CupertinoRegisterScreen), findsNothing);
+  });
+
+  testWidgets('verification back button returns to Cupertino registration', (
+    WidgetTester tester,
+  ) async {
+    final authProvider = AuthProvider(apiService: _SuccessfulAuthApiService());
+    addTearDown(authProvider.dispose);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: authProvider,
+        child: CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Builder(
+              builder: (context) => CupertinoButton(
+                onPressed: () => Navigator.of(context).push(
+                  CupertinoPageRoute<void>(
+                    builder: (_) => const CupertinoVerifyEmailScreen(
+                      email: 'user@example.com',
+                    ),
+                  ),
+                ),
+                child: const Text('Open verification'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open verification'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Quay lại đăng ký'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoRegisterScreen), findsOneWidget);
+    expect(find.byType(CupertinoVerifyEmailScreen), findsNothing);
   });
 
   test('login stays unauthenticated when backend is unavailable', () async {

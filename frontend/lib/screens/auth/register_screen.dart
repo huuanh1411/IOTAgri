@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import 'verify_email_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -46,14 +47,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _fullNameController.text.trim(),
       );
 
-      if (!success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Đăng ký thất bại'),
-            backgroundColor: Colors.red,
+      if (!mounted) return;
+      if (success) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => VerifyEmailScreen(email: _emailController.text.trim()),
           ),
         );
+        return;
       }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.errorMessage ?? 'Đăng ký thất bại'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 

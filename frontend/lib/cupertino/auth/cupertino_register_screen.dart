@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
+import 'cupertino_verify_email_screen.dart';
 
 class CupertinoRegisterScreen extends StatefulWidget {
   const CupertinoRegisterScreen({super.key});
@@ -75,7 +76,11 @@ class _CupertinoRegisterScreenState extends State<CupertinoRegisterScreen> {
       });
     }
     if (success && mounted) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.of(context).pushReplacement(
+        CupertinoPageRoute<void>(
+          builder: (_) => CupertinoVerifyEmailScreen(email: email),
+        ),
+      );
     }
   }
 

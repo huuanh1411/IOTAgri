@@ -72,6 +72,16 @@ services:
       Jwt__Issuer: IOTAgriBackend
       Jwt__Audience: IOTAgriBackendClients
       Jwt__Key: ${JWT_KEY}
+      Smtp__Host: ${SMTP_HOST:-}
+      Smtp__Port: ${SMTP_PORT:-587}
+      Smtp__Username: ${SMTP_USERNAME:-}
+      Smtp__Password: ${SMTP_PASSWORD:-}
+      Smtp__SenderAddress: ${SMTP_FROM_EMAIL:-}
+      Smtp__SenderName: ${SMTP_FROM_NAME:-}
+      Smtp__UseStartTls: ${SMTP_USE_STARTTLS:-true}
+      EmailVerification__Pepper: ${EMAIL_VERIFICATION_PEPPER:?EMAIL_VERIFICATION_PEPPER must be set}
+      GoogleAuth__AllowedClientIds__0: ${GOOGLE_ALLOWED_CLIENT_ID_0:-}
+      GoogleAuth__AllowedClientIds__1: ${GOOGLE_ALLOWED_CLIENT_ID_1:-}
       AdminBootstrap__Email: ${ADMIN_BOOTSTRAP_EMAIL:-}
       AdminBootstrap__Password: ${ADMIN_BOOTSTRAP_PASSWORD:-}
       AdminBootstrap__FullName: ${ADMIN_BOOTSTRAP_FULL_NAME:-Administrator}
@@ -108,6 +118,8 @@ services:
       context: ./frontend
       args:
         API_BASE_URL: https://api.aerogreen.vn
+        GOOGLE_WEB_CLIENT_ID: ${GOOGLE_WEB_CLIENT_ID}
+        GOOGLE_ANDROID_SERVER_CLIENT_ID: ${GOOGLE_ANDROID_SERVER_CLIENT_ID}
     restart: unless-stopped
     depends_on:
       api:
