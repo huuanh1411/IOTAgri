@@ -79,7 +79,7 @@ services:
       Smtp__SenderAddress: ${SMTP_FROM_EMAIL:-}
       Smtp__SenderName: ${SMTP_FROM_NAME:-}
       Smtp__UseStartTls: ${SMTP_USE_STARTTLS:-true}
-      EmailVerification__Pepper: ${EMAIL_VERIFICATION_PEPPER:?EMAIL_VERIFICATION_PEPPER must be set}
+      EmailVerification__Pepper: ${EMAIL_VERIFICATION_PEPPER:-}
       GoogleAuth__AllowedClientIds__0: ${GOOGLE_ALLOWED_CLIENT_ID_0:-}
       GoogleAuth__AllowedClientIds__1: ${GOOGLE_ALLOWED_CLIENT_ID_1:-}
       AdminBootstrap__Email: ${ADMIN_BOOTSTRAP_EMAIL:-}

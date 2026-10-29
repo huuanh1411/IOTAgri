@@ -10,7 +10,8 @@ for host in "$API_HOST" "$MQTT_HOST"; do
   getent ahostsv4 "$host" >/dev/null || { echo "DNS missing for $host"; exit 1; }
 done
 
-for value in POSTGRES_PASSWORD JWT_KEY ADMIN_BOOTSTRAP_PASSWORD MQTT_ADMIN_PASSWORD MQTT_API_PASSWORD; do
+for value in POSTGRES_PASSWORD JWT_KEY ADMIN_BOOTSTRAP_PASSWORD MQTT_ADMIN_PASSWORD MQTT_API_PASSWORD EMAIL_VERIFICATION_PEPPER; do
+  [ -n "${!value:-}" ] || { echo "$value must be set"; exit 1; }
   [ "${!value}" != change-me ] || { echo "$value still has example value"; exit 1; }
 done
 
