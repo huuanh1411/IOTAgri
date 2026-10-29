@@ -390,20 +390,30 @@ public class AuthHandlerTests
     }
 
     [Fact]
-    public async Task Google_identity_with_matching_unconfirmed_email_is_rejected_without_linking()
+    public async Task Google_identity_confirms_and_links_matching_unconfirmed_user()
     {
         var identity = new GoogleIdentity("google-subject", "unconfirmed@example.test", "Google User");
+        var user = new ApplicationUser { Id = "unconfirmed-user", Email = identity.Email, EmailConfirmed = false };
         var validator = new Mock<IGoogleTokenValidator>();
         validator.Setup(v => v.ValidateAsync("valid-id-token", It.IsAny<CancellationToken>())).ReturnsAsync(identity);
         var users = BackendTestDoubles.Users();
         users.Setup(u => u.FindByLoginAsync("Google", identity.Subject)).ReturnsAsync((ApplicationUser?)null);
-        users.Setup(u => u.FindByEmailAsync(identity.Email)).ReturnsAsync(new ApplicationUser { EmailConfirmed = false });
+        users.Setup(u => u.FindByEmailAsync(identity.Email)).ReturnsAsync(user);
+        users.Setup(u => u.UpdateAsync(user)).ReturnsAsync(IdentityResult.Success);
+        users.Setup(u => u.AddLoginAsync(user, It.Is<UserLoginInfo>(login => login.LoginProvider == "Google" && login.ProviderKey == identity.Subject))).ReturnsAsync(IdentityResult.Success);
+        users.Setup(u => u.GetRolesAsync(user)).ReturnsAsync(new List<string> { "User" });
+        var tokens = new Mock<ITokenService>();
+        tokens.Setup(t => t.CreateAccessToken(user, It.IsAny<IList<string>>())).Returns("google-access-token");
+        tokens.Setup(t => t.GenerateRefreshTokenValue()).Returns("google-refresh-token");
 
+        await using var db = CreateDatabase();
         var result = await BackendTestDoubles.InvokeHandler(typeof(AuthEndpoints), "GoogleSignInAsync",
-            new GoogleSignInRequest("valid-id-token"), validator.Object, users.Object, null, null, Configuration());
+            new GoogleSignInRequest("valid-id-token"), validator.Object, users.Object, db, tokens.Object, Configuration());
 
-        Assert.Equal(409, Assert.IsAssignableFrom<IStatusCodeHttpResult>(result).StatusCode);
-        users.Verify(u => u.AddLoginAsync(It.IsAny<ApplicationUser>(), It.IsAny<UserLoginInfo>()), Times.Never);
+        Assert.Equal(200, Assert.IsAssignableFrom<IStatusCodeHttpResult>(result).StatusCode);
+        Assert.True(user.EmailConfirmed);
+        users.Verify(u => u.UpdateAsync(user), Times.Once);
+        users.Verify(u => u.AddLoginAsync(user, It.IsAny<UserLoginInfo>()), Times.Once);
     }
 
     [Fact]

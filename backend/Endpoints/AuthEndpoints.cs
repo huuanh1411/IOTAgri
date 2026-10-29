@@ -188,7 +188,13 @@ public static class AuthEndpoints
             user = await userManager.FindByEmailAsync(identity.Email);
             if (user is not null && !user.EmailConfirmed)
             {
-                return Results.Conflict(new { error = "Email verification is required before linking Google sign-in." });
+                user.EmailConfirmed = true;
+                user.ConcurrencyStamp = Guid.NewGuid().ToString();
+                var confirmResult = await userManager.UpdateAsync(user);
+                if (!confirmResult.Succeeded)
+                {
+                    return Results.Problem("Unable to confirm the Google-verified email.", statusCode: StatusCodes.Status500InternalServerError);
+                }
             }
 
             if (user is null)
