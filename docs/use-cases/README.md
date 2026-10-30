@@ -2,11 +2,11 @@
 
 [← Mục lục](../README.md) · [SRS](../requirements/SRS.md) · [Sơ đồ đầy đủ](../diagrams/project-diagrams.md)
 
-Baseline 27/10/2026. Mỗi sơ đồ đặt actor ở giữa và trình bày toàn bộ hành động của actor trong một ảnh ngang; danh mục dưới đây tách luồng và gắn ID yêu cầu. Đăng nhập là tiền điều kiện, không vẽ `include` vào mọi use case. Không mô tả Admin kế thừa User trong Identity.
+Baseline 27/10/2026. Mỗi sơ đồ đặt actor ngoài khung hệ thống, các use case so le trong khung và hiển thị đầy đủ trong một ảnh; danh mục dưới đây tách luồng và gắn ID yêu cầu. Đăng nhập là tiền điều kiện, không vẽ `include` vào mọi use case. Không mô tả Admin kế thừa User trong Identity.
 
 ## Sơ đồ tổng quan
 
-Mỗi actor ở trung tâm một ảnh riêng, tên nằm dưới hình người que. Các use case tỏa ra hai bên, nối trực tiếp bằng đoạn thẳng và không có khung bao. Mở từng ảnh để xem toàn bộ hành động của actor cùng lúc.
+Mỗi actor đứng ngoài khung hệ thống **IOTAgri**, tên nằm dưới hình người que. Các use case bố trí so le bên trong khung, nối trực tiếp với actor bằng đoạn thẳng theo mẫu UML. Mở từng ảnh để xem toàn bộ hành động của actor cùng lúc.
 
 ### Khách
 

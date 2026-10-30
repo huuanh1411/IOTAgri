@@ -1,18 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="780" viewBox="0 0 1200 780" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
 <title id="title">IOTAgri — Khách</title>
-<desc id="desc">Actor ở trung tâm, tên bên dưới hình người que. Các use case bố trí so le hai bên, nối trực tiếp bằng đoạn thẳng; không có khung bao.</desc>
+<desc id="desc">Actor đứng ngoài bên trái khung hệ thống IOTAgri, tên dưới hình người que. Các use case bố trí so le trong khung, nối trực tiếp bằng đoạn thẳng.</desc>
 <rect width="100%" height="100%" fill="white"/>
 <g font-family="Arial, sans-serif" fill="#17212b">
 <g data-actor="Guest" transform="translate(0 0)">
 <text x="600" y="45" text-anchor="middle" font-size="24" font-weight="bold">IOTAgri — Khách</text>
-<line data-usecase="GuestUC1" x1="565" y1="378" x2="480" y2="390" stroke="#334155" stroke-width="1.5"/>
-<ellipse data-usecase="GuestUC1" cx="260" cy="390" rx="220" ry="43" fill="#FFFFFF" stroke="#334155" stroke-width="1.4"/>
-<text x="260" y="396.0" text-anchor="middle" font-size="17" font-weight="normal">UC-01: Đăng ký / Đăng nhập</text>
-<line data-usecase="GuestUC2" x1="635" y1="378" x2="720" y2="390" stroke="#334155" stroke-width="1.5"/>
-<ellipse data-usecase="GuestUC2" cx="940" cy="390" rx="220" ry="43" fill="#FFFFFF" stroke="#334155" stroke-width="1.4"/>
-<text x="940" y="396.0" text-anchor="middle" font-size="17" font-weight="normal">UC-03: Quên / Đặt lại mật khẩu</text>
-<g fill="none" stroke="#17212b" stroke-width="2.5"><circle cx="600" cy="338" r="15"/><path d="M600 353 V402 M565 378 L600 363 L635 378 M600 402 L576 437 M600 402 L624 437"/></g>
-<text x="600" y="462" text-anchor="middle" font-size="16" font-weight="normal">Khách</text>
+<rect data-system="IOTAgri" x="240" y="80" width="930" height="770" rx="8" fill="#f1eef5" stroke="#51485c" stroke-width="1.8"/>
+<rect x="240" y="59" width="150" height="30" rx="5" fill="#7138a0"/>
+<g fill="white"><text x="315" y="80" text-anchor="middle" font-size="17" font-weight="bold">IOTAgri</text></g>
+<line data-usecase="GuestUC1" x1="155" y1="438" x2="260.00" y2="300.00" stroke="#7138a0" stroke-width="1.6"/>
+<line data-usecase="GuestUC2" x1="155" y1="438" x2="797.57" y2="570.61" stroke="#7138a0" stroke-width="1.6"/>
+<ellipse data-usecase="GuestUC1" cx="470" cy="300" rx="210" ry="40" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.6" stroke-dasharray="8 5"/>
+<text x="470" y="306.0" text-anchor="middle" font-size="16" font-weight="normal">UC-01: Đăng ký / Đăng nhập</text>
+<ellipse data-usecase="GuestUC2" cx="940" cy="600" rx="210" ry="40" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.6" stroke-dasharray="8 5"/>
+<text x="940" y="606.0" text-anchor="middle" font-size="16" font-weight="normal">UC-03: Quên / Đặt lại mật khẩu</text>
+<g fill="none" stroke="#17212b" stroke-width="2.5"><circle cx="120" cy="398" r="15"/><path d="M120 413 V462 M85 438 L120 423 L155 438 M120 462 L96 497 M120 462 L144 497"/></g>
+<text x="120" y="522" text-anchor="middle" font-size="16" font-weight="normal">Khách</text>
 </g>
 </g>
 </svg>

@@ -6,7 +6,7 @@
 
 ## Use Case
 
-Mỗi sơ đồ đặt actor ở trung tâm, tên nằm dưới hình người que; các use case bố trí so le hai bên và nối trực tiếp bằng đoạn thẳng. Toàn bộ hành động của một actor nằm gọn trong một ảnh ngang, không có khung bao.
+Mỗi sơ đồ đặt actor bên ngoài, ở bên trái khung hệ thống **IOTAgri**, tên nằm dưới hình người que. Các use case bố trí so le bên trong khung và nối trực tiếp với actor bằng đoạn thẳng, theo mẫu UML. Toàn bộ hành động của actor nằm gọn trong một ảnh.
 
 Nguồn: [PlantUML chi tiết](use-case.puml) · [Ảnh tổng hợp](rendered/use-case.svg). Các use case chung xuất hiện ở từng actor tương ứng; màu vàng là chức năng cục bộ/mock.
 
