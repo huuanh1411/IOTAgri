@@ -23,6 +23,7 @@ import 'models/user.dart' as legacy_models;
 import 'core/animation/app_motion.dart';
 import 'core/theme/app_colors.dart';
 import 'core/widgets/floating_pill_nav_bar.dart';
+import 'widgets/session_timeout_wrapper.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   // Keep the router instance stable. Recreating it after every auth update
@@ -81,22 +82,43 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   .read(authControllerProvider.notifier)
                   .handleSessionExpired(),
             ),
-            child: const CupertinoAdminDashboardScreen(),
+            child: const SessionTimeoutListener(
+              child: CupertinoAdminDashboardScreen(),
+            ),
           );
         },
       ),
       // Shell route that holds the bottom navigation and preserves tab state.
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          return Scaffold(
-            backgroundColor: AppColors.background,
-            body: AppMotionTabTransition(
-              index: navigationShell.currentIndex,
-              child: navigationShell,
+          final user = ref.read(authControllerProvider).user;
+          return provider.ChangeNotifierProvider(
+            lazy: false,
+            create: (_) => AuthProvider(
+              initialUser: user != null
+                  ? legacy_models.User(
+                      id: user.id,
+                      email: user.email,
+                      fullName: user.fullName,
+                      role: user.role,
+                    )
+                  : null,
+              onSessionExpired: () => ref
+                  .read(authControllerProvider.notifier)
+                  .handleSessionExpired(),
             ),
-            bottomNavigationBar: FloatingPillNavBar(
-              currentIndex: navigationShell.currentIndex,
-              onTap: navigationShell.goBranch,
+            child: SessionTimeoutListener(
+              child: Scaffold(
+                backgroundColor: AppColors.background,
+                body: AppMotionTabTransition(
+                  index: navigationShell.currentIndex,
+                  child: navigationShell,
+                ),
+                bottomNavigationBar: FloatingPillNavBar(
+                  currentIndex: navigationShell.currentIndex,
+                  onTap: navigationShell.goBranch,
+                ),
+              ),
             ),
           );
         },

@@ -76,6 +76,17 @@ class ApiService {
     _accessToken = await _readToken('access_token');
   }
 
+  /// Get current access token (for session timeout manager)
+  Future<String?> getCurrentAccessToken() async {
+    await _loadTokens();
+    return _accessToken;
+  }
+
+  /// Get current refresh token (for session timeout manager)
+  Future<String?> getCurrentRefreshToken() async {
+    return await _readToken('refresh_token');
+  }
+
   Future<void> _saveTokens(String accessToken, String refreshToken) async {
     try {
       await _storage.write(key: 'access_token', value: accessToken);
