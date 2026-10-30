@@ -1708,4 +1708,32 @@ class AppLocalizationsVi extends AppLocalizations {
   String setupStepProgress(int current, int total) {
     return 'Bước $current/$total';
   }
+
+  @override
+  String get deleteAccountTitle => 'Xóa tài khoản';
+
+  @override
+  String get deleteAccountSubtitle =>
+      'Xóa vĩnh viễn tài khoản và dữ liệu của bạn';
+
+  @override
+  String get deleteAccountWarningTitle => 'Không thể hoàn tác thao tác này';
+
+  @override
+  String get deleteAccountWarningBody =>
+      'Việc xóa tài khoản sẽ xóa vĩnh viễn hồ sơ, thiết bị, lịch sử cảm biến, lịch biểu, cảnh báo, yêu cầu hỗ trợ và dữ liệu đăng nhập.';
+
+  @override
+  String get deleteAccountConfirmationInstruction =>
+      'Nhập DELETE để xác nhận xóa tài khoản vĩnh viễn.';
+
+  @override
+  String get deleteAccountConfirmationLabel => 'Nhập DELETE';
+
+  @override
+  String get deleteAccountAction => 'Xóa tài khoản';
+
+  @override
+  String get deleteAccountFailed =>
+      'Không thể xóa tài khoản. Vui lòng thử lại.';
 }

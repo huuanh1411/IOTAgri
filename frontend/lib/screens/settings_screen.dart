@@ -7,6 +7,7 @@ import 'package:provider/provider.dart' as provider;
 
 import '../cupertino/profile/cupertino_change_password_screen.dart';
 import '../core/animation/app_motion.dart';
+import 'delete_account_screen.dart';
 import '../core/widgets/page_header.dart';
 import '../core/widgets/section_chip.dart';
 import '../providers/app_settings_provider.dart';
@@ -120,11 +121,28 @@ class SettingsScreen extends ConsumerWidget {
                         : 'Đổi mật khẩu',
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  // Mở màn đổi mật khẩu có sẵn, gọi API backend qua ApiService.
                   onTap: () => Navigator.of(context).push<void>(
                     AppMotion.detailRoute<void>(
                       context: context,
                       builder: (_) => const CupertinoChangePasswordScreen(),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Card(
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.delete_forever_outlined,
+                    color: Colors.red,
+                  ),
+                  title: Text(context.l10n.deleteAccountTitle),
+                  subtitle: Text(context.l10n.deleteAccountSubtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push<void>(
+                    AppMotion.detailRoute<void>(
+                      context: context,
+                      builder: (_) => const DeleteAccountScreen(),
                     ),
                   ),
                 ),

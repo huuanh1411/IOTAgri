@@ -777,5 +777,13 @@
   "backendUrlLabel": "Backend URL",
   "backAction": "Back",
   "setupStepProgress": "Step {current} of {total}",
-  "@setupStepProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}}
+  "@setupStepProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "deleteAccountTitle": "Delete account",
+  "deleteAccountSubtitle": "Permanently remove your account and data",
+  "deleteAccountWarningTitle": "This action cannot be undone",
+  "deleteAccountWarningBody": "Deleting your account permanently removes your profile, devices, sensor history, schedules, alerts, support tickets, and sign-in data.",
+  "deleteAccountConfirmationInstruction": "Type DELETE to confirm permanent account deletion.",
+  "deleteAccountConfirmationLabel": "Type DELETE",
+  "deleteAccountAction": "Delete account",
+  "deleteAccountFailed": "Unable to delete account. Please try again."
 }

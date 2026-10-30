@@ -1717,4 +1717,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String setupStepProgress(int current, int total) {
     return 'Step $current of $total';
   }
+
+  @override
+  String get deleteAccountTitle => 'Delete account';
+
+  @override
+  String get deleteAccountSubtitle =>
+      'Permanently remove your account and data';
+
+  @override
+  String get deleteAccountWarningTitle => 'This action cannot be undone';
+
+  @override
+  String get deleteAccountWarningBody =>
+      'Deleting your account permanently removes your profile, devices, sensor history, schedules, alerts, support tickets, and sign-in data.';
+
+  @override
+  String get deleteAccountConfirmationInstruction =>
+      'Type DELETE to confirm permanent account deletion.';
+
+  @override
+  String get deleteAccountConfirmationLabel => 'Type DELETE';
+
+  @override
+  String get deleteAccountAction => 'Delete account';
+
+  @override
+  String get deleteAccountFailed =>
+      'Unable to delete account. Please try again.';
 }

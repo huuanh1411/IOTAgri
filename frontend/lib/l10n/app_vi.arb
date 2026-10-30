@@ -777,5 +777,13 @@
   "backendUrlLabel": "URL máy chủ",
   "backAction": "Quay lại",
   "setupStepProgress": "Bước {current}/{total}",
-  "@setupStepProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}}
+  "@setupStepProgress": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "deleteAccountTitle": "Xóa tài khoản",
+  "deleteAccountSubtitle": "Xóa vĩnh viễn tài khoản và dữ liệu của bạn",
+  "deleteAccountWarningTitle": "Không thể hoàn tác thao tác này",
+  "deleteAccountWarningBody": "Việc xóa tài khoản sẽ xóa vĩnh viễn hồ sơ, thiết bị, lịch sử cảm biến, lịch biểu, cảnh báo, yêu cầu hỗ trợ và dữ liệu đăng nhập.",
+  "deleteAccountConfirmationInstruction": "Nhập DELETE để xác nhận xóa tài khoản vĩnh viễn.",
+  "deleteAccountConfirmationLabel": "Nhập DELETE",
+  "deleteAccountAction": "Xóa tài khoản",
+  "deleteAccountFailed": "Không thể xóa tài khoản. Vui lòng thử lại."
 }
