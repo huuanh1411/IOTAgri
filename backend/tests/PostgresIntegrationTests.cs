@@ -66,7 +66,7 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
     {
         await using var db = await _fixture.CreateDatabaseAsync();
         var user = new ApplicationUser { Id = "delete-owner", UserName = "delete@example.test", Email = "delete@example.test", FullName = "Delete Owner" };
-        var device = new Device { Name = "Delete Device", DeviceKey = "delete-device-key", Owner = user };
+        var device = new Device { Name = "Delete Device", DeviceKey = "delete-device-key", ProvisionedHardwareId = "0123456789ABCDEF", Owner = user };
         var schedule = new PumpSchedule { Device = device, WeekdayMask = 1, StartTime = new TimeOnly(6, 0), DurationSeconds = 60, TimeZone = "Asia/Bangkok" };
         var command = new PumpCommand { Device = device, IsOn = true, DurationSeconds = 60 };
         var ticket = new SupportTicket { User = user, Subject = "Delete ticket" };
@@ -89,11 +89,13 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
         users.Setup(manager => manager.GetRolesAsync(user)).ReturnsAsync(new[] { "User" });
         users.Setup(manager => manager.DeleteAsync(user)).ReturnsAsync(IdentityResult.Success)
             .Callback<ApplicationUser>(deleted => db.Users.Remove(deleted));
+        var broker = new TestMqttBrokerAdminService();
 
         var result = await BackendTestDoubles.InvokeHandler(
-            typeof(AuthEndpoints), "DeleteAccountAsync", Principal(user.Id), users.Object, db, CancellationToken.None);
+            typeof(AuthEndpoints), "DeleteAccountAsync", Principal(user.Id), users.Object, db, broker, CancellationToken.None);
 
         Assert.Equal(204, Status(result));
+        Assert.Equal(new[] { device.DeviceKey }, broker.RemovedDeviceKeys);
         Assert.False(await db.Users.AnyAsync(item => item.Id == user.Id));
         Assert.Empty(await db.Devices.Where(item => item.OwnerId == user.Id).ToListAsync());
         Assert.Empty(await db.SensorReadings.ToListAsync());
@@ -107,6 +109,53 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
         Assert.Empty(await db.SupportTickets.Where(item => item.UserId == user.Id).ToListAsync());
         Assert.Empty(await db.SupportTicketMessages.ToListAsync());
         Assert.Single(await db.AccountDeletionAudits.ToListAsync());
+    }
+
+    [Fact]
+    public async Task Delete_account_serializes_concurrent_device_creation()
+    {
+        await using var db = await _fixture.CreateDatabaseAsync();
+        var user = new ApplicationUser { Id = "serialized-delete-owner", UserName = "serialized@example.test", Email = "serialized@example.test" };
+        var provisionedDevice = new Device { Name = "Provisioned", DeviceKey = "serialized-provisioned-key", ProvisionedHardwareId = "0123456789ABCDEF", Owner = user };
+        db.AddRange(user, provisionedDevice);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        user = await db.Users.SingleAsync(candidate => candidate.Id == user.Id);
+
+        var users = BackendTestDoubles.Users();
+        users.Setup(manager => manager.FindByIdAsync(user.Id)).ReturnsAsync(user);
+        users.Setup(manager => manager.GetRolesAsync(user)).ReturnsAsync(new[] { "User" });
+        users.Setup(manager => manager.DeleteAsync(user)).ReturnsAsync(IdentityResult.Success)
+            .Callback<ApplicationUser>(deleted => db.Users.Remove(deleted));
+        var broker = new Mock<IMqttBrokerAdminService>();
+        var removalStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var allowRemoval = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        broker.Setup(service => service.RemoveDeviceAsync(provisionedDevice.DeviceKey, It.IsAny<CancellationToken>()))
+            .Returns((string _, CancellationToken _) =>
+            {
+                removalStarted.SetResult();
+                return allowRemoval.Task;
+            });
+
+        var deletion = BackendTestDoubles.InvokeHandler(
+            typeof(AuthEndpoints), "DeleteAccountAsync", Principal(user.Id), users.Object, db, broker.Object, CancellationToken.None);
+        await removalStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+        await using var concurrentDb = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseNpgsql(db.Database.GetConnectionString())
+            .Options);
+        concurrentDb.Devices.Add(new Device { Name = "Concurrent", DeviceKey = "serialized-concurrent-key", OwnerId = user.Id });
+        var creation = concurrentDb.SaveChangesAsync();
+        await Task.Delay(300);
+        Assert.False(creation.IsCompleted);
+
+        allowRemoval.SetResult();
+        Assert.Equal(204, Status(await deletion));
+        await Assert.ThrowsAsync<DbUpdateException>(() => creation);
+        await using var verifyDb = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseNpgsql(db.Database.GetConnectionString())
+            .Options);
+        Assert.Empty(await verifyDb.Devices.Where(device => device.OwnerId == user.Id).ToListAsync());
     }
 
     [Fact]

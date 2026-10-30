@@ -379,6 +379,7 @@ public static class AuthEndpoints
         ClaimsPrincipal principal,
         UserManager<ApplicationUser> userManager,
         ApplicationDbContext db,
+        IMqttBrokerAdminService brokerAdmin,
         CancellationToken cancellationToken)
     {
         var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -400,8 +401,19 @@ public static class AuthEndpoints
         }
 
         await using var transaction = db.Database.IsRelational()
-            ? await db.Database.BeginTransactionAsync(cancellationToken)
+            ? await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken)
             : null;
+
+        if (db.Database.IsNpgsql())
+        {
+            var lockedUser = await db.Users
+                .FromSqlInterpolated($"SELECT * FROM \"AspNetUsers\" WHERE \"Id\" = {userId} FOR UPDATE")
+                .SingleOrDefaultAsync(cancellationToken);
+            if (lockedUser is null)
+            {
+                return Results.Unauthorized();
+            }
+        }
 
         var ticketIds = await db.SupportTickets
             .Where(ticket => ticket.UserId == userId)
@@ -414,10 +426,16 @@ public static class AuthEndpoints
             .Where(ticket => ticket.UserId == userId)
             .ExecuteDeleteAsync(cancellationToken);
 
-        var deviceIds = await db.Devices
+        var devices = await db.Devices
             .Where(device => device.OwnerId == userId)
-            .Select(device => device.Id)
+            .Select(device => new { device.Id, device.DeviceKey, device.ProvisionedHardwareId })
             .ToListAsync(cancellationToken);
+        foreach (var device in devices.Where(device => device.ProvisionedHardwareId is not null))
+        {
+            await brokerAdmin.RemoveDeviceAsync(device.DeviceKey, cancellationToken);
+        }
+
+        var deviceIds = devices.Select(device => device.Id).ToList();
         var scheduleIds = await db.PumpSchedules
             .Where(schedule => deviceIds.Contains(schedule.DeviceId))
             .Select(schedule => schedule.Id)

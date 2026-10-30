@@ -292,7 +292,7 @@ public class AuthHandlerTests
         users.Setup(manager => manager.GetRolesAsync(user)).ReturnsAsync(new[] { "Admin" });
 
         var result = await BackendTestDoubles.InvokeHandler(
-            typeof(AuthEndpoints), "DeleteAccountAsync", Principal(user.Id), users.Object, CreateDatabase(), CancellationToken.None);
+            typeof(AuthEndpoints), "DeleteAccountAsync", Principal(user.Id), users.Object, CreateDatabase(), new TestMqttBrokerAdminService(), CancellationToken.None);
 
         Assert.IsType<Microsoft.AspNetCore.Http.HttpResults.ForbidHttpResult>(result);
     }
@@ -301,7 +301,7 @@ public class AuthHandlerTests
     public async Task Delete_account_returns_unauthorized_when_subject_is_missing()
     {
         var result = await BackendTestDoubles.InvokeHandler(
-            typeof(AuthEndpoints), "DeleteAccountAsync", new ClaimsPrincipal(), BackendTestDoubles.Users().Object, CreateDatabase(), CancellationToken.None);
+            typeof(AuthEndpoints), "DeleteAccountAsync", new ClaimsPrincipal(), BackendTestDoubles.Users().Object, CreateDatabase(), new TestMqttBrokerAdminService(), CancellationToken.None);
 
         Assert.Equal(401, Assert.IsAssignableFrom<IStatusCodeHttpResult>(result).StatusCode);
     }
