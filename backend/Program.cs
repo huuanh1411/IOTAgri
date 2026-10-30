@@ -90,6 +90,7 @@ builder.Services.AddSingleton<MqttIngestionService>();
 builder.Services.AddHostedService(services => services.GetRequiredService<MqttIngestionService>());
 builder.Services.AddHostedService<PumpScheduleDispatchService>();
 builder.Services.AddHostedService<LightScheduleDispatchService>();
+builder.Services.AddHostedService<AccountDeletionAuditCleanupService>();
 
 var app = builder.Build();
 
