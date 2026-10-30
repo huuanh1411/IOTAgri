@@ -11,6 +11,7 @@ import '../providers/auth_provider.dart';
 import '../services/google_sign_in_button.dart';
 import '../utils/l10n.dart';
 import 'auth/verify_email_screen.dart';
+import 'privacy_policy_screen.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -317,13 +318,44 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  Text(
-                    context.l10n.termsNotice,
-                    textAlign: TextAlign.center,
-                    style: AppText.body(
-                      context,
-                      fontSize: 10,
-                    ).copyWith(color: AppColors.secondaryText),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        context.l10n.termsNoticePrefix,
+                        style: AppText.body(
+                          context,
+                          fontSize: 10,
+                        ).copyWith(color: AppColors.secondaryText),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const PrivacyPolicyScreen(),
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          context.l10n.privacyPolicyTitle,
+                          style: AppText.body(context, fontSize: 10).copyWith(
+                            color: AppColors.forestGreen,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        context.l10n.termsNoticeSuffix,
+                        style: AppText.body(
+                          context,
+                          fontSize: 10,
+                        ).copyWith(color: AppColors.secondaryText),
+                      ),
+                    ],
                   ),
                 ],
               ),

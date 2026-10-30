@@ -8,5 +8,6 @@ RUN flutter pub get
 RUN flutter build web --release --dart-define=API_BASE_URL=$API_BASE_URL --dart-define=GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID --dart-define=GOOGLE_ANDROID_SERVER_CLIENT_ID=$GOOGLE_ANDROID_SERVER_CLIENT_ID
 
 FROM nginx:alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/build/web /usr/share/nginx/html
 EXPOSE 80

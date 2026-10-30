@@ -8,6 +8,7 @@ import 'package:iotagri_app/data/repositories/auth_repository.dart';
 import 'package:iotagri_app/providers/auth_controller.dart';
 import 'package:iotagri_app/router.dart';
 import 'package:iotagri_app/services/api_service.dart';
+import 'package:iotagri_app/screens/privacy_policy_screen.dart';
 
 class _CurrentUserRepository extends AuthRepository {
   _CurrentUserRepository(this.currentUser);
@@ -55,6 +56,19 @@ void main() {
     await tester.pump();
     return router.routeInformationProvider.value.uri.path;
   }
+
+  testWidgets('privacy policy is public without authentication', (
+    tester,
+  ) async {
+    final location = await redirectedLocation(
+      tester,
+      null,
+      from: '/privacy-policy',
+    );
+
+    expect(location, '/privacy-policy');
+    expect(find.byType(PrivacyPolicyScreen), findsOneWidget);
+  });
 
   testWidgets('authenticated admin is redirected to admin dashboard', (
     tester,

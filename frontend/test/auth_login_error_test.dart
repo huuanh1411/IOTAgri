@@ -10,6 +10,7 @@ import 'package:iotagri_app/l10n/app_localizations.dart';
 import 'package:iotagri_app/providers/auth_controller.dart';
 import 'package:iotagri_app/screens/auth/verify_email_screen.dart';
 import 'package:iotagri_app/screens/auth_screen.dart';
+import 'package:iotagri_app/screens/privacy_policy_screen.dart';
 
 class _RejectedAuthRepository extends AuthRepository {
   @override
@@ -152,6 +153,23 @@ Widget _buildAuthScreen(
 }
 
 void main() {
+  testWidgets('opens privacy policy from authentication notice', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_buildAuthScreen(_RejectedAuthRepository()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Chính sách quyền riêng tư'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PrivacyPolicyScreen), findsOneWidget);
+  });
+
   testWidgets('shows a clear inline message for invalid credentials', (
     tester,
   ) async {

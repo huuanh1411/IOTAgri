@@ -306,6 +306,68 @@ class AppLocalizationsEn extends AppLocalizations {
       'By continuing, you agree to the Terms and Privacy Policy.';
 
   @override
+  String get termsNoticePrefix => 'By continuing, you agree to the Terms and ';
+
+  @override
+  String get termsNoticeSuffix => '.';
+
+  @override
+  String get privacyPolicyTitle => 'Privacy Policy';
+
+  @override
+  String get privacyPolicyIntro =>
+      'This Privacy Policy explains how Aerogreen collects, uses, and protects information when you use our mobile and web application.';
+
+  @override
+  String get privacyPolicyDataTitle => 'Data we collect';
+
+  @override
+  String get privacyPolicyDataBody =>
+      'We collect the account information you provide, including your name and email address. When you use Google Sign-In, we receive your Google account identity and verified email address. We also collect garden, device, sensor, schedule, and alert data needed to provide Aerogreen features. We process email-verification requests and support messages you send us.';
+
+  @override
+  String get privacyPolicyUseTitle => 'How we use data';
+
+  @override
+  String get privacyPolicyUseBody =>
+      'We use your data to create and secure your account, connect and operate your devices, display garden information, send requested verification codes, provide support, and improve application reliability.';
+
+  @override
+  String get privacyPolicySharingTitle => 'How we share data';
+
+  @override
+  String get privacyPolicySharingBody =>
+      'We do not sell your personal data. Google processes sign-in information when you choose Google Sign-In. Our email delivery provider processes your email address only to send verification codes. We may disclose information when required by law or to protect Aerogreen, users, and the public.';
+
+  @override
+  String get privacyPolicySecurityTitle => 'Security';
+
+  @override
+  String get privacyPolicySecurityBody =>
+      'We use reasonable technical and organizational safeguards, including encrypted connections and access controls. No internet service can guarantee absolute security.';
+
+  @override
+  String get privacyPolicyRetentionTitle => 'Data retention';
+
+  @override
+  String get privacyPolicyRetentionBody =>
+      'We retain account and application data while your account remains active and as needed for security, legal obligations, dispute resolution, and service operations. We delete or anonymize data when it is no longer needed.';
+
+  @override
+  String get privacyPolicyRightsTitle => 'Your choices and rights';
+
+  @override
+  String get privacyPolicyRightsBody =>
+      'You may request access, correction, export, or deletion of your personal data, subject to applicable law. Deleting your account may remove access to connected devices and historical garden information.';
+
+  @override
+  String get privacyPolicyContactTitle => 'Contact us';
+
+  @override
+  String get privacyPolicyContactBody =>
+      'For privacy questions or data requests, email xteam.aerogreen@gmail.com.';
+
+  @override
   String get authInvalidCredentials => 'Incorrect email or password.';
 
   @override

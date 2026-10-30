@@ -12,6 +12,7 @@ import 'screens/harvest_screen.dart';
 import 'screens/help_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/plant_picker_screen.dart';
+import 'screens/privacy_policy_screen.dart';
 import 'screens/more_screen.dart';
 import 'screens/sensor_detail_screen.dart';
 import 'screens/settings_screen.dart';
@@ -46,9 +47,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       if (state.matchedLocation == '/splash') return null;
       final user = ref.read(authControllerProvider).user;
       final isLoggedIn = user != null;
-      final isOnAuth = state.matchedLocation == '/auth';
-      if (!isLoggedIn && !isOnAuth) return '/auth';
-      if (user != null && isOnAuth) {
+      final isPublicPage =
+          state.matchedLocation == '/auth' ||
+          state.matchedLocation == '/privacy-policy';
+      if (!isLoggedIn && !isPublicPage) return '/auth';
+      if (user != null && state.matchedLocation == '/auth') {
         return user.role == 'admin' ? '/admin' : '/home';
       }
       if (user != null &&
@@ -65,6 +68,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
+      GoRoute(
+        path: '/privacy-policy',
+        builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
       GoRoute(
         path: '/admin',
         builder: (context, state) {

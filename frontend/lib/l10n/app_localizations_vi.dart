@@ -306,6 +306,69 @@ class AppLocalizationsVi extends AppLocalizations {
       'Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản & Quyền riêng tư.';
 
   @override
+  String get termsNoticePrefix =>
+      'Tiếp tục đồng nghĩa bạn đồng ý với Điều khoản & ';
+
+  @override
+  String get termsNoticeSuffix => '.';
+
+  @override
+  String get privacyPolicyTitle => 'Chính sách quyền riêng tư';
+
+  @override
+  String get privacyPolicyIntro =>
+      'Chính sách này giải thích cách Aerogreen thu thập, sử dụng và bảo vệ thông tin khi bạn dùng ứng dụng di động và web của chúng tôi.';
+
+  @override
+  String get privacyPolicyDataTitle => 'Dữ liệu chúng tôi thu thập';
+
+  @override
+  String get privacyPolicyDataBody =>
+      'Chúng tôi thu thập thông tin tài khoản bạn cung cấp, gồm họ tên và địa chỉ email. Khi bạn dùng Google Sign-In, chúng tôi nhận danh tính tài khoản Google và địa chỉ email đã xác minh của bạn. Chúng tôi cũng thu thập dữ liệu vườn, thiết bị, cảm biến, lịch và cảnh báo cần thiết để cung cấp tính năng Aerogreen. Chúng tôi xử lý yêu cầu xác minh email và tin nhắn hỗ trợ bạn gửi.';
+
+  @override
+  String get privacyPolicyUseTitle => 'Cách chúng tôi sử dụng dữ liệu';
+
+  @override
+  String get privacyPolicyUseBody =>
+      'Chúng tôi sử dụng dữ liệu để tạo và bảo mật tài khoản, kết nối và vận hành thiết bị, hiển thị thông tin khu vườn, gửi mã xác minh theo yêu cầu, hỗ trợ bạn và cải thiện độ tin cậy của ứng dụng.';
+
+  @override
+  String get privacyPolicySharingTitle => 'Cách chúng tôi chia sẻ dữ liệu';
+
+  @override
+  String get privacyPolicySharingBody =>
+      'Chúng tôi không bán dữ liệu cá nhân của bạn. Google xử lý thông tin đăng nhập khi bạn chọn Google Sign-In. Nhà cung cấp dịch vụ email của chúng tôi chỉ xử lý địa chỉ email để gửi mã xác minh. Chúng tôi có thể tiết lộ thông tin khi pháp luật yêu cầu hoặc để bảo vệ Aerogreen, người dùng và cộng đồng.';
+
+  @override
+  String get privacyPolicySecurityTitle => 'Bảo mật';
+
+  @override
+  String get privacyPolicySecurityBody =>
+      'Chúng tôi áp dụng các biện pháp kỹ thuật và tổ chức hợp lý, gồm kết nối mã hóa và kiểm soát truy cập. Không dịch vụ Internet nào có thể bảo đảm an toàn tuyệt đối.';
+
+  @override
+  String get privacyPolicyRetentionTitle => 'Lưu giữ dữ liệu';
+
+  @override
+  String get privacyPolicyRetentionBody =>
+      'Chúng tôi lưu giữ dữ liệu tài khoản và ứng dụng khi tài khoản còn hoạt động và khi cần cho bảo mật, nghĩa vụ pháp lý, giải quyết tranh chấp và vận hành dịch vụ. Chúng tôi xóa hoặc ẩn danh dữ liệu khi không còn cần thiết.';
+
+  @override
+  String get privacyPolicyRightsTitle => 'Lựa chọn và quyền của bạn';
+
+  @override
+  String get privacyPolicyRightsBody =>
+      'Bạn có thể yêu cầu truy cập, chỉnh sửa, xuất hoặc xóa dữ liệu cá nhân theo pháp luật áp dụng. Việc xóa tài khoản có thể làm mất quyền truy cập thiết bị đã kết nối và dữ liệu vườn trước đó.';
+
+  @override
+  String get privacyPolicyContactTitle => 'Liên hệ';
+
+  @override
+  String get privacyPolicyContactBody =>
+      'Để hỏi về quyền riêng tư hoặc yêu cầu dữ liệu, hãy gửi email đến xteam.aerogreen@gmail.com.';
+
+  @override
   String get authInvalidCredentials => 'Email hoặc mật khẩu không đúng.';
 
   @override

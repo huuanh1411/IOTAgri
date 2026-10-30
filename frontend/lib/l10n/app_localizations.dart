@@ -638,6 +638,114 @@ abstract class AppLocalizations {
   /// **'By continuing, you agree to the Terms and Privacy Policy.'**
   String get termsNotice;
 
+  /// No description provided for @termsNoticePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'By continuing, you agree to the Terms and '**
+  String get termsNoticePrefix;
+
+  /// No description provided for @termsNoticeSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'.'**
+  String get termsNoticeSuffix;
+
+  /// No description provided for @privacyPolicyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicyTitle;
+
+  /// No description provided for @privacyPolicyIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'This Privacy Policy explains how Aerogreen collects, uses, and protects information when you use our mobile and web application.'**
+  String get privacyPolicyIntro;
+
+  /// No description provided for @privacyPolicyDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data we collect'**
+  String get privacyPolicyDataTitle;
+
+  /// No description provided for @privacyPolicyDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We collect the account information you provide, including your name and email address. When you use Google Sign-In, we receive your Google account identity and verified email address. We also collect garden, device, sensor, schedule, and alert data needed to provide Aerogreen features. We process email-verification requests and support messages you send us.'**
+  String get privacyPolicyDataBody;
+
+  /// No description provided for @privacyPolicyUseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How we use data'**
+  String get privacyPolicyUseTitle;
+
+  /// No description provided for @privacyPolicyUseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We use your data to create and secure your account, connect and operate your devices, display garden information, send requested verification codes, provide support, and improve application reliability.'**
+  String get privacyPolicyUseBody;
+
+  /// No description provided for @privacyPolicySharingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How we share data'**
+  String get privacyPolicySharingTitle;
+
+  /// No description provided for @privacyPolicySharingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We do not sell your personal data. Google processes sign-in information when you choose Google Sign-In. Our email delivery provider processes your email address only to send verification codes. We may disclose information when required by law or to protect Aerogreen, users, and the public.'**
+  String get privacyPolicySharingBody;
+
+  /// No description provided for @privacyPolicySecurityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get privacyPolicySecurityTitle;
+
+  /// No description provided for @privacyPolicySecurityBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We use reasonable technical and organizational safeguards, including encrypted connections and access controls. No internet service can guarantee absolute security.'**
+  String get privacyPolicySecurityBody;
+
+  /// No description provided for @privacyPolicyRetentionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data retention'**
+  String get privacyPolicyRetentionTitle;
+
+  /// No description provided for @privacyPolicyRetentionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We retain account and application data while your account remains active and as needed for security, legal obligations, dispute resolution, and service operations. We delete or anonymize data when it is no longer needed.'**
+  String get privacyPolicyRetentionBody;
+
+  /// No description provided for @privacyPolicyRightsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your choices and rights'**
+  String get privacyPolicyRightsTitle;
+
+  /// No description provided for @privacyPolicyRightsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You may request access, correction, export, or deletion of your personal data, subject to applicable law. Deleting your account may remove access to connected devices and historical garden information.'**
+  String get privacyPolicyRightsBody;
+
+  /// No description provided for @privacyPolicyContactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us'**
+  String get privacyPolicyContactTitle;
+
+  /// No description provided for @privacyPolicyContactBody.
+  ///
+  /// In en, this message translates to:
+  /// **'For privacy questions or data requests, email xteam.aerogreen@gmail.com.'**
+  String get privacyPolicyContactBody;
+
   /// No description provided for @authInvalidCredentials.
   ///
   /// In en, this message translates to:
