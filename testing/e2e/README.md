@@ -20,6 +20,21 @@ Lệnh `node` dùng được trên Windows/macOS/Linux. Runner tự build ứng 
 tạo tài khoản, xác minh email qua Mailpit, chạy test, lưu bằng chứng rồi dọn stack.
 Không cần bật backend/frontend hay simulator thủ công.
 
+Suite chỉ chạy thủ công trên máy của người test; nhánh `Test` không còn workflow
+GitHub Actions tự chạy khi push/pull request.
+
+Nếu đang ở checkout ứng dụng trên `main`, lấy riêng bộ test rồi chạy trên source
+đang có, không cần chuyển nhánh:
+
+```powershell
+git fetch origin
+git restore --source=origin/Test -- testing/e2e
+node testing/e2e/scripts/run.cjs
+```
+
+Lệnh `node` vừa dựng/cài môi trường trong Docker vừa chạy test ngay, không chỉ
+cài dependency. Các lệnh này không sửa source backend/frontend.
+
 Nhánh `Test` không chứa mã ứng dụng. Runner tự tải revision cố định trong
 [`application-source.json`](application-source.json) vào `.app/<revision>/` được
 gitignore rồi build tại đó. Bản hiện tại dùng `bb2900380f2c2d15decdbc4b458584b6a57e66fb`
@@ -98,7 +113,8 @@ Các mục này chưa được xác nhận chỉ bằng suite simulator.
   ảnh/trace/video khi lỗi, MQTT command ledger, log service, trạng thái container,
   revision Git và exit code. `artifacts/latest-run.txt` chỉ tới phiên gần nhất.
 - Artifact có dữ liệu và token **của tài khoản test** trong trace; không đưa tài khoản
-  production vào suite. Kết quả local được gitignore. CI lưu artifact 14 ngày.
+  production vào suite. Kết quả local được gitignore và được giữ trên máy cho
+  đến khi người dùng tự dọn; không có bước upload artifact lên GitHub Actions.
 - Test FAIL, lỗi setup/build và lỗi cleanup trả exit code khác 0; không chuyển lỗi
   thành skip hoặc coi việc discovery thành kết quả PASS.
 
@@ -111,9 +127,10 @@ Helper nhập liệu dùng sự kiện bàn phím, và helper cuộn đưa các 
 hình vào semantics tree trước khi tương tác. Không thay đổi source ứng dụng để
 làm test PASS. Lỗi hoặc giới hạn thao tác UI được giữ trong báo cáo để xem xét.
 
-Workflow `.github/workflows/e2e.yml` chạy khi push cập nhật suite vào nhánh `Test`,
-và trên pull request liên quan. FAIL vẫn xuất artifact và giữ
-exit code khác 0. Xem [báo cáo đã công bố](../reports/system-e2e/2026-10-30/README.md).
+Lượt kiểm chứng mới nhất từ clone sạch: **31 PASS / 1 FAIL / 0 skipped**.
+Ca chưa đạt là `WEB-04 / mobile`; không sửa ứng dụng hoặc bỏ assertion để đổi
+kết quả. FAIL vẫn xuất artifact local và giữ exit code khác 0.
+Xem [báo cáo và các phiên độc lập](../reports/system-e2e/2026-10-30/README.md).
 
 Tham khảo: [Mailpit SMTP](https://mailpit.axllent.org/docs/configuration/smtp/),
 [Playwright Docker](https://playwright.dev/docs/docker). Phiên bản Playwright trong

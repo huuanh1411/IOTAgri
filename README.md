@@ -19,14 +19,18 @@ Lần đầu cần Internet và dung lượng cho image Flutter/Playwright.
 
 [Hướng dẫn đầy đủ](testing/e2e/README.md) · [Báo cáo E2E 30/10/2026](testing/reports/system-e2e/2026-10-30/README.md)
 
-Phiên đã lưu: **30 PASS / 2 FAIL / 0 skipped**, gồm một ca lịch bơm và một ca
-automation mobile chưa đạt. Đây là kết quả thật; môi trường sẵn sàng không có nghĩa
-là mọi ca đều PASS. `npm.cmd ci` trong `testing/e2e` chỉ cần cho các tiện ích local
-như `npm.cmd run report` hoặc `npm.cmd run test:list`.
+**Phiên mới nhất: 31 PASS / 1 FAIL / 0 skipped**, đã chạy từ clone sạch, không
+cài dependency local và không có source ứng dụng trong gốc nhánh `Test`.
+Ca chưa đạt là `WEB-04 / mobile` ở thao tác chọn thời gian chạy bơm;
+[xem metadata phiên](testing/reports/system-e2e/2026-10-30/clean-checkout-validation.json).
 
-Đã kiểm chứng thêm từ clone sạch: **31 PASS / 1 FAIL**, không cài dependency local
-và không có source ứng dụng trong gốc nhánh `Test`;
-[xem metadata phiên độc lập](testing/reports/system-e2e/2026-10-30/clean-checkout-validation.json).
+Phiên trước có **30 PASS / 2 FAIL** và được giữ riêng trong báo cáo lịch sử.
+Không cộng gộp kết quả giữa các phiên. Đây là kết quả thật; môi trường sẵn sàng
+không có nghĩa là mọi ca đều PASS.
+
+Nhánh `Test` chỉ chạy test thủ công, **không còn GitHub Actions**.
+`npm.cmd ci` trong `testing/e2e` chỉ cần cho tiện ích local như `npm.cmd run report`
+hoặc `npm.cmd run test:list`; chạy lệnh `node` ở trên không cần bước này.
 
 [Kết quả backend](testing/TEST_REPORT.md) · [Kết quả Flutter](docs/testing/2026-10-18-frontend/README.md) · [Kết quả Web UI](docs/testing/2026-10-19-ui/README.md) · [Thư viện ảnh](docs/testing/2026-10-19-ui/screenshots/README.md)
 
@@ -34,6 +38,7 @@ và không có source ứng dụng trong gốc nhánh `Test`;
 
 | Bộ kiểm thử                                           | Phiên đã lưu        |    PASS |   FAIL | TIMEOUT | Điều cần biết                                          |
 | ----------------------------------------------------- | ------------------- | ------: | -----: | ------: | ------------------------------------------------------ |
+| [System E2E mới nhất](testing/reports/system-e2e/2026-10-30/README.md) | 30/10/2026 · clone sạch · 32 ca | **31** | **1** | 0 | Không sửa code ứng dụng; chạy thủ công bằng Docker |
 | [Backend](testing/TEST_REPORT.md)                     | 14/10/2026 · 345 ca | **339** |  **6** |       0 | 4 nhóm lỗi xác nhận; có TRX và coverage                |
 | [Flutter](docs/testing/2026-10-18-frontend/README.md) | 18/10/2026 · 133 ca | **133** |      0 |       0 | **57 placeholder**; 76 ca có assertion dữ liệu/hành vi |
 | [Web UI](docs/testing/2026-10-19-ui/README.md)        | 19/10/2026 · 33 ca  |  **22** | **10** |   **1** | 11 kịch bản trên 3 viewport; có ảnh và trace           |

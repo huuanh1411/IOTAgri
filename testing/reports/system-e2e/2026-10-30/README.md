@@ -1,5 +1,16 @@
 # E2E toàn hệ thống — 30/10/2026
 
+## Phiên mới nhất: kiểm chứng từ clone sạch
+
+**32 ca: 31 PASS / 1 FAIL / 0 skipped**, phiên `1793359161922-540bfa`.
+Ca chưa đạt là `WEB-04 / mobile`; source ứng dụng giữ nguyên và cleanup thành công.
+[Metadata kết quả mới nhất](clean-checkout-validation.json).
+
+Chạy thủ công bằng `node testing/e2e/scripts/run.cjs`; nhánh `Test` không còn
+GitHub Actions. Các bằng chứng bên dưới thuộc phiên trước, được giữ nguyên.
+
+## Phiên trước: đầy đủ ảnh, log và trace
+
 **32 ca: 30 PASS, 2 FAIL, 0 skipped.** Exit code **1**; cleanup **0**.
 Phiên `1793358159401-35b398` chạy trên code ứng dụng nguyên bản; không sửa backend
 hoặc frontend để đổi kết quả. Đây là bằng chứng của phiên đã chạy, không phải

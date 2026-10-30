@@ -1,5 +1,15 @@
 # Báo cáo E2E trên code nguyên bản — 30/10/2026
 
+## Phiên mới nhất
+
+Phiên clone sạch `1793359161922-540bfa`: **32 ca, 31 PASS, 1 FAIL, 0 skipped**.
+Ca chưa đạt: `WEB-04 / mobile` ở thao tác automation chọn thời gian chạy bơm.
+Source ứng dụng không thay đổi, cleanup thành công. Xem
+[metadata gốc](../reports/system-e2e/2026-10-30/clean-checkout-validation.json).
+Suite hiện chỉ chạy thủ công, không dùng GitHub Actions trên nhánh `Test`.
+
+## Phiên trước — giữ nguyên bằng chứng
+
 [Bản bằng chứng đã công bố trên nhánh Test](../reports/system-e2e/2026-10-30/README.md)
 gồm HTML, JSON, JUnit, ảnh, log, trace/video và manifest SHA-256 đã che credential.
 

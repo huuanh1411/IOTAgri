@@ -6,7 +6,8 @@
 
 | Phạm vi | Phiên                         | Kết quả                              | Mở dữ liệu                                                                                                                                  |
 | ------- | ----------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| System E2E | 30/10/2026 · 32 ca | 30 PASS / 2 FAIL / 0 skipped | [Báo cáo, ảnh, log và trace](system-e2e/2026-10-30/README.md) |
+| System E2E mới nhất | 30/10/2026 · clone sạch · 32 ca | 31 PASS / 1 FAIL / 0 skipped | [Metadata phiên mới nhất](system-e2e/2026-10-30/clean-checkout-validation.json) · [Báo cáo](system-e2e/2026-10-30/README.md) |
+| System E2E trước đó | 30/10/2026 · 32 ca | 30 PASS / 2 FAIL / 0 skipped | [Báo cáo, ảnh, log và trace](system-e2e/2026-10-30/README.md) |
 | Backend | `followup-final` · 14/10/2026 | 339 PASS / 6 FAIL                    | [TRX gốc](coverage/followup-final/backend-tests.trx) · [Console](summary/followup-final-test.log)                                           |
 | Flutter | 18/10/2026                    | 133 PASS, gồm 57 placeholder         | [Báo cáo theo file](../../docs/testing/2026-10-18-frontend/README.md) · [Events](../../docs/testing/2026-10-18-frontend/flutter-test.jsonl) |
 | Web UI  | 19/10/2026                    | 22 PASS / 10 FAIL / 1 TIMEOUT        | [Báo cáo & ảnh](../../docs/testing/2026-10-19-ui/README.md) · [Artifact](frontend/e2e/2026-10-19/README.md)                                 |
