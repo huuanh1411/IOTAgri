@@ -24,6 +24,7 @@ public static class AuthEndpoints
         group.MapPost("/login", LoginAsync);
         group.MapPost("/refresh", RefreshAsync);
         group.MapPost("/logout", LogoutAsync).RequireAuthorization();
+        group.MapDelete("/account", DeleteAccountAsync).RequireAuthorization();
         group.MapPost("/change-password", ChangePasswordAsync).RequireAuthorization();
         group.MapGet("/profile", GetProfileAsync).RequireAuthorization();
         group.MapPut("/profile", UpdateProfileAsync).RequireAuthorization();
@@ -369,6 +370,79 @@ public static class AuthEndpoints
             await db.RefreshTokens
                 .Where(token => token.UserId == user.Id && token.RevokedAt == null && token.ExpiresAt > now)
                 .ExecuteUpdateAsync(setters => setters.SetProperty(token => token.RevokedAt, now));
+        }
+
+        return Results.NoContent();
+    }
+
+    private static async Task<IResult> DeleteAccountAsync(
+        ClaimsPrincipal principal,
+        UserManager<ApplicationUser> userManager,
+        ApplicationDbContext db,
+        CancellationToken cancellationToken)
+    {
+        var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var roles = await userManager.GetRolesAsync(user);
+        if (roles.Contains("Admin", StringComparer.OrdinalIgnoreCase))
+        {
+            return Results.Forbid();
+        }
+
+        await using var transaction = db.Database.IsRelational()
+            ? await db.Database.BeginTransactionAsync(cancellationToken)
+            : null;
+
+        var ticketIds = await db.SupportTickets
+            .Where(ticket => ticket.UserId == userId)
+            .Select(ticket => ticket.Id)
+            .ToListAsync(cancellationToken);
+        await db.SupportTicketMessages
+            .Where(message => ticketIds.Contains(message.TicketId) || message.AuthorUserId == userId)
+            .ExecuteDeleteAsync(cancellationToken);
+        await db.SupportTickets
+            .Where(ticket => ticket.UserId == userId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        var deviceIds = await db.Devices
+            .Where(device => device.OwnerId == userId)
+            .Select(device => device.Id)
+            .ToListAsync(cancellationToken);
+        var scheduleIds = await db.PumpSchedules
+            .Where(schedule => deviceIds.Contains(schedule.DeviceId))
+            .Select(schedule => schedule.Id)
+            .ToListAsync(cancellationToken);
+        await db.DeviceAlerts.Where(alert => deviceIds.Contains(alert.DeviceId)).ExecuteDeleteAsync(cancellationToken);
+        await db.SensorReadings.Where(reading => deviceIds.Contains(reading.DeviceId)).ExecuteDeleteAsync(cancellationToken);
+        await db.PumpScheduleOccurrences.Where(occurrence => scheduleIds.Contains(occurrence.ScheduleId)).ExecuteDeleteAsync(cancellationToken);
+        await db.PumpSchedules.Where(schedule => deviceIds.Contains(schedule.DeviceId)).ExecuteDeleteAsync(cancellationToken);
+        await db.LightSchedules.Where(schedule => deviceIds.Contains(schedule.DeviceId)).ExecuteDeleteAsync(cancellationToken);
+        await db.PumpCommands.Where(command => deviceIds.Contains(command.DeviceId)).ExecuteDeleteAsync(cancellationToken);
+        await db.Devices.Where(device => deviceIds.Contains(device.Id)).ExecuteDeleteAsync(cancellationToken);
+        await db.RefreshTokens.Where(token => token.UserId == userId).ExecuteDeleteAsync(cancellationToken);
+        await db.EmailVerificationCodes.Where(code => code.UserId == userId).ExecuteDeleteAsync(cancellationToken);
+
+        db.AccountDeletionAudits.Add(new AccountDeletionAudit());
+        var deleteResult = await userManager.DeleteAsync(user);
+        if (!deleteResult.Succeeded)
+        {
+            return Results.Problem("Unable to delete account.", statusCode: StatusCodes.Status500InternalServerError);
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+        if (transaction is not null)
+        {
+            await transaction.CommitAsync(cancellationToken);
         }
 
         return Results.NoContent();

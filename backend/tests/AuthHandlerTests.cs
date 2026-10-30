@@ -283,6 +283,34 @@ public class AuthHandlerTests
         sender.Verify(s => s.SendVerificationCodeAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    [Fact]
+    public async Task Delete_account_rejects_admin_user()
+    {
+        var user = new ApplicationUser { Id = "admin-1" };
+        var users = BackendTestDoubles.Users();
+        users.Setup(manager => manager.FindByIdAsync(user.Id)).ReturnsAsync(user);
+        users.Setup(manager => manager.GetRolesAsync(user)).ReturnsAsync(new[] { "Admin" });
+
+        var result = await BackendTestDoubles.InvokeHandler(
+            typeof(AuthEndpoints), "DeleteAccountAsync", Principal(user.Id), users.Object, CreateDatabase(), CancellationToken.None);
+
+        Assert.IsType<Microsoft.AspNetCore.Http.HttpResults.ForbidHttpResult>(result);
+    }
+
+    [Fact]
+    public async Task Delete_account_returns_unauthorized_when_subject_is_missing()
+    {
+        var result = await BackendTestDoubles.InvokeHandler(
+            typeof(AuthEndpoints), "DeleteAccountAsync", new ClaimsPrincipal(), BackendTestDoubles.Users().Object, CreateDatabase(), CancellationToken.None);
+
+        Assert.Equal(401, Assert.IsAssignableFrom<IStatusCodeHttpResult>(result).StatusCode);
+    }
+
+    private static ClaimsPrincipal Principal(string id) => new(new ClaimsIdentity(new[]
+    {
+        new Claim(ClaimTypes.NameIdentifier, id)
+    }, "test"));
+
     private static ApplicationDbContext CreateDatabase() => new(new DbContextOptionsBuilder<ApplicationDbContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString())
         .Options);

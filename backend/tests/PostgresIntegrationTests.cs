@@ -20,6 +20,7 @@ using IOTAgriBackend.Endpoints;
 using IOTAgriBackend.Models;
 using IOTAgriBackend.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,6 +59,54 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
         var audit = await db.AccountDeletionAudits.SingleAsync();
         Assert.NotEqual(Guid.Empty, audit.Id);
         Assert.InRange(audit.DeletedAt, DateTime.UtcNow.AddMinutes(-1), DateTime.UtcNow);
+    }
+
+    [Fact]
+    public async Task Delete_account_removes_owned_data_transactionally()
+    {
+        await using var db = await _fixture.CreateDatabaseAsync();
+        var user = new ApplicationUser { Id = "delete-owner", UserName = "delete@example.test", Email = "delete@example.test", FullName = "Delete Owner" };
+        var device = new Device { Name = "Delete Device", DeviceKey = "delete-device-key", Owner = user };
+        var schedule = new PumpSchedule { Device = device, WeekdayMask = 1, StartTime = new TimeOnly(6, 0), DurationSeconds = 60, TimeZone = "Asia/Bangkok" };
+        var command = new PumpCommand { Device = device, IsOn = true, DurationSeconds = 60 };
+        var ticket = new SupportTicket { User = user, Subject = "Delete ticket" };
+        db.AddRange(user, device, schedule, command, ticket);
+        await db.SaveChangesAsync();
+        db.AddRange(
+            new SensorReading { DeviceId = device.Id },
+            new DeviceAlert { DeviceId = device.Id, Type = DeviceAlertType.HighTemperature },
+            new LightSchedule { DeviceId = device.Id, WeekdayMask = 1, StartTime = new TimeOnly(18, 0), DurationSeconds = 60, TimeZone = "Asia/Bangkok" },
+            new PumpScheduleOccurrence { ScheduleId = schedule.Id, CommandId = command.Id, OccurrenceUtc = DateTime.UtcNow },
+            new RefreshToken { UserId = user.Id, Token = "delete-refresh-token", ExpiresAt = DateTime.UtcNow.AddDays(1) },
+            EmailVerificationCode.Create(user.Id, "123456", "test-pepper", DateTime.UtcNow),
+            new SupportTicketMessage { TicketId = ticket.Id, AuthorUserId = user.Id, Body = "Delete message" });
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        user = await db.Users.SingleAsync(item => item.Id == user.Id);
+
+        var users = BackendTestDoubles.Users();
+        users.Setup(manager => manager.FindByIdAsync(user.Id)).ReturnsAsync(user);
+        users.Setup(manager => manager.GetRolesAsync(user)).ReturnsAsync(new[] { "User" });
+        users.Setup(manager => manager.DeleteAsync(user)).ReturnsAsync(IdentityResult.Success)
+            .Callback<ApplicationUser>(deleted => db.Users.Remove(deleted));
+
+        var result = await BackendTestDoubles.InvokeHandler(
+            typeof(AuthEndpoints), "DeleteAccountAsync", Principal(user.Id), users.Object, db, CancellationToken.None);
+
+        Assert.Equal(204, Status(result));
+        Assert.False(await db.Users.AnyAsync(item => item.Id == user.Id));
+        Assert.Empty(await db.Devices.Where(item => item.OwnerId == user.Id).ToListAsync());
+        Assert.Empty(await db.SensorReadings.ToListAsync());
+        Assert.Empty(await db.PumpSchedules.ToListAsync());
+        Assert.Empty(await db.LightSchedules.ToListAsync());
+        Assert.Empty(await db.DeviceAlerts.ToListAsync());
+        Assert.Empty(await db.PumpCommands.ToListAsync());
+        Assert.Empty(await db.PumpScheduleOccurrences.ToListAsync());
+        Assert.Empty(await db.RefreshTokens.Where(item => item.UserId == user.Id).ToListAsync());
+        Assert.Empty(await db.EmailVerificationCodes.Where(item => item.UserId == user.Id).ToListAsync());
+        Assert.Empty(await db.SupportTickets.Where(item => item.UserId == user.Id).ToListAsync());
+        Assert.Empty(await db.SupportTicketMessages.ToListAsync());
+        Assert.Single(await db.AccountDeletionAudits.ToListAsync());
     }
 
     [Fact]
