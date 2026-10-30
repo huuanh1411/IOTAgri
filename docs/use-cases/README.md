@@ -2,42 +2,17 @@
 
 [← Mục lục](../README.md) · [SRS](../requirements/SRS.md) · [Sơ đồ đầy đủ](../diagrams/project-diagrams.md)
 
-Baseline 27/10/2026. Sơ đồ nhóm các thao tác cùng mục tiêu để đọc được trên một trang; danh mục dưới đây tách luồng và gắn ID yêu cầu. Đăng nhập là tiền điều kiện, không vẽ `include` vào mọi use case. Không mô tả Admin kế thừa User trong Identity.
+Baseline 27/10/2026. Sơ đồ chia theo actor, mỗi actor có một khung chứa các hành động của mình; danh mục dưới đây tách luồng và gắn ID yêu cầu. Đăng nhập là tiền điều kiện, không vẽ `include` vào mọi use case. Không mô tả Admin kế thừa User trong Identity.
 
 ## Sơ đồ tổng quan
 
-```mermaid
-flowchart LR
-    Guest["Khách"]
-    User["Người dùng"]
-    Admin["Quản trị viên"]
-    ESP["ESP32"]
-    SMTP["SMTP"]
-    subgraph System["IOTAgri — Nhóm mục tiêu"]
-        Auth(["UC-01–04: Tài khoản, phiên và mật khẩu"])
-        Ops(["UC-05–12: Thiết bị, giám sát, điều khiển và lịch"])
-        Support(["UC-13: Phiếu hỗ trợ"])
-        Manage(["UC-14–16: Quản trị, báo cáo và cấu hình"])
-        Local(["UC-17: Cây trồng và cài đặt cục bộ"])
-        Hardware(["UC-06–07,18: Claim, telemetry và actuator"])
-    end
-    Guest --- Auth
-    User --- Auth
-    User --- Ops
-    User --- Support
-    User --- Local
-    Admin --- Auth
-    Admin --- Manage
-    Admin --- Support
-    ESP --- Hardware
-    SMTP --- Auth
-    classDef local fill:#fff7db,stroke:#b78103,color:#332500;
-    class Local local;
-```
+![Use Case tổng quan theo actor](../diagrams/rendered/use-case-overview.svg)
 
-Sơ đồ tổng quan nhóm mục tiêu để đọc nhanh; xem [sơ đồ chi tiết đầy đủ](../diagrams/project-diagrams.md#use-case) để biết toàn bộ liên kết actor–use case. UC-01–04 là một nhóm; khách chỉ được đăng ký/đăng nhập và khôi phục mật khẩu, còn quản lý hồ sơ/phiên cần quyền tương ứng.
+Sơ đồ tổng quan nhóm các mục tiêu **trong từng khung actor**; xem [sơ đồ chi tiết đầy đủ](../diagrams/project-diagrams.md#use-case) để biết toàn bộ hành động. Actor là hình người que, tên nằm bên dưới; mỗi hành động trong khung được nối trực tiếp với actor bằng một đoạn thẳng. Actor đứng ngoài khung. Các use case chung như hồ sơ/phiên xuất hiện ở cả khung User và Admin, không thể hiện quan hệ kế thừa vai trò.
 
-Bản UML chuẩn: [use-case.puml](../diagrams/use-case.puml). Mermaid dùng flowchart để trình bày actor và mục tiêu; đây không phải cú pháp UML Use Case nguyên bản. Màu vàng thể hiện chức năng cục bộ/mock. ESP32 tham gia cả telemetry lẫn thực thi actuator.
+Nguồn UML: [tổng quan](../diagrams/use-case-overview.puml) · [chi tiết](../diagrams/use-case.puml). Màu vàng thể hiện chức năng cục bộ/mock. ESP32 và SMTP là actor ngoài hệ thống, dùng cùng ký hiệu actor UML. Các khung đều mô tả cùng hệ thống IOTAgri.
+
+Xem chi tiết riêng từng actor: [Khách](../diagrams/rendered/use-case-guest.svg) · [Người dùng](../diagrams/rendered/use-case-user.svg) · [Quản trị viên](../diagrams/rendered/use-case-admin.svg) · [ESP32](../diagrams/rendered/use-case-esp.svg) · [SMTP](../diagrams/rendered/use-case-smtp.svg).
 
 ## Danh mục
 

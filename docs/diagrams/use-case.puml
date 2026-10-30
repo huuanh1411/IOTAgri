@@ -1,76 +1,87 @@
 @startuml
 left to right direction
+skinparam actorStyle stickman
 skinparam packageStyle rectangle
 skinparam shadowing false
-title IOTAgri - Use Case (hiện trạng mã nguồn)
-actor "Khách" as Guest
-actor "Người dùng\nđã đăng nhập" as User
-actor "Quản trị viên" as Admin
-actor "Thiết bị ESP32" as ESP
-actor "Dịch vụ email SMTP" as SMTP
+skinparam linetype polyline
+title IOTAgri - Use Case theo actor
+' Mỗi actor có một khung riêng; use case chung được lặp lại theo vai trò.
 
-rectangle "Hệ thống IOTAgri" {
-  usecase "Đăng ký / Đăng nhập" as Auth
-  usecase "Quên mật khẩu / Đặt lại mật khẩu" as Recovery
-  usecase "Quản lý hồ sơ / Đổi mật khẩu\nĐăng xuất" as Profile
-  usecase "Thêm / Xem / Sửa / Xóa\nthiết bị sở hữu" as Devices
-  usecase "Tạo mã ghép nối" as Provision
-  usecase "Ghép nối phần cứng bằng mã" as Claim
-  usecase "Xem dashboard / Trạng thái online" as Monitor
-  usecase "Xem lịch sử / Biểu đồ\nTổng hợp cảm biến" as History
-  usecase "Điều khiển bơm\nXem lịch sử lệnh" as Pump
-  usecase "Điều khiển đèn / Xem trạng thái" as Light
-  usecase "Quản lý lịch bơm / Lịch đèn" as Schedule
-  usecase "Cấu hình ngưỡng\nXem và xử lý cảnh báo" as Alerts
-  usecase "Tạo / Xem / Trao đổi phiếu hỗ trợ" as Tickets
-  usecase "Chọn cây / Theo dõi ngày trồng" as Plants #FFF7DB
-  usecase "Cài đặt ứng dụng\nThông báo cục bộ" as Preferences #FFF7DB
-  usecase "Xem tài khoản / Phân quyền\nKhóa và mở khóa" as Accounts
-  usecase "Xem mọi thiết bị / Dữ liệu\nChuyển chủ sở hữu" as Fleet
-  usecase "Xem tổng quan / Báo cáo / Xuất CSV" as Reports
-  usecase "Xem trạng thái hệ thống\nCấu hình ngưỡng mặc định" as System
-  usecase "Xem nhật ký quản trị" as Audit
-  usecase "Phản hồi / Đổi trạng thái\nvà ưu tiên phiếu hỗ trợ" as Support
-  usecase "Gửi và lưu số liệu cảm biến" as Telemetry
-  usecase "Nhận lệnh bơm, đèn\nGửi trạng thái" as Actuate
+actor "Khách" as Guest
+rectangle "IOTAgri — Khách" as GuestFrame {
+  usecase "Đăng ký / Đăng nhập" as GuestUC1
+  usecase "Quên mật khẩu / Đặt lại mật khẩu" as GuestUC2
 }
-Guest -- Auth
-Guest -- Recovery
-SMTP -- Recovery
-User -- Profile
-User -- Devices
-User -- Provision
-User -- Monitor
-User -- History
-User -- Pump
-User -- Light
-User -- Schedule
-User -- Alerts
-User -- Tickets
-User -- Plants
-User -- Preferences
-Admin -- Profile
-Admin -- Accounts
-Admin -- Fleet
-Admin -- Reports
-Admin -- System
-Admin -- Audit
-Admin -- Support
-ESP -- Claim
-ESP -- Telemetry
-ESP -- Actuate
-note bottom of Plants
-  Danh mục cây dùng mock_data.dart.
-  Cây đang trồng lưu trên thiết bị người dùng.
-end note
-note bottom of Schedule
-  Tự chạy lịch là xử lý nội bộ của hệ thống.
-  Cần bật cấu hình scheduling tương ứng.
-end note
+Guest -- GuestUC1
+Guest -- GuestUC2
+
+actor "Người dùng\nđã đăng nhập" as User
+rectangle "IOTAgri — Người dùng đã đăng nhập" as UserFrame {
+  usecase "Làm mới phiên / Đăng xuất\nQuản lý hồ sơ / Đổi mật khẩu" as UserUC1
+  usecase "Thêm / Xem / Sửa / Xóa\nthiết bị sở hữu" as UserUC2
+  usecase "Tạo mã ghép nối" as UserUC3
+  usecase "Xem dashboard / Trạng thái online" as UserUC4
+  usecase "Xem lịch sử / Biểu đồ\nTổng hợp cảm biến" as UserUC5
+  usecase "Điều khiển bơm\nXem lịch sử lệnh" as UserUC6
+  usecase "Điều khiển đèn / Xem trạng thái" as UserUC7
+  usecase "Quản lý lịch bơm / Lịch đèn" as UserUC8
+  usecase "Cấu hình ngưỡng\nXem và xử lý cảnh báo" as UserUC9
+  usecase "Tạo / Xem / Trao đổi phiếu hỗ trợ" as UserUC10
+  usecase "Chọn cây / Theo dõi ngày trồng" as UserUC11 #FFF7DB
+  usecase "Cài đặt ứng dụng\nThông báo cục bộ" as UserUC12 #FFF7DB
+}
+User -- UserUC1
+User -- UserUC2
+User -- UserUC3
+User -- UserUC4
+User -- UserUC5
+User -- UserUC6
+User -- UserUC7
+User -- UserUC8
+User -- UserUC9
+User -- UserUC10
+User -- UserUC11
+User -- UserUC12
+
+actor "Quản trị viên" as Admin
+rectangle "IOTAgri — Quản trị viên" as AdminFrame {
+  usecase "Quản lý hồ sơ / Đổi mật khẩu\nĐăng xuất" as AdminUC1
+  usecase "Xem tài khoản / Phân quyền\nKhóa và mở khóa" as AdminUC2
+  usecase "Xem mọi thiết bị / Dữ liệu\nChuyển chủ sở hữu" as AdminUC3
+  usecase "Xem tổng quan / Báo cáo / Xuất CSV" as AdminUC4
+  usecase "Xem trạng thái hệ thống\nCấu hình ngưỡng mặc định" as AdminUC5
+  usecase "Xem nhật ký quản trị" as AdminUC6
+  usecase "Làm mới phiên / Đăng xuất\nQuản lý hồ sơ / Đổi mật khẩu" as AdminUC7
+}
+Admin -- AdminUC1
+Admin -- AdminUC2
+Admin -- AdminUC3
+Admin -- AdminUC4
+Admin -- AdminUC5
+Admin -- AdminUC6
+Admin -- AdminUC7
+
+actor "Thiết bị ESP32" as ESP
+rectangle "IOTAgri — Thiết bị ESP32" as ESPFrame {
+  usecase "Ghép nối phần cứng bằng mã" as ESPUC1
+  usecase "Gửi và lưu số liệu cảm biến" as ESPUC2
+  usecase "Nhận lệnh bơm, đèn\nGửi trạng thái" as ESPUC3
+}
+ESP -- ESPUC1
+ESP -- ESPUC2
+ESP -- ESPUC3
+
+actor "Dịch vụ email SMTP" as SMTP
+rectangle "IOTAgri — Dịch vụ email SMTP" as SMTPFrame {
+  usecase "Quên mật khẩu / Đặt lại mật khẩu" as SMTPUC1
+}
+SMTP -- SMTPUC1
+
 legend bottom
-  Điều kiện chung: API nghiệp vụ yêu cầu đăng nhập.
-  API chủ thiết bị kiểm tra OwnerId; API quản trị yêu cầu AdminOnly.
-  Hai vai trò không có quan hệ kế thừa được khai báo trong Identity.
-  Màu vàng: chức năng dùng dữ liệu cục bộ trên ứng dụng.
+  Mỗi khung liệt kê các hành động của một actor đối với IOTAgri.
+  Use case chung xuất hiện ở từng khung tương ứng, không biểu diễn kế thừa vai trò.
+  API nghiệp vụ yêu cầu đăng nhập; API chủ thiết bị kiểm tra OwnerId; quản trị yêu cầu AdminOnly.
+  Màu vàng: chức năng cục bộ/mock; cây đang trồng lưu trên thiết bị người dùng.
+  Tự chạy lịch là xử lý nội bộ, cần bật cấu hình scheduling tương ứng.
 endlegend
 @enduml

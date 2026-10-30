@@ -2,73 +2,15 @@
 
 [← Thư viện](README.md) · [SRS](../requirements/SRS.md) · [Luồng Use Case](../use-cases/README.md) · [Từ điển dữ liệu](../data/README.md)
 
-Đối chiếu source ngày 27/10/2026. Trang này nhúng nguyên nội dung hai tệp Mermaid chuẩn; giải thích và giới hạn nằm trong các liên kết trên.
+Đối chiếu source ngày 27/10/2026. Trang này nhúng ảnh UML Use Case và mã Mermaid ERD; giải thích và giới hạn nằm trong các liên kết trên.
 
 ## Use Case
 
-```mermaid
-flowchart LR
-    Guest["Khách"]
-    User["Người dùng đã đăng nhập"]
-    Admin["Quản trị viên"]
-    ESP["Thiết bị ESP32"]
+![Use Case chi tiết theo từng actor](rendered/use-case.svg)
 
-    subgraph IOTAgri["Hệ thống IOTAgri"]
-        direction TB
-        Auth([Đăng ký / Đăng nhập])
-        Recovery([Quên mật khẩu / Đặt lại mật khẩu qua email])
-        Profile([Quản lý hồ sơ / Đổi mật khẩu / Đăng xuất])
-        Devices([Thêm / Xem / Sửa / Xóa thiết bị sở hữu])
-        Provision([Tạo mã ghép nối thiết bị])
-        Claim([Ghép nối phần cứng bằng mã])
-        Monitor([Xem dashboard / Trạng thái online])
-        History([Xem lịch sử / Biểu đồ / Tổng hợp cảm biến])
-        Pump([Điều khiển bơm / Xem lịch sử lệnh])
-        Light([Điều khiển đèn / Xem trạng thái])
-        Schedule([Quản lý lịch bơm / Lịch đèn])
-        Alerts([Cấu hình ngưỡng / Xem và xử lý cảnh báo])
-        Tickets([Tạo / Xem / Trao đổi phiếu hỗ trợ])
-        LocalPlant([Chọn cây / Theo dõi ngày trồng trên ứng dụng])
-        LocalSettings([Cài đặt ứng dụng / Thông báo cục bộ])
-        Accounts([Xem tài khoản / Phân quyền / Khóa và mở khóa])
-        Fleet([Xem mọi thiết bị / Dữ liệu / Chuyển chủ sở hữu])
-        Reports([Xem tổng quan / Báo cáo / Xuất CSV])
-        System([Xem trạng thái hệ thống / Cấu hình ngưỡng mặc định])
-        Audit([Xem nhật ký quản trị])
-        Support([Phản hồi / Đổi trạng thái và ưu tiên phiếu hỗ trợ])
-        Telemetry([Gửi và lưu số liệu cảm biến])
-        Actuate([Nhận lệnh bơm, đèn / Gửi trạng thái])
-    end
+Nguồn: [PlantUML chi tiết](use-case.puml). Mỗi actor là hình người que có tên bên dưới, đứng ngoài một khung chứa toàn bộ hành động của mình. Mỗi hành động được nối trực tiếp với actor bằng một đoạn thẳng. Các use case chung được lặp lại trong khung của từng vai trò.
 
-    Guest --- Auth
-    Guest --- Recovery
-    Recovery --- SMTP["Dịch vụ email SMTP"]
-    User --- Profile
-    User --- Devices
-    User --- Provision
-    User --- Monitor
-    User --- History
-    User --- Pump
-    User --- Light
-    User --- Schedule
-    User --- Alerts
-    User --- Tickets
-    User --- LocalPlant
-    User --- LocalSettings
-    Admin --- Accounts
-    Admin --- Fleet
-    Admin --- Reports
-    Admin --- System
-    Admin --- Audit
-    Admin --- Support
-    Admin --- Profile
-    ESP --- Claim
-    ESP --- Telemetry
-    ESP --- Actuate
-
-    classDef local fill:#fff7db,stroke:#b78103,color:#332500;
-    class LocalPlant,LocalSettings local;
-```
+Xem riêng: [Khách](rendered/use-case-guest.svg) · [Người dùng](rendered/use-case-user.svg) · [Quản trị viên](rendered/use-case-admin.svg) · [ESP32](rendered/use-case-esp.svg) · [SMTP](rendered/use-case-smtp.svg).
 
 ## ERD
 

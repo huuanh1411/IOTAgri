@@ -30,8 +30,7 @@ docs/
   data/README.md
   diagrams/README.md
   diagrams/project-diagrams.md
-  diagrams/use-case-overview.mmd
-  diagrams/use-case.mmd
+  diagrams/use-case-overview.puml
   diagrams/use-case.puml
   diagrams/erd.mmd
   diagrams/rendered/*.svg
