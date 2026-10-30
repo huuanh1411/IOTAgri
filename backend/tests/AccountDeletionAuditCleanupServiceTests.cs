@@ -30,6 +30,27 @@ public class AccountDeletionAuditCleanupServiceTests
         Assert.True(remaining.DeletedAt > now.AddDays(-30));
     }
 
+    [Fact]
+    public async Task Failed_cleanup_cycle_logs_error_and_later_cycle_runs()
+    {
+        var attempts = 0;
+        var errors = 0;
+
+        Task Cleanup(CancellationToken _)
+        {
+            attempts++;
+            return attempts == 1
+                ? Task.FromException(new InvalidOperationException("transient database error"))
+                : Task.CompletedTask;
+        }
+
+        await AccountDeletionAuditCleanupService.RunCleanupCycleAsync(Cleanup, _ => errors++, CancellationToken.None);
+        await AccountDeletionAuditCleanupService.RunCleanupCycleAsync(Cleanup, _ => errors++, CancellationToken.None);
+
+        Assert.Equal(2, attempts);
+        Assert.Equal(1, errors);
+    }
+
     private static ApplicationDbContext CreateDatabase(Microsoft.Data.Sqlite.SqliteConnection connection) => new(new DbContextOptionsBuilder<ApplicationDbContext>()
         .UseSqlite(connection)
         .Options);
