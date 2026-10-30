@@ -1,0 +1,6 @@
+NAME                                           IMAGE                                       COMMAND                  SERVICE     CREATED         STATUS                   PORTS
+iotagri-e2e-1793358159401-35b398-api-1         iotagri-e2e-1793358159401-35b398-api        "dotnet IOTAgriBacke…"   api         4 minutes ago   Up 4 minutes (healthy)   
+iotagri-e2e-1793358159401-35b398-frontend-1    iotagri-e2e-1793358159401-35b398-frontend   "/docker-entrypoint.…"   frontend    4 minutes ago   Up 4 minutes (healthy)   80/tcp
+iotagri-e2e-1793358159401-35b398-mailpit-1     axllent/mailpit:v1.32.0                     "/mailpit"               mailpit     4 minutes ago   Up 4 minutes (healthy)   1025/tcp, 1110/tcp, 8025/tcp
+iotagri-e2e-1793358159401-35b398-mosquitto-1   eclipse-mosquitto:2                         "/docker-entrypoint.…"   mosquitto   4 minutes ago   Up 4 minutes (healthy)   1883/tcp
+iotagri-e2e-1793358159401-35b398-postgres-1    postgres:17-alpine                          "docker-entrypoint.s…"   postgres    4 minutes ago   Up 4 minutes (healthy)   5432/tcp

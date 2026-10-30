@@ -1,6 +1,6 @@
 # Frontend testing
 
-Frontend có hai lớp kiểm thử: Flutter trong [`test/`](test/) và trình duyệt Playwright trong [`e2e/`](e2e/). Cả hai cần được chạy cùng mã nguồn ứng dụng tương ứng; nhánh `Test` chỉ lưu phần kiểm thử.
+Frontend có các suite lịch sử: Flutter trong [`test/`](test/) và Playwright trong [`e2e/`](e2e/); các suite này cần mã ứng dụng tương ứng. Để chạy hệ thống ngay sau khi pull `Test`, dùng [suite E2E mới](../testing/e2e/README.md), có Docker và tự tải source đã khóa revision.
 
 ## Flutter
 

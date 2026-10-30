@@ -1,0 +1,6 @@
+node_modules/
+.app/
+artifacts/
+.auth/
+test-results/
+playwright-report/

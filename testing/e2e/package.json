@@ -1,0 +1,15 @@
+{
+  "name": "iotagri-system-e2e",
+  "private": true,
+  "scripts": {
+    "test": "node scripts/run.cjs",
+    "test:list": "playwright test --list",
+    "test:direct": "playwright test",
+    "report": "node scripts/report.cjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "mqtt": "5.14.1",
+    "pg": "8.16.3"
+  }
+}

@@ -2,6 +2,28 @@
 
 **Kết quả kiểm thử, lỗi đã ghi nhận và bằng chứng của IOTAgri.**
 
+## Chạy E2E toàn hệ thống ngay sau khi pull
+
+Cài **Git, Node.js 22 và Docker Desktop (Linux containers)**, mở Docker Desktop,
+rồi chạy từ gốc repo:
+
+```powershell
+git pull --ff-only origin Test
+node testing/e2e/scripts/run.cjs
+```
+
+Không cần cài Flutter, .NET, Chrome, PostgreSQL, MQTT hay tạo `.env`. Bộ chạy tự
+tải đúng revision ứng dụng đã khóa, build Docker, tạo DB/MQTT/email test riêng,
+chạy 32 ca rồi lưu báo cáo và dọn môi trường. Không sửa code ứng dụng.
+Lần đầu cần Internet và dung lượng cho image Flutter/Playwright.
+
+[Hướng dẫn đầy đủ](testing/e2e/README.md) · [Báo cáo E2E 30/10/2026](testing/reports/system-e2e/2026-10-30/README.md)
+
+Phiên đã lưu: **30 PASS / 2 FAIL / 0 skipped**, gồm một ca lịch bơm và một ca
+automation mobile chưa đạt. Đây là kết quả thật; môi trường sẵn sàng không có nghĩa
+là mọi ca đều PASS. `npm.cmd ci` trong `testing/e2e` chỉ cần cho các tiện ích local
+như `npm.cmd run report` hoặc `npm.cmd run test:list`.
+
 [Kết quả backend](testing/TEST_REPORT.md) · [Kết quả Flutter](docs/testing/2026-10-18-frontend/README.md) · [Kết quả Web UI](docs/testing/2026-10-19-ui/README.md) · [Thư viện ảnh](docs/testing/2026-10-19-ui/screenshots/README.md)
 
 ## Kết quả trong một phút

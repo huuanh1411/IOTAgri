@@ -1,0 +1,143 @@
+ Container iotagri-e2e-1793358159401-35b398-runner-run-7a19acae76e8 Creating 
+ Container iotagri-e2e-1793358159401-35b398-runner-run-7a19acae76e8 Created 
+
+Running 32 tests using 1 worker
+
+  ✓   1 [system] › tests/system.spec.cjs:12:1 › SYS-01 anonymous access and forged Google token are rejected (333ms)
+  ✓   2 [system] › tests/system.spec.cjs:21:1 › SYS-02 real login, token rotation, replay rejection and logout (576ms)
+  ✓   3 [system] › tests/system.spec.cjs:30:1 › SYS-03 users cannot enter admin APIs; bootstrap admin can (505ms)
+  ✓   4 [system] › tests/system.spec.cjs:37:1 › SYS-04 device ownership protects readings, commands and deletion (962ms)
+  ✓   5 [system] › tests/system.spec.cjs:50:1 › SYS-05 MQTT reading persists in PostgreSQL, API and dashboard (712ms)
+  ✓   6 [system] › tests/system.spec.cjs:60:1 › SYS-06 real PostgreSQL aggregation returns MQTT samples (626ms)
+  ✓   7 [system] › tests/system.spec.cjs:67:1 › SYS-07 pump command reaches device, ACK is stored and command is idempotent (4.6s)
+  ✓   8 [system] › tests/system.spec.cjs:80:1 › SYS-08 pump off is acknowledged (474ms)
+  ✓   9 [system] › tests/system.spec.cjs:87:1 › SYS-09 device rejection is recorded as failed with reason (459ms)
+  ✓  10 [system] › tests/system.spec.cjs:95:1 › SYS-10 missing device ACK stays pending until a real ACK arrives (538ms)
+  ✓  11 [system] › tests/system.spec.cjs:107:1 › SYS-11 light on/off travels through the broker and status API (610ms)
+  ✓  12 [system] › tests/system.spec.cjs:116:1 › SYS-12 unsafe readings create alerts, safe readings resolve them (780ms)
+  ✘  13 [system] › tests/system.spec.cjs:127:1 › SYS-13 pump scheduler dispatches once and device acknowledges (30.9s)
+  ✓  14 [system] › tests/system.spec.cjs:137:1 › SYS-14 light scheduler sends both start and stop and persists occurrence (17.8s)
+  ✓  15 [system] › tests/system.spec.cjs:146:1 › SYS-15 device becomes offline without telemetry and recovers (35.9s)
+  ✓  16 [system] › tests/system.spec.cjs:153:1 › SYS-16 user ticket, admin reply, user visibility and ownership (1.0s)
+  ✓  17 [system] › tests/system.spec.cjs:167:1 › SYS-17 invalid commands and overlapping schedules do not reach MQTT (513ms)
+  ✓  18 [desktop] › tests/browser.spec.cjs:6:1 › WEB-01 registration through UI, email delivery, verification and login (15.9s)
+  ✓  19 [desktop] › tests/browser.spec.cjs:28:1 › WEB-02 real login and dashboard session survive reload; logout revokes session (13.1s)
+  ✓  20 [desktop] › tests/browser.spec.cjs:46:1 › WEB-03 admin login routes to admin dashboard (5.3s)
+  ✓  21 [desktop] › tests/browser.spec.cjs:51:1 › WEB-04 MQTT telemetry and browser pump command complete the real system loop (14.1s)
+  ✓  22 [desktop] › tests/browser.spec.cjs:85:1 › WEB-05 invalid credentials and injected network failure keep user on login (5.7s)
+  ✓  23 [mobile] › tests/browser.spec.cjs:6:1 › WEB-01 registration through UI, email delivery, verification and login (15.3s)
+  ✓  24 [mobile] › tests/browser.spec.cjs:28:1 › WEB-02 real login and dashboard session survive reload; logout revokes session (11.7s)
+  ✓  25 [mobile] › tests/browser.spec.cjs:46:1 › WEB-03 admin login routes to admin dashboard (5.4s)
+  ✘  26 [mobile] › tests/browser.spec.cjs:51:1 › WEB-04 MQTT telemetry and browser pump command complete the real system loop (26.4s)
+  ✓  27 [mobile] › tests/browser.spec.cjs:85:1 › WEB-05 invalid credentials and injected network failure keep user on login (5.1s)
+  ✓  28 [small-mobile] › tests/browser.spec.cjs:6:1 › WEB-01 registration through UI, email delivery, verification and login (12.4s)
+  ✓  29 [small-mobile] › tests/browser.spec.cjs:28:1 › WEB-02 real login and dashboard session survive reload; logout revokes session (10.2s)
+  ✓  30 [small-mobile] › tests/browser.spec.cjs:46:1 › WEB-03 admin login routes to admin dashboard (4.5s)
+  ✓  31 [small-mobile] › tests/browser.spec.cjs:51:1 › WEB-04 MQTT telemetry and browser pump command complete the real system loop (11.6s)
+  ✓  32 [small-mobile] › tests/browser.spec.cjs:85:1 › WEB-05 invalid credentials and injected network failure keep user on login (4.7s)
+
+
+  1) [system] › tests/system.spec.cjs:127:1 › SYS-13 pump scheduler dispatches once and device acknowledges 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+    Call Log:
+    - Timeout 30000ms exceeded while waiting on the predicate
+
+      127 | test('SYS-13 pump scheduler dispatches once and device acknowledges', async ({ actor, device, db }) => {
+      128 |   const schedule = await json(await actor.api.post(`/api/devices/${device.id}/pump-schedules`, { data: nearFutureSchedule() }), 201);
+    > 129 |   await expect.poll(() => device.simulator.commands.filter(c => c.source === 'scheduled').length, { timeout: 30000 }).toBe(1);
+          |                                                                                                                       ^
+      130 |   await expect.poll(async () => (await history(actor.api, device.id)).items.find(c => c.source === 1)?.status).toBe(1);
+      131 |   const result = await db.query('SELECT "DispatchedAt" FROM "PumpScheduleOccurrences" WHERE "ScheduleId"=$1', [schedule.id]);
+      132 |   expect(result.rows).toHaveLength(1);
+        at /tests/tests/system.spec.cjs:129:119
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    artifacts/latest/test-results/system-SYS-13-pump-schedul-5e7e8-nce-and-device-acknowledges-system/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #5: semantics (text/plain) ──────────────────────────────────────────────────────────
+    
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #6: video (video/webm) ──────────────────────────────────────────────────────────────
+    artifacts/latest/test-results/system-SYS-13-pump-schedul-5e7e8-nce-and-device-acknowledges-system/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: artifacts/latest/test-results/system-SYS-13-pump-schedul-5e7e8-nce-and-device-acknowledges-system/error-context.md
+
+    attachment #8: trace (application/zip) ─────────────────────────────────────────────────────────
+    artifacts/latest/test-results/system-SYS-13-pump-schedul-5e7e8-nce-and-device-acknowledges-system/trace.zip
+    Usage:
+
+        npx playwright show-trace artifacts/latest/test-results/system-SYS-13-pump-schedul-5e7e8-nce-and-device-acknowledges-system/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › tests/browser.spec.cjs:51:1 › WEB-04 MQTT telemetry and browser pump command complete the real system loop 
+
+    TimeoutError: page.waitForResponse: Timeout 15000ms exceeded while waiting for event "response"
+
+      61 |   await reveal(page, start);
+      62 |   await start.click();
+    > 63 |   const response = page.waitForResponse(r => r.url().includes(`/api/devices/${device.id}/pump/commands`) && r.request().method() === 'POST');
+         |                         ^
+      64 |   await page.getByRole('button', { name: /30 giây/ }).click();
+      65 |   const command = await (await response).json();
+      66 |   await expect.poll(() => device.simulator.commands.some(c => c.commandId === command.id && c.isOn)).toBe(true);
+        at /tests/tests/browser.spec.cjs:63:25
+
+    TimeoutError: locator.click: Timeout 15000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: /30 giây/ })
+
+
+      62 |   await start.click();
+      63 |   const response = page.waitForResponse(r => r.url().includes(`/api/devices/${device.id}/pump/commands`) && r.request().method() === 'POST');
+    > 64 |   await page.getByRole('button', { name: /30 giây/ }).click();
+         |                                                       ^
+      65 |   const command = await (await response).json();
+      66 |   await expect.poll(() => device.simulator.commands.some(c => c.commandId === command.id && c.isOn)).toBe(true);
+      67 |   await expect.poll(async () => (await db.query('SELECT "AcknowledgedIsOn" FROM "PumpCommands" WHERE "Id"=$1', [command.id])).rows[0]?.AcknowledgedIsOn).toBe(true);
+        at /tests/tests/browser.spec.cjs:64:55
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    artifacts/latest/test-results/browser-WEB-04-MQTT-teleme-35ecc-mplete-the-real-system-loop-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #5: semantics (text/plain) ──────────────────────────────────────────────────────────
+    - button "Quay lại":
+      - button "Quay lại"
+    - heading "E2E mobile device" [level=2]
+    - button
+    - group:
+      - text: E2E mobile device Online Kết nối ổn định Cập nhật 18:07 Cảm biến
+      - button "Nhiệt độ không khí 25.4 °C"
+      - button "Độ ẩm 64.0 %"
+      - button "Nhiệt độ dung dịch 23.8 °C"
+      - button "TDS 61...
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #6: video (video/webm) ──────────────────────────────────────────────────────────────
+    artifacts/latest/test-results/browser-WEB-04-MQTT-teleme-35ecc-mplete-the-real-system-loop-mobile/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: artifacts/latest/test-results/browser-WEB-04-MQTT-teleme-35ecc-mplete-the-real-system-loop-mobile/error-context.md
+
+    attachment #8: trace (application/zip) ─────────────────────────────────────────────────────────
+    artifacts/latest/test-results/browser-WEB-04-MQTT-teleme-35ecc-mplete-the-real-system-loop-mobile/trace.zip
+    Usage:
+
+        npx playwright show-trace artifacts/latest/test-results/browser-WEB-04-MQTT-teleme-35ecc-mplete-the-real-system-loop-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [system] › tests/system.spec.cjs:127:1 › SYS-13 pump scheduler dispatches once and device acknowledges 
+    [mobile] › tests/browser.spec.cjs:51:1 › WEB-04 MQTT telemetry and browser pump command complete the real system loop 
+  30 passed (4.5m)
+

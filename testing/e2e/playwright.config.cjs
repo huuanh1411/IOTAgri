@@ -1,0 +1,37 @@
+const { defineConfig } = require('@playwright/test');
+module.exports = defineConfig({
+  testDir: './tests',
+  timeout: 60000,
+  expect: { timeout: 15000 },
+  fullyParallel: false,
+  workers: 1,
+  retries: 0,
+  forbidOnly: !!process.env.CI,
+  globalSetup: './support/setup.cjs',
+  outputDir: './artifacts/latest/test-results',
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: './artifacts/latest/playwright-report', open: 'never' }],
+    ['json', { outputFile: './artifacts/latest/results.json' }],
+    ['junit', { outputFile: './artifacts/latest/junit.xml' }],
+  ],
+  use: {
+    baseURL: process.env.FE_URL || 'http://frontend',
+    browserName: 'chromium',
+    headless: true,
+    actionTimeout: 15000,
+    navigationTimeout: 30000,
+    locale: 'vi-VN',
+    timezoneId: 'Asia/Ho_Chi_Minh',
+    screenshot: 'only-on-failure',
+    trace: 'retain-on-failure',
+    video: 'retain-on-failure',
+    serviceWorkers: 'block',
+  },
+  projects: [
+    { name: 'system', testMatch: '**/system.spec.cjs' },
+    { name: 'desktop', testMatch: '**/browser.spec.cjs', use: { viewport: { width: 1280, height: 900 } } },
+    { name: 'mobile', testMatch: '**/browser.spec.cjs', use: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },
+    { name: 'small-mobile', testMatch: '**/browser.spec.cjs', use: { viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true } },
+  ],
+});

@@ -1,0 +1,103 @@
+# Standalone stack: does not load the application's .env or production volumes.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: iotagri_e2e
+      POSTGRES_USER: e2e
+      POSTGRES_PASSWORD: E2eDatabaseOnly!
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U e2e -d iotagri_e2e]
+      interval: 2s
+      timeout: 3s
+      retries: 40
+    volumes:
+      - database:/var/lib/postgresql/data
+  mosquitto:
+    image: eclipse-mosquitto:2
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    healthcheck:
+      test: [CMD-SHELL, "mosquitto_pub -h localhost -t e2e/health -m ready"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  mailpit:
+    image: axllent/mailpit:v1.32.0
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "true"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+  api:
+    build:
+      context: ${E2E_APP_DIR:-../..}
+      dockerfile: ${E2E_API_DOCKERFILE:-testing/e2e/api.Dockerfile}
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Database=iotagri_e2e;Username=e2e;Password=E2eDatabaseOnly!
+      Jwt__Issuer: IOTAgriBackend
+      Jwt__Audience: IOTAgriBackendClients
+      Jwt__Key: E2eOnlyJwtSigningKeyWithAtLeastSixtyFourCharactersForLocalTesting123456789
+      Mqtt__Host: mosquitto
+      Mqtt__Port: "1883"
+      Mqtt__UseTls: "false"
+      Mqtt__ClientId: e2e-backend
+      Smtp__Host: mailpit
+      Smtp__Port: "1025"
+      Smtp__Username: e2e
+      Smtp__Password: E2eMailOnly!
+      Smtp__SenderAddress: noreply@example.test
+      Smtp__UseStartTls: "false"
+      EmailVerification__Pepper: E2eOnlyVerificationPepper123456789
+      AdminBootstrap__Email: admin@example.test
+      AdminBootstrap__Password: E2eAdminOnly!123
+      AdminBootstrap__FullName: E2E Admin
+      MockDevice__Enabled: "false"
+      PumpScheduling__Enabled: "true"
+      PumpScheduling__PollSeconds: "5"
+      PumpScheduling__DueWindowSeconds: "15"
+      LightScheduling__Enabled: "true"
+      LightScheduling__PollSeconds: "5"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    healthcheck:
+      test: [CMD, curl, -fsS, http://localhost:8080/health]
+      interval: 3s
+      timeout: 3s
+      retries: 60
+  frontend:
+    build:
+      context: ${E2E_FRONTEND_DIR:-../../frontend}
+      dockerfile: ${E2E_FRONTEND_DOCKERFILE:-../testing/e2e/frontend.Dockerfile}
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, wget, -q, --spider, http://127.0.0.1/]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  runner:
+    build: .
+    init: true
+    shm_size: 1gb
+    environment:
+      FE_URL: http://frontend
+      API_URL: http://api:8080
+      MAIL_URL: http://mailpit:8025
+      MQTT_URL: mqtt://mosquitto:1883
+      DATABASE_URL: postgres://e2e:E2eDatabaseOnly!@postgres:5432/iotagri_e2e
+    volumes:
+      - ${E2E_ARTIFACTS_DIR:-./artifacts/latest}:/tests/artifacts/latest
+    depends_on:
+      frontend:
+        condition: service_healthy
+volumes:
+  database:
