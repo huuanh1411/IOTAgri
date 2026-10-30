@@ -112,7 +112,7 @@ hình vào semantics tree trước khi tương tác. Không thay đổi source �
 làm test PASS. Lỗi hoặc giới hạn thao tác UI được giữ trong báo cáo để xem xét.
 
 Workflow `.github/workflows/e2e.yml` chạy khi push cập nhật suite vào nhánh `Test`,
-trên pull request liên quan và khi chạy thủ công. FAIL vẫn xuất artifact và giữ
+và trên pull request liên quan. FAIL vẫn xuất artifact và giữ
 exit code khác 0. Xem [báo cáo đã công bố](../reports/system-e2e/2026-10-30/README.md).
 
 Tham khảo: [Mailpit SMTP](https://mailpit.axllent.org/docs/configuration/smtp/),

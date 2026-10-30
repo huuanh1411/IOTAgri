@@ -46,3 +46,14 @@ HTML report trực tiếp. Có thể mở ZIP bằng Playwright Trace Viewer.
 
 Chạy lại từ gốc nhánh `Test` bằng `node testing/e2e/scripts/run.cjs`.
 Xem [hướng dẫn môi trường và phạm vi](../../../e2e/README.md).
+
+## Kiểm chứng bản clone sạch
+
+Phiên riêng `1793359161922-540bfa` bắt đầu từ clone sạch của nhánh `Test` tại
+`72488ea`: không có mã ứng dụng trong gốc checkout, không có `node_modules` trên
+host. Một lệnh `node testing/e2e/scripts/run.cjs` tự tải source đã khóa, build,
+chạy đủ **32 ca: 31 PASS / 1 FAIL / 0 skipped**, rồi dọn DB/container thành công.
+Ca chưa đạt vẫn là `WEB-04 / mobile`. Source cache không thay đổi sau khi chạy.
+
+[Metadata và kết quả kiểm chứng](clean-checkout-validation.json). Đây là phiên
+độc lập; không thay thế hoặc cộng dồn với kết quả 30 PASS / 2 FAIL phía trên.

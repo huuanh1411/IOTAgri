@@ -24,6 +24,10 @@ automation mobile chưa đạt. Đây là kết quả thật; môi trường s�
 là mọi ca đều PASS. `npm.cmd ci` trong `testing/e2e` chỉ cần cho các tiện ích local
 như `npm.cmd run report` hoặc `npm.cmd run test:list`.
 
+Đã kiểm chứng thêm từ clone sạch: **31 PASS / 1 FAIL**, không cài dependency local
+và không có source ứng dụng trong gốc nhánh `Test`;
+[xem metadata phiên độc lập](testing/reports/system-e2e/2026-10-30/clean-checkout-validation.json).
+
 [Kết quả backend](testing/TEST_REPORT.md) · [Kết quả Flutter](docs/testing/2026-10-18-frontend/README.md) · [Kết quả Web UI](docs/testing/2026-10-19-ui/README.md) · [Thư viện ảnh](docs/testing/2026-10-19-ui/screenshots/README.md)
 
 ## Kết quả trong một phút
