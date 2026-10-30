@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const { json, verificationCode, fixturePath, apiURL } = require('./api.cjs');
+const { verifiesEmail, registrationStatus } = require('./contract.cjs');
 module.exports = async () => {
   const api = await request.newContext({ baseURL: apiURL });
   try {
@@ -10,10 +11,14 @@ module.exports = async () => {
     const accounts = { admin: { email: 'admin@example.test', password: 'E2eAdminOnly!123' } };
     for (const role of ['owner', 'other']) {
       const account = { email: `${role}-${randomUUID()}@example.test`, password: 'E2eUserOnly!123', fullName: `E2E ${role}` };
-      await json(await api.post('/api/auth/register', { data: account }), 202);
-      expect((await api.post('/api/auth/login', { data: account })).status()).toBe(403);
-      const code = await verificationCode(api, account.email);
-      await json(await api.post('/api/auth/verify-email', { data: { email: account.email, code } }), 204);
+      await json(await api.post('/api/auth/register', { data: account }), registrationStatus);
+      if (verifiesEmail) {
+        expect((await api.post('/api/auth/login', { data: account })).status()).toBe(403);
+        const code = await verificationCode(api, account.email);
+        await json(await api.post('/api/auth/verify-email', { data: { email: account.email, code } }), 204);
+      }
+      const tokens = await json(await api.post('/api/auth/login', { data: account }));
+      expect(tokens.accessToken).toEqual(expect.any(String));
       accounts[role] = account;
     }
     fs.mkdirSync(path.dirname(fixturePath), { recursive: true });

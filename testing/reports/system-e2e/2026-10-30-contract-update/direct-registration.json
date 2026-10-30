@@ -1,0 +1,46 @@
+{
+  "runId": "1793375820093-569172",
+  "application": {
+    "mode": "remote",
+    "repository": "https://github.com/huuanh1411/IOTAgri.git",
+    "ref": "202ffb8e7cc01440cae2ebd93f96df634b19a831",
+    "revision": "202ffb8e7cc01440cae2ebd93f96df634b19a831"
+  },
+  "authContract": "direct-v1",
+  "startedAt": "2026-10-30T15:57:00.134Z",
+  "finishedAt": "2026-10-30T16:00:15.308Z",
+  "testExitCode": 0,
+  "cleanupExitCode": 0,
+  "stats": {
+    "startTime": "2026-10-30T15:59:27.456Z",
+    "duration": 44801.699,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "setupErrors": [],
+  "cases": [
+    {
+      "title": "SYS-01 anonymous access and Google endpoint follow the selected auth contract",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-01 registration and login through UI (direct-v1)",
+      "project": "desktop",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-01 registration and login through UI (direct-v1)",
+      "project": "mobile",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-01 registration and login through UI (direct-v1)",
+      "project": "small-mobile",
+      "status": "expected"
+    }
+  ],
+  "note": "Application source unchanged. Test working tree contained the configuration update under validation; application SHA recorded above. No retries or skipped failures."
+}

@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { randomBytes } = require('node:crypto');
 const { prepareApplication } = require('../support/application.cjs');
+const { authContract } = require('../support/contract.cjs');
 
 const root = path.resolve(__dirname, '..');
 const project = `iotagri-e2e-${Date.now()}-${randomBytes(3).toString('hex')}`;
@@ -10,6 +11,7 @@ const stamp = project.slice('iotagri-e2e-'.length);
 const artifacts = path.join(root, 'artifacts', stamp);
 fs.mkdirSync(artifacts, { recursive: true });
 const env = { ...process.env, E2E_ARTIFACTS_DIR: artifacts.replaceAll('\\', '/') };
+env.E2E_AUTH_CONTRACT = authContract;
 for (const key of ['COMPOSE_FILE', 'COMPOSE_PROJECT_NAME', 'COMPOSE_PROFILES', 'COMPOSE_ENV_FILES']) delete env[key];
 // Never consume the developer's .env or COMPOSE_FILE/COMPOSE_PROJECT_NAME.
 const compose = ['compose', '--env-file', path.join(root, 'empty.env'), '-p', project, '-f', path.join(root, 'compose.yaml')];
@@ -28,6 +30,7 @@ function docker(args, logName) {
 let exitCode = 1;
 let cleanupCode = 0;
 const meta = { project, revision: spawnSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).stdout?.trim(), startedAt: new Date().toISOString(), args: process.argv.slice(2) };
+meta.authContract = authContract;
 meta.workingTree = spawnSync('git', ['status', '--short'], { cwd: path.resolve(root, '../..'), encoding: 'utf8' }).stdout?.trim();
 fs.writeFileSync(path.join(artifacts, 'run.json'), JSON.stringify(meta, null, 2));
 try {
@@ -41,6 +44,7 @@ try {
   env.E2E_FRONTEND_DOCKERFILE = path.join(root, 'frontend.Dockerfile').replaceAll('\\', '/');
   fs.writeFileSync(path.join(artifacts, 'run.json'), JSON.stringify(meta, null, 2));
   console.log(`Application: ${meta.application.revision} (${meta.application.mode})`);
+  console.log(`Auth contract: ${authContract}`);
   if (docker([...compose, 'config', '--quiet']) !== 0)
     throw new Error('Invalid E2E Compose configuration.');
   console.log(`Building E2E images. Log: ${path.join(artifacts, 'build.log')}`);
@@ -62,6 +66,19 @@ try {
   fs.writeFileSync(path.join(artifacts, 'run.json'), JSON.stringify(meta, null, 2));
   fs.writeFileSync(path.join(artifacts, 'exit-code.txt'), `${exitCode}\n`);
   fs.writeFileSync(path.join(root, 'artifacts', 'latest-run.txt'), `${artifacts}\n`);
+  const resultsFile = path.join(artifacts, 'results.json');
+  if (fs.existsSync(resultsFile)) {
+    try {
+      const results = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
+      meta.stats = results.stats;
+      meta.setupErrors = (results.errors || []).map(error => error.message);
+      const s = results.stats;
+      console.log(`Tests: ${s.expected} passed, ${s.unexpected} failed, ${s.skipped} skipped, ${s.flaky} flaky; ${meta.setupErrors.length} setup/runner errors`);
+    } catch (error) { console.error(`Cannot read test summary: ${error.message}`); }
+  }
+  console.log(`Test exit: ${exitCode}; cleanup exit: ${cleanupCode}`);
+  console.log(`Runner log: ${path.join(artifacts, 'runner.log')}`);
+  fs.writeFileSync(path.join(artifacts, 'run.json'), JSON.stringify(meta, null, 2));
   console.log(`Artifacts: ${artifacts}`);
   console.log(`HTML: ${path.join(artifacts, 'playwright-report', 'index.html')}`);
 }

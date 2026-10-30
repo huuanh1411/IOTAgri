@@ -1,5 +1,9 @@
 # Báo cáo E2E trên code nguyên bản — 30/10/2026
 
+Phiên cập nhật hợp đồng xác thực: **main a3dc757 — 30 PASS / 2 FAIL**. [Xem báo cáo](../reports/system-e2e/2026-10-30-contract-update/README.md). Chỉ sửa test, giữ nguyên lỗi ứng dụng.
+
+Các phiên bên dưới là lịch sử riêng biệt.
+
 ## Phiên mới nhất
 
 Phiên clone sạch `1793359161922-540bfa`: **32 ca, 31 PASS, 1 FAIL, 0 skipped**.

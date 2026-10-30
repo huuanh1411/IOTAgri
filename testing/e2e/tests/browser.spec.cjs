@@ -1,9 +1,10 @@
 const { randomUUID } = require('node:crypto');
 const { test, expect } = require('../support/fixtures.cjs');
 const { verificationCode, json } = require('../support/api.cjs');
+const { verifiesEmail, registrationStatus, authContract } = require('../support/contract.cjs');
 const { openApp, fillLogin, submitLogin, loginUI, semantics, enterText, reveal } = require('../support/browser.cjs');
 
-test('WEB-01 registration through UI, email delivery, verification and login', async ({ page, request, db }) => {
+test(`WEB-01 registration and login through UI (${authContract})`, async ({ page, request, db }) => {
   const account = { email: `web-${randomUUID()}@example.test`, password: 'E2eBrowserOnly!123' };
   await openApp(page);
   await page.getByRole('button', { name: 'Đăng ký', exact: true }).click();
@@ -12,7 +13,16 @@ test('WEB-01 registration through UI, email delivery, verification and login', a
   await enterText(page.getByRole('textbox', { name: 'Xác nhận mật khẩu', exact: true }), account.password);
   const registration = page.waitForResponse(r => r.url().endsWith('/api/auth/register') && r.request().method() === 'POST');
   await page.getByRole('button', { name: /Tạo tài khoản\s*→/ }).click();
-  expect((await registration).status()).toBe(202);
+  expect((await registration).status()).toBe(registrationStatus);
+  if (!verifiesEmail) {
+    await expect(page).toHaveURL(/\/home$/);
+    expect((await db.query('SELECT "Email", "FullName" FROM "AspNetUsers" WHERE "Email"=$1', [account.email])).rows)
+      .toEqual([{ Email: account.email, FullName: 'E2E Browser' }]);
+    await page.reload();
+    await semantics(page);
+    await expect(page).toHaveURL(/\/home$/);
+    return;
+  }
   const code = await verificationCode(request, account.email);
   await enterText(page.getByRole('textbox', { name: /Mã xác minh/ }), code);
   const verified = page.waitForResponse(r => r.url().endsWith('/api/auth/verify-email') && r.request().method() === 'POST');

@@ -2,6 +2,7 @@ const { randomUUID } = require('node:crypto');
 const { request } = require('@playwright/test');
 const { test, expect } = require('../support/fixtures.cjs');
 const { json, accounts, login, apiURL } = require('../support/api.cjs');
+const { verifiesEmail } = require('../support/contract.cjs');
 
 async function history(api, id) { return json(await api.get(`/api/devices/${id}/pump-commands`)); }
 function nearFutureSchedule() {
@@ -9,12 +10,12 @@ function nearFutureSchedule() {
   return { isEnabled: true, weekdayMask: 127, startTime: date.toISOString().slice(11, 19), durationSeconds: 3, timeZone: 'Etc/UTC' };
 }
 
-test('SYS-01 anonymous access and forged Google token are rejected', async ({}) => {
+test('SYS-01 anonymous access and Google endpoint follow the selected auth contract', async ({}) => {
   const api = await request.newContext({ baseURL: apiURL });
   try {
     expect((await api.get('/api/devices/')).status()).toBe(401);
     expect((await api.get('/api/admin/users')).status()).toBe(401);
-    expect((await api.post('/api/auth/google', { data: { idToken: 'forged-e2e-token' } })).status()).toBe(401);
+    expect((await api.post('/api/auth/google', { data: { idToken: 'forged-e2e-token' } })).status()).toBe(verifiesEmail ? 401 : 404);
   } finally { await api.dispose(); }
 });
 

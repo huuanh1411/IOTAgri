@@ -2,6 +2,12 @@
 
 **Kết quả kiểm thử, lỗi đã ghi nhận và bằng chứng của IOTAgri.**
 
+**Cập nhật cấu hình mới: main `a3dc757` — 30 PASS / 2 FAIL / 0 skipped.**
+[Báo cáo và lỗi cần xử lý](testing/reports/system-e2e/2026-10-30-contract-update/README.md).
+
+Xem [hướng dẫn chọn luồng xác thực](testing/e2e/README.md).
+Chỉ thay đổi test; lỗi ứng dụng được báo cáo, không tự sửa.
+
 ## Chạy E2E toàn hệ thống ngay sau khi pull
 
 Cài **Git, Node.js 22 và Docker Desktop (Linux containers)**, mở Docker Desktop,
@@ -13,13 +19,13 @@ node testing/e2e/scripts/run.cjs
 ```
 
 Không cần cài Flutter, .NET, Chrome, PostgreSQL, MQTT hay tạo `.env`. Bộ chạy tự
-tải đúng revision ứng dụng đã khóa, build Docker, tạo DB/MQTT/email test riêng,
+tải main mới nhất và ghi SHA ứng dụng đã kiểm tra, build Docker, tạo DB/MQTT/email test riêng,
 chạy 32 ca rồi lưu báo cáo và dọn môi trường. Không sửa code ứng dụng.
 Lần đầu cần Internet và dung lượng cho image Flutter/Playwright.
 
 [Hướng dẫn đầy đủ](testing/e2e/README.md) · [Báo cáo E2E 30/10/2026](testing/reports/system-e2e/2026-10-30/README.md)
 
-**Phiên mới nhất: 31 PASS / 1 FAIL / 0 skipped**, đã chạy từ clone sạch, không
+**Phiên lịch sử trước khi đổi cấu hình: 31 PASS / 1 FAIL / 0 skipped**, đã chạy từ clone sạch, không
 cài dependency local và không có source ứng dụng trong gốc nhánh `Test`.
 Ca chưa đạt là `WEB-04 / mobile` ở thao tác chọn thời gian chạy bơm;
 [xem metadata phiên](testing/reports/system-e2e/2026-10-30/clean-checkout-validation.json).

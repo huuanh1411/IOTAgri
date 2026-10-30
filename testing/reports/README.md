@@ -1,5 +1,9 @@
 # Bằng chứng kiểm thử
 
+Phiên cập nhật hợp đồng xác thực: **main a3dc757 — 30 PASS / 2 FAIL**. [Xem báo cáo](system-e2e/2026-10-30-contract-update/README.md). Chỉ sửa test, giữ nguyên lỗi ứng dụng.
+
+Các phiên bên dưới là lịch sử riêng biệt.
+
 [← Tổng quan QA](../../README.md) · [Báo cáo frontend](../../docs/testing/README.md) · [Hồ sơ backend](../README.md)
 
 ## Chọn đúng nguồn dữ liệu

@@ -17,7 +17,7 @@ node testing/e2e/scripts/run.cjs
 ```
 
 Lệnh `node` dùng được trên Windows/macOS/Linux. Runner tự build ứng dụng, chờ healthcheck,
-tạo tài khoản, xác minh email qua Mailpit, chạy test, lưu bằng chứng rồi dọn stack.
+tạo tài khoản theo hợp đồng xác thực đã chọn, chạy test, lưu bằng chứng rồi dọn stack.
 Không cần bật backend/frontend hay simulator thủ công.
 
 Suite chỉ chạy thủ công trên máy của người test; nhánh `Test` không còn workflow
@@ -35,17 +35,50 @@ node testing/e2e/scripts/run.cjs
 Lệnh `node` vừa dựng/cài môi trường trong Docker vừa chạy test ngay, không chỉ
 cài dependency. Các lệnh này không sửa source backend/frontend.
 
-Nhánh `Test` không chứa mã ứng dụng. Runner tự tải revision cố định trong
-[`application-source.json`](application-source.json) vào `.app/<revision>/` được
-gitignore rồi build tại đó. Bản hiện tại dùng `bb2900380f2c2d15decdbc4b458584b6a57e66fb`
-của `origin/main`; backend/frontend khớp source của báo cáo ngày 30/10.
-Không checkout/reset nhánh của bạn, không sửa source cache để làm test PASS.
-Mỗi lần chạy ghi cả revision nhánh test và revision ứng dụng vào `run.json`.
+Nhánh `Test` không chứa mã ứng dụng. Mỗi lần chạy, runner fetch `refs/heads/main`
+trong [`application-source.json`](application-source.json), chốt SHA rồi build từ cache
+`.app/<SHA>/`. Main có commit mới thì lần chạy tiếp theo lấy commit mới; `run.json`
+ghi ref, SHA và chế độ xác thực để truy lại kết quả. Fetch lỗi sẽ dừng, không dùng cache cũ.
+Muốn tái lập một phiên, đặt `$env:E2E_APP_REV='<SHA đầy đủ>'` trước khi chạy trên nhánh Test.
 
-Nếu bộ test nằm trong checkout đã có đủ backend/frontend, runner dùng source
-checkout đó. Có thể chỉ định một checkout ứng dụng khác bằng biến `E2E_APP_DIR`.
-Để cập nhật ứng dụng cần test, đổi SHA đầy đủ trong `application-source.json`,
-kiểm tra lại rồi commit thay đổi này. Chạy lại không tự trôi sang main mới hơn.
+Nếu bộ test nằm trong checkout có backend/frontend, runner kiểm tra chính code hiện có,
+bao gồm sửa đổi chưa commit. Runner không tự pull/reset checkout đó; `run.json` ghi SHA
+và trạng thái local. Có thể chọn checkout khác bằng biến `E2E_APP_DIR`.
+`E2E_APP_REV` chỉ áp dụng khi tải source từ remote; không thay đổi checkout ứng dụng.
+
+## Chọn đúng hợp đồng xác thực
+
+Không suy đoán chế độ từ HTTP nhận được và không chấp nhận cả 201/202 để làm test PASS.
+Chọn yêu cầu nghiệp vụ trước khi chạy:
+
+| Chế độ | Hành vi phải đạt | Phiên bản tham chiếu |
+|---|---|---|
+| `verified-v1` (mặc định) | Đăng ký 202, chưa xác minh không đăng nhập được (403), SMTP gửi mã, xác minh 204, đăng nhập 200; Google token giả 401 | main tại `a3dc75761cba97f71b9fe3cc80d49773ff89295b` |
+| `direct-v1` | Đăng ký 201, đăng nhập 200 ngay; UI đăng ký vào home và giữ phiên sau reload; endpoint Google chưa có (404) | `202ffb8e7cc01440cae2ebd93f96df634b19a831` |
+
+Với checkout của bạn đang ở commit `202ffb8...`, lấy bộ test mới rồi chọn luồng trực tiếp:
+
+```powershell
+git fetch origin
+git restore --source=origin/Test -- testing/e2e
+$env:E2E_AUTH_CONTRACT='direct-v1'
+node testing/e2e/scripts/run.cjs
+Remove-Item Env:E2E_AUTH_CONTRACT
+```
+
+Với main mới có xác thực email hoặc chạy riêng nhánh Test:
+
+```powershell
+$env:E2E_AUTH_CONTRACT='verified-v1'
+node testing/e2e/scripts/run.cjs
+```
+
+Hai chế độ không thay thế nhau khi có regression. Nếu yêu cầu là xác thực email nhưng
+ứng dụng trả 201, giữ `verified-v1` để báo lỗi; không chuyển chế độ để che lỗi.
+Không tự sửa ứng dụng, không retry tự động, không bỏ qua assertion lỗi.
+Các luồng chưa tương thích khác vẫn báo FAIL để người phụ trách phân loại và xử lý.
+Suite không đảm bảo tương thích với mọi thay đổi nghiệp vụ trong tương lai.
+`direct-v1` không bao phủ SMTP/xác thực email hay Google OAuth.
 
 Các lệnh tiện ích dưới đây cần cài package local một lần:
 
@@ -78,7 +111,7 @@ chỉ dành cho chẩn đoán bên trong runner đã cấu hình.
 
 | Nhóm | Ca tự động |
 |---|---|
-| Xác thực | Đăng ký trên UI → SMTP → mã xác minh → DB → đăng nhập; refresh rotation/replay, logout; từ chối Google token giả |
+| Xác thực (`verified-v1`) | Đăng ký trên UI → SMTP → mã xác minh → DB → đăng nhập; refresh rotation/replay, logout; từ chối Google token giả |
 | Phân quyền | Anonymous, user/admin; hai user không đọc/điều khiển/xóa thiết bị của nhau |
 | Dữ liệu | MQTT telemetry → PostgreSQL → readings/aggregation → dashboard; hiển thị trên UI |
 | Bơm | UI → API → MQTT → ACK → DB; bật/tắt, tự dừng, idempotency, thiết bị từ chối, thiếu ACK rồi khôi phục |

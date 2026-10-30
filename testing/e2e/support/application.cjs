@@ -13,25 +13,34 @@ function prepareApplication(suiteRoot, logPath) {
   };
   const local = process.env.E2E_APP_DIR ? path.resolve(process.env.E2E_APP_DIR) : repositoryRoot;
   if (hasApplication(local)) {
-    return { mode: 'checkout', directory: local, revision: git(['rev-parse', 'HEAD'], local) };
+    return { mode: 'checkout', directory: local, revision: git(['rev-parse', 'HEAD'], local), workingTree: git(['status', '--short'], local) };
   }
   if (process.env.E2E_APP_DIR) throw new Error('E2E_APP_DIR must contain backend/Program.cs and frontend/pubspec.yaml.');
   const source = JSON.parse(fs.readFileSync(path.join(suiteRoot, 'application-source.json'), 'utf8'));
-  if (!/^[a-f0-9]{40}$/.test(source.revision)) throw new Error('application-source.json requires a full Git commit SHA.');
-  const directory = path.join(suiteRoot, '.app', source.revision);
+  const ref = process.env.E2E_APP_REV || source.ref || source.revision;
+  if (!ref || ref.startsWith('-')) throw new Error('Invalid application source ref.');
+  const mirror = path.join(suiteRoot, '.app', 'remote.git');
+  if (!fs.existsSync(path.join(mirror, 'HEAD'))) {
+    fs.mkdirSync(mirror, { recursive: true });
+    git(['init', '--bare'], mirror, true);
+  }
+  // Fetch once per run, then materialize that exact SHA. Never reset a user's checkout.
+  git(['fetch', '--depth=1', source.repository, ref], mirror, true);
+  const revision = git(['rev-parse', 'FETCH_HEAD'], mirror);
+  const directory = path.join(suiteRoot, '.app', revision);
   if (!fs.existsSync(path.join(directory, '.git'))) {
     fs.mkdirSync(directory, { recursive: true });
     git(['init'], directory, true);
   }
   const existing = spawnSync('git', ['rev-parse', '--verify', 'HEAD'], { cwd: directory, encoding: 'utf8' });
   if (existing.status !== 0) {
-    git(['fetch', '--depth=1', source.repository, source.revision], directory, true);
-    git(['checkout', '--detach', source.revision], directory, true);
+    git(['fetch', '--depth=1', mirror, revision], directory, true);
+    git(['checkout', '--detach', revision], directory, true);
   }
-  if (git(['rev-parse', 'HEAD'], directory) !== source.revision)
+  if (git(['rev-parse', 'HEAD'], directory) !== revision)
     throw new Error('Application cache has a different revision; use a fresh .app cache.');
   if (git(['status', '--porcelain'], directory)) throw new Error('Application cache has local changes; preserve them and use a fresh cache.');
-  if (!hasApplication(directory)) throw new Error('Pinned source does not contain a runnable application.');
-  return { mode: 'pinned', directory, repository: source.repository, revision: source.revision };
+  if (!hasApplication(directory)) throw new Error('Selected source does not contain a runnable application.');
+  return { mode: 'remote', directory, repository: source.repository, ref, revision };
 }
 module.exports = { prepareApplication };

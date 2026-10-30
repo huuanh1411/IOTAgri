@@ -90,6 +90,7 @@ services:
     shm_size: 1gb
     environment:
       FE_URL: http://frontend
+      E2E_AUTH_CONTRACT: ${E2E_AUTH_CONTRACT:-verified-v1}
       API_URL: http://api:8080
       MAIL_URL: http://mailpit:8025
       MQTT_URL: mqtt://mosquitto:1883

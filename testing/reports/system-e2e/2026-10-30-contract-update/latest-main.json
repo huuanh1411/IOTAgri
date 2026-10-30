@@ -1,0 +1,193 @@
+{
+  "runId": "1793375393095-36430b",
+  "application": {
+    "mode": "remote",
+    "repository": "https://github.com/huuanh1411/IOTAgri.git",
+    "ref": "refs/heads/main",
+    "revision": "a3dc75761cba97f71b9fe3cc80d49773ff89295b"
+  },
+  "authContract": "verified-v1",
+  "startedAt": "2026-10-30T15:49:53.145Z",
+  "finishedAt": "2026-10-30T15:56:50.567Z",
+  "testExitCode": 1,
+  "cleanupExitCode": 0,
+  "stats": {
+    "startTime": "2026-10-30T15:52:20.281Z",
+    "duration": 266618.087,
+    "expected": 30,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  },
+  "setupErrors": [],
+  "cases": [
+    {
+      "title": "SYS-01 anonymous access and Google endpoint follow the selected auth contract",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-02 real login, token rotation, replay rejection and logout",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-03 users cannot enter admin APIs; bootstrap admin can",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-04 device ownership protects readings, commands and deletion",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-05 MQTT reading persists in PostgreSQL, API and dashboard",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-06 real PostgreSQL aggregation returns MQTT samples",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-07 pump command reaches device, ACK is stored and command is idempotent",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-08 pump off is acknowledged",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-09 device rejection is recorded as failed with reason",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-10 missing device ACK stays pending until a real ACK arrives",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-11 light on/off travels through the broker and status API",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-12 unsafe readings create alerts, safe readings resolve them",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-13 pump scheduler dispatches once and device acknowledges",
+      "project": "system",
+      "status": "unexpected",
+      "errors": [
+        "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 1\nReceived: 0\n\nCall Log:\n- Timeout 30000ms exceeded while waiting on the predicate\n\n  128 | test('SYS-13 pump scheduler dispatches once and device acknowledges', async ({ actor, device, db }) => {\n  129 |   const schedule = await json(await actor.api.post(`/api/devices/${device.id}/pump-schedules`, { data: nearFutureSchedule() }), 201);\n> 130 |   await expect.poll(() => device.simulator.commands.filter(c => c.source === 'scheduled').length, { timeout: 30000 }).toBe(1);\n      |                                                                                                                       ^\n  131 |   await expect.poll(async () => (await history(actor.api, device.id)).items.find(c => c.source === 1)?.status).toBe(1);\n  132 |   const result = await db.query('SELECT \"DispatchedAt\" FROM \"PumpScheduleOccurrences\" WHERE \"ScheduleId\"=$1', [schedule.id]);\n  133 |   expect(result.rows).toHaveLength(1);\n    at /tests/tests/system.spec.cjs:130:119"
+      ]
+    },
+    {
+      "title": "SYS-14 light scheduler sends both start and stop and persists occurrence",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-15 device becomes offline without telemetry and recovers",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-16 user ticket, admin reply, user visibility and ownership",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-17 invalid commands and overlapping schedules do not reach MQTT",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-01 registration and login through UI (verified-v1)",
+      "project": "desktop",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-02 real login and dashboard session survive reload; logout revokes session",
+      "project": "desktop",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-03 admin login routes to admin dashboard",
+      "project": "desktop",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-04 MQTT telemetry and browser pump command complete the real system loop",
+      "project": "desktop",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-05 invalid credentials and injected network failure keep user on login",
+      "project": "desktop",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-01 registration and login through UI (verified-v1)",
+      "project": "mobile",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-02 real login and dashboard session survive reload; logout revokes session",
+      "project": "mobile",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-03 admin login routes to admin dashboard",
+      "project": "mobile",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-04 MQTT telemetry and browser pump command complete the real system loop",
+      "project": "mobile",
+      "status": "unexpected",
+      "errors": [
+        "TimeoutError: page.waitForResponse: Timeout 15000ms exceeded while waiting for event \"response\"\n\n  71 |   await reveal(page, start);\n  72 |   await start.click();\n> 73 |   const response = page.waitForResponse(r => r.url().includes(`/api/devices/${device.id}/pump/commands`) && r.request().method() === 'POST');\n     |                         ^\n  74 |   await page.getByRole('button', { name: /30 giây/ }).click();\n  75 |   const command = await (await response).json();\n  76 |   await expect.poll(() => device.simulator.commands.some(c => c.commandId === command.id && c.isOn)).toBe(true);\n    at /tests/tests/browser.spec.cjs:73:25",
+        "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for getByRole('button', { name: /30 giây/ })\n\n\n  72 |   await start.click();\n  73 |   const response = page.waitForResponse(r => r.url().includes(`/api/devices/${device.id}/pump/commands`) && r.request().method() === 'POST');\n> 74 |   await page.getByRole('button', { name: /30 giây/ }).click();\n     |                                                       ^\n  75 |   const command = await (await response).json();\n  76 |   await expect.poll(() => device.simulator.commands.some(c => c.commandId === command.id && c.isOn)).toBe(true);\n  77 |   await expect.poll(async () => (await db.query('SELECT \"AcknowledgedIsOn\" FROM \"PumpCommands\" WHERE \"Id\"=$1', [command.id])).rows[0]?.AcknowledgedIsOn).toBe(true);\n    at /tests/tests/browser.spec.cjs:74:55"
+      ]
+    },
+    {
+      "title": "WEB-05 invalid credentials and injected network failure keep user on login",
+      "project": "mobile",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-01 registration and login through UI (verified-v1)",
+      "project": "small-mobile",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-02 real login and dashboard session survive reload; logout revokes session",
+      "project": "small-mobile",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-03 admin login routes to admin dashboard",
+      "project": "small-mobile",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-04 MQTT telemetry and browser pump command complete the real system loop",
+      "project": "small-mobile",
+      "status": "expected"
+    },
+    {
+      "title": "WEB-05 invalid credentials and injected network failure keep user on login",
+      "project": "small-mobile",
+      "status": "expected"
+    }
+  ],
+  "note": "Application source unchanged. Test working tree contained the configuration update under validation; application SHA recorded above. No retries or skipped failures."
+}

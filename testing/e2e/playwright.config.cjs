@@ -1,5 +1,7 @@
 const { defineConfig } = require('@playwright/test');
+const { authContract } = require('./support/contract.cjs');
 module.exports = defineConfig({
+  metadata: { authContract },
   testDir: './tests',
   timeout: 60000,
   expect: { timeout: 15000 },
