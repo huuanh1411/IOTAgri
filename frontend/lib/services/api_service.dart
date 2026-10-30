@@ -393,6 +393,21 @@ class ApiService {
     }
   }
 
+  Future<void> deleteAccount() async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.delete(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.deleteAccount}'),
+        headers: headers,
+      ),
+    );
+
+    if (response.statusCode == 204) {
+      await _clearTokens();
+      return;
+    }
+    throw ApiError.fromResponse(response);
+  }
+
   // Profile methods
   Future<Map<String, dynamic>> getProfile() async {
     final response = await _authenticatedRequest(

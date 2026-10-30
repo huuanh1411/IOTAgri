@@ -194,6 +194,60 @@ void main() {
     );
   });
 
+  test('deleteAccount clears credentials only after a 204 response', () async {
+    final service = ApiService(
+      client: MockClient((request) async {
+        if (request.method == 'POST') {
+          return http.Response(
+            jsonEncode({
+              'accessToken': _accessToken(),
+              'refreshToken': 'refresh-1',
+            }),
+            200,
+          );
+        }
+        expect(request.method, 'DELETE');
+        expect(request.url.path, '/api/auth/account');
+        return http.Response('', 204);
+      }),
+      storage: const _UnavailableSecureStorage(),
+      allowWebStorageFallback: true,
+    );
+
+    await service.login('qa@example.test', 'QaPassword1!');
+    await service.deleteAccount();
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getString('iotagri.auth.access_token'), isNull);
+    expect(preferences.getString('iotagri.auth.refresh_token'), isNull);
+  });
+
+  test('deleteAccount retains credentials after a failed response', () async {
+    final service = ApiService(
+      client: MockClient((request) async {
+        if (request.method == 'POST') {
+          return http.Response(
+            jsonEncode({
+              'accessToken': _accessToken(),
+              'refreshToken': 'refresh-1',
+            }),
+            200,
+          );
+        }
+        return http.Response('', 500);
+      }),
+      storage: const _UnavailableSecureStorage(),
+      allowWebStorageFallback: true,
+    );
+
+    await service.login('qa@example.test', 'QaPassword1!');
+    await expectLater(service.deleteAccount(), throwsA(isA<Exception>()));
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getString('iotagri.auth.access_token'), isNotNull);
+    expect(preferences.getString('iotagri.auth.refresh_token'), 'refresh-1');
+  });
+
   test('refresh accepts 200 and retries an authenticated request', () async {
     SharedPreferences.setMockInitialValues({
       'iotagri.auth.access_token': _accessToken(expiresInHours: -1),

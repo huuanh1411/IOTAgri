@@ -23,6 +23,7 @@ class ApiConstants {
       '/api/auth/resend-verification-code';
   static const String refresh = '/api/auth/refresh';
   static const String logout = '/api/auth/logout';
+  static const String deleteAccount = '/api/auth/account';
   static const String profile = '/api/auth/profile';
 
   // Device endpoints

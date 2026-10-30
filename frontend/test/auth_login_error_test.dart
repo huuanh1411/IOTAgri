@@ -137,6 +137,27 @@ class _ExistingUnverifiedEmailAuthRepository extends AuthRepository {
   }
 }
 
+class _DeletingRepository extends AuthRepository {
+  @override
+  Future<User?> getCurrentUser() async => const User(
+    id: 'user-1',
+    fullName: 'Deletion Tester',
+    email: 'delete@example.com',
+    role: 'user',
+    plan: 'Pro',
+  );
+
+  @override
+  Future<void> deleteAccount() async {}
+}
+
+class _FailingDeleteRepository extends _DeletingRepository {
+  @override
+  Future<void> deleteAccount() async {
+    throw Exception('Account deletion failed.');
+  }
+}
+
 Widget _buildAuthScreen(
   AuthRepository repo, {
   Locale locale = const Locale('vi'),
@@ -153,6 +174,26 @@ Widget _buildAuthScreen(
 }
 
 void main() {
+  test('deleteAccount clears auth state only after repository success', () async {
+    final controller = AuthController(_DeletingRepository());
+    await Future<void>.delayed(Duration.zero);
+
+    final deleted = await controller.deleteAccount();
+
+    expect(deleted, isTrue);
+    expect(controller.state.user, isNull);
+  });
+
+  test('deleteAccount preserves auth state when repository fails', () async {
+    final controller = AuthController(_FailingDeleteRepository());
+    await Future<void>.delayed(Duration.zero);
+
+    final deleted = await controller.deleteAccount();
+
+    expect(deleted, isFalse);
+    expect(controller.state.user?.id, 'user-1');
+  });
+
   testWidgets('opens privacy policy from authentication notice', (
     tester,
   ) async {

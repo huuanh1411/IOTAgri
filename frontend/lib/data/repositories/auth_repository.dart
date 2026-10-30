@@ -53,6 +53,8 @@ class AuthRepository {
 
   Future<void> logout() => _api.logout();
 
+  Future<void> deleteAccount() => _api.deleteAccount();
+
   Future<User> _loadCurrentProfile(api_models.User session) async {
     try {
       final profile = await _api.getProfile();
