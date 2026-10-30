@@ -1,99 +1,46 @@
-@startuml use-case-overview-guest
+@startuml use-case-overview
 left to right direction
 skinparam actorStyle stickman
 skinparam shadowing false
 skinparam linetype polyline
 skinparam usecaseBorderColor #7138A0
 skinparam rectangleBackgroundColor #F1EEF5
-' Actor ở ngoài khung hệ thống; các use case bố trí so le bên trong.
-' SVG do render-use-cases.py xuất giữ bố cục theo hình mẫu UML.
+title IOTAgri — Các actor trong cùng một sơ đồ
 actor "Khách" as Guest
+actor "Người dùng\nđã đăng nhập" as User
+actor "Quản trị viên" as Admin
+actor "Thiết bị ESP32" as ESP
+actor "Dịch vụ email SMTP" as SMTP
+
 rectangle "IOTAgri" {
   usecase "UC-01: Đăng ký / Đăng nhập" as GuestUC1
   usecase "UC-03: Quên / Đặt lại mật khẩu" as GuestUC2
-}
-Guest -- GuestUC1
-Guest -- GuestUC2
-@enduml
-
-@startuml use-case-overview-user
-left to right direction
-skinparam actorStyle stickman
-skinparam shadowing false
-skinparam linetype polyline
-skinparam usecaseBorderColor #7138A0
-skinparam rectangleBackgroundColor #F1EEF5
-' Actor ở ngoài khung hệ thống; các use case bố trí so le bên trong.
-' SVG do render-use-cases.py xuất giữ bố cục theo hình mẫu UML.
-actor "Người dùng\nđã đăng nhập" as User
-rectangle "IOTAgri" {
   usecase "UC-02,04: Phiên đăng nhập / Hồ sơ / Mật khẩu" as UserUC1
   usecase "UC-05–06: Thiết bị / Tạo mã ghép nối" as UserUC2
   usecase "UC-08–12: Giám sát / Điều khiển / Lịch / Cảnh báo" as UserUC3
   usecase "UC-13: Tạo / Xem / Trao đổi phiếu hỗ trợ" as UserUC4
   usecase "UC-17: Cây trồng / Cài đặt cục bộ" as UserUC5 #FFF7DB
+  usecase "UC-13: Phản hồi / Quản lý phiếu hỗ trợ" as AdminUC2
+  usecase "UC-14–15: Tài khoản / Thiết bị toàn hệ thống" as AdminUC3
+  usecase "UC-16: Báo cáo / Cấu hình / Nhật ký quản trị" as AdminUC4
+  usecase "UC-06: Ghép nối phần cứng bằng mã" as ESPUC1
+  usecase "UC-07: Gửi số liệu cảm biến" as ESPUC2
+  usecase "UC-18: Nhận lệnh bơm, đèn / Gửi trạng thái" as ESPUC3
 }
+
+Guest -- GuestUC1
+Guest -- GuestUC2
 User -- UserUC1
 User -- UserUC2
 User -- UserUC3
 User -- UserUC4
 User -- UserUC5
-@enduml
-
-@startuml use-case-overview-admin
-left to right direction
-skinparam actorStyle stickman
-skinparam shadowing false
-skinparam linetype polyline
-skinparam usecaseBorderColor #7138A0
-skinparam rectangleBackgroundColor #F1EEF5
-' Actor ở ngoài khung hệ thống; các use case bố trí so le bên trong.
-' SVG do render-use-cases.py xuất giữ bố cục theo hình mẫu UML.
-actor "Quản trị viên" as Admin
-rectangle "IOTAgri" {
-  usecase "UC-02,04: Phiên đăng nhập / Hồ sơ / Mật khẩu" as AdminUC1
-  usecase "UC-13: Phản hồi / Quản lý phiếu hỗ trợ" as AdminUC2
-  usecase "UC-14–15: Tài khoản / Thiết bị toàn hệ thống" as AdminUC3
-  usecase "UC-16: Báo cáo / Cấu hình / Nhật ký quản trị" as AdminUC4
-}
-Admin -- AdminUC1
+Admin -- UserUC1
 Admin -- AdminUC2
 Admin -- AdminUC3
 Admin -- AdminUC4
-@enduml
-
-@startuml use-case-overview-esp
-left to right direction
-skinparam actorStyle stickman
-skinparam shadowing false
-skinparam linetype polyline
-skinparam usecaseBorderColor #7138A0
-skinparam rectangleBackgroundColor #F1EEF5
-' Actor ở ngoài khung hệ thống; các use case bố trí so le bên trong.
-' SVG do render-use-cases.py xuất giữ bố cục theo hình mẫu UML.
-actor "Thiết bị ESP32" as ESP
-rectangle "IOTAgri" {
-  usecase "UC-06: Ghép nối phần cứng bằng mã" as ESPUC1
-  usecase "UC-07: Gửi số liệu cảm biến" as ESPUC2
-  usecase "UC-18: Nhận lệnh bơm, đèn / Gửi trạng thái" as ESPUC3
-}
 ESP -- ESPUC1
 ESP -- ESPUC2
 ESP -- ESPUC3
-@enduml
-
-@startuml use-case-overview-smtp
-left to right direction
-skinparam actorStyle stickman
-skinparam shadowing false
-skinparam linetype polyline
-skinparam usecaseBorderColor #7138A0
-skinparam rectangleBackgroundColor #F1EEF5
-' Actor ở ngoài khung hệ thống; các use case bố trí so le bên trong.
-' SVG do render-use-cases.py xuất giữ bố cục theo hình mẫu UML.
-actor "Dịch vụ email SMTP" as SMTP
-rectangle "IOTAgri" {
-  usecase "UC-03: Chuyển email khôi phục mật khẩu" as SMTPUC1
-}
-SMTP -- SMTPUC1
+SMTP -- GuestUC2
 @enduml

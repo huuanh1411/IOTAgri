@@ -6,29 +6,11 @@
 
 ## Use Case
 
-Mỗi sơ đồ đặt actor bên ngoài, ở bên trái khung hệ thống **IOTAgri**, tên nằm dưới hình người que. Các use case bố trí so le bên trong khung và nối trực tiếp với actor bằng đoạn thẳng, theo mẫu UML. Toàn bộ hành động của actor nằm gọn trong một ảnh.
+Tất cả actor cùng xuất hiện trong một sơ đồ, bên ngoài **một khung hệ thống IOTAgri duy nhất**. Tên actor nằm dưới hình người que. Các use case bố trí so le bên trong và nối trực tiếp với actor tương ứng. Use case dùng chung chỉ vẽ một lần, nhận liên kết từ các actor liên quan.
 
-Nguồn: [PlantUML chi tiết](use-case.puml) · [Ảnh tổng hợp](rendered/use-case.svg). Các use case chung xuất hiện ở từng actor tương ứng; màu vàng là chức năng cục bộ/mock.
+![Use Case — Tất cả actor trong cùng khung hệ thống](rendered/use-case.svg)
 
-### Khách
-
-![Use Case — Khách](rendered/use-case-guest.svg)
-
-### Người dùng đã đăng nhập
-
-![Use Case — Người dùng đã đăng nhập](rendered/use-case-user.svg)
-
-### Quản trị viên
-
-![Use Case — Quản trị viên](rendered/use-case-admin.svg)
-
-### Thiết bị ESP32
-
-![Use Case — Thiết bị ESP32](rendered/use-case-esp.svg)
-
-### Dịch vụ email SMTP
-
-![Use Case — Dịch vụ email SMTP](rendered/use-case-smtp.svg)
+Nguồn: [PlantUML chi tiết](use-case.puml) · [Tổng quan](rendered/use-case-overview.svg). Màu vàng là chức năng cục bộ/mock.
 
 ## ERD
 
