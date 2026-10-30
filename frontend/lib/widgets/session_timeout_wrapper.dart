@@ -18,19 +18,19 @@ class SessionTimeoutListener extends StatefulWidget {
 
 class _SessionTimeoutListenerState extends State<SessionTimeoutListener> {
   bool _isDialogShown = false;
+  late final AuthProvider _authProvider;
 
   @override
   void initState() {
     super.initState();
-    final authProvider = context.read<AuthProvider>();
+    _authProvider = context.read<AuthProvider>();
     // Listen for session warning callback
-    authProvider.onSessionWarningCallback = _onSessionWarning;
+    _authProvider.onSessionWarningCallback = _onSessionWarning;
   }
 
   @override
   void dispose() {
-    final authProvider = context.read<AuthProvider>();
-    authProvider.onSessionWarningCallback = null;
+    _authProvider.onSessionWarningCallback = null;
     super.dispose();
   }
 
