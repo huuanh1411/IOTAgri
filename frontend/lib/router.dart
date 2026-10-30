@@ -40,9 +40,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/splash',
     refreshListenable: authRefresh,
-    // On the web, refresh normally preserves the current hash (such as /auth).
-    // The startup flow must begin with the Flutter animated splash instead.
-    overridePlatformDefaultLocation: true,
     redirect: (BuildContext context, GoRouterState state) {
       if (state.matchedLocation == '/splash') return null;
       final user = ref.read(authControllerProvider).user;
