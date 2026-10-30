@@ -6,11 +6,29 @@
 
 ## Use Case
 
-![Use Case chi tiết theo từng actor](rendered/use-case.svg)
+Mỗi sơ đồ đặt actor ở trung tâm, tên nằm dưới hình người que; các use case bố trí so le hai bên và nối trực tiếp bằng đoạn thẳng. Toàn bộ hành động của một actor nằm gọn trong một ảnh ngang, không có khung bao.
 
-Nguồn: [PlantUML chi tiết](use-case.puml). Mỗi actor là hình người que có tên bên dưới, đứng ngoài một khung chứa toàn bộ hành động của mình. Mỗi hành động được nối trực tiếp với actor bằng một đoạn thẳng. Các use case chung được lặp lại trong khung của từng vai trò.
+Nguồn: [PlantUML chi tiết](use-case.puml) · [Ảnh tổng hợp](rendered/use-case.svg). Các use case chung xuất hiện ở từng actor tương ứng; màu vàng là chức năng cục bộ/mock.
 
-Xem riêng: [Khách](rendered/use-case-guest.svg) · [Người dùng](rendered/use-case-user.svg) · [Quản trị viên](rendered/use-case-admin.svg) · [ESP32](rendered/use-case-esp.svg) · [SMTP](rendered/use-case-smtp.svg).
+### Khách
+
+![Use Case — Khách](rendered/use-case-guest.svg)
+
+### Người dùng đã đăng nhập
+
+![Use Case — Người dùng đã đăng nhập](rendered/use-case-user.svg)
+
+### Quản trị viên
+
+![Use Case — Quản trị viên](rendered/use-case-admin.svg)
+
+### Thiết bị ESP32
+
+![Use Case — Thiết bị ESP32](rendered/use-case-esp.svg)
+
+### Dịch vụ email SMTP
+
+![Use Case — Dịch vụ email SMTP](rendered/use-case-smtp.svg)
 
 ## ERD
 

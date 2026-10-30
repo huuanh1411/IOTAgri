@@ -2,17 +2,35 @@
 
 [← Mục lục](../README.md) · [SRS](../requirements/SRS.md) · [Sơ đồ đầy đủ](../diagrams/project-diagrams.md)
 
-Baseline 27/10/2026. Sơ đồ chia theo actor, mỗi actor có một khung chứa các hành động của mình; danh mục dưới đây tách luồng và gắn ID yêu cầu. Đăng nhập là tiền điều kiện, không vẽ `include` vào mọi use case. Không mô tả Admin kế thừa User trong Identity.
+Baseline 27/10/2026. Mỗi sơ đồ đặt actor ở giữa và trình bày toàn bộ hành động của actor trong một ảnh ngang; danh mục dưới đây tách luồng và gắn ID yêu cầu. Đăng nhập là tiền điều kiện, không vẽ `include` vào mọi use case. Không mô tả Admin kế thừa User trong Identity.
 
 ## Sơ đồ tổng quan
 
-![Use Case tổng quan theo actor](../diagrams/rendered/use-case-overview.svg)
+Mỗi actor ở trung tâm một ảnh riêng, tên nằm dưới hình người que. Các use case tỏa ra hai bên, nối trực tiếp bằng đoạn thẳng và không có khung bao. Mở từng ảnh để xem toàn bộ hành động của actor cùng lúc.
 
-Sơ đồ tổng quan nhóm các mục tiêu **trong từng khung actor**; xem [sơ đồ chi tiết đầy đủ](../diagrams/project-diagrams.md#use-case) để biết toàn bộ hành động. Actor là hình người que, tên nằm bên dưới; mỗi hành động trong khung được nối trực tiếp với actor bằng một đoạn thẳng. Actor đứng ngoài khung. Các use case chung như hồ sơ/phiên xuất hiện ở cả khung User và Admin, không thể hiện quan hệ kế thừa vai trò.
+### Khách
 
-Nguồn UML: [tổng quan](../diagrams/use-case-overview.puml) · [chi tiết](../diagrams/use-case.puml). Màu vàng thể hiện chức năng cục bộ/mock. ESP32 và SMTP là actor ngoài hệ thống, dùng cùng ký hiệu actor UML. Các khung đều mô tả cùng hệ thống IOTAgri.
+![Tổng quan Use Case — Khách](../diagrams/rendered/use-case-overview-guest.svg)
 
-Xem chi tiết riêng từng actor: [Khách](../diagrams/rendered/use-case-guest.svg) · [Người dùng](../diagrams/rendered/use-case-user.svg) · [Quản trị viên](../diagrams/rendered/use-case-admin.svg) · [ESP32](../diagrams/rendered/use-case-esp.svg) · [SMTP](../diagrams/rendered/use-case-smtp.svg).
+### Người dùng đã đăng nhập
+
+![Tổng quan Use Case — Người dùng đã đăng nhập](../diagrams/rendered/use-case-overview-user.svg)
+
+### Quản trị viên
+
+![Tổng quan Use Case — Quản trị viên](../diagrams/rendered/use-case-overview-admin.svg)
+
+### Thiết bị ESP32
+
+![Tổng quan Use Case — Thiết bị ESP32](../diagrams/rendered/use-case-overview-esp.svg)
+
+### Dịch vụ email SMTP
+
+![Tổng quan Use Case — Dịch vụ email SMTP](../diagrams/rendered/use-case-overview-smtp.svg)
+
+Xem [sơ đồ chi tiết từng actor](../diagrams/project-diagrams.md#use-case) hoặc [ảnh tổng hợp](../diagrams/rendered/use-case-overview.svg).
+
+Nguồn UML: [tổng quan](../diagrams/use-case-overview.puml) · [chi tiết](../diagrams/use-case.puml). Các use case chung như hồ sơ/phiên xuất hiện ở cả User và Admin, không thể hiện kế thừa vai trò. Màu vàng là chức năng cục bộ/mock. ESP32 và SMTP là actor ngoài hệ thống, dùng cùng ký hiệu actor UML.
 
 ## Danh mục
 
