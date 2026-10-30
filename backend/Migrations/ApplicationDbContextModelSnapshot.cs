@@ -22,6 +22,22 @@ namespace IOTAgriBackend.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("IOTAgriBackend.Models.AccountDeletionAudit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeletedAt");
+
+                    b.ToTable("AccountDeletionAudits");
+                });
+
             modelBuilder.Entity("IOTAgriBackend.Models.AdminAuditLog", b =>
                 {
                     b.Property<Guid>("Id")

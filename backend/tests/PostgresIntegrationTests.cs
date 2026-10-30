@@ -48,13 +48,27 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
     }
 
     [Fact]
+    public async Task Account_deletion_audit_stores_only_id_and_timestamp()
+    {
+        await using var db = await _fixture.CreateDatabaseAsync();
+
+        db.AccountDeletionAudits.Add(new AccountDeletionAudit());
+        await db.SaveChangesAsync();
+
+        var audit = await db.AccountDeletionAudits.SingleAsync();
+        Assert.NotEqual(Guid.Empty, audit.Id);
+        Assert.InRange(audit.DeletedAt, DateTime.UtcNow.AddMinutes(-1), DateTime.UtcNow);
+    }
+
+    [Fact]
     public async Task Fresh_database_applies_all_migrations_and_has_no_pending_model_changes()
     {
         await using var db = await _fixture.CreateDatabaseAsync();
         var applied = (await db.Database.GetAppliedMigrationsAsync()).ToList();
-        Assert.Equal(20, applied.Count);
+        Assert.Equal(21, applied.Count);
         Assert.Contains("20261009120000_AddSolutionTemperatureToSensorReadings", applied);
         Assert.Contains("20261027101944_AddEmailVerificationCodes", applied);
+        Assert.Contains("20261030141138_AddAccountDeletionAudits", applied);
         Assert.Contains("20261014072501_AddPumpScheduleActiveDateRange", applied);
         Assert.Contains("20261019101304_AddProvisioningClaimLeaseModel", applied);
         Assert.Empty(await db.Database.GetPendingMigrationsAsync());

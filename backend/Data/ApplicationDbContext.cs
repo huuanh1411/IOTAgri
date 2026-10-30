@@ -25,6 +25,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<SupportTicketMessage> SupportTicketMessages => Set<SupportTicketMessage>();
     public DbSet<SystemAlertDefaults> SystemAlertDefaults => Set<SystemAlertDefaults>();
     public DbSet<EmailVerificationCode> EmailVerificationCodes => Set<EmailVerificationCode>();
+    public DbSet<AccountDeletionAudit> AccountDeletionAudits => Set<AccountDeletionAudit>();
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -191,6 +192,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
                 .WithMany()
                 .HasForeignKey(message => message.AuthorUserId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<AccountDeletionAudit>(entity =>
+        {
+            entity.HasKey(audit => audit.Id);
+            entity.HasIndex(audit => audit.DeletedAt);
         });
 
         builder.Entity<SystemAlertDefaults>(entity =>
