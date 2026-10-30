@@ -785,5 +785,14 @@
   "deleteAccountConfirmationInstruction": "Nhập DELETE để xác nhận xóa tài khoản vĩnh viễn.",
   "deleteAccountConfirmationLabel": "Nhập DELETE",
   "deleteAccountAction": "Xóa tài khoản",
-  "deleteAccountFailed": "Không thể xóa tài khoản. Vui lòng thử lại."
+  "deleteAccountFailed": "Không thể xóa tài khoản. Vui lòng thử lại.",
+  "deleteAccountInfoIntro": "Bạn có thể xóa vĩnh viễn tài khoản Aerogreen và dữ liệu liên quan.",
+  "deleteAccountInfoStepsTitle": "Cách xóa tài khoản",
+  "deleteAccountInfoStepsBody": "1. Đăng nhập Aerogreen.\n2. Mở Cài đặt.\n3. Chọn Xóa tài khoản.\n4. Nhập chính xác DELETE, rồi chọn Xóa tài khoản.",
+  "deleteAccountInfoDataTitle": "Dữ liệu bị xóa vĩnh viễn",
+  "deleteAccountInfoDataBody": "Chúng tôi xóa vĩnh viễn hồ sơ, thiết bị, lịch sử cảm biến, lịch biểu, cảnh báo, yêu cầu hỗ trợ và dữ liệu đăng nhập của bạn.",
+  "deleteAccountInfoRetentionTitle": "Lưu giữ biên bản xóa",
+  "deleteAccountInfoRetentionBody": "Chúng tôi chỉ lưu biên bản xóa không định danh trong 30 ngày, sau đó xóa biên bản này.",
+  "deleteAccountInfoContactTitle": "Cần hỗ trợ?",
+  "deleteAccountInfoContactBody": "Để được hỗ trợ xóa tài khoản, hãy gửi email đến xteam.aerogreen@gmail.com."
 }

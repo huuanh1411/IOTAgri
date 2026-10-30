@@ -3132,6 +3132,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to delete account. Please try again.'**
   String get deleteAccountFailed;
+
+  /// No description provided for @deleteAccountInfoIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'You can permanently delete your Aerogreen account and its associated data.'**
+  String get deleteAccountInfoIntro;
+
+  /// No description provided for @deleteAccountInfoStepsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to delete your account'**
+  String get deleteAccountInfoStepsTitle;
+
+  /// No description provided for @deleteAccountInfoStepsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Sign in to Aerogreen.\n2. Open Settings.\n3. Select Delete account.\n4. Type DELETE exactly, then select Delete account.'**
+  String get deleteAccountInfoStepsBody;
+
+  /// No description provided for @deleteAccountInfoDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data permanently deleted'**
+  String get deleteAccountInfoDataTitle;
+
+  /// No description provided for @deleteAccountInfoDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We permanently delete your profile, devices, sensor history, schedules, alerts, support tickets, and sign-in data.'**
+  String get deleteAccountInfoDataBody;
+
+  /// No description provided for @deleteAccountInfoRetentionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion audit retention'**
+  String get deleteAccountInfoRetentionTitle;
+
+  /// No description provided for @deleteAccountInfoRetentionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We retain only a non-identifying deletion audit record for 30 days, then remove it.'**
+  String get deleteAccountInfoRetentionBody;
+
+  /// No description provided for @deleteAccountInfoContactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help?'**
+  String get deleteAccountInfoContactTitle;
+
+  /// No description provided for @deleteAccountInfoContactBody.
+  ///
+  /// In en, this message translates to:
+  /// **'For deletion help, email xteam.aerogreen@gmail.com.'**
+  String get deleteAccountInfoContactBody;
 }
 
 class _AppLocalizationsDelegate

@@ -785,5 +785,14 @@
   "deleteAccountConfirmationInstruction": "Type DELETE to confirm permanent account deletion.",
   "deleteAccountConfirmationLabel": "Type DELETE",
   "deleteAccountAction": "Delete account",
-  "deleteAccountFailed": "Unable to delete account. Please try again."
+  "deleteAccountFailed": "Unable to delete account. Please try again.",
+  "deleteAccountInfoIntro": "You can permanently delete your Aerogreen account and its associated data.",
+  "deleteAccountInfoStepsTitle": "How to delete your account",
+  "deleteAccountInfoStepsBody": "1. Sign in to Aerogreen.\n2. Open Settings.\n3. Select Delete account.\n4. Type DELETE exactly, then select Delete account.",
+  "deleteAccountInfoDataTitle": "Data permanently deleted",
+  "deleteAccountInfoDataBody": "We permanently delete your profile, devices, sensor history, schedules, alerts, support tickets, and sign-in data.",
+  "deleteAccountInfoRetentionTitle": "Deletion audit retention",
+  "deleteAccountInfoRetentionBody": "We retain only a non-identifying deletion audit record for 30 days, then remove it.",
+  "deleteAccountInfoContactTitle": "Need help?",
+  "deleteAccountInfoContactBody": "For deletion help, email xteam.aerogreen@gmail.com."
 }

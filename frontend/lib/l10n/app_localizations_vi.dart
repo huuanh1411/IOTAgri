@@ -1736,4 +1736,36 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get deleteAccountFailed =>
       'Không thể xóa tài khoản. Vui lòng thử lại.';
+
+  @override
+  String get deleteAccountInfoIntro =>
+      'Bạn có thể xóa vĩnh viễn tài khoản Aerogreen và dữ liệu liên quan.';
+
+  @override
+  String get deleteAccountInfoStepsTitle => 'Cách xóa tài khoản';
+
+  @override
+  String get deleteAccountInfoStepsBody =>
+      '1. Đăng nhập Aerogreen.\n2. Mở Cài đặt.\n3. Chọn Xóa tài khoản.\n4. Nhập chính xác DELETE, rồi chọn Xóa tài khoản.';
+
+  @override
+  String get deleteAccountInfoDataTitle => 'Dữ liệu bị xóa vĩnh viễn';
+
+  @override
+  String get deleteAccountInfoDataBody =>
+      'Chúng tôi xóa vĩnh viễn hồ sơ, thiết bị, lịch sử cảm biến, lịch biểu, cảnh báo, yêu cầu hỗ trợ và dữ liệu đăng nhập của bạn.';
+
+  @override
+  String get deleteAccountInfoRetentionTitle => 'Lưu giữ biên bản xóa';
+
+  @override
+  String get deleteAccountInfoRetentionBody =>
+      'Chúng tôi chỉ lưu biên bản xóa không định danh trong 30 ngày, sau đó xóa biên bản này.';
+
+  @override
+  String get deleteAccountInfoContactTitle => 'Cần hỗ trợ?';
+
+  @override
+  String get deleteAccountInfoContactBody =>
+      'Để được hỗ trợ xóa tài khoản, hãy gửi email đến xteam.aerogreen@gmail.com.';
 }

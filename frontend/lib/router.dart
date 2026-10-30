@@ -8,6 +8,7 @@ import 'package:provider/provider.dart' as provider;
 import 'cupertino/admin/cupertino_admin_dashboard_screen.dart';
 import 'screens/alert_center_tab_screen.dart';
 import 'screens/auth_screen.dart';
+import 'screens/delete_account_info_screen.dart';
 import 'screens/harvest_screen.dart';
 import 'screens/help_screen.dart';
 import 'screens/home_screen.dart';
@@ -46,7 +47,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isLoggedIn = user != null;
       final isPublicPage =
           state.matchedLocation == '/auth' ||
-          state.matchedLocation == '/privacy-policy';
+          state.matchedLocation == '/privacy-policy' ||
+          state.matchedLocation == '/delete-account';
       if (!isLoggedIn && !isPublicPage) return '/auth';
       if (user != null && state.matchedLocation == '/auth') {
         return user.role == 'admin' ? '/admin' : '/home';
@@ -68,6 +70,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/privacy-policy',
         builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
+      GoRoute(
+        path: '/delete-account',
+        builder: (context, state) => const DeleteAccountInfoScreen(),
       ),
       GoRoute(
         path: '/admin',

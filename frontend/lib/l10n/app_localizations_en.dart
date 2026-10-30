@@ -1745,4 +1745,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteAccountFailed =>
       'Unable to delete account. Please try again.';
+
+  @override
+  String get deleteAccountInfoIntro =>
+      'You can permanently delete your Aerogreen account and its associated data.';
+
+  @override
+  String get deleteAccountInfoStepsTitle => 'How to delete your account';
+
+  @override
+  String get deleteAccountInfoStepsBody =>
+      '1. Sign in to Aerogreen.\n2. Open Settings.\n3. Select Delete account.\n4. Type DELETE exactly, then select Delete account.';
+
+  @override
+  String get deleteAccountInfoDataTitle => 'Data permanently deleted';
+
+  @override
+  String get deleteAccountInfoDataBody =>
+      'We permanently delete your profile, devices, sensor history, schedules, alerts, support tickets, and sign-in data.';
+
+  @override
+  String get deleteAccountInfoRetentionTitle => 'Deletion audit retention';
+
+  @override
+  String get deleteAccountInfoRetentionBody =>
+      'We retain only a non-identifying deletion audit record for 30 days, then remove it.';
+
+  @override
+  String get deleteAccountInfoContactTitle => 'Need help?';
+
+  @override
+  String get deleteAccountInfoContactBody =>
+      'For deletion help, email xteam.aerogreen@gmail.com.';
 }
