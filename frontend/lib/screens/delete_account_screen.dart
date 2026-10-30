@@ -79,7 +79,13 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 12),
-              Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  _error!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
             ],
             const SizedBox(height: 24),
             FilledButton(

@@ -65,7 +65,11 @@ void main() {
     await tester.pumpAndSettle();
 
     final confirm = find.widgetWithText(FilledButton, 'Delete account');
-    expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
+    for (final confirmation in ['delete', 'Delete', 'DELETE ']) {
+      await tester.enterText(find.byType(TextField), confirmation);
+      await tester.pump();
+      expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
+    }
 
     await tester.enterText(find.byType(TextField), 'DELETE');
     await tester.pump();
@@ -106,5 +110,9 @@ void main() {
 
     expect(find.byType(DeleteAccountScreen), findsOneWidget);
     expect(find.text('Unable to delete account. Please try again.'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('Unable to delete account. Please try again.')),
+      matchesSemantics(isLiveRegion: true),
+    );
   });
 }
