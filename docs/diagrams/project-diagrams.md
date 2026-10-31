@@ -1,22 +1,22 @@
-# IOTAgri — Context Diagram, Use Case and ERD
+# IOTAgri - Context Diagram, Use Case and ERD
 
-[← Thư viện](README.md) · [SRS](../requirements/SRS.md) · [Luồng Use Case](../use-cases/README.md) · [Từ điển dữ liệu](../data/README.md)
+[Diagram library](README.md) / [SRS](../requirements/SRS.md) / [Use Case flows](../use-cases/README.md) / [Data dictionary](../data/README.md)
 
-Đối chiếu source ngày 27/10/2026. Trang này nhúng Context Diagram, ảnh UML Use Case và mã Mermaid ERD; giải thích và giới hạn nằm trong các liên kết trên.
+Checked against the source baseline of 27 October 2026. This page embeds the Context Diagram, UML Use Case SVG and Mermaid ERD. Supporting explanations and limitations are available through the links above.
 
 ## Context Diagram
 
-![Context Diagram — IOTAgri System Context](rendered/context-diagram-radial.svg)
+![Context Diagram - IOTAgri System Context](rendered/context-diagram-radial.svg)
 
-IOTAgri là một tiến trình duy nhất trao đổi dữ liệu với năm thực thể bên ngoài. Xem [ranh giới và luồng dữ liệu](context-diagram.md) · [Nguồn Mermaid](system-context.mmd).
+IOTAgri is represented as one process exchanging data with five external entities. See [system boundaries and data flows](context-diagram.md) and the [Mermaid source](system-context.mmd).
 
 ## Use Case
 
-Tất cả actor cùng xuất hiện trong một sơ đồ, bên ngoài **một khung hệ thống IOTAgri duy nhất**. Tên actor nằm dưới hình người que. Các use case bố trí so le bên trong và nối trực tiếp với actor tương ứng. Use case dùng chung chỉ vẽ một lần, nhận liên kết từ các actor liên quan.
+All actors appear together in one diagram, outside **a single shared IOTAgri system boundary**. Actor names are placed below the stick figures. Use cases are staggered inside the boundary and connected directly to their actors. A shared use case is drawn once and linked to every relevant actor.
 
-![Use Case — All Actors and a Shared System Boundary](rendered/use-case.svg)
+![Use Case - All Actors and a Shared System Boundary](rendered/use-case.svg)
 
-Nguồn: [PlantUML chi tiết](use-case.puml) · [Tổng quan](rendered/use-case-overview.svg). Màu vàng là chức năng cục bộ/mock.
+Sources: [Detailed PlantUML](use-case.puml) / [Overview](rendered/use-case-overview.svg). Yellow indicates local/mock functionality.
 
 ## ERD
 

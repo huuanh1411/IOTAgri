@@ -1,35 +1,34 @@
-# Thư viện sơ đồ
+# Diagram Library
 
-[← Mục lục](../README.md)
+[Documentation index](../README.md)
 
-| Nội dung | Xem trực tiếp | Nguồn chỉnh sửa |
+| Content | View | Editable source |
 | --- | --- | --- |
-| Context Diagram | [Bối cảnh và luồng dữ liệu](context-diagram.md) | [Mermaid](system-context.mmd) · [SVG](rendered/context-diagram-radial.svg) |
-| Use Case | [Sơ đồ và luồng chi tiết](../use-cases/README.md) | [Tổng quan PlantUML](use-case-overview.puml) · [Chi tiết PlantUML](use-case.puml) |
-| ERD | [Tổng quan và từ điển](../data/README.md) | [Mermaid đầy đủ](erd.mmd) |
-| Context, Use Case và ERD trên một trang | [Bản xem đầy đủ](project-diagrams.md) | SVG Context/Use Case và Mermaid ERD |
+| Context Diagram | [System context and data flows](context-diagram.md) | [Mermaid](system-context.mmd) / [SVG](rendered/context-diagram-radial.svg) |
+| Use Case | [Diagram and detailed flows](../use-cases/README.md) | [PlantUML overview](use-case-overview.puml) / [Detailed PlantUML](use-case.puml) |
+| ERD | [Overview and data dictionary](../data/README.md) | [Full Mermaid source](erd.mmd) |
+| Context, Use Case and ERD on one page | [Combined diagram view](project-diagrams.md) | Context/Use Case SVGs and Mermaid ERD |
 
-Use Case dùng PlantUML và SVG: tất cả actor là hình người que đứng ngoài một khung hệ thống IOTAgri chung, tên bên dưới, các use case bố trí so le trong khung; các liên kết đến hành động là đoạn thẳng trực tiếp. Các trang Markdown nhúng SVG để hiển thị đúng bố cục. ERD tiếp tục dùng Mermaid. ERD đầy đủ khá rộng, nên bắt đầu bằng bản tổng quan ở trang dữ liệu.
+The use case diagrams use PlantUML sources and SVG images. All actors are stick figures outside a single shared IOTAgri system boundary, with names below them. Use cases are staggered inside the boundary and connected directly to their actors. Markdown pages embed the SVGs to preserve this layout. The ERD uses Mermaid. The detailed ERD is wide; start with the overview on the data page.
 
-Baseline: **27/10/2026**, xem [nguồn và giới hạn](../reference/source-baseline.md). Các đường dẫn cũ `docs/diagrams/*` được giữ để không làm gãy bookmark; nội dung giải thích được tổ chức lại theo nghiệp vụ, dữ liệu và yêu cầu.
+Baseline: **27 October 2026**. See [sources and limitations](../reference/source-baseline.md). Existing `docs/diagrams/*` paths are retained to preserve bookmarks. Supporting explanations are organized by business flows, data and requirements.
 
+## Rendered SVGs
 
-## Bản SVG đã render
+[Use Case overview](rendered/use-case-overview.svg) / [Detailed Use Case](rendered/use-case.svg) / [Detailed ERD](rendered/erd.svg) / [ERD overview](rendered/erd-overview.svg) / [System context](rendered/context-diagram-radial.svg)
 
-[Use Case tổng quan](rendered/use-case-overview.svg) · [Use Case đầy đủ](rendered/use-case.svg) · [ERD đầy đủ](rendered/erd.svg) · [ERD tổng quan](rendered/erd-overview.svg) · [Bối cảnh hệ thống](rendered/context-diagram-radial.svg)
-
-SVG giữ chữ và đường nét khi phóng to. Hai nguồn PlantUML là nguồn chỉnh sửa Use Case; các bản flowchart Mermaid cũ đã được thay thế để dùng đúng ký hiệu actor. Sau khi sửa nguồn, chạy từ gốc repository:
+SVGs preserve text and lines when zoomed. The two PlantUML files are the editable use case sources; the previous Mermaid flowcharts were replaced to use proper actor notation. After changing the sources, run from the repository root:
 
 ```sh
 python docs/diagrams/render-use-cases.py
 ```
 
-Context Diagram dùng bố cục tròn: năm thực thể cách đều quanh IOTAgri, nhãn luồng rút gọn. Sau khi sửa [nguồn Mermaid](system-context.mmd), giữ bố cục này bằng lệnh:
+The Context Diagram uses a radial layout, with five entities evenly spaced around IOTAgri and concise flow labels. After editing the [Mermaid source](system-context.mmd), preserve this layout by running:
 
 ```sh
 python docs/diagrams/render-context.py
 ```
 
-Script chỉ dùng thư viện chuẩn Python, đọc các khai báo actor/rectangle/usecase và liên kết trong hai tệp PlantUML của dự án, xuất hai ảnh chung (tổng quan và chi tiết), mỗi ảnh có đủ năm actor và một khung hệ thống. Các ảnh SVG dùng đoạn thẳng từ tay actor đến từng hình elip, không có điểm trung chuyển. Bố cục khi render bằng PlantUML khác có thể thay đổi theo engine.
+The scripts use only the Python standard library. The use case renderer reads actor, rectangle and use case declarations and associations from the two PlantUML files. It generates an overview and a detailed diagram, each containing all five actors and one system boundary. SVG associations are straight lines from an actor's hand to each use case ellipse, without intermediate routing points. Other PlantUML engines may produce a different layout.
 
-Mỗi sơ đồ có duy nhất một khung IOTAgri, với toàn bộ actor ở bên ngoài và các use case ở bên trong. Use case dùng chung chỉ vẽ một lần và nối đến mọi actor liên quan. Màu vàng giữ ý nghĩa chức năng cục bộ/mock. Khi sửa Mermaid ERD, cần render lại SVG ERD tương ứng.
+Each use case diagram contains exactly one IOTAgri boundary. All actors are outside it and all use cases are inside. A shared use case is drawn once and linked to every relevant actor. Yellow indicates local/mock functionality. After editing the Mermaid ERD, regenerate its corresponding SVG.

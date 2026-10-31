@@ -1,39 +1,39 @@
-# Context Diagram — IOTAgri System Context
+# Context Diagram - IOTAgri System Context
 
-[← Thư viện sơ đồ](README.md) · [SRS](../requirements/SRS.md#2-bối-cảnh-và-tác-nhân) · [Use Case](../use-cases/README.md) · [Các sơ đồ](project-diagrams.md)
+[Diagram library](README.md) / [SRS](../requirements/SRS.md) / [Use Case](../use-cases/README.md) / [All diagrams](project-diagrams.md)
 
-Context diagram biểu diễn IOTAgri như **một tiến trình duy nhất**, trao đổi dữ liệu với năm thực thể bên ngoài được phân bổ đều quanh vòng tròn trung tâm. Mũi tên chỉ hướng dữ liệu; nhãn rút gọn để dễ đọc, chi tiết nằm trong bảng luồng dữ liệu bên dưới. Nội dung bám theo baseline **27/10/2026** của [SRS](../requirements/SRS.md) và [nguồn đối chiếu](../reference/source-baseline.md).
+The context diagram represents IOTAgri as **one process** exchanging data with five external entities evenly distributed around the central circle. Arrows indicate data-flow direction. Labels are concise; the table below provides details. The diagram follows the **27 October 2026** baseline in the [SRS](../requirements/SRS.md) and [source reference](../reference/source-baseline.md).
 
-![Context Diagram — IOTAgri and External Entities](rendered/context-diagram-radial.svg)
+![Context Diagram - IOTAgri and External Entities](rendered/context-diagram-radial.svg)
 
-[Mở ảnh SVG](rendered/context-diagram-radial.svg) · [Nguồn Mermaid](system-context.mmd)
+[Open SVG](rendered/context-diagram-radial.svg) / [Mermaid source](system-context.mmd)
 
-## Ranh giới hệ thống
+## System boundary
 
-IOTAgri bao gồm ứng dụng Flutter, backend ASP.NET Core, xử lý lịch/cảnh báo, cơ sở dữ liệu PostgreSQL và hạ tầng MQTT/Mosquitto thuộc hệ thống. Những thành phần này không tách thành thực thể bên ngoài trong context diagram. ESP32 là thiết bị bên ngoài trao đổi với IOTAgri; SMTP là dịch vụ chuyển email tích hợp bên ngoài.
+IOTAgri includes the Flutter application, ASP.NET Core backend, scheduling and alert processing, PostgreSQL database, and the system's MQTT/Mosquitto infrastructure. These components are internal to IOTAgri and are not shown as external entities. ESP32 is an external device exchanging data with IOTAgri. SMTP is an external email delivery service.
 
-Ở mức bối cảnh, đường nối với ESP32 gộp hai kênh: ghép nối qua HTTP API và trao đổi số đo/lệnh/trạng thái qua MQTT. Xem [luồng kết nối kỹ thuật trong SRS](../requirements/SRS.md#22-luồng-kết-nối-kỹ-thuật) nếu cần biết các thành phần trung gian.
+At the context level, the ESP32 connection combines two channels: pairing through the HTTP API and exchanging readings, commands and status through MQTT. See the technical connection flow in [SRS section 2.2](../requirements/SRS.md) for the intermediate components.
 
-## Luồng dữ liệu
+## Data flows
 
-| Thực thể bên ngoài | Dữ liệu gửi vào IOTAgri | Dữ liệu IOTAgri gửi ra |
+| External entity | Data sent to IOTAgri | Data sent by IOTAgri |
 | --- | --- | --- |
-| Khách | Thông tin đăng ký/đăng nhập; yêu cầu khôi phục và dữ liệu đặt lại mật khẩu | Kết quả xác thực, phiên đăng nhập và kết quả xử lý yêu cầu mật khẩu |
-| Người dùng đã đăng nhập | Yêu cầu quản lý thiết bị, giám sát; lệnh bơm/đèn; lịch, ngưỡng và phiếu hỗ trợ | Số đo, lịch sử, trạng thái thiết bị; kết quả lệnh, cảnh báo và phản hồi hỗ trợ |
-| Quản trị viên | Yêu cầu quản trị tài khoản/thiết bị; cấu hình, truy vấn báo cáo và xử lý hỗ trợ | Dữ liệu quản trị, báo cáo/CSV, nhật ký, trạng thái và kết quả xử lý |
-| Thiết bị ESP32 | Mã ghép nối, hardwareId; số đo cảm biến, ACK và trạng thái bơm/đèn | DeviceKey, cấu hình/thông tin xác thực MQTT và lệnh điều khiển bơm/đèn |
-| Dịch vụ email SMTP | Không biểu diễn luồng nghiệp vụ đầu vào từ SMTP | Yêu cầu gửi thư, địa chỉ người nhận và liên kết đặt lại mật khẩu |
+| Guest | Registration/sign-in details; password recovery requests and password reset data | Authentication results, sessions and password request results |
+| Authenticated user | Device management and monitoring requests; pump/light commands; schedules, thresholds and support tickets | Readings, history and device status; command results, alerts and support responses |
+| Administrator | Account/device administration requests; configuration, report queries and support actions | Administration data, reports/CSV, audit logs, status and operation results |
+| ESP32 device | Pairing code, hardwareId; sensor readings, ACKs and pump/light status | DeviceKey, MQTT configuration/credentials and pump/light control commands |
+| SMTP email service | No incoming business data flow from SMTP is shown | Email delivery requests, recipient addresses and password reset links |
 
-SMTP chuyển thư tới hộp thư người nhận theo cấu hình; sơ đồ không giả định có callback xác nhận phát thư. Cảnh báo ở đây là dữ liệu người dùng xem trong hệ thống, không hàm ý đã có dịch vụ push notification cloud. Lệnh đã gửi không đồng nghĩa relay đã thực thi; ACK/trạng thái thiết bị là luồng phản hồi riêng.
+SMTP delivers messages to recipient mailboxes according to its configuration. The diagram does not assume a delivery confirmation callback. Alerts represent data users can view within the system; they do not imply an implemented cloud push notification service. Sending a command does not prove that the relay executed it: device ACKs and status are separate response flows.
 
-## Cập nhật sơ đồ
+## Updating the diagram
 
-Chỉnh [system-context.mmd](system-context.mmd), sau đó render lại SVG từ gốc repository:
+Edit [system-context.mmd](system-context.mmd), then regenerate the SVG from the repository root:
 
 ```sh
 python docs/diagrams/render-context.py
 ```
 
-Script dùng thư viện chuẩn Python, đọc tên thực thể và nhãn luồng từ nguồn Mermaid, cố định năm thực thể cách nhau 72° quanh vòng tròn. Render trực tiếp bằng Mermaid có thể cho bố cục khác.
+The script uses the Python standard library. It reads entity names and flow labels from the Mermaid source and positions five entities at 72-degree intervals around the circle. Rendering directly with Mermaid may produce a different layout.
 
-Context diagram thể hiện ranh giới và luồng dữ liệu; [Use Case](../use-cases/README.md) thể hiện mục tiêu của actor, còn [ERD](../data/README.md) mô tả cấu trúc dữ liệu.
+The context diagram shows the system boundary and data flows. The [Use Case](../use-cases/README.md) documentation describes actor goals, while the [ERD](../data/README.md) describes the data structure.
