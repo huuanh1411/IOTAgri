@@ -1,0 +1,31 @@
+---
+config:
+  theme: base
+  flowchart:
+    curve: linear
+    htmlLabels: true
+    nodeSpacing: 65
+    rankSpacing: 120
+---
+flowchart LR
+    Guest["Khách"]
+    User["Người dùng đã đăng nhập"]
+    System(("0<br/>HỆ THỐNG IOTAgri<br/>Giám sát và điều khiển<br/>nông nghiệp thủy canh"))
+    Admin["Quản trị viên"]
+    ESP["Thiết bị ESP32"]
+    SMTP["Dịch vụ email SMTP"]
+
+    Guest -->|"Thông tin đăng ký, đăng nhập<br/>Yêu cầu khôi phục / đặt lại mật khẩu"| System
+    System -->|"Kết quả xác thực, phiên đăng nhập<br/>Kết quả xử lý yêu cầu mật khẩu"| Guest
+    User -->|"Yêu cầu quản lý thiết bị, giám sát<br/>Lệnh bơm / đèn, lịch, ngưỡng, phiếu hỗ trợ"| System
+    System -->|"Số đo, lịch sử, trạng thái thiết bị<br/>Kết quả lệnh, cảnh báo, phản hồi hỗ trợ"| User
+    Admin -->|"Yêu cầu quản trị tài khoản, thiết bị<br/>Cấu hình hệ thống, báo cáo, xử lý hỗ trợ"| System
+    System -->|"Dữ liệu quản trị, báo cáo / CSV<br/>Nhật ký, trạng thái và kết quả xử lý"| Admin
+    ESP -->|"Mã ghép nối, hardwareId<br/>Số đo cảm biến, ACK, trạng thái bơm / đèn"| System
+    System -->|"DeviceKey, cấu hình / xác thực MQTT<br/>Lệnh điều khiển bơm / đèn"| ESP
+    System -->|"Yêu cầu gửi email khôi phục<br/>Người nhận và liên kết đặt lại mật khẩu"| SMTP
+
+    classDef external fill:#f3eef8,stroke:#7138a0,stroke-width:2px,color:#241535;
+    classDef system fill:#e7f2ff,stroke:#245b99,stroke-width:3px,color:#163754;
+    class Guest,User,Admin,ESP,SMTP external;
+    class System system;

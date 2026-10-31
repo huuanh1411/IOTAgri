@@ -28,6 +28,16 @@ Tài liệu mô tả các hành vi đã thấy trong Flutter, ASP.NET Core Minim
 
 Admin có thể dùng API người dùng cho dữ liệu của chính mình. Quyền Admin không tự bỏ qua điều kiện `OwnerId` trong API chủ thiết bị. Scheduler, PostgreSQL và Mosquitto là thành phần nội bộ/hạ tầng, không coi scheduler là actor nghiệp vụ.
 
+### 2.1 Context Diagram
+
+![Context Diagram — Bối cảnh hệ thống IOTAgri](../diagrams/rendered/system-context.svg)
+
+IOTAgri được biểu diễn như một tiến trình duy nhất, trao đổi dữ liệu với Khách, Người dùng, Quản trị viên, ESP32 và SMTP. Flutter, backend, PostgreSQL và Mosquitto nằm trong phạm vi hệ thống. Xem [ranh giới và đặc tả luồng dữ liệu](../diagrams/context-diagram.md).
+
+### 2.2 Luồng kết nối kỹ thuật
+
+Sơ đồ sau phân rã các thành phần bên trong IOTAgri để giải thích kết nối kỹ thuật:
+
 ```mermaid
 flowchart LR
     U[Người dùng / Quản trị viên] --> F[Flutter]

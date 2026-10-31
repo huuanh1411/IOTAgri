@@ -4,9 +4,10 @@
 
 | Nội dung | Xem trực tiếp | Nguồn chỉnh sửa |
 | --- | --- | --- |
+| Context Diagram | [Bối cảnh và luồng dữ liệu](context-diagram.md) | [Mermaid](system-context.mmd) · [SVG](rendered/system-context.svg) |
 | Use Case | [Sơ đồ và luồng chi tiết](../use-cases/README.md) | [Tổng quan PlantUML](use-case-overview.puml) · [Chi tiết PlantUML](use-case.puml) |
 | ERD | [Tổng quan và từ điển](../data/README.md) | [Mermaid đầy đủ](erd.mmd) |
-| Cả hai sơ đồ trên một trang | [Bản xem đầy đủ](project-diagrams.md) | SVG Use Case và Mermaid ERD |
+| Context, Use Case và ERD trên một trang | [Bản xem đầy đủ](project-diagrams.md) | SVG Context/Use Case và Mermaid ERD |
 
 Use Case dùng PlantUML và SVG: tất cả actor là hình người que đứng ngoài một khung hệ thống IOTAgri chung, tên bên dưới, các use case bố trí so le trong khung; các liên kết đến hành động là đoạn thẳng trực tiếp. Các trang Markdown nhúng SVG để hiển thị đúng bố cục. ERD tiếp tục dùng Mermaid. ERD đầy đủ khá rộng, nên bắt đầu bằng bản tổng quan ở trang dữ liệu.
 

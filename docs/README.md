@@ -4,6 +4,7 @@
 
 | Nhóm | Tài liệu | Mục đích |
 | --- | --- | --- |
+| Bối cảnh | [Context Diagram](diagrams/context-diagram.md) | Ranh giới IOTAgri, thực thể bên ngoài và luồng dữ liệu |
 | Yêu cầu | [SRS](requirements/SRS.md) | Phạm vi, FR/NFR, giới hạn và tiêu chí chấp nhận |
 | Nghiệp vụ | [Use Case](use-cases/README.md) | Actor, danh mục UC và luồng chính/ngoại lệ |
 | Dữ liệu | [ERD và từ điển dữ liệu](data/README.md) | Schema vật lý, ràng buộc và dữ liệu không lưu DB |
@@ -17,7 +18,7 @@
 - “Có triển khai”: thấy trong source, không đồng nghĩa đã nghiệm thu trên môi trường thật.
 - “Cục bộ/mock”: không coi là nghiệp vụ đã đồng bộ PostgreSQL.
 - “Đề xuất/chưa xác nhận”: yêu cầu cần thống nhất hoặc kiểm chứng, không phải cam kết hiện hữu.
-- Sơ đồ `.mmd` là nguồn Mermaid chuẩn. Bản nhúng trong `project-diagrams.md` được đồng bộ từ các tệp này.
+- Sơ đồ `.mmd` là nguồn Mermaid chuẩn; `.puml` là nguồn UML Use Case. Trang `project-diagrams.md` nhúng SVG Context/Use Case và mã Mermaid ERD từ các nguồn tương ứng.
 
 ## Cấu trúc
 
@@ -30,6 +31,8 @@ docs/
   data/README.md
   diagrams/README.md
   diagrams/project-diagrams.md
+  diagrams/context-diagram.md
+  diagrams/system-context.mmd
   diagrams/use-case-overview.puml
   diagrams/use-case.puml
   diagrams/erd.mmd

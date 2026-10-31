@@ -1,8 +1,14 @@
-# IOTAgri — Use Case và ERD
+# IOTAgri — Context Diagram, Use Case và ERD
 
 [← Thư viện](README.md) · [SRS](../requirements/SRS.md) · [Luồng Use Case](../use-cases/README.md) · [Từ điển dữ liệu](../data/README.md)
 
-Đối chiếu source ngày 27/10/2026. Trang này nhúng ảnh UML Use Case và mã Mermaid ERD; giải thích và giới hạn nằm trong các liên kết trên.
+Đối chiếu source ngày 27/10/2026. Trang này nhúng Context Diagram, ảnh UML Use Case và mã Mermaid ERD; giải thích và giới hạn nằm trong các liên kết trên.
+
+## Context Diagram
+
+![Context Diagram — Bối cảnh hệ thống IOTAgri](rendered/system-context.svg)
+
+IOTAgri là một tiến trình duy nhất trao đổi dữ liệu với năm thực thể bên ngoài. Xem [ranh giới và luồng dữ liệu](context-diagram.md) · [Nguồn Mermaid](system-context.mmd).
 
 ## Use Case
 
