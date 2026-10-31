@@ -15,15 +15,15 @@ flowchart LR
     ESP["Thiết bị ESP32"]
     SMTP["Dịch vụ email SMTP"]
 
-    Guest -->|"Thông tin đăng ký, đăng nhập<br/>Yêu cầu khôi phục / đặt lại mật khẩu"| System
-    System -->|"Kết quả xác thực, phiên đăng nhập<br/>Kết quả xử lý yêu cầu mật khẩu"| Guest
-    User -->|"Yêu cầu quản lý thiết bị, giám sát<br/>Lệnh bơm / đèn, lịch, ngưỡng, phiếu hỗ trợ"| System
-    System -->|"Số đo, lịch sử, trạng thái thiết bị<br/>Kết quả lệnh, cảnh báo, phản hồi hỗ trợ"| User
-    Admin -->|"Yêu cầu quản trị tài khoản, thiết bị<br/>Cấu hình hệ thống, báo cáo, xử lý hỗ trợ"| System
-    System -->|"Dữ liệu quản trị, báo cáo / CSV<br/>Nhật ký, trạng thái và kết quả xử lý"| Admin
-    ESP -->|"Mã ghép nối, hardwareId<br/>Số đo cảm biến, ACK, trạng thái bơm / đèn"| System
-    System -->|"DeviceKey, cấu hình / xác thực MQTT<br/>Lệnh điều khiển bơm / đèn"| ESP
-    System -->|"Yêu cầu gửi email khôi phục<br/>Người nhận và liên kết đặt lại mật khẩu"| SMTP
+    Guest -->|"Đăng ký / Đăng nhập<br/>Khôi phục mật khẩu"| System
+    System -->|"Kết quả xác thực<br/>Kết quả đặt lại mật khẩu"| Guest
+    User -->|"Quản lý thiết bị<br/>Điều khiển / Đặt lịch<br/>Gửi yêu cầu hỗ trợ"| System
+    System -->|"Số đo / Trạng thái<br/>Cảnh báo / Lịch sử<br/>Phản hồi hỗ trợ"| User
+    Admin -->|"Quản trị / Cấu hình<br/>Tra cứu / Xử lý hỗ trợ"| System
+    System -->|"Báo cáo / Nhật ký<br/>Kết quả quản trị"| Admin
+    ESP -->|"Mã ghép nối / Số đo<br/>ACK / Trạng thái"| System
+    System -->|"Cấu hình MQTT<br/>Lệnh bơm / đèn"| ESP
+    System -->|"Gửi email<br/>Đặt lại mật khẩu"| SMTP
 
     classDef external fill:#f3eef8,stroke:#7138a0,stroke-width:2px,color:#241535;
     classDef system fill:#e7f2ff,stroke:#245b99,stroke-width:3px,color:#163754;

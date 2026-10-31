@@ -24,6 +24,12 @@ SVG giữ chữ và đường nét khi phóng to. Hai nguồn PlantUML là ngu�
 python docs/diagrams/render-use-cases.py
 ```
 
+Context Diagram dùng bố cục tròn: năm thực thể cách đều quanh IOTAgri, nhãn luồng rút gọn. Sau khi sửa [nguồn Mermaid](system-context.mmd), giữ bố cục này bằng lệnh:
+
+```sh
+python docs/diagrams/render-context.py
+```
+
 Script chỉ dùng thư viện chuẩn Python, đọc các khai báo actor/rectangle/usecase và liên kết trong hai tệp PlantUML của dự án, xuất hai ảnh chung (tổng quan và chi tiết), mỗi ảnh có đủ năm actor và một khung hệ thống. Các ảnh SVG dùng đoạn thẳng từ tay actor đến từng hình elip, không có điểm trung chuyển. Bố cục khi render bằng PlantUML khác có thể thay đổi theo engine.
 
 Mỗi sơ đồ có duy nhất một khung IOTAgri, với toàn bộ actor ở bên ngoài và các use case ở bên trong. Use case dùng chung chỉ vẽ một lần và nối đến mọi actor liên quan. Màu vàng giữ ý nghĩa chức năng cục bộ/mock. Khi sửa Mermaid ERD, cần render lại SVG ERD tương ứng.

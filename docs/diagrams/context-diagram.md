@@ -2,7 +2,7 @@
 
 [← Thư viện sơ đồ](README.md) · [SRS](../requirements/SRS.md#2-bối-cảnh-và-tác-nhân) · [Use Case](../use-cases/README.md) · [Các sơ đồ](project-diagrams.md)
 
-Context diagram biểu diễn IOTAgri như **một tiến trình duy nhất**, trao đổi dữ liệu với năm thực thể bên ngoài. Mũi tên chỉ hướng dữ liệu, nhãn mô tả dữ liệu hoặc yêu cầu được trao đổi. Nội dung bám theo baseline **27/10/2026** của [SRS](../requirements/SRS.md) và [nguồn đối chiếu](../reference/source-baseline.md).
+Context diagram biểu diễn IOTAgri như **một tiến trình duy nhất**, trao đổi dữ liệu với năm thực thể bên ngoài được phân bổ đều quanh vòng tròn trung tâm. Mũi tên chỉ hướng dữ liệu; nhãn rút gọn để dễ đọc, chi tiết nằm trong bảng luồng dữ liệu bên dưới. Nội dung bám theo baseline **27/10/2026** của [SRS](../requirements/SRS.md) và [nguồn đối chiếu](../reference/source-baseline.md).
 
 ![Context Diagram — Hệ thống IOTAgri và các thực thể bên ngoài](rendered/system-context.svg)
 
@@ -31,7 +31,9 @@ SMTP chuyển thư tới hộp thư người nhận theo cấu hình; sơ đồ 
 Chỉnh [system-context.mmd](system-context.mmd), sau đó render lại SVG từ gốc repository:
 
 ```sh
-npx --package @mermaid-js/mermaid-cli@12.0.0 mmdc -i docs/diagrams/system-context.mmd -o docs/diagrams/rendered/system-context.svg -b white
+python docs/diagrams/render-context.py
 ```
+
+Script dùng thư viện chuẩn Python, đọc tên thực thể và nhãn luồng từ nguồn Mermaid, cố định năm thực thể cách nhau 72° quanh vòng tròn. Render trực tiếp bằng Mermaid có thể cho bố cục khác.
 
 Context diagram thể hiện ranh giới và luồng dữ liệu; [Use Case](../use-cases/README.md) thể hiện mục tiêu của actor, còn [ERD](../data/README.md) mô tả cấu trúc dữ liệu.
