@@ -1,5 +1,5 @@
 const { randomUUID } = require('node:crypto');
-const { test, expect } = require('../support/fixtures.cjs');
+const { test, expect } = require('../support/browser-fixtures.cjs');
 const { verificationCode, json } = require('../support/api.cjs');
 const { verifiesEmail, registrationStatus, authContract } = require('../support/contract.cjs');
 const { openApp, fillLogin, submitLogin, loginUI, semantics, enterText, reveal } = require('../support/browser.cjs');

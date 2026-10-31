@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "test": "node scripts/run.cjs",
+    "test:lowram": "node scripts/run.cjs --low-ram",
     "test:list": "playwright test --list",
     "test:direct": "playwright test",
     "report": "node scripts/report.cjs"

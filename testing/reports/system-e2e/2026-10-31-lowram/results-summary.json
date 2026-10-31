@@ -1,0 +1,112 @@
+{
+  "runId": "1793409739804-7da1d9",
+  "application": {
+    "mode": "remote",
+    "repository": "https://github.com/huuanh1411/IOTAgri.git",
+    "ref": "refs/heads/main",
+    "revision": "a3dc75761cba97f71b9fe3cc80d49773ff89295b"
+  },
+  "mode": "low-ram",
+  "authContract": "verified-v1",
+  "startedAt": "2026-10-31T01:22:19.839Z",
+  "finishedAt": "2026-10-31T01:31:28.459Z",
+  "stats": {
+    "startTime": "2026-10-31T01:30:06.898Z",
+    "duration": 79080.696,
+    "expected": 17,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "testExitCode": 0,
+  "cleanupExitCode": 0,
+  "scope": "17 system tests; 15 UI cases not selected",
+  "cases": [
+    {
+      "title": "SYS-01 anonymous access and Google endpoint follow the selected auth contract",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-02 real login, token rotation, replay rejection and logout",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-03 users cannot enter admin APIs; bootstrap admin can",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-04 device ownership protects readings, commands and deletion",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-05 MQTT reading persists in PostgreSQL, API and dashboard",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-06 real PostgreSQL aggregation returns MQTT samples",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-07 pump command reaches device, ACK is stored and command is idempotent",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-08 pump off is acknowledged",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-09 device rejection is recorded as failed with reason",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-10 missing device ACK stays pending until a real ACK arrives",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-11 light on/off travels through the broker and status API",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-12 unsafe readings create alerts, safe readings resolve them",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-13 pump scheduler dispatches once and device acknowledges",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-14 light scheduler sends both start and stop and persists occurrence",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-15 device becomes offline without telemetry and recovers",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-16 user ticket, admin reply, user visibility and ownership",
+      "project": "system",
+      "status": "expected"
+    },
+    {
+      "title": "SYS-17 invalid commands and overlapping schedules do not reach MQTT",
+      "project": "system",
+      "status": "expected"
+    }
+  ],
+  "note": "Application unchanged. No retries or relaxed assertions. Test working tree under validation before commit."
+}

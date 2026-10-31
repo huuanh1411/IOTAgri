@@ -1,0 +1,7 @@
+# Optional starting point; not applied by the test runner.
+# Merge these values into %UserProfile%\.wslconfig; preserve other settings.
+# Applies globally to WSL 2 distributions, not just this test project.
+[wsl2]
+memory=3GB
+processors=2
+swap=1GB

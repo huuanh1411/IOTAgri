@@ -1,0 +1,72 @@
+{
+  "builder": {
+    "Memory": 1610612736,
+    "MemorySwap": 1610612736,
+    "CpuQuota": 100000,
+    "CpuPeriod": 100000
+  },
+  "runtimeLimits": [
+    {
+      "container": "iotagri-e2e-1793409739804-7da1d9-api-1",
+      "memoryBytes": 671088640,
+      "memorySwapBytes": 671088640,
+      "cpuLimit": 1.0
+    },
+    {
+      "container": "iotagri-e2e-1793409739804-7da1d9-postgres-1",
+      "memoryBytes": 268435456,
+      "memorySwapBytes": 268435456,
+      "cpuLimit": 0.5
+    },
+    {
+      "container": "iotagri-e2e-1793409739804-7da1d9-mosquitto-1",
+      "memoryBytes": 67108864,
+      "memorySwapBytes": 67108864,
+      "cpuLimit": 0.25
+    },
+    {
+      "container": "iotagri-e2e-1793409739804-7da1d9-mailpit-1",
+      "memoryBytes": 134217728,
+      "memorySwapBytes": 134217728,
+      "cpuLimit": 0.25
+    },
+    {
+      "container": "iotagri-e2e-1793409739804-7da1d9-runner-run",
+      "memoryBytes": 536870912,
+      "memorySwapBytes": 536870912,
+      "cpuLimit": 0.75
+    }
+  ],
+  "runtimeSampleAtUtc": "2026-10-31T01:30:34.913623+00:00",
+  "runtimeSample": [
+    {
+      "container": "iotagri-e2e-1793409739804-7da1d9-api-1",
+      "memory": "120.2MiB / 640MiB"
+    },
+    {
+      "container": "iotagri-e2e-1793409739804-7da1d9-postgres-1",
+      "memory": "60.72MiB / 256MiB"
+    },
+    {
+      "container": "iotagri-e2e-1793409739804-7da1d9-mosquitto-1",
+      "memory": "6.949MiB / 64MiB"
+    },
+    {
+      "container": "iotagri-e2e-1793409739804-7da1d9-mailpit-1",
+      "memory": "25.27MiB / 128MiB"
+    },
+    {
+      "container": "iotagri-e2e-1793409739804-7da1d9-runner-run",
+      "memory": "227.6MiB / 512MiB"
+    }
+  ],
+  "caveat": "A point-in-time Docker container sample, not peak usage or total host/WSL RAM. No physical 4/8 GB machine validation.",
+  "checks": {
+    "noFrontendOrBuilderInRuntime": true,
+    "chromiumExecutableInstalled": false,
+    "fullSuiteDiscoveryCount": 32,
+    "systemAssertionsUnchanged": true,
+    "browserDiagnosticsMovedUnchanged": true,
+    "testProjectContainersRemovedAfterRun": true
+  }
+}

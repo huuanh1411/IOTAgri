@@ -4,7 +4,62 @@ Suite này chạy ứng dụng qua Flutter Web, API .NET, PostgreSQL,
 Mosquitto và SMTP Mailpit thật. Playwright điều khiển Chromium; simulator đóng vai
 thiết bị và nhận lệnh/trả ACK qua broker thật. Không cần Flutter/.NET SDK cài trên máy.
 
-## Chạy trên Windows
+## Máy ít RAM: chạy 17 ca hệ thống
+
+```powershell
+node testing/e2e/scripts/run.cjs --low-ram
+```
+
+Hoặc `npm.cmd run test:lowram` sau khi đã cài dependency local.
+Cần Node.js 22, Git, Docker Desktop Linux containers và Docker Buildx (đi kèm Docker Desktop).
+Không cần Flutter/.NET/Chrome cài trên máy. Chế độ này **không build Flutter, không chạy
+Chromium và không chạy 15 ca giao diện**. API/DB/MQTT/SMTP vẫn là dịch vụ thật;
+simulator thay phần cứng. 17 ca hệ thống giữ nguyên assertion, timeout và `retries: 0`.
+Fixture browser được tách riêng, test API không tạo page/browser để thu diagnostics.
+
+| Giai đoạn/thành phần | Giới hạn RAM container | CPU tối đa |
+|---|---:|---:|
+| Builder tạm (build tuần tự, dừng trước khi chạy dịch vụ) | 1536 MiB | 1 |
+| API | 640 MiB | 1 |
+| PostgreSQL | 256 MiB | 0.5 |
+| MQTT | 64 MiB | 0.25 |
+| Mailpit | 128 MiB | 0.25 |
+| Runner Node, không cài browser | 512 MiB | 0.75 |
+
+Tổng trần container ở pha chạy test là **1600 MiB**, không phải số RAM tổng của Docker
+Desktop hay Windows. Docker VM/WSL2, daemon, filesystem cache và IDE còn dùng RAM riêng.
+Chưa xác nhận chạy trên máy vật lý 4 GB/8 GB; không cam kết mọi máy ít RAM đều chạy mượt.
+Máy 8 GB có thể thử phân bổ Docker khoảng 3 GB và 2 CPU, đóng IDE/app nặng khi chạy;
+đây là cấu hình khởi đầu để thử, không phải yêu cầu đã được đo kiểm trên mọi máy.
+Runner không tự thay đổi cấu hình Docker Desktop/WSL trên máy người dùng.
+
+Với Docker dùng WSL 2, có [mẫu giới hạn VM](windows/wslconfig.lowram.example)
+3 GB RAM / 2 CPU / 1 GB swap. Nếu muốn áp dụng, mở WSL Settings hoặc ghép các giá trị
+vào `%UserProfile%\.wslconfig`, giữ lại cấu hình khác đang có. Cấu hình này áp dụng
+cho tất cả distro WSL 2. Lưu công việc, dừng các tác vụ WSL/Docker đang chạy rồi dùng
+`wsl --shutdown` và mở lại Docker Desktop để nhận cấu hình mới. Không chạy shutdown
+khi còn công việc khác cần giữ. Đây là mẫu thử, chưa phải kiểm chứng trên máy 8 GB.
+[Tài liệu Microsoft về phạm vi và cách áp dụng](https://learn.microsoft.com/windows/wsl/wsl-config).
+
+Build dùng builder tạm riêng, không đổi builder mặc định; giới hạn cả CPU/RAM trong
+quá trình compile .NET, tắt build song song. BuildKit giới hạn một tác vụ tại một thời điểm.
+Builder bị xóa trước khi dựng stack và được dọn khi có lỗi. SDK/image có thể cần tải lại
+khi tạo builder tạm; chế độ này ưu tiên giảm RAM hơn tốc độ build.
+Build có thể chậm hơn để giảm áp lực RAM. Không tự chuyển sang build không giới hạn khi lỗi.
+
+Ví dụ chỉ chọn một ca hệ thống:
+
+```powershell
+node testing/e2e/scripts/run.cjs --low-ram --grep SYS-07
+```
+
+Không nhận các tùy chọn chọn browser/project/workers hoặc bật UI trong chế độ này.
+Kết quả ghi `mode: low-ram` và phạm vi trong `run.json`; PASS 17 ca **không có nghĩa**
+15 ca UI đã được kiểm tra. Giới hạn CPU có thể làm lộ lỗi timing; FAIL cần được phân loại,
+không tự sửa ứng dụng hay nới assertion để PASS. Kết quả/log vẫn được giữ khi có lỗi.
+Chọn `E2E_AUTH_CONTRACT` như hướng dẫn bên dưới, độc lập với chế độ RAM.
+
+## Chạy đầy đủ trên Windows (32 ca)
 
 Cần Git, Node.js 22 và Docker Desktop đang chạy **Linux containers**. Lần đầu cần mạng
 để tải image và package; dành đủ dung lượng cho image Flutter và trình duyệt.

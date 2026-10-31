@@ -1,5 +1,7 @@
 # Bằng chứng kiểm thử
 
+**Chế độ ít RAM 31/10/2026: 17 ca hệ thống PASS, chưa chạy UI.** [Cấu hình và bằng chứng](system-e2e/2026-10-31-lowram/README.md).
+
 Phiên cập nhật hợp đồng xác thực: **main a3dc757 — 30 PASS / 2 FAIL**. [Xem báo cáo](system-e2e/2026-10-30-contract-update/README.md). Chỉ sửa test, giữ nguyên lỗi ứng dụng.
 
 Các phiên bên dưới là lịch sử riêng biệt.

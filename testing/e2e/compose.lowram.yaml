@@ -1,0 +1,45 @@
+# API/DB/MQTT/SMTP only. No Flutter frontend or browser image.
+services:
+  postgres:
+    extends: { file: compose.yaml, service: postgres }
+    mem_limit: 256m
+    memswap_limit: 256m
+    cpus: 0.5
+    command: [postgres, -c, shared_buffers=32MB, -c, max_connections=30, -c, work_mem=2MB]
+  mosquitto:
+    extends: { file: compose.yaml, service: mosquitto }
+    mem_limit: 64m
+    memswap_limit: 64m
+    cpus: 0.25
+  mailpit:
+    extends: { file: compose.yaml, service: mailpit }
+    mem_limit: 128m
+    memswap_limit: 128m
+    cpus: 0.25
+  api:
+    extends: { file: compose.yaml, service: api }
+    image: ${E2E_LOW_RAM_API_IMAGE:?Use scripts/run.cjs --low-ram}
+    mem_limit: 640m
+    memswap_limit: 640m
+    cpus: 1.0
+  runner:
+    image: ${E2E_LOW_RAM_RUNNER_IMAGE:?Use scripts/run.cjs --low-ram}
+    init: true
+    mem_limit: 512m
+    memswap_limit: 512m
+    cpus: 0.75
+    environment:
+      E2E_RUN_MODE: low-ram
+      E2E_AUTH_CONTRACT: ${E2E_AUTH_CONTRACT:-verified-v1}
+      NODE_OPTIONS: --max-old-space-size=256
+      API_URL: http://api:8080
+      MAIL_URL: http://mailpit:8025
+      MQTT_URL: mqtt://mosquitto:1883
+      DATABASE_URL: postgres://e2e:E2eDatabaseOnly!@postgres:5432/iotagri_e2e
+    volumes:
+      - ${E2E_ARTIFACTS_DIR:-./artifacts/latest}:/tests/artifacts/latest
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  database:

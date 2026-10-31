@@ -1,5 +1,7 @@
 # IOTAgri · Test & QA
 
+**Chế độ ít RAM 31/10/2026: 17 ca hệ thống PASS, chưa chạy UI.** [Cấu hình và bằng chứng](testing/reports/system-e2e/2026-10-31-lowram/README.md).
+
 **Kết quả kiểm thử, lỗi đã ghi nhận và bằng chứng của IOTAgri.**
 
 **Cập nhật cấu hình mới: main `a3dc757` — 30 PASS / 2 FAIL / 0 skipped.**
@@ -7,6 +9,17 @@
 
 Xem [hướng dẫn chọn luồng xác thực](testing/e2e/README.md).
 Chỉ thay đổi test; lỗi ứng dụng được báo cáo, không tự sửa.
+
+## Chạy trên máy ít RAM
+
+```powershell
+node testing/e2e/scripts/run.cjs --low-ram
+```
+
+Chỉ chạy **17 ca hệ thống API/DB/MQTT/SMTP**, không build Flutter và không chạy browser.
+Không tính 15 ca UI vào kết quả. Builder giới hạn 1536 MiB/1 CPU; tổng trần container
+pha test 1600 MiB, chưa gồm Docker VM và hệ điều hành. Xem [giới hạn và hướng dẫn](testing/e2e/README.md).
+Lệnh không có `--low-ram` bên dưới vẫn chạy bộ đầy đủ 32 ca.
 
 ## Chạy E2E toàn hệ thống ngay sau khi pull
 
