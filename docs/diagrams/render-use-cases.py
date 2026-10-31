@@ -111,8 +111,8 @@ def render(actors, cases, edges, positions, title):
     svg = ['<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1800" '
            'viewBox="0 0 2400 1800" role="img" aria-labelledby="title desc">',
            f'<title id="title">{escape(title)}</title>',
-           '<desc id="desc">Năm actor cùng xuất hiện bên ngoài một khung hệ thống IOTAgri. '
-           'Use case bố trí so le bên trong; use case chung chỉ vẽ một lần.</desc>',
+           '<desc id="desc">All five actors appear outside a single IOTAgri system boundary. '
+           'Use cases are staggered inside; shared use cases are drawn once.</desc>',
            '<rect width="100%" height="100%" fill="white"/>',
            '<g font-family="Arial, sans-serif" fill="#17212b">', text(1200, 43, title, 30, 'bold'),
            '<rect data-system="IOTAgri" x="240" y="80" width="1920" height="1660" '
@@ -142,7 +142,7 @@ def render(actors, cases, edges, positions, title):
                    f'<circle cx="{x}" cy="{y-52}" r="17"/>'
                    f'<path d="M{x} {y-35} V{y+12} M{x-35} {y-12} L{x} {y-27} L{x+35} {y-12} '
                    f'M{x} {y+12} L{x-24} {y+47} M{x} {y+12} L{x+24} {y+47}"/></g>')
-        for i, part in enumerate(textwrap.wrap(name, 11)):
+        for i, part in enumerate(textwrap.wrap(name, 14)):
             svg.append(text(x, y + 77 + i * 25, part, 21))
         svg.append('</g>')
     return '\n'.join(svg + ['</g>', '</svg>', ''])
@@ -150,8 +150,8 @@ def render(actors, cases, edges, positions, title):
 
 if __name__ == '__main__':
     for stem, positions, title in [
-        ('use-case', DETAIL, 'IOTAgri — Use Case đầy đủ'),
-        ('use-case-overview', OVERVIEW, 'IOTAgri — Tổng quan Use Case'),
+        ('use-case', DETAIL, 'IOTAgri — Detailed Use Case Diagram'),
+        ('use-case-overview', OVERVIEW, 'IOTAgri — Use Case Overview'),
     ]:
         actors, cases, edges = read_source(ROOT / f'{stem}.puml')
         output = render(actors, cases, edges, positions, title)

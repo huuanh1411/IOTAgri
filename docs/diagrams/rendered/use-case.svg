@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1800" viewBox="0 0 2400 1800" role="img" aria-labelledby="title desc">
-<title id="title">IOTAgri — Use Case đầy đủ</title>
-<desc id="desc">Năm actor cùng xuất hiện bên ngoài một khung hệ thống IOTAgri. Use case bố trí so le bên trong; use case chung chỉ vẽ một lần.</desc>
+<title id="title">IOTAgri — Detailed Use Case Diagram</title>
+<desc id="desc">All five actors appear outside a single IOTAgri system boundary. Use cases are staggered inside; shared use cases are drawn once.</desc>
 <rect width="100%" height="100%" fill="white"/>
 <g font-family="Arial, sans-serif" fill="#17212b">
-<text x="1200" y="43" text-anchor="middle" font-size="30" font-weight="bold">IOTAgri — Use Case đầy đủ</text>
+<text x="1200" y="43" text-anchor="middle" font-size="30" font-weight="bold">IOTAgri — Detailed Use Case Diagram</text>
 <rect data-system="IOTAgri" x="240" y="80" width="1920" height="1660" rx="8" fill="#f1eef5" stroke="#51485c" stroke-width="2"/>
 <rect x="240" y="59" width="170" height="30" rx="5" fill="#7138a0"/>
 <g fill="white"><text x="325" y="81" text-anchor="middle" font-size="21" font-weight="bold">IOTAgri</text></g>
@@ -33,104 +33,103 @@
 <line data-actor="ESP" data-usecase="ESPUC3" x1="2245" y1="1538" x2="2045.84" y2="1611.13" stroke="#7138a0" stroke-width="1.8"/>
 <line data-actor="SMTP" data-usecase="GuestUC2" x1="2245" y1="168" x2="1188.22" y2="280.04" stroke="#7138a0" stroke-width="1.8"/>
 <g data-usecase="GuestUC1"><ellipse cx="470" cy="150" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="470" y="156.0" text-anchor="middle" font-size="20" font-weight="normal">Đăng ký / Đăng nhập</text>
+<text x="470" y="156.0" text-anchor="middle" font-size="20" font-weight="normal">Sign up / Sign in</text>
 </g>
 <g data-usecase="GuestUC2"><ellipse cx="1000" cy="300" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="1000" y="306.0" text-anchor="middle" font-size="20" font-weight="normal">Quên mật khẩu / Đặt lại mật khẩu</text>
+<text x="1000" y="306.0" text-anchor="middle" font-size="20" font-weight="normal">Forgot password / Reset password</text>
 </g>
 <g data-usecase="UserUC1"><ellipse cx="470" cy="550" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="470" y="545.0" text-anchor="middle" font-size="20" font-weight="normal">Làm mới phiên / Đăng xuất</text>
-<text x="470" y="567.0" text-anchor="middle" font-size="20" font-weight="normal">Quản lý hồ sơ / Đổi mật khẩu</text>
+<text x="470" y="545.0" text-anchor="middle" font-size="20" font-weight="normal">Refresh session / Sign out</text>
+<text x="470" y="567.0" text-anchor="middle" font-size="20" font-weight="normal">Manage profile / Change password</text>
 </g>
 <g data-usecase="UserUC2"><ellipse cx="470" cy="730" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="470" y="725.0" text-anchor="middle" font-size="20" font-weight="normal">Thêm / Xem / Sửa / Xóa</text>
-<text x="470" y="747.0" text-anchor="middle" font-size="20" font-weight="normal">thiết bị sở hữu</text>
+<text x="470" y="725.0" text-anchor="middle" font-size="20" font-weight="normal">Add / View / Edit / Delete</text>
+<text x="470" y="747.0" text-anchor="middle" font-size="20" font-weight="normal">owned devices</text>
 </g>
 <g data-usecase="UserUC3"><ellipse cx="940" cy="750" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="940" y="756.0" text-anchor="middle" font-size="20" font-weight="normal">Tạo mã ghép nối</text>
+<text x="940" y="756.0" text-anchor="middle" font-size="20" font-weight="normal">Generate pairing code</text>
 </g>
 <g data-usecase="UserUC4"><ellipse cx="470" cy="820" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="470" y="826.0" text-anchor="middle" font-size="20" font-weight="normal">Xem dashboard / Trạng thái online</text>
+<text x="470" y="826.0" text-anchor="middle" font-size="20" font-weight="normal">View dashboard / Online status</text>
 </g>
 <g data-usecase="UserUC5"><ellipse cx="940" cy="850" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="940" y="845.0" text-anchor="middle" font-size="20" font-weight="normal">Xem lịch sử / Biểu đồ</text>
-<text x="940" y="867.0" text-anchor="middle" font-size="20" font-weight="normal">Tổng hợp cảm biến</text>
+<text x="940" y="845.0" text-anchor="middle" font-size="20" font-weight="normal">View history / Charts</text>
+<text x="940" y="867.0" text-anchor="middle" font-size="20" font-weight="normal">Sensor aggregates</text>
 </g>
 <g data-usecase="UserUC6"><ellipse cx="940" cy="950" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="940" y="945.0" text-anchor="middle" font-size="20" font-weight="normal">Điều khiển bơm</text>
-<text x="940" y="967.0" text-anchor="middle" font-size="20" font-weight="normal">Xem lịch sử lệnh</text>
+<text x="940" y="945.0" text-anchor="middle" font-size="20" font-weight="normal">Control pump</text>
+<text x="940" y="967.0" text-anchor="middle" font-size="20" font-weight="normal">View command history</text>
 </g>
 <g data-usecase="UserUC7"><ellipse cx="940" cy="1050" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="940" y="1056.0" text-anchor="middle" font-size="20" font-weight="normal">Điều khiển đèn / Xem trạng thái</text>
+<text x="940" y="1056.0" text-anchor="middle" font-size="20" font-weight="normal">Control light / View status</text>
 </g>
 <g data-usecase="UserUC8"><ellipse cx="940" cy="1150" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="940" y="1156.0" text-anchor="middle" font-size="20" font-weight="normal">Quản lý lịch bơm / Lịch đèn</text>
+<text x="940" y="1156.0" text-anchor="middle" font-size="20" font-weight="normal">Manage pump / Light schedules</text>
 </g>
 <g data-usecase="UserUC9"><ellipse cx="940" cy="1250" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="940" y="1245.0" text-anchor="middle" font-size="20" font-weight="normal">Cấu hình ngưỡng</text>
-<text x="940" y="1267.0" text-anchor="middle" font-size="20" font-weight="normal">Xem và xử lý cảnh báo</text>
+<text x="940" y="1245.0" text-anchor="middle" font-size="20" font-weight="normal">Configure thresholds</text>
+<text x="940" y="1267.0" text-anchor="middle" font-size="20" font-weight="normal">View and resolve alerts</text>
 </g>
 <g data-usecase="UserUC10"><ellipse cx="470" cy="1300" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="470" y="1306.0" text-anchor="middle" font-size="20" font-weight="normal">Tạo / Xem / Trao đổi phiếu hỗ trợ</text>
+<text x="470" y="1295.0" text-anchor="middle" font-size="20" font-weight="normal">Create / View / Discuss</text>
+<text x="470" y="1317.0" text-anchor="middle" font-size="20" font-weight="normal">support tickets</text>
 </g>
 <g data-usecase="UserUC11"><ellipse cx="940" cy="1350" rx="210" ry="45" fill="#FFF7DB" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="940" y="1356.0" text-anchor="middle" font-size="20" font-weight="normal">Chọn cây / Theo dõi ngày trồng</text>
+<text x="940" y="1356.0" text-anchor="middle" font-size="20" font-weight="normal">Select crops / Track planting dates</text>
 </g>
 <g data-usecase="UserUC12"><ellipse cx="470" cy="1390" rx="210" ry="45" fill="#FFF7DB" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="470" y="1385.0" text-anchor="middle" font-size="20" font-weight="normal">Cài đặt ứng dụng</text>
-<text x="470" y="1407.0" text-anchor="middle" font-size="20" font-weight="normal">Thông báo cục bộ</text>
+<text x="470" y="1385.0" text-anchor="middle" font-size="20" font-weight="normal">App settings</text>
+<text x="470" y="1407.0" text-anchor="middle" font-size="20" font-weight="normal">Local notifications</text>
 </g>
 <g data-usecase="AdminUC2"><ellipse cx="1940" cy="550" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="1940" y="545.0" text-anchor="middle" font-size="20" font-weight="normal">Xem tài khoản / Phân quyền</text>
-<text x="1940" y="567.0" text-anchor="middle" font-size="20" font-weight="normal">Khóa và mở khóa</text>
+<text x="1940" y="545.0" text-anchor="middle" font-size="20" font-weight="normal">View accounts / Assign roles</text>
+<text x="1940" y="567.0" text-anchor="middle" font-size="20" font-weight="normal">Lock and unlock accounts</text>
 </g>
 <g data-usecase="AdminUC3"><ellipse cx="1470" cy="750" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="1470" y="745.0" text-anchor="middle" font-size="20" font-weight="normal">Xem mọi thiết bị / Dữ liệu</text>
-<text x="1470" y="767.0" text-anchor="middle" font-size="20" font-weight="normal">Chuyển chủ sở hữu</text>
+<text x="1470" y="745.0" text-anchor="middle" font-size="20" font-weight="normal">View all devices / Data</text>
+<text x="1470" y="767.0" text-anchor="middle" font-size="20" font-weight="normal">Transfer ownership</text>
 </g>
 <g data-usecase="AdminUC4"><ellipse cx="1470" cy="950" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="1470" y="956.0" text-anchor="middle" font-size="20" font-weight="normal">Xem tổng quan / Báo cáo / Xuất CSV</text>
+<text x="1470" y="945.0" text-anchor="middle" font-size="20" font-weight="normal">View overview / Reports / Export</text>
+<text x="1470" y="967.0" text-anchor="middle" font-size="20" font-weight="normal">CSV</text>
 </g>
 <g data-usecase="AdminUC5"><ellipse cx="1940" cy="1050" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="1940" y="1045.0" text-anchor="middle" font-size="20" font-weight="normal">Xem trạng thái hệ thống</text>
-<text x="1940" y="1067.0" text-anchor="middle" font-size="20" font-weight="normal">Cấu hình ngưỡng mặc định</text>
+<text x="1940" y="1045.0" text-anchor="middle" font-size="20" font-weight="normal">View system status</text>
+<text x="1940" y="1067.0" text-anchor="middle" font-size="20" font-weight="normal">Configure default thresholds</text>
 </g>
 <g data-usecase="AdminUC6"><ellipse cx="1470" cy="1150" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="1470" y="1156.0" text-anchor="middle" font-size="20" font-weight="normal">Xem nhật ký quản trị</text>
+<text x="1470" y="1156.0" text-anchor="middle" font-size="20" font-weight="normal">View admin audit logs</text>
 </g>
 <g data-usecase="AdminUC7"><ellipse cx="1940" cy="1250" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="1940" y="1245.0" text-anchor="middle" font-size="20" font-weight="normal">Phản hồi / Đổi trạng thái</text>
-<text x="1940" y="1267.0" text-anchor="middle" font-size="20" font-weight="normal">và ưu tiên phiếu hỗ trợ</text>
+<text x="1940" y="1245.0" text-anchor="middle" font-size="20" font-weight="normal">Reply / Update status</text>
+<text x="1940" y="1267.0" text-anchor="middle" font-size="20" font-weight="normal">and ticket priority</text>
 </g>
 <g data-usecase="ESPUC1"><ellipse cx="1940" cy="1450" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="1940" y="1456.0" text-anchor="middle" font-size="20" font-weight="normal">Ghép nối phần cứng bằng mã</text>
+<text x="1940" y="1456.0" text-anchor="middle" font-size="20" font-weight="normal">Pair hardware using a code</text>
 </g>
 <g data-usecase="ESPUC2"><ellipse cx="1470" cy="1550" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="1470" y="1556.0" text-anchor="middle" font-size="20" font-weight="normal">Gửi và lưu số liệu cảm biến</text>
+<text x="1470" y="1556.0" text-anchor="middle" font-size="20" font-weight="normal">Send and store sensor readings</text>
 </g>
 <g data-usecase="ESPUC3"><ellipse cx="1940" cy="1650" rx="210" ry="45" fill="#FFFFFF" stroke="#7138a0" stroke-width="1.8" stroke-dasharray="8 5"/>
-<text x="1940" y="1645.0" text-anchor="middle" font-size="20" font-weight="normal">Nhận lệnh bơm, đèn</text>
-<text x="1940" y="1667.0" text-anchor="middle" font-size="20" font-weight="normal">Gửi trạng thái</text>
+<text x="1940" y="1645.0" text-anchor="middle" font-size="20" font-weight="normal">Receive pump and light commands</text>
+<text x="1940" y="1667.0" text-anchor="middle" font-size="20" font-weight="normal">Report status</text>
 </g>
 <g data-actor="Guest"><g fill="none" stroke="#17212b" stroke-width="3"><circle cx="120" cy="178" r="17"/><path d="M120 195 V242 M85 218 L120 203 L155 218 M120 242 L96 277 M120 242 L144 277"/></g>
-<text x="120" y="307" text-anchor="middle" font-size="21" font-weight="normal">Khách</text>
+<text x="120" y="307" text-anchor="middle" font-size="21" font-weight="normal">Guest</text>
 </g>
 <g data-actor="User"><g fill="none" stroke="#17212b" stroke-width="3"><circle cx="120" cy="998" r="17"/><path d="M120 1015 V1062 M85 1038 L120 1023 L155 1038 M120 1062 L96 1097 M120 1062 L144 1097"/></g>
-<text x="120" y="1127" text-anchor="middle" font-size="21" font-weight="normal">Người dùng</text>
-<text x="120" y="1152" text-anchor="middle" font-size="21" font-weight="normal">đã đăng</text>
-<text x="120" y="1177" text-anchor="middle" font-size="21" font-weight="normal">nhập</text>
+<text x="120" y="1127" text-anchor="middle" font-size="21" font-weight="normal">Authenticated</text>
+<text x="120" y="1152" text-anchor="middle" font-size="21" font-weight="normal">User</text>
 </g>
 <g data-actor="Admin"><g fill="none" stroke="#17212b" stroke-width="3"><circle cx="2280" cy="648" r="17"/><path d="M2280 665 V712 M2245 688 L2280 673 L2315 688 M2280 712 L2256 747 M2280 712 L2304 747"/></g>
-<text x="2280" y="777" text-anchor="middle" font-size="21" font-weight="normal">Quản trị</text>
-<text x="2280" y="802" text-anchor="middle" font-size="21" font-weight="normal">viên</text>
+<text x="2280" y="777" text-anchor="middle" font-size="21" font-weight="normal">Administrator</text>
 </g>
 <g data-actor="ESP"><g fill="none" stroke="#17212b" stroke-width="3"><circle cx="2280" cy="1498" r="17"/><path d="M2280 1515 V1562 M2245 1538 L2280 1523 L2315 1538 M2280 1562 L2256 1597 M2280 1562 L2304 1597"/></g>
-<text x="2280" y="1627" text-anchor="middle" font-size="21" font-weight="normal">Thiết bị</text>
-<text x="2280" y="1652" text-anchor="middle" font-size="21" font-weight="normal">ESP32</text>
+<text x="2280" y="1627" text-anchor="middle" font-size="21" font-weight="normal">ESP32 device</text>
 </g>
 <g data-actor="SMTP"><g fill="none" stroke="#17212b" stroke-width="3"><circle cx="2280" cy="128" r="17"/><path d="M2280 145 V192 M2245 168 L2280 153 L2315 168 M2280 192 L2256 227 M2280 192 L2304 227"/></g>
-<text x="2280" y="257" text-anchor="middle" font-size="21" font-weight="normal">Dịch vụ</text>
-<text x="2280" y="282" text-anchor="middle" font-size="21" font-weight="normal">email SMTP</text>
+<text x="2280" y="257" text-anchor="middle" font-size="21" font-weight="normal">SMTP email</text>
+<text x="2280" y="282" text-anchor="middle" font-size="21" font-weight="normal">service</text>
 </g>
 </g>
 </svg>

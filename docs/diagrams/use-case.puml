@@ -5,37 +5,37 @@ skinparam shadowing false
 skinparam linetype polyline
 skinparam usecaseBorderColor #7138A0
 skinparam rectangleBackgroundColor #F1EEF5
-title IOTAgri — Các actor trong cùng một sơ đồ
-actor "Khách" as Guest
-actor "Người dùng\nđã đăng nhập" as User
-actor "Quản trị viên" as Admin
-actor "Thiết bị ESP32" as ESP
-actor "Dịch vụ email SMTP" as SMTP
+title IOTAgri — All actors in one diagram
+actor "Guest" as Guest
+actor "Authenticated\nUser" as User
+actor "Administrator" as Admin
+actor "ESP32 device" as ESP
+actor "SMTP email\nservice" as SMTP
 
 rectangle "IOTAgri" {
-  usecase "Đăng ký / Đăng nhập" as GuestUC1
-  usecase "Quên mật khẩu / Đặt lại mật khẩu" as GuestUC2
-  usecase "Làm mới phiên / Đăng xuất\nQuản lý hồ sơ / Đổi mật khẩu" as UserUC1
-  usecase "Thêm / Xem / Sửa / Xóa\nthiết bị sở hữu" as UserUC2
-  usecase "Tạo mã ghép nối" as UserUC3
-  usecase "Xem dashboard / Trạng thái online" as UserUC4
-  usecase "Xem lịch sử / Biểu đồ\nTổng hợp cảm biến" as UserUC5
-  usecase "Điều khiển bơm\nXem lịch sử lệnh" as UserUC6
-  usecase "Điều khiển đèn / Xem trạng thái" as UserUC7
-  usecase "Quản lý lịch bơm / Lịch đèn" as UserUC8
-  usecase "Cấu hình ngưỡng\nXem và xử lý cảnh báo" as UserUC9
-  usecase "Tạo / Xem / Trao đổi phiếu hỗ trợ" as UserUC10
-  usecase "Chọn cây / Theo dõi ngày trồng" as UserUC11 #FFF7DB
-  usecase "Cài đặt ứng dụng\nThông báo cục bộ" as UserUC12 #FFF7DB
-  usecase "Xem tài khoản / Phân quyền\nKhóa và mở khóa" as AdminUC2
-  usecase "Xem mọi thiết bị / Dữ liệu\nChuyển chủ sở hữu" as AdminUC3
-  usecase "Xem tổng quan / Báo cáo / Xuất CSV" as AdminUC4
-  usecase "Xem trạng thái hệ thống\nCấu hình ngưỡng mặc định" as AdminUC5
-  usecase "Xem nhật ký quản trị" as AdminUC6
-  usecase "Phản hồi / Đổi trạng thái\nvà ưu tiên phiếu hỗ trợ" as AdminUC7
-  usecase "Ghép nối phần cứng bằng mã" as ESPUC1
-  usecase "Gửi và lưu số liệu cảm biến" as ESPUC2
-  usecase "Nhận lệnh bơm, đèn\nGửi trạng thái" as ESPUC3
+  usecase "Sign up / Sign in" as GuestUC1
+  usecase "Forgot password / Reset password" as GuestUC2
+  usecase "Refresh session / Sign out\nManage profile / Change password" as UserUC1
+  usecase "Add / View / Edit / Delete\nowned devices" as UserUC2
+  usecase "Generate pairing code" as UserUC3
+  usecase "View dashboard / Online status" as UserUC4
+  usecase "View history / Charts\nSensor aggregates" as UserUC5
+  usecase "Control pump\nView command history" as UserUC6
+  usecase "Control light / View status" as UserUC7
+  usecase "Manage pump / Light schedules" as UserUC8
+  usecase "Configure thresholds\nView and resolve alerts" as UserUC9
+  usecase "Create / View / Discuss\nsupport tickets" as UserUC10
+  usecase "Select crops / Track planting dates" as UserUC11 #FFF7DB
+  usecase "App settings\nLocal notifications" as UserUC12 #FFF7DB
+  usecase "View accounts / Assign roles\nLock and unlock accounts" as AdminUC2
+  usecase "View all devices / Data\nTransfer ownership" as AdminUC3
+  usecase "View overview / Reports / Export CSV" as AdminUC4
+  usecase "View system status\nConfigure default thresholds" as AdminUC5
+  usecase "View admin audit logs" as AdminUC6
+  usecase "Reply / Update status\nand ticket priority" as AdminUC7
+  usecase "Pair hardware using a code" as ESPUC1
+  usecase "Send and store sensor readings" as ESPUC2
+  usecase "Receive pump and light commands\nReport status" as ESPUC3
 }
 
 Guest -- GuestUC1

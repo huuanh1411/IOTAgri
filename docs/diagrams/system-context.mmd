@@ -8,21 +8,21 @@ config:
     rankSpacing: 120
 ---
 flowchart LR
-    Guest["Khách"]
-    User["Người dùng"]
+    Guest["Guest"]
+    User["User"]
     System(("0<br/>IOTAgri"))
-    Admin["Quản trị viên"]
+    Admin["Administrator"]
     ESP["ESP32"]
     SMTP["SMTP"]
 
-    Guest -->|"Đăng ký / Đăng nhập"| System
-    System -->|"Xác thực"| Guest
-    User -->|"Điều khiển"| System
-    System -->|"Giám sát"| User
-    Admin -->|"Quản trị"| System
-    System -->|"Báo cáo"| Admin
-    ESP -->|"Số đo / Trạng thái"| System
-    System -->|"Lệnh bơm / đèn"| ESP
+    Guest -->|"Sign up / Sign in"| System
+    System -->|"Authentication"| Guest
+    User -->|"Control"| System
+    System -->|"Monitoring"| User
+    Admin -->|"Administration"| System
+    System -->|"Reports"| Admin
+    ESP -->|"Readings / Status"| System
+    System -->|"Pump / Light commands"| ESP
     System -->|"Email"| SMTP
 
     classDef external fill:#f3eef8,stroke:#7138a0,stroke-width:2px,color:#241535;

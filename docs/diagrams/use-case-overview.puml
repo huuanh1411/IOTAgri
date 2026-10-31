@@ -5,27 +5,27 @@ skinparam shadowing false
 skinparam linetype polyline
 skinparam usecaseBorderColor #7138A0
 skinparam rectangleBackgroundColor #F1EEF5
-title IOTAgri — Các actor trong cùng một sơ đồ
-actor "Khách" as Guest
-actor "Người dùng\nđã đăng nhập" as User
-actor "Quản trị viên" as Admin
-actor "Thiết bị ESP32" as ESP
-actor "Dịch vụ email SMTP" as SMTP
+title IOTAgri — All actors in one diagram
+actor "Guest" as Guest
+actor "Authenticated\nUser" as User
+actor "Administrator" as Admin
+actor "ESP32 device" as ESP
+actor "SMTP email\nservice" as SMTP
 
 rectangle "IOTAgri" {
-  usecase "UC-01: Đăng ký / Đăng nhập" as GuestUC1
-  usecase "UC-03: Quên / Đặt lại mật khẩu" as GuestUC2
-  usecase "UC-02,04: Phiên đăng nhập / Hồ sơ / Mật khẩu" as UserUC1
-  usecase "UC-05–06: Thiết bị / Tạo mã ghép nối" as UserUC2
-  usecase "UC-08–12: Giám sát / Điều khiển / Lịch / Cảnh báo" as UserUC3
-  usecase "UC-13: Tạo / Xem / Trao đổi phiếu hỗ trợ" as UserUC4
-  usecase "UC-17: Cây trồng / Cài đặt cục bộ" as UserUC5 #FFF7DB
-  usecase "UC-13: Phản hồi / Quản lý phiếu hỗ trợ" as AdminUC2
-  usecase "UC-14–15: Tài khoản / Thiết bị toàn hệ thống" as AdminUC3
-  usecase "UC-16: Báo cáo / Cấu hình / Nhật ký quản trị" as AdminUC4
-  usecase "UC-06: Ghép nối phần cứng bằng mã" as ESPUC1
-  usecase "UC-07: Gửi số liệu cảm biến" as ESPUC2
-  usecase "UC-18: Nhận lệnh bơm, đèn / Gửi trạng thái" as ESPUC3
+  usecase "UC-01: Sign up / Sign in" as GuestUC1
+  usecase "UC-03: Forgot / Reset password" as GuestUC2
+  usecase "UC-02,04: Session / Profile / Password" as UserUC1
+  usecase "UC-05–06: Devices / Pairing codes" as UserUC2
+  usecase "UC-08–12: Monitoring / Control\nSchedules / Alerts" as UserUC3
+  usecase "UC-13: Create / View / Discuss\nsupport tickets" as UserUC4
+  usecase "UC-17: Crops / Local settings" as UserUC5 #FFF7DB
+  usecase "UC-13: Reply / Manage tickets" as AdminUC2
+  usecase "UC-14–15: System-wide\naccounts / Devices" as AdminUC3
+  usecase "UC-16: Reports / Configuration\nAdmin audit logs" as AdminUC4
+  usecase "UC-06: Pair hardware using a code" as ESPUC1
+  usecase "UC-07: Send sensor readings" as ESPUC2
+  usecase "UC-18: Receive pump/light commands\nReport status" as ESPUC3
 }
 
 Guest -- GuestUC1

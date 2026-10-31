@@ -1,4 +1,4 @@
-# IOTAgri — Context Diagram, Use Case và ERD
+# IOTAgri — Context Diagram, Use Case and ERD
 
 [← Thư viện](README.md) · [SRS](../requirements/SRS.md) · [Luồng Use Case](../use-cases/README.md) · [Từ điển dữ liệu](../data/README.md)
 
@@ -6,7 +6,7 @@
 
 ## Context Diagram
 
-![Context Diagram — Bối cảnh hệ thống IOTAgri](rendered/context-diagram-radial.svg)
+![Context Diagram — IOTAgri System Context](rendered/context-diagram-radial.svg)
 
 IOTAgri là một tiến trình duy nhất trao đổi dữ liệu với năm thực thể bên ngoài. Xem [ranh giới và luồng dữ liệu](context-diagram.md) · [Nguồn Mermaid](system-context.mmd).
 
@@ -14,7 +14,7 @@ IOTAgri là một tiến trình duy nhất trao đổi dữ liệu với năm th
 
 Tất cả actor cùng xuất hiện trong một sơ đồ, bên ngoài **một khung hệ thống IOTAgri duy nhất**. Tên actor nằm dưới hình người que. Các use case bố trí so le bên trong và nối trực tiếp với actor tương ứng. Use case dùng chung chỉ vẽ một lần, nhận liên kết từ các actor liên quan.
 
-![Use Case — Tất cả actor trong cùng khung hệ thống](rendered/use-case.svg)
+![Use Case — All Actors and a Shared System Boundary](rendered/use-case.svg)
 
 Nguồn: [PlantUML chi tiết](use-case.puml) · [Tổng quan](rendered/use-case-overview.svg). Màu vàng là chức năng cục bộ/mock.
 
@@ -43,11 +43,11 @@ erDiagram
 
     AspNetUsers {
         string Id PK
-        string Email "nullable trong Identity"
-        string UserName "nullable trong Identity"
+        string Email "nullable in Identity"
+        string UserName "nullable in Identity"
         string FullName
         string PhoneNumber "nullable"
-        string PasswordHash "nullable trong Identity"
+        string PasswordHash "nullable in Identity"
         bool LockoutEnabled
         datetimeoffset LockoutEnd "nullable"
     }
@@ -91,7 +91,7 @@ erDiagram
         datetime CreatedAt
         datetime ExpiresAt
         datetime RevokedAt "nullable"
-        string ReplacedByToken "nullable; khong phai FK"
+        string ReplacedByToken "nullable; not an FK"
     }
     Devices {
         uuid Id PK
@@ -154,7 +154,7 @@ erDiagram
     PumpScheduleOccurrences {
         uuid Id PK
         uuid ScheduleId FK
-        uuid CommandId UK "tham chieu logic; khong phai FK"
+        uuid CommandId UK "logical reference; not an FK"
         datetime OccurrenceUtc
         datetime DispatchedAt "nullable"
     }
@@ -184,7 +184,7 @@ erDiagram
         string UserId FK
         string Subject
         string Category
-        uuid DeviceId "nullable; khong phai FK"
+        uuid DeviceId "nullable; not an FK"
         string DeviceName "nullable"
         string Status
         string Priority
@@ -200,10 +200,10 @@ erDiagram
     }
     AdminAuditLogs {
         uuid Id PK
-        string ActorUserId "khong phai FK"
+        string ActorUserId "not an FK"
         string Action
         string TargetType
-        string TargetId "khong phai FK"
+        string TargetId "not an FK"
         string PreviousValue "nullable"
         string NewValue "nullable"
         datetime CreatedAt

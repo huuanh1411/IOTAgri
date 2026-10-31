@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1200" viewBox="0 0 1400 1200" role="img" aria-labelledby="title desc">
 <title id="title">Context Diagram — IOTAgri</title>
-<desc id="desc">Năm thực thể bên ngoài cách đều nhau 72 độ quanh vòng tròn IOTAgri. Chín mũi tên biểu diễn hướng luồng dữ liệu.</desc>
+<desc id="desc">Five external entities are spaced 72 degrees apart around the IOTAgri circle. Nine arrows indicate data-flow direction.</desc>
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#7138a0"/></marker></defs>
 <rect width="1400" height="1200" fill="white"/>
 <g font-family="Arial, sans-serif">
@@ -14,22 +14,22 @@
 <line data-source="System" data-target="SMTP" x1="700.00" y1="720.00" x2="700.00" y2="985.00" stroke="#7138a0" stroke-width="2" marker-end="url(#arrow)"/>
 <line data-source="User" data-target="System" x1="350.03" y1="694.79" x2="581.60" y2="619.54" stroke="#7138a0" stroke-width="2" marker-end="url(#arrow)"/>
 <line data-source="System" data-target="User" x1="592.73" y1="653.78" x2="410.56" y2="712.97" stroke="#7138a0" stroke-width="2" marker-end="url(#arrow)"/>
-<g data-flow="Guest-System"><text x="622.20" y="322.79" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Đăng ký / Đăng nhập</text></g>
-<g data-flow="System-Guest"><text x="460.40" y="440.34" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Xác thực</text></g>
-<g data-flow="Admin-System"><text x="939.60" y="440.34" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Quản trị</text></g>
-<g data-flow="System-Admin"><text x="777.80" y="322.79" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Báo cáo</text></g>
-<g data-flow="ESP-System"><text x="925.88" y="778.54" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Số đo / Trạng thái</text></g>
-<g data-flow="System-ESP"><text x="987.69" y="588.33" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Lệnh bơm / đèn</text></g>
+<g data-flow="Guest-System"><text x="622.20" y="322.79" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Sign up / Sign in</text></g>
+<g data-flow="System-Guest"><text x="460.40" y="440.34" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Authentication</text></g>
+<g data-flow="Admin-System"><text x="939.60" y="440.34" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Administration</text></g>
+<g data-flow="System-Admin"><text x="777.80" y="322.79" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Reports</text></g>
+<g data-flow="ESP-System"><text x="925.88" y="778.54" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Readings / Status</text></g>
+<g data-flow="System-ESP"><text x="987.69" y="588.33" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Pump / Light commands</text></g>
 <g data-flow="System-SMTP"><text x="600.00" y="870.00" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Email</text></g>
-<g data-flow="User-System"><text x="412.31" y="588.33" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Điều khiển</text></g>
-<g data-flow="System-User"><text x="474.12" y="778.54" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Giám sát</text></g>
+<g data-flow="User-System"><text x="412.31" y="588.33" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Control</text></g>
+<g data-flow="System-User"><text x="474.12" y="778.54" text-anchor="middle" font-size="18" fill="#17212b" font-weight="normal">Monitoring</text></g>
 <circle data-system="IOTAgri" cx="700" cy="600" r="120" fill="#e7f2ff" stroke="#245b99" stroke-width="3"/>
 <text x="700.00" y="575.00" text-anchor="middle" font-size="20" fill="#245b99" font-weight="normal">0</text>
 <text x="700.00" y="620.00" text-anchor="middle" font-size="29" fill="#163754" font-weight="bold">IOTAgri</text>
-<g data-entity="Guest"><rect x="343.13" y="225.21" width="220" height="70" rx="8" fill="#f3eef8" stroke="#7138a0" stroke-width="2"/><text x="453.13" y="266.21" text-anchor="middle" font-size="21" fill="#17212b" font-weight="bold">Khách</text></g>
-<g data-entity="Admin"><rect x="836.87" y="225.21" width="220" height="70" rx="8" fill="#f3eef8" stroke="#7138a0" stroke-width="2"/><text x="946.87" y="266.21" text-anchor="middle" font-size="21" fill="#17212b" font-weight="bold">Quản trị viên</text></g>
+<g data-entity="Guest"><rect x="343.13" y="225.21" width="220" height="70" rx="8" fill="#f3eef8" stroke="#7138a0" stroke-width="2"/><text x="453.13" y="266.21" text-anchor="middle" font-size="21" fill="#17212b" font-weight="bold">Guest</text></g>
+<g data-entity="Admin"><rect x="836.87" y="225.21" width="220" height="70" rx="8" fill="#f3eef8" stroke="#7138a0" stroke-width="2"/><text x="946.87" y="266.21" text-anchor="middle" font-size="21" fill="#17212b" font-weight="bold">Administrator</text></g>
 <g data-entity="ESP"><rect x="989.44" y="694.79" width="220" height="70" rx="8" fill="#f3eef8" stroke="#7138a0" stroke-width="2"/><text x="1099.44" y="735.79" text-anchor="middle" font-size="21" fill="#17212b" font-weight="bold">ESP32</text></g>
 <g data-entity="SMTP"><rect x="590.00" y="985.00" width="220" height="70" rx="8" fill="#f3eef8" stroke="#7138a0" stroke-width="2"/><text x="700.00" y="1026.00" text-anchor="middle" font-size="21" fill="#17212b" font-weight="bold">SMTP</text></g>
-<g data-entity="User"><rect x="190.56" y="694.79" width="220" height="70" rx="8" fill="#f3eef8" stroke="#7138a0" stroke-width="2"/><text x="300.56" y="735.79" text-anchor="middle" font-size="21" fill="#17212b" font-weight="bold">Người dùng</text></g>
+<g data-entity="User"><rect x="190.56" y="694.79" width="220" height="70" rx="8" fill="#f3eef8" stroke="#7138a0" stroke-width="2"/><text x="300.56" y="735.79" text-anchor="middle" font-size="21" fill="#17212b" font-weight="bold">User</text></g>
 </g>
 </svg>

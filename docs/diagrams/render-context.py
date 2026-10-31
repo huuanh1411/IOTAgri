@@ -33,8 +33,8 @@ def render():
         '<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1200" '
         'viewBox="0 0 1400 1200" role="img" aria-labelledby="title desc">',
         '<title id="title">Context Diagram — IOTAgri</title>',
-        '<desc id="desc">Năm thực thể bên ngoài cách đều nhau 72 độ quanh '
-        'vòng tròn IOTAgri. Chín mũi tên biểu diễn hướng luồng dữ liệu.</desc>',
+        '<desc id="desc">Five external entities are spaced 72 degrees apart around '
+        'the IOTAgri circle. Nine arrows indicate data-flow direction.</desc>',
         '<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" '
         'markerWidth="8" markerHeight="8" orient="auto-start-reverse">'
         '<path d="M0 0 L10 5 L0 10 Z" fill="#7138a0"/></marker></defs>',

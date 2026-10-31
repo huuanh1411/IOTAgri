@@ -20,11 +20,11 @@ erDiagram
 
     AspNetUsers {
         string Id PK
-        string Email "nullable trong Identity"
-        string UserName "nullable trong Identity"
+        string Email "nullable in Identity"
+        string UserName "nullable in Identity"
         string FullName
         string PhoneNumber "nullable"
-        string PasswordHash "nullable trong Identity"
+        string PasswordHash "nullable in Identity"
         bool LockoutEnabled
         datetimeoffset LockoutEnd "nullable"
     }
@@ -68,7 +68,7 @@ erDiagram
         datetime CreatedAt
         datetime ExpiresAt
         datetime RevokedAt "nullable"
-        string ReplacedByToken "nullable; khong phai FK"
+        string ReplacedByToken "nullable; not an FK"
     }
     Devices {
         uuid Id PK
@@ -131,7 +131,7 @@ erDiagram
     PumpScheduleOccurrences {
         uuid Id PK
         uuid ScheduleId FK
-        uuid CommandId UK "tham chieu logic; khong phai FK"
+        uuid CommandId UK "logical reference; not an FK"
         datetime OccurrenceUtc
         datetime DispatchedAt "nullable"
     }
@@ -161,7 +161,7 @@ erDiagram
         string UserId FK
         string Subject
         string Category
-        uuid DeviceId "nullable; khong phai FK"
+        uuid DeviceId "nullable; not an FK"
         string DeviceName "nullable"
         string Status
         string Priority
@@ -177,10 +177,10 @@ erDiagram
     }
     AdminAuditLogs {
         uuid Id PK
-        string ActorUserId "khong phai FK"
+        string ActorUserId "not an FK"
         string Action
         string TargetType
-        string TargetId "khong phai FK"
+        string TargetId "not an FK"
         string PreviousValue "nullable"
         string NewValue "nullable"
         datetime CreatedAt

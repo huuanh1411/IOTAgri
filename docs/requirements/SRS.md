@@ -40,12 +40,12 @@ Sơ đồ sau phân rã các thành phần bên trong IOTAgri để giải thíc
 
 ```mermaid
 flowchart LR
-    U[Người dùng / Quản trị viên] --> F[Flutter]
+    U[User / Administrator] --> F[Flutter]
     F -->|HTTP API / JWT| A[ASP.NET Core]
     A --> D[(PostgreSQL)]
     A <-->|MQTT| M[Mosquitto]
     M <-->|Telemetry / Command / Status| E[ESP32]
-    A -->|Khôi phục mật khẩu| S[SMTP]
+    A -->|Password recovery| S[SMTP]
 ```
 
 ## 3. Yêu cầu chức năng và nghiệm thu
