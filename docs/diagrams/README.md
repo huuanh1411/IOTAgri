@@ -4,7 +4,7 @@
 
 | Nội dung | Xem trực tiếp | Nguồn chỉnh sửa |
 | --- | --- | --- |
-| Context Diagram | [Bối cảnh và luồng dữ liệu](context-diagram.md) | [Mermaid](system-context.mmd) · [SVG](rendered/system-context.svg) |
+| Context Diagram | [Bối cảnh và luồng dữ liệu](context-diagram.md) | [Mermaid](system-context.mmd) · [SVG](rendered/context-diagram-radial.svg) |
 | Use Case | [Sơ đồ và luồng chi tiết](../use-cases/README.md) | [Tổng quan PlantUML](use-case-overview.puml) · [Chi tiết PlantUML](use-case.puml) |
 | ERD | [Tổng quan và từ điển](../data/README.md) | [Mermaid đầy đủ](erd.mmd) |
 | Context, Use Case và ERD trên một trang | [Bản xem đầy đủ](project-diagrams.md) | SVG Context/Use Case và Mermaid ERD |
@@ -16,7 +16,7 @@ Baseline: **27/10/2026**, xem [nguồn và giới hạn](../reference/source-bas
 
 ## Bản SVG đã render
 
-[Use Case tổng quan](rendered/use-case-overview.svg) · [Use Case đầy đủ](rendered/use-case.svg) · [ERD đầy đủ](rendered/erd.svg) · [ERD tổng quan](rendered/erd-overview.svg) · [Bối cảnh hệ thống](rendered/system-context.svg)
+[Use Case tổng quan](rendered/use-case-overview.svg) · [Use Case đầy đủ](rendered/use-case.svg) · [ERD đầy đủ](rendered/erd.svg) · [ERD tổng quan](rendered/erd-overview.svg) · [Bối cảnh hệ thống](rendered/context-diagram-radial.svg)
 
 SVG giữ chữ và đường nét khi phóng to. Hai nguồn PlantUML là nguồn chỉnh sửa Use Case; các bản flowchart Mermaid cũ đã được thay thế để dùng đúng ký hiệu actor. Sau khi sửa nguồn, chạy từ gốc repository:
 

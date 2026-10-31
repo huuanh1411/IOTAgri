@@ -9,21 +9,21 @@ config:
 ---
 flowchart LR
     Guest["Khách"]
-    User["Người dùng đã đăng nhập"]
-    System(("0<br/>HỆ THỐNG IOTAgri<br/>Giám sát và điều khiển<br/>nông nghiệp thủy canh"))
+    User["Người dùng"]
+    System(("0<br/>IOTAgri"))
     Admin["Quản trị viên"]
-    ESP["Thiết bị ESP32"]
-    SMTP["Dịch vụ email SMTP"]
+    ESP["ESP32"]
+    SMTP["SMTP"]
 
-    Guest -->|"Đăng ký / Đăng nhập<br/>Khôi phục mật khẩu"| System
-    System -->|"Kết quả xác thực<br/>Kết quả đặt lại mật khẩu"| Guest
-    User -->|"Quản lý thiết bị<br/>Điều khiển / Đặt lịch<br/>Gửi yêu cầu hỗ trợ"| System
-    System -->|"Số đo / Trạng thái<br/>Cảnh báo / Lịch sử<br/>Phản hồi hỗ trợ"| User
-    Admin -->|"Quản trị / Cấu hình<br/>Tra cứu / Xử lý hỗ trợ"| System
-    System -->|"Báo cáo / Nhật ký<br/>Kết quả quản trị"| Admin
-    ESP -->|"Mã ghép nối / Số đo<br/>ACK / Trạng thái"| System
-    System -->|"Cấu hình MQTT<br/>Lệnh bơm / đèn"| ESP
-    System -->|"Gửi email<br/>Đặt lại mật khẩu"| SMTP
+    Guest -->|"Đăng ký / Đăng nhập"| System
+    System -->|"Xác thực"| Guest
+    User -->|"Điều khiển"| System
+    System -->|"Giám sát"| User
+    Admin -->|"Quản trị"| System
+    System -->|"Báo cáo"| Admin
+    ESP -->|"Số đo / Trạng thái"| System
+    System -->|"Lệnh bơm / đèn"| ESP
+    System -->|"Email"| SMTP
 
     classDef external fill:#f3eef8,stroke:#7138a0,stroke-width:2px,color:#241535;
     classDef system fill:#e7f2ff,stroke:#245b99,stroke-width:3px,color:#163754;

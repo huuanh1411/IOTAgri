@@ -6,7 +6,7 @@
 
 ## Context Diagram
 
-![Context Diagram — Bối cảnh hệ thống IOTAgri](rendered/system-context.svg)
+![Context Diagram — Bối cảnh hệ thống IOTAgri](rendered/context-diagram-radial.svg)
 
 IOTAgri là một tiến trình duy nhất trao đổi dữ liệu với năm thực thể bên ngoài. Xem [ranh giới và luồng dữ liệu](context-diagram.md) · [Nguồn Mermaid](system-context.mmd).
 

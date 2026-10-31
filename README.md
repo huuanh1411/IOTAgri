@@ -24,9 +24,9 @@ Quản lý thiết bị ESP32, theo dõi cảm biến, điều khiển bơm/đè
 
 IOTAgri ở trung tâm, trao đổi dữ liệu với **Khách, Người dùng, Quản trị viên, ESP32 và SMTP**.
 
-![Context Diagram — Bối cảnh hệ thống IOTAgri](docs/diagrams/rendered/system-context.svg)
+![Context Diagram — Bối cảnh hệ thống IOTAgri](docs/diagrams/rendered/context-diagram-radial.svg)
 
-[Giải thích luồng dữ liệu](docs/diagrams/context-diagram.md) · [Mở ảnh để phóng to](docs/diagrams/rendered/system-context.svg) · [Nguồn Mermaid](docs/diagrams/system-context.mmd)
+[Giải thích luồng dữ liệu](docs/diagrams/context-diagram.md) · [Mở ảnh để phóng to](docs/diagrams/rendered/context-diagram-radial.svg) · [Nguồn Mermaid](docs/diagrams/system-context.mmd)
 
 ## Use Case
 

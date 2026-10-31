@@ -30,7 +30,7 @@ Admin có thể dùng API người dùng cho dữ liệu của chính mình. Quy
 
 ### 2.1 Context Diagram
 
-![Context Diagram — Bối cảnh hệ thống IOTAgri](../diagrams/rendered/system-context.svg)
+![Context Diagram — Bối cảnh hệ thống IOTAgri](../diagrams/rendered/context-diagram-radial.svg)
 
 IOTAgri được biểu diễn như một tiến trình duy nhất, trao đổi dữ liệu với Khách, Người dùng, Quản trị viên, ESP32 và SMTP. Flutter, backend, PostgreSQL và Mosquitto nằm trong phạm vi hệ thống. Xem [ranh giới và đặc tả luồng dữ liệu](../diagrams/context-diagram.md).
 

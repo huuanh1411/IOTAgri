@@ -4,9 +4,9 @@
 
 Context diagram biểu diễn IOTAgri như **một tiến trình duy nhất**, trao đổi dữ liệu với năm thực thể bên ngoài được phân bổ đều quanh vòng tròn trung tâm. Mũi tên chỉ hướng dữ liệu; nhãn rút gọn để dễ đọc, chi tiết nằm trong bảng luồng dữ liệu bên dưới. Nội dung bám theo baseline **27/10/2026** của [SRS](../requirements/SRS.md) và [nguồn đối chiếu](../reference/source-baseline.md).
 
-![Context Diagram — Hệ thống IOTAgri và các thực thể bên ngoài](rendered/system-context.svg)
+![Context Diagram — Hệ thống IOTAgri và các thực thể bên ngoài](rendered/context-diagram-radial.svg)
 
-[Mở ảnh SVG](rendered/system-context.svg) · [Nguồn Mermaid](system-context.mmd)
+[Mở ảnh SVG](rendered/context-diagram-radial.svg) · [Nguồn Mermaid](system-context.mmd)
 
 ## Ranh giới hệ thống
 
