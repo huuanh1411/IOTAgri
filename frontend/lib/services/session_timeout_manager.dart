@@ -17,6 +17,7 @@ class SessionTimeoutManager {
   
   final FlutterSecureStorage _storage;
   final bool _allowWebStorageFallback;
+  final bool _enforceSessionTimeout;
   Timer? _expiryCheckTimer;
   Timer? _warningTimer;
   Timer? _refreshTimer;
@@ -31,11 +32,15 @@ class SessionTimeoutManager {
   SessionTimeoutManager({
     FlutterSecureStorage? storage,
     bool? allowWebStorageFallback,
+    bool? enforceSessionTimeout,
     required this.onRefreshToken,
     required this.onSessionExpired,
     required this.onSessionWarning,
   }) : _storage = storage ?? const FlutterSecureStorage(),
-       _allowWebStorageFallback = allowWebStorageFallback ?? kIsWeb;
+       _allowWebStorageFallback = allowWebStorageFallback ?? kIsWeb,
+       // Mobile sessions recover expired access tokens through the refresh
+       // token path. Keep the proactive expiry warning/logout on web only.
+       _enforceSessionTimeout = enforceSessionTimeout ?? kIsWeb;
 
   static String _webFallbackKey(String key) => 'iotagri.auth.$key';
 
@@ -106,7 +111,12 @@ class SessionTimeoutManager {
   /// Initialize the session timeout manager with current token
   Future<void> initialize() async {
     if (_isDisposed) return;
-    
+
+    if (!_enforceSessionTimeout) {
+      _cancelAllTimers();
+      return;
+    }
+
     final accessToken = await _readToken(_accessTokenKey);
     if (accessToken == null) {
       _cancelAllTimers();
@@ -126,7 +136,12 @@ class SessionTimeoutManager {
   /// Update token expiry after token refresh
   Future<void> updateTokenExpiry(String newAccessToken) async {
     if (_isDisposed) return;
-    
+
+    if (!_enforceSessionTimeout) {
+      _cancelAllTimers();
+      return;
+    }
+
     final expiry = _extractExpiryFromToken(newAccessToken);
     if (expiry == null) {
       debugPrint('Could not extract expiry from new access token');
