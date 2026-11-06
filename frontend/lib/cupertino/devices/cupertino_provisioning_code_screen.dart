@@ -118,11 +118,18 @@ class _CupertinoProvisioningCodeScreenState
     });
     try {
       final status = await _espService.getStatus();
-      final networks = await _espService.scanNetworks();
+      // Scanning is optional: an accessible ESP can still accept a manual SSID.
+      List<EspWifiNetwork> networks = const [];
+      try {
+        networks = await _espService.scanNetworks();
+      } catch (_) {
+        // Keep the verified connection and allow manual network entry below.
+      }
       if (!mounted) return;
       setState(() {
         _hardwareId = status.hardwareId;
         _networks = networks;
+        _manualNetwork = networks.isEmpty;
         _busy = false;
         _stage = _SetupStage.wifi;
         _message = networks.isEmpty
@@ -381,6 +388,7 @@ class _CupertinoProvisioningCodeScreenState
             : Text(context.l10n.connectToEspAction),
       ),
       _BackButton(onPressed: _goBack),
+      _TechnicalInformation(code: _code, hardwareId: _hardwareId),
     ],
   );
 

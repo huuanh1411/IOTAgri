@@ -38,16 +38,24 @@ class _FakeEspService extends EspProvisioningService {
 
   String? provisionedSsid;
   String? provisionedPassword;
+  bool scanFails = false;
 
   @override
   Future<EspDeviceStatus> getStatus() async =>
       const EspDeviceStatus(hardwareId: 'AGRI-12F4', setupMode: true);
 
   @override
-  Future<List<EspWifiNetwork>> scanNetworks() async => const [
-    EspWifiNetwork(ssid: 'BETEA', rssi: -42),
-    EspWifiNetwork(ssid: 'Home 2.4G', rssi: -67),
-  ];
+  Future<List<EspWifiNetwork>> scanNetworks() async {
+    if (scanFails) {
+      throw const EspProvisioningException(
+        'ESP could not scan Wi-Fi networks.',
+      );
+    }
+    return const [
+      EspWifiNetwork(ssid: 'BETEA', rssi: -42),
+      EspWifiNetwork(ssid: 'Home 2.4G', rssi: -67),
+    ];
+  }
 
   @override
   Future<void> provision({
@@ -72,6 +80,51 @@ void main() {
     isOnline: false,
     createdAt: '2026-10-22T00:00:00Z',
   );
+
+  testWidgets('allows manual provisioning when the ESP scan fails', (
+    tester,
+  ) async {
+    final esp = _FakeEspService()..scanFails = true;
+    await tester.pumpWidget(
+      buildLocalizedCupertinoApp(
+        home: CupertinoProvisioningCodeScreen(
+          device: device,
+          apiService: _FakeApiService(),
+          espProvisioningService: esp,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Thiết bị đã sẵn sàng'));
+    await tester.pumpAndSettle();
+
+    // Recovery through the ESP's own portal must be possible before scanning.
+    await tester.ensureVisible(find.text('Thông tin kỹ thuật'));
+    await tester.tap(find.text('Thông tin kỹ thuật'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('SECRET-CODE'), findsOneWidget);
+    await tester.tap(
+      find.widgetWithText(CupertinoActionSheetAction, 'Đã hiểu'),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Kết nối với ESP').last);
+    await tester.tap(find.text('Kết nối với ESP').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Bước 3/5'), findsOneWidget);
+    expect(find.byType(CupertinoTextField), findsNWidgets(2));
+    await tester.enterText(find.byType(CupertinoTextField).first, 'GTA house');
+    await tester.enterText(find.byType(CupertinoTextField).last, 'wifi-secret');
+    final submit = find.widgetWithText(CupertinoButton, 'Thiết lập thiết bị');
+    await tester.ensureVisible(submit);
+    await tester.tap(submit);
+    await tester.pump();
+    expect(esp.provisionedSsid, 'GTA house');
+    expect(esp.provisionedPassword, 'wifi-secret');
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    expect(find.text('Bước 5/5'), findsOneWidget);
+  });
 
   testWidgets('guides the user through the five-step provisioning wizard', (
     tester,
