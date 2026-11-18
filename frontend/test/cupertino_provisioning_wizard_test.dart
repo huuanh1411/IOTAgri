@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/testing.dart';
+import 'package:iotagri_app/cupertino/devices/cupertino_devices_screen.dart';
 import 'package:iotagri_app/cupertino/devices/cupertino_provisioning_code_screen.dart';
+import 'package:iotagri_app/l10n/app_localizations.dart';
 import 'package:iotagri_app/models/device.dart';
 import 'package:iotagri_app/services/api_service.dart';
 import 'package:iotagri_app/services/esp_provisioning_service.dart';
@@ -31,6 +34,11 @@ class _FakeApiService extends ApiService {
   }) async => [
     {'temperature': 24},
   ];
+}
+
+class _OfflineApiService extends ApiService {
+  @override
+  Future<List<dynamic>> getDevices() async => throw Exception('offline');
 }
 
 class _FakeEspService extends EspProvisioningService {
@@ -236,5 +244,55 @@ void main() {
 
     expect(find.text('Bước 2/5'), findsOneWidget);
     expect(api.createCodeCalls, 1);
+  });
+
+  testWidgets('restores setup route when the devices API is offline', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'device_setup_${device.id}_code': 'SECRET-CODE',
+      'device_setup_${device.id}_expires_at': '2099-01-01T00:00:00Z',
+      'device_setup_${device.id}_stage': 2,
+    });
+    final router = GoRouter(
+      initialLocation: '/devices',
+      routes: [
+        GoRoute(
+          path: '/devices',
+          name: 'devices',
+          builder: (_, _) =>
+              CupertinoDevicesScreen(apiService: _OfflineApiService()),
+          routes: [
+            GoRoute(
+              path: ':deviceId/setup',
+              name: 'device-setup',
+              builder: (_, _) => CupertinoProvisioningCodeScreen(
+                device: device,
+                apiService: _FakeApiService(),
+                espProvisioningService: _FakeEspService(),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp.router(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('vi'),
+        routerConfig: router,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/devices/${device.id}/setup',
+    );
+    expect(find.text('Bước 2/5'), findsOneWidget);
+    expect(find.text('Hãy kiểm tra kết nối mạng và thử lại.'), findsNothing);
   });
 }

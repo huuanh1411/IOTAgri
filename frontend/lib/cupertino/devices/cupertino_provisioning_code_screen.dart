@@ -33,6 +33,9 @@ class CupertinoProvisioningCodeScreen extends StatefulWidget {
 
 class _CupertinoProvisioningCodeScreenState
     extends State<CupertinoProvisioningCodeScreen> {
+  static const _activeDeviceIdKey = 'device_setup_active_device_id';
+  static const _activeDeviceNameKey = 'device_setup_active_device_name';
+
   late final ApiService _apiService;
   late final EspProvisioningService _espService;
   final _ssid = TextEditingController();
@@ -158,6 +161,8 @@ class _CupertinoProvisioningCodeScreenState
     _SetupStage? stage,
   }) async {
     final preferences = await SharedPreferences.getInstance();
+    await preferences.setString(_activeDeviceIdKey, widget.device.id);
+    await preferences.setString(_activeDeviceNameKey, widget.device.name);
     final currentCode = code ?? _code;
     if (currentCode != null) {
       await preferences.setString('${_sessionPrefix}code', currentCode.code);
@@ -174,6 +179,10 @@ class _CupertinoProvisioningCodeScreenState
     await preferences.remove('${_sessionPrefix}code');
     await preferences.remove('${_sessionPrefix}expires_at');
     await preferences.remove('${_sessionPrefix}stage');
+    if (preferences.getString(_activeDeviceIdKey) == widget.device.id) {
+      await preferences.remove(_activeDeviceIdKey);
+      await preferences.remove(_activeDeviceNameKey);
+    }
   }
 
   void _setStage(_SetupStage stage) {

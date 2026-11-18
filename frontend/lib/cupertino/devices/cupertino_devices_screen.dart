@@ -2,6 +2,7 @@ import '../../utils/display_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/animation/app_motion.dart';
 import '../../core/widgets/page_header.dart';
@@ -21,6 +22,9 @@ class CupertinoDevicesScreen extends StatefulWidget {
 }
 
 class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
+  static const _activeDeviceIdKey = 'device_setup_active_device_id';
+  static const _activeDeviceNameKey = 'device_setup_active_device_name';
+
   late final ApiService _apiService;
   List<Device> _devices = const [];
   bool _isLoading = true;
@@ -55,11 +59,63 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
       });
     } catch (error) {
       if (!mounted) return;
+      if (await _resumeActiveSetup()) return;
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
         _errorMessage = () => localizedApiError(error, context.l10n);
       });
     }
+  }
+
+  Future<bool> _resumeActiveSetup() async {
+    final preferences = await SharedPreferences.getInstance();
+    var deviceId = preferences.getString(_activeDeviceIdKey);
+    deviceId ??= _findStoredSetupDeviceId(preferences);
+    if (deviceId == null || deviceId.isEmpty) return false;
+
+    final prefix = 'device_setup_${deviceId}_';
+    final code = preferences.getString('${prefix}code');
+    final expiry = DateTime.tryParse(
+      preferences.getString('${prefix}expires_at') ?? '',
+    );
+    if (code == null ||
+        code.isEmpty ||
+        expiry == null ||
+        !expiry.isAfter(DateTime.now().toUtc())) {
+      await preferences.remove(_activeDeviceIdKey);
+      await preferences.remove(_activeDeviceNameKey);
+      return false;
+    }
+
+    if (!mounted) return false;
+    context.goNamed(
+      'device-setup',
+      pathParameters: {'deviceId': deviceId},
+      queryParameters: {
+        'name': preferences.getString(_activeDeviceNameKey) ?? 'ESP device',
+      },
+    );
+    return true;
+  }
+
+  String? _findStoredSetupDeviceId(SharedPreferences preferences) {
+    const prefix = 'device_setup_';
+    const suffix = '_expires_at';
+    for (final key in preferences.getKeys()) {
+      if (!key.startsWith(prefix) || !key.endsWith(suffix)) continue;
+      final deviceId = key.substring(prefix.length, key.length - suffix.length);
+      final expiry = DateTime.tryParse(preferences.getString(key) ?? '');
+      final code = preferences.getString('$prefix${deviceId}_code');
+      if (deviceId.isNotEmpty &&
+          code != null &&
+          code.isNotEmpty &&
+          expiry != null &&
+          expiry.isAfter(DateTime.now().toUtc())) {
+        return deviceId;
+      }
+    }
+    return null;
   }
 
   Future<void> _createAndProvisionDevice() async {
