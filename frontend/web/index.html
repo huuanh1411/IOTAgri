@@ -37,7 +37,22 @@
   </style>
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async=""></script>
-
-
+  <script>
+    (async () => {
+      try {
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map((registration) => registration.unregister()));
+        }
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+        }
+      } finally {
+        const bootstrap = document.createElement('script');
+        bootstrap.src = 'flutter_bootstrap.js?v=no-pwa-1';
+        document.body.appendChild(bootstrap);
+      }
+    })();
+  </script>
 </body></html>

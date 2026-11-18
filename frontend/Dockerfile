@@ -5,7 +5,7 @@ ARG GOOGLE_WEB_CLIENT_ID
 ARG GOOGLE_ANDROID_SERVER_CLIENT_ID
 COPY . .
 RUN flutter pub get
-RUN flutter build web --release --dart-define=API_BASE_URL=$API_BASE_URL --dart-define=GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID --dart-define=GOOGLE_ANDROID_SERVER_CLIENT_ID=$GOOGLE_ANDROID_SERVER_CLIENT_ID
+RUN flutter build web --release --pwa-strategy=none --dart-define=API_BASE_URL=$API_BASE_URL --dart-define=GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID --dart-define=GOOGLE_ANDROID_SERVER_CLIENT_ID=$GOOGLE_ANDROID_SERVER_CLIENT_ID
 RUN set -eux; \
     bundle_hash="$(sha256sum build/web/main.dart.js | cut -c1-12)"; \
     cp build/web/main.dart.js "build/web/main.${bundle_hash}.dart.js"; \
