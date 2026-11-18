@@ -41,6 +41,18 @@ class _OfflineApiService extends ApiService {
   Future<List<dynamic>> getDevices() async => throw Exception('offline');
 }
 
+class _DeviceListApiService extends _FakeApiService {
+  @override
+  Future<List<dynamic>> getDevices() async => [
+    {
+      'id': 'device-42',
+      'name': 'Tower A',
+      'isOnline': false,
+      'createdAt': '2026-10-22T00:00:00Z',
+    },
+  ];
+}
+
 class _FakeEspService extends EspProvisioningService {
   _FakeEspService()
     : super(client: MockClient((_) async => throw UnimplementedError()));
@@ -91,6 +103,51 @@ void main() {
     isOnline: false,
     createdAt: '2026-10-22T00:00:00Z',
   );
+
+  testWidgets('opening setup reflects the device route in the browser URL', (
+    tester,
+  ) async {
+    final api = _DeviceListApiService();
+    final router = GoRouter(
+      initialLocation: '/devices',
+      routes: [
+        GoRoute(
+          path: '/devices',
+          name: 'devices',
+          builder: (_, _) => CupertinoDevicesScreen(apiService: api),
+          routes: [
+            GoRoute(
+              path: ':deviceId/setup',
+              name: 'device-setup',
+              builder: (_, _) => CupertinoProvisioningCodeScreen(
+                device: device,
+                apiService: api,
+                espProvisioningService: _FakeEspService(),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp.router(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('vi'),
+        routerConfig: router,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(CupertinoIcons.qrcode));
+    await tester.pumpAndSettle();
+
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/devices/${device.id}/setup',
+    );
+  });
 
   testWidgets('allows manual provisioning when the ESP scan fails', (
     tester,

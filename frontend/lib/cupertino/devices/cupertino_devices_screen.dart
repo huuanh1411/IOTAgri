@@ -129,7 +129,7 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
     if (mounted) setState(() => _isCreating = false);
     if (result != null && mounted) {
       await _loadDevices(showLoading: false);
-      if (mounted) await _openProvisioning(result);
+      if (mounted) _openProvisioning(result);
     }
   }
 
@@ -191,14 +191,13 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
     if (mounted) await _loadDevices(showLoading: false);
   }
 
-  Future<void> _openProvisioning(Device device) async {
-    await context.pushNamed<void>(
+  void _openProvisioning(Device device) {
+    context.goNamed(
       'device-setup',
       pathParameters: {'deviceId': device.id},
       queryParameters: {'name': device.name},
       extra: device,
     );
-    if (mounted) await _loadDevices(showLoading: false);
   }
 
   void _showError(String message) {
