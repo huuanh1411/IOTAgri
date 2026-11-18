@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../services/api_service.dart';
 import '../services/google_sign_in_service.dart';
-import '../services/session_timeout_manager.dart';
 
 class AuthProvider with ChangeNotifier {
   final ApiService _apiService;
@@ -13,7 +12,6 @@ class AuthProvider with ChangeNotifier {
   String? _errorMessage;
   final VoidCallback? _onSessionExpired;
   late final VoidCallback _sessionExpiredHandler;
-  late final SessionTimeoutManager _sessionTimeoutManager;
 
   AuthProvider({
     ApiService? apiService,
@@ -26,12 +24,6 @@ class AuthProvider with ChangeNotifier {
     _sessionExpiredHandler = _handleSessionExpired;
     ApiService.onSessionExpired = _sessionExpiredHandler;
     
-    _sessionTimeoutManager = SessionTimeoutManager(
-      onRefreshToken: _handleTokenRefresh,
-      onSessionExpired: _handleSessionExpired,
-      onSessionWarning: _handleSessionWarning,
-    );
-    
     initialize();
   }
 
@@ -40,15 +32,10 @@ class AuthProvider with ChangeNotifier {
   bool get isInitialized => _isInitialized;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _user != null;
-  SessionTimeoutManager get sessionTimeoutManager => _sessionTimeoutManager;
-  VoidCallback? onSessionWarningCallback;
 
   Future<void> initialize() async {
     try {
       _user = await _apiService.restoreSession() ?? _user;
-      if (_user != null) {
-        await _sessionTimeoutManager.initialize();
-      }
     } catch (_) {
       // Keep the authenticated Riverpod user when legacy session restore fails.
     } finally {
@@ -71,9 +58,6 @@ class AuthProvider with ChangeNotifier {
       if (user == null) throw Exception('Invalid access token');
       _user = user;
       
-      // Initialize session timeout manager with new token
-      await _sessionTimeoutManager.initialize();
-
       _isLoading = false;
       notifyListeners();
       return true;
@@ -104,9 +88,6 @@ class AuthProvider with ChangeNotifier {
           : null;
       if (user == null) throw Exception('Invalid access token');
       _user = user;
-      
-      // Initialize session timeout manager with new token
-      await _sessionTimeoutManager.initialize();
       
       _isLoading = false;
       notifyListeners();
@@ -205,27 +186,6 @@ class AuthProvider with ChangeNotifier {
     _onSessionExpired?.call();
   }
 
-  void _handleSessionWarning() {
-    onSessionWarningCallback?.call();
-  }
-
-  Future<void> _handleTokenRefresh() async {
-    // Trigger a dummy authenticated request to force token refresh
-    // The API service handles automatic token refresh internally
-    try {
-      await _apiService.getProfile();
-      // After successful refresh, update the session timeout manager
-      final accessToken = await _apiService.getCurrentAccessToken();
-      if (accessToken != null) {
-        await _sessionTimeoutManager.updateTokenExpiry(accessToken);
-      }
-    } catch (e) {
-      debugPrint('Token refresh failed: $e');
-      // If refresh fails, the session will be marked as expired
-      // and the user will need to log in again
-    }
-  }
-
   Future<void> logout() async {
     _isLoading = true;
     notifyListeners();
@@ -235,7 +195,6 @@ class AuthProvider with ChangeNotifier {
     } catch (error) {
       debugPrint('Logout error: $error');
     } finally {
-      await _sessionTimeoutManager.clear();
       _user = null;
       _isLoading = false;
       notifyListeners();
@@ -287,7 +246,6 @@ class AuthProvider with ChangeNotifier {
     if (identical(ApiService.onSessionExpired, _sessionExpiredHandler)) {
       ApiService.onSessionExpired = null;
     }
-    _sessionTimeoutManager.dispose();
     super.dispose();
   }
 

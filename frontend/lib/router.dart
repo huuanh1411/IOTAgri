@@ -25,7 +25,6 @@ import 'models/user.dart' as legacy_models;
 import 'core/animation/app_motion.dart';
 import 'core/theme/app_colors.dart';
 import 'core/widgets/floating_pill_nav_bar.dart';
-import 'widgets/session_timeout_wrapper.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   // Keep the router instance stable. Recreating it after every auth update
@@ -92,9 +91,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   .read(authControllerProvider.notifier)
                   .handleSessionExpired(),
             ),
-            child: const SessionTimeoutListener(
-              child: CupertinoAdminDashboardScreen(),
-            ),
+            child: const CupertinoAdminDashboardScreen(),
           );
         },
       ),
@@ -117,17 +114,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   .read(authControllerProvider.notifier)
                   .handleSessionExpired(),
             ),
-            child: SessionTimeoutListener(
-              child: Scaffold(
-                backgroundColor: AppColors.background,
-                body: AppMotionTabTransition(
-                  index: navigationShell.currentIndex,
-                  child: navigationShell,
-                ),
-                bottomNavigationBar: FloatingPillNavBar(
-                  currentIndex: navigationShell.currentIndex,
-                  onTap: navigationShell.goBranch,
-                ),
+            child: Scaffold(
+              backgroundColor: AppColors.background,
+              body: AppMotionTabTransition(
+                index: navigationShell.currentIndex,
+                child: navigationShell,
+              ),
+              bottomNavigationBar: FloatingPillNavBar(
+                currentIndex: navigationShell.currentIndex,
+                onTap: navigationShell.goBranch,
               ),
             ),
           );
