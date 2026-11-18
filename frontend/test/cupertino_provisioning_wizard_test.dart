@@ -5,6 +5,7 @@ import 'package:iotagri_app/cupertino/devices/cupertino_provisioning_code_screen
 import 'package:iotagri_app/models/device.dart';
 import 'package:iotagri_app/services/api_service.dart';
 import 'package:iotagri_app/services/esp_provisioning_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'test_app.dart';
 
@@ -74,6 +75,8 @@ class _FakeEspService extends EspProvisioningService {
 }
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
   final device = Device(
     id: 'device-42',
     name: 'Tower A',
@@ -197,5 +200,41 @@ void main() {
     await tester.tap(find.text('Thông tin kỹ thuật'));
     await tester.pumpAndSettle();
     expect(find.textContaining('SECRET-CODE'), findsOneWidget);
+  });
+
+  testWidgets('restores the ESP connection step after the web tab rebuilds', (
+    tester,
+  ) async {
+    final api = _FakeApiService();
+    await tester.pumpWidget(
+      buildLocalizedCupertinoApp(
+        home: CupertinoProvisioningCodeScreen(
+          device: device,
+          apiService: api,
+          espProvisioningService: _FakeEspService(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Thiết bị đã sẵn sàng'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bước 2/5'), findsOneWidget);
+    expect(api.createCodeCalls, 1);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      buildLocalizedCupertinoApp(
+        home: CupertinoProvisioningCodeScreen(
+          device: device,
+          apiService: api,
+          espProvisioningService: _FakeEspService(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bước 2/5'), findsOneWidget);
+    expect(api.createCodeCalls, 1);
   });
 }

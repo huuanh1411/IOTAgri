@@ -15,7 +15,9 @@ import 'package:iotagri_app/services/api_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 Map<String, dynamic> device(String name) => {
-  'id': name, 'name': name, 'isOnline': true,
+  'id': name,
+  'name': name,
+  'isOnline': true,
   'createdAt': '2026-10-01T00:00:00Z',
   'lastSeenAt': '2026-10-16T08:30:00Z',
 };
@@ -29,6 +31,7 @@ class ListApi extends ApiService {
     if (fail) throw Exception('Mất kết nối');
     return pending == null ? devices : pending!.future;
   }
+
   @override
   Future<Map<String, dynamic>> createDevice(String name) async {
     final added = device(name);
@@ -43,49 +46,89 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({});
   });
 
-  testWidgets('five tab taps select corresponding shell branch and preserve URLs', (tester) async {
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
-    final router = container.read(goRouterProvider);
-    addTearDown(router.dispose);
-    final shell = router.configuration.routes.whereType<StatefulShellRoute>().single;
-    expect(shell.branches.map((b) => (b.routes.first as GoRoute).path),
-      ['/home', '/alerts', '/pick', '/devices', '/other']);
-    final devicesRoute = shell.branches[3].routes.first as GoRoute;
-    expect(devicesRoute.name, 'devices');
-    final other = shell.branches[4].routes.first as GoRoute;
-    expect(other.routes.whereType<GoRoute>().map((r) => r.path), ['settings', 'harvest', 'help']);
+  testWidgets(
+    'five tab taps select corresponding shell branch and preserve URLs',
+    (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final router = container.read(goRouterProvider);
+      addTearDown(router.dispose);
+      final shell = router.configuration.routes
+          .whereType<StatefulShellRoute>()
+          .single;
+      expect(shell.branches.map((b) => (b.routes.first as GoRoute).path), [
+        '/home',
+        '/alerts',
+        '/pick',
+        '/devices',
+        '/other',
+      ]);
+      final devicesRoute = shell.branches[3].routes.first as GoRoute;
+      expect(devicesRoute.name, 'devices');
+      expect(
+        devicesRoute.routes.whereType<GoRoute>().single.name,
+        'device-setup',
+      );
+      final other = shell.branches[4].routes.first as GoRoute;
+      expect(other.routes.whereType<GoRoute>().map((r) => r.path), [
+        'settings',
+        'harvest',
+        'help',
+      ]);
 
-    tester.view.physicalSize = const Size(320, 700);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    var selected = 0;
-    await tester.pumpWidget(MaterialApp(home: StatefulBuilder(builder: (context, setState) {
-      return Scaffold(bottomNavigationBar: FloatingPillNavBar(
-        currentIndex: selected,
-        onTap: (index) => setState(() => selected = index),
-      ));
-    })));
-    for (final (index, label) in ['Trang chủ', 'Cảnh báo', 'Chọn giống', 'Thiết bị', 'Khác'].indexed) {
-      await tester.tap(find.text(label));
-      await tester.pumpAndSettle();
-      expect(selected, index);
-      expect(tester.takeException(), isNull);
-    }
-  });
+      tester.view.physicalSize = const Size(320, 700);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      var selected = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              return Scaffold(
+                bottomNavigationBar: FloatingPillNavBar(
+                  currentIndex: selected,
+                  onTap: (index) => setState(() => selected = index),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      for (final (index, label) in [
+        'Trang chủ',
+        'Cảnh báo',
+        'Chọn giống',
+        'Thiết bị',
+        'Khác',
+      ].indexed) {
+        await tester.tap(find.text(label));
+        await tester.pumpAndSettle();
+        expect(selected, index);
+        expect(tester.takeException(), isNull);
+      }
+    },
+  );
 
   Future<void> mount(WidgetTester tester, ListApi api) async {
-    await tester.pumpWidget(MaterialApp(theme: AppTheme.lightTheme, home: DevicesScreen(apiService: api)));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: DevicesScreen(apiService: api),
+      ),
+    );
     await tester.pump();
   }
 
-  testWidgets('list uses page header and fits long names/actions at 320px', (tester) async {
+  testWidgets('list uses page header and fits long names/actions at 320px', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(320, 800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    final api = ListApi()..devices = [device('Tháp rau rất dài ở khu vườn phía đông')];
+    final api = ListApi()
+      ..devices = [device('Tháp rau rất dài ở khu vườn phía đông')];
     await mount(tester, api);
     expect(find.byType(PageHeader), findsOneWidget);
     expect(find.text('Chi tiết'), findsOneWidget);
@@ -93,7 +136,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('search filters case-insensitively and shows no matches', (tester) async {
+  testWidgets('search filters case-insensitively and shows no matches', (
+    tester,
+  ) async {
     final api = ListApi()..devices = List.generate(7, (i) => device('Tháp $i'));
     await mount(tester, api);
     await tester.enterText(find.byType(CupertinoSearchTextField), 'THÁP 2');
@@ -105,7 +150,9 @@ void main() {
     expect(find.text('Không tìm thấy thiết bị.'), findsOneWidget);
   });
 
-  testWidgets('loading, error retry, empty and create remain usable', (tester) async {
+  testWidgets('loading, error retry, empty and create remain usable', (
+    tester,
+  ) async {
     final api = ListApi()..pending = Completer<List<dynamic>>();
     await mount(tester, api);
     expect(find.text('Đang tải thiết bị...'), findsOneWidget);

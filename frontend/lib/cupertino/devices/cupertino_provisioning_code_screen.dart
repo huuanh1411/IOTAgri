@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants/api_constants.dart';
 import '../../models/device.dart';
@@ -57,7 +58,7 @@ class _CupertinoProvisioningCodeScreenState
     super.initState();
     _apiService = widget.apiService ?? ApiService();
     _espService = widget.espProvisioningService ?? EspProvisioningService();
-    _generateCode();
+    _restoreOrGenerateCode();
   }
 
   @override
@@ -95,9 +96,8 @@ class _CupertinoProvisioningCodeScreenState
         _loading = false;
         _fatalError = null;
       });
-      _expiryTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-        if (mounted) setState(() {});
-      });
+      await _persistSession(code: code);
+      _startExpiryTimer();
       return true;
     } catch (error) {
       if (!mounted) return false;
@@ -109,6 +109,76 @@ class _CupertinoProvisioningCodeScreenState
       });
       return false;
     }
+  }
+
+  String get _sessionPrefix => 'device_setup_${widget.device.id}_';
+
+  Future<void> _restoreOrGenerateCode() async {
+    final preferences = await SharedPreferences.getInstance();
+    final savedCode = preferences.getString('${_sessionPrefix}code');
+    final savedExpiry = preferences.getString('${_sessionPrefix}expires_at');
+    final expiresAt = DateTime.tryParse(savedExpiry ?? '');
+    if (savedCode == null ||
+        savedCode.trim().isEmpty ||
+        expiresAt == null ||
+        !expiresAt.isAfter(DateTime.now().toUtc())) {
+      await _clearSession();
+      if (!mounted) return;
+      await _generateCode();
+      return;
+    }
+
+    final savedStage = preferences.getInt('${_sessionPrefix}stage') ?? 0;
+    if (!mounted) return;
+    setState(() {
+      _code = ProvisioningCode(
+        code: savedCode,
+        expiresAt: savedExpiry!,
+        createdAt: '',
+      );
+      // A restored web tab must reconnect to the ESP and rescan networks.
+      _stage = savedStage > _SetupStage.prepare.index
+          ? _SetupStage.connect
+          : _SetupStage.prepare;
+      _loading = false;
+      _fatalError = null;
+    });
+    _startExpiryTimer();
+  }
+
+  void _startExpiryTimer() {
+    _expiryTimer?.cancel();
+    _expiryTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  Future<void> _persistSession({
+    ProvisioningCode? code,
+    _SetupStage? stage,
+  }) async {
+    final preferences = await SharedPreferences.getInstance();
+    final currentCode = code ?? _code;
+    if (currentCode != null) {
+      await preferences.setString('${_sessionPrefix}code', currentCode.code);
+      await preferences.setString(
+        '${_sessionPrefix}expires_at',
+        currentCode.expiresAt,
+      );
+    }
+    await preferences.setInt('${_sessionPrefix}stage', (stage ?? _stage).index);
+  }
+
+  Future<void> _clearSession() async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove('${_sessionPrefix}code');
+    await preferences.remove('${_sessionPrefix}expires_at');
+    await preferences.remove('${_sessionPrefix}stage');
+  }
+
+  void _setStage(_SetupStage stage) {
+    setState(() => _stage = stage);
+    unawaited(_persistSession(stage: stage));
   }
 
   Future<void> _connectToEsp() async {
@@ -136,6 +206,7 @@ class _CupertinoProvisioningCodeScreenState
             ? () => context.l10n.espFoundNoNetworks
             : null;
       });
+      unawaited(_persistSession(stage: _SetupStage.wifi));
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -175,6 +246,7 @@ class _CupertinoProvisioningCodeScreenState
       _progress = 1;
       _message = null;
     });
+    unawaited(_persistSession(stage: _SetupStage.progress));
     try {
       await _espService.provision(
         ssid: _ssid.text.trim(),
@@ -218,11 +290,14 @@ class _CupertinoProvisioningCodeScreenState
     }
   }
 
-  void _returnToWifi(String Function() message) => setState(() {
-    _stage = _SetupStage.wifi;
-    _busy = false;
-    _message = message;
-  });
+  void _returnToWifi(String Function() message) {
+    setState(() {
+      _stage = _SetupStage.wifi;
+      _busy = false;
+      _message = message;
+    });
+    unawaited(_persistSession(stage: _SetupStage.wifi));
+  }
 
   Future<void> _checkUncertainOutcome() async {
     setState(() {
@@ -252,6 +327,7 @@ class _CupertinoProvisioningCodeScreenState
             _stage = _SetupStage.success;
             _message = null;
           });
+          await _clearSession();
           return;
         }
         if (attempt >= 2 && mounted) setState(() => _progress = 4);
@@ -267,20 +343,30 @@ class _CupertinoProvisioningCodeScreenState
     }
   }
 
-  void _goBack() => setState(() {
-    _message = null;
-    if (_stage == _SetupStage.connect) _stage = _SetupStage.prepare;
-    if (_stage == _SetupStage.wifi) _stage = _SetupStage.connect;
-  });
+  void _goBack() {
+    final nextStage = switch (_stage) {
+      _SetupStage.connect => _SetupStage.prepare,
+      _SetupStage.wifi => _SetupStage.connect,
+      _ => _stage,
+    };
+    setState(() {
+      _message = null;
+      _stage = nextStage;
+    });
+    unawaited(_persistSession(stage: nextStage));
+  }
 
-  void _viewDevice() => Navigator.of(context).pushReplacement<void, void>(
-    CupertinoPageRoute<void>(
-      builder: (_) => CupertinoDeviceDetailScreen(
-        device: widget.device,
-        apiService: _apiService,
+  void _viewDevice() {
+    unawaited(_clearSession());
+    Navigator.of(context).pushReplacement<void, void>(
+      CupertinoPageRoute<void>(
+        builder: (_) => CupertinoDeviceDetailScreen(
+          device: widget.device,
+          apiService: _apiService,
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   bool get _isExpired {
     final expiresAt = DateTime.tryParse(_code?.expiresAt ?? '');
@@ -360,7 +446,7 @@ class _CupertinoProvisioningCodeScreenState
       _Instruction(text: context.l10n.noInternetIsNormal),
       const SizedBox(height: 16),
       CupertinoButton.filled(
-        onPressed: () => setState(() => _stage = _SetupStage.connect),
+        onPressed: () => _setStage(_SetupStage.connect),
         child: Text(context.l10n.deviceIsReady),
       ),
     ],

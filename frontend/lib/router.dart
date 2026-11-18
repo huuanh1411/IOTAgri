@@ -19,6 +19,8 @@ import 'screens/sensor_detail_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/splash_screen.dart';
 import 'cupertino/devices/cupertino_devices_screen.dart';
+import 'cupertino/devices/cupertino_provisioning_code_screen.dart';
+import 'models/device.dart';
 import 'providers/auth_controller.dart';
 import 'providers/auth_provider.dart';
 import 'models/user.dart' as legacy_models;
@@ -197,6 +199,26 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 path: '/devices',
                 name: 'devices',
                 builder: (context, state) => const CupertinoDevicesScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':deviceId/setup',
+                    name: 'device-setup',
+                    builder: (context, state) {
+                      final extra = state.extra;
+                      final device = extra is Device
+                          ? extra
+                          : Device(
+                              id: state.pathParameters['deviceId'] ?? '',
+                              name:
+                                  state.uri.queryParameters['name'] ??
+                                  'ESP device',
+                              isOnline: false,
+                              createdAt: '',
+                            );
+                      return CupertinoProvisioningCodeScreen(device: device);
+                    },
+                  ),
+                ],
               ),
             ],
           ),

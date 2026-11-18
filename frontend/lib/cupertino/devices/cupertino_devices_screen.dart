@@ -1,5 +1,6 @@
 import '../../utils/display_localizations.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/animation/app_motion.dart';
@@ -9,7 +10,6 @@ import '../../services/api_service.dart';
 import '../../utils/l10n.dart';
 import 'add_device_screen.dart';
 import 'cupertino_device_detail_screen.dart';
-import 'cupertino_provisioning_code_screen.dart';
 
 class CupertinoDevicesScreen extends StatefulWidget {
   final ApiService? apiService;
@@ -136,13 +136,11 @@ class _CupertinoDevicesScreenState extends State<CupertinoDevicesScreen> {
   }
 
   Future<void> _openProvisioning(Device device) async {
-    await Navigator.of(context).push<void>(
-      CupertinoPageRoute<void>(
-        builder: (_) => CupertinoProvisioningCodeScreen(
-          device: device,
-          apiService: _apiService,
-        ),
-      ),
+    await context.pushNamed<void>(
+      'device-setup',
+      pathParameters: {'deviceId': device.id},
+      queryParameters: {'name': device.name},
+      extra: device,
     );
     if (mounted) await _loadDevices(showLoading: false);
   }
