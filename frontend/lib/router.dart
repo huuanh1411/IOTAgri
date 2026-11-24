@@ -239,12 +239,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                     builder: (context, state) => const HarvestScreen(),
                   ),
                   GoRoute(
-                    path: 'help',
-                    builder: (context, state) => const HelpScreen(),
-                  ),
-                  GoRoute(
                     path: 'subscription',
                     builder: (context, state) => const SubscriptionScreen(),
+                  ),
+                  GoRoute(
+                    path: 'help',
+                    builder: (context, state) => const HelpScreen(),
                   ),
                 ],
               ),

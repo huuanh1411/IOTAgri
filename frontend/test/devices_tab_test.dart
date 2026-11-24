@@ -73,6 +73,7 @@ void main() {
       expect(other.routes.whereType<GoRoute>().map((r) => r.path), [
         'settings',
         'harvest',
+        'subscription',
         'help',
       ]);
 
