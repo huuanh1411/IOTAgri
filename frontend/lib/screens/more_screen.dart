@@ -138,6 +138,13 @@ class MoreScreen extends ConsumerWidget {
                         ),
                         const Divider(height: 1),
                         _ListRow(
+                          icon: Icons.account_balance_wallet_outlined,
+                          title: context.l10n.payment,
+                          subtitle: context.l10n.paymentSubtitle,
+                          onTap: () => context.push('/other/subscription'),
+                        ),
+                        const Divider(height: 1),
+                        _ListRow(
                           icon: Icons.help_center, // help circle
                           title: context.l10n.helpAndSupport,
                           subtitle: context.l10n.faqAndChat,

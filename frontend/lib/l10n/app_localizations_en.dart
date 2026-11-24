@@ -1777,4 +1777,27 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteAccountInfoContactBody =>
       'For deletion help, email xteam.aerogreen@gmail.com.';
+
+  @override String get payment => 'Payment';
+  @override String get paymentSubtitle => 'Manage service plans and payments';
+  @override String get subscription => 'Subscription';
+  @override String get subscriptionSubtitle => 'Choose a service plan for your growing towers';
+  @override String get subscriptionUnavailable => 'Subscription plans are not available yet';
+  @override String get subscriptionUnavailableDetail => 'Plans and official prices will appear here when they are provided.';
+  @override String get choosePlan => 'Choose plan';
+  @override String get choosePlants => 'Choose plants';
+  @override String get choosePlantsSubtitle => 'Each selected plant uses one growing tower.';
+  @override String get selectedPlan => 'Selected plan';
+  @override String get selectedPlants => 'Selected plants';
+  @override String get growingTowers => 'Growing towers';
+  @override String get continueToPayment => 'Continue to payment';
+  @override String get paymentDetails => 'Payment details';
+  @override String get paymentWaiting => 'Waiting for payment information';
+  @override String get paymentWaitingDetail => 'The payment QR code and order total will be shown here when they are provided.';
+  @override String get paymentInstructions => 'Open your banking app, scan the QR code, then confirm the transfer details before paying.';
+  @override String get paymentPending => 'Waiting for payment';
+  @override String get paymentSucceeded => 'Payment successful';
+  @override String get paymentFailed => 'Payment failed';
+  @override String get paymentExpired => 'Payment expired';
+  @override String get backToPlans => 'Back to plans';
 }

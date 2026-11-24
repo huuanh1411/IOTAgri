@@ -3186,6 +3186,29 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'For deletion help, email xteam.aerogreen@gmail.com.'**
   String get deleteAccountInfoContactBody;
+
+  String get payment;
+  String get paymentSubtitle;
+  String get subscription;
+  String get subscriptionSubtitle;
+  String get subscriptionUnavailable;
+  String get subscriptionUnavailableDetail;
+  String get choosePlan;
+  String get choosePlants;
+  String get choosePlantsSubtitle;
+  String get selectedPlan;
+  String get selectedPlants;
+  String get growingTowers;
+  String get continueToPayment;
+  String get paymentDetails;
+  String get paymentWaiting;
+  String get paymentWaitingDetail;
+  String get paymentInstructions;
+  String get paymentPending;
+  String get paymentSucceeded;
+  String get paymentFailed;
+  String get paymentExpired;
+  String get backToPlans;
 }
 
 class _AppLocalizationsDelegate

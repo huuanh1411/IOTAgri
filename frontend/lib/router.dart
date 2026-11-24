@@ -18,6 +18,7 @@ import 'screens/more_screen.dart';
 import 'screens/sensor_detail_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/splash_screen.dart';
+import 'screens/subscription_screen.dart';
 import 'cupertino/devices/cupertino_devices_screen.dart';
 import 'cupertino/devices/cupertino_provisioning_code_screen.dart';
 import 'models/device.dart';
@@ -240,6 +241,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'help',
                     builder: (context, state) => const HelpScreen(),
+                  ),
+                  GoRoute(
+                    path: 'subscription',
+                    builder: (context, state) => const SubscriptionScreen(),
                   ),
                 ],
               ),

@@ -1768,4 +1768,27 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get deleteAccountInfoContactBody =>
       'Để được hỗ trợ xóa tài khoản, hãy gửi email đến xteam.aerogreen@gmail.com.';
+
+  @override String get payment => 'Thanh toán';
+  @override String get paymentSubtitle => 'Quản lý gói dịch vụ và thanh toán';
+  @override String get subscription => 'Gói dịch vụ';
+  @override String get subscriptionSubtitle => 'Chọn gói dịch vụ cho các tháp trồng của bạn';
+  @override String get subscriptionUnavailable => 'Chưa có gói dịch vụ khả dụng';
+  @override String get subscriptionUnavailableDetail => 'Gói và giá chính thức sẽ hiển thị ở đây khi được cung cấp.';
+  @override String get choosePlan => 'Chọn gói';
+  @override String get choosePlants => 'Chọn loại cây';
+  @override String get choosePlantsSubtitle => 'Mỗi loại cây được chọn sử dụng một tháp trồng.';
+  @override String get selectedPlan => 'Gói đã chọn';
+  @override String get selectedPlants => 'Cây đã chọn';
+  @override String get growingTowers => 'Tháp trồng';
+  @override String get continueToPayment => 'Tiếp tục thanh toán';
+  @override String get paymentDetails => 'Thông tin thanh toán';
+  @override String get paymentWaiting => 'Đang chờ thông tin thanh toán';
+  @override String get paymentWaitingDetail => 'Mã QR và tổng tiền sẽ hiển thị ở đây khi được cung cấp.';
+  @override String get paymentInstructions => 'Mở ứng dụng ngân hàng, quét mã QR, sau đó kiểm tra thông tin chuyển khoản trước khi thanh toán.';
+  @override String get paymentPending => 'Đang chờ thanh toán';
+  @override String get paymentSucceeded => 'Thanh toán thành công';
+  @override String get paymentFailed => 'Thanh toán thất bại';
+  @override String get paymentExpired => 'Thanh toán đã hết hạn';
+  @override String get backToPlans => 'Quay lại chọn gói';
 }
