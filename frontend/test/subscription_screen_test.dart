@@ -30,7 +30,9 @@ void main() {
     await tester.pumpWidget(_app());
     await tester.tap(find.text('Khởi đầu'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Xà lách'));
     await tester.tap(find.text('Xà lách'));
+    await tester.ensureVisible(find.text('Húng quế'));
     await tester.tap(find.text('Húng quế'));
     await tester.pumpAndSettle();
 
@@ -44,7 +46,11 @@ void main() {
     await tester.pumpWidget(_app());
     await tester.tap(find.text('Khởi đầu'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Mở QR minh họa'), 250);
+    await tester.scrollUntilVisible(
+      find.text('Mở QR minh họa'),
+      250,
+      scrollable: find.byType(SingleChildScrollView),
+    );
     await tester.tap(find.text('Mở QR minh họa'));
     await tester.pumpAndSettle();
 
