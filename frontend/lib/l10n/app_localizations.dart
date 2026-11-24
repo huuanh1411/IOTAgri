@@ -3209,6 +3209,40 @@ abstract class AppLocalizations {
   String get paymentFailed;
   String get paymentExpired;
   String get backToPlans;
+  String get demoDataNotice;
+  String get openDemoQr;
+  String get oneTower;
+  String get orderSummary;
+  String get seedlings;
+  String get nutrientSolution;
+  String get planPrice;
+  String get seedlingPrice;
+  String get nutrientPrice;
+  String get demoTotal;
+  String get demoPriceDisclaimer;
+  String get demoOrderReference;
+  String get demoQrNotice;
+  String get tryDemoStatus;
+  String get paymentSucceededDemo;
+  String get paymentFailedDemo;
+  String get paymentSuccessStatus;
+  String get paymentFailedStatus;
+  String get demoPlanStarterName;
+  String get demoPlanStarterDescription;
+  String get demoPlanGardenName;
+  String get demoPlanGardenDescription;
+  String get demoPlanProName;
+  String get demoPlanProDescription;
+  String get demoBenefitMonitoring;
+  String get demoBenefitSupport;
+  String get demoBenefitInsights;
+  String get demoBenefitPriority;
+  String get demoPlantButterhead;
+  String get demoPlantGenovese;
+  String get demoPlantBabyLeaf;
+  String get demoPlantSpearmint;
+  String get demoPlantTuscan;
+  String get demoPlantSlowBolt;
 }
 
 class _AppLocalizationsDelegate

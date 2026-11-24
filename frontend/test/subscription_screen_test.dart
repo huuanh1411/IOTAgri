@@ -3,53 +3,55 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:iotagri_app/l10n/app_localizations.dart';
 import 'package:iotagri_app/screens/subscription_screen.dart';
 
-Widget _app(Widget child) => MaterialApp(
-  locale: const Locale('vi'),
+Widget _app() => const MaterialApp(
+  locale: Locale('vi'),
   supportedLocales: AppLocalizations.supportedLocales,
   localizationsDelegates: AppLocalizations.localizationsDelegates,
-  home: child,
+  home: SubscriptionScreen(),
 );
 
 void main() {
-  const plan = SubscriptionPlan(
-    id: 'plan-1',
-    name: 'Pro',
-    description: 'Gói từ Backend',
-    benefits: ['Quyền lợi từ Backend'],
-    formattedPrice: '100.000 đ',
-  );
+  testWidgets('shows demo plans and reveals plants after plan selection', (tester) async {
+    await tester.pumpWidget(_app());
 
-  testWidgets(
-    'selects multiple plants and updates one-tower-per-plant summary',
-    (tester) async {
-      await tester.pumpWidget(_app(const SubscriptionScreen(plans: [plan])));
+    expect(find.text('Khởi đầu'), findsOneWidget);
+    expect(find.text('Vườn nhà'), findsOneWidget);
+    expect(find.text('Chuyên nghiệp'), findsOneWidget);
+    expect(find.text('Xà lách'), findsNothing);
 
-      await tester.tap(find.text('Pro'));
-      await tester.tap(find.text('Xà lách'));
-      await tester.tap(find.text('Húng quế'));
-      await tester.pump();
-
-      expect(find.text('Cây đã chọn: 2'), findsOneWidget);
-      expect(find.text('Tháp trồng: 2'), findsOneWidget);
-    },
-  );
-
-  testWidgets('shows waiting state instead of making a QR code', (
-    tester,
-  ) async {
-    await tester.pumpWidget(_app(const SubscriptionScreen(plans: [plan])));
-    await tester.tap(find.byType(Radio<String>));
-    await tester.pump();
-    final continueButton = find.byType(FilledButton);
-    await tester.scrollUntilVisible(
-      continueButton,
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(continueButton);
+    await tester.tap(find.text('Vườn nhà'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Đang chờ thông tin thanh toán'), findsOneWidget);
-    expect(find.byType(Image), findsNothing);
+    expect(find.text('Xà lách'), findsOneWidget);
+    expect(find.text('Rau mùi'), findsOneWidget);
+  });
+
+  testWidgets('selects multiple plants and updates demo quantities', (tester) async {
+    await tester.pumpWidget(_app());
+    await tester.tap(find.text('Khởi đầu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Xà lách'));
+    await tester.tap(find.text('Húng quế'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cây đã chọn'), findsOneWidget);
+    expect(find.text('2'), findsWidgets);
+    expect(find.text('24'), findsOneWidget);
+    expect(find.text('500 ml'), findsOneWidget);
+  });
+
+  testWidgets('opens a test QR and lets the user try non-transactional states', (tester) async {
+    await tester.pumpWidget(_app());
+    await tester.tap(find.text('Khởi đầu'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Mở QR minh họa'), 250);
+    await tester.tap(find.text('Mở QR minh họa'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('QR thử nghiệm. Không sử dụng để thanh toán thật.'), findsOneWidget);
+    expect(find.text('Thành công (minh họa)'), findsOneWidget);
+    await tester.tap(find.text('Thành công (minh họa)'));
+    await tester.pumpAndSettle();
+    expect(find.text('Thanh toán minh họa thành công — không có giao dịch thật'), findsOneWidget);
   });
 }
