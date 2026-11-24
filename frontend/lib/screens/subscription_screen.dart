@@ -128,7 +128,20 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   Widget _paymentStatusLabel() {
     final (text, color, icon) = switch (_paymentStatus) { _DemoPaymentStatus.pending => (context.l10n.paymentPending, AppColors.mutedSage, Icons.schedule_outlined), _DemoPaymentStatus.success => (context.l10n.paymentSucceededDemo, AppColors.mint, Icons.check_circle_outline), _DemoPaymentStatus.failed => (context.l10n.paymentFailedDemo, AppColors.danger, Icons.error_outline) };
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(icon, color: color), const SizedBox(width: 8), Text(text, style: TextStyle(color: color, fontWeight: FontWeight.w700))]);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, color: color),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: color, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    );
   }
   String _statusText(_DemoPaymentStatus status) => switch (status) { _DemoPaymentStatus.pending => context.l10n.paymentPending, _DemoPaymentStatus.success => context.l10n.paymentSuccessStatus, _DemoPaymentStatus.failed => context.l10n.paymentFailedStatus };
   String _planName(DemoSubscriptionPlan p) => switch (p.id) { 'starter' => context.l10n.demoPlanStarterName, 'garden' => context.l10n.demoPlanGardenName, _ => context.l10n.demoPlanProName };
