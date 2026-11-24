@@ -10,7 +10,8 @@ permissions:
 
 concurrency:
   group: production-deploy
-  cancel-in-progress: false
+  # A newer main commit must not wait forever behind a stalled remote deploy.
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -36,7 +37,7 @@ jobs:
           VPS_PORT: ${{ secrets.VPS_PORT }}
           VPS_USER: ${{ secrets.VPS_USER }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 \
+          timeout 15m ssh -i ~/.ssh/id_ed25519 \
             -o BatchMode=yes \
             -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile=~/.ssh/known_hosts \
