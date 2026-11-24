@@ -49,7 +49,7 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('Mở QR minh họa'),
       250,
-      scrollable: find.byType(SingleChildScrollView),
+      scrollable: find.byType(Scrollable).first,
     );
     await tester.tap(find.text('Mở QR minh họa'));
     await tester.pumpAndSettle();
