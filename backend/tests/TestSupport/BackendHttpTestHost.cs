@@ -60,6 +60,8 @@ internal static class BackendHttpTestHost
             });
         builder.Services.AddAuthorization(o => o.AddPolicy("AdminOnly", p => p.RequireRole("Admin")));
         builder.Services.AddApplicationWebSecurity(builder.Configuration, builder.Environment);
+        builder.Services.Configure<SubscriptionOptions>(builder.Configuration.GetSection("Subscription"));
+        builder.Services.Configure<SePayOptions>(builder.Configuration.GetSection("SePay"));
         builder.Services.AddScoped<ITokenService, TokenService>();
         builder.Services.AddSingleton<IEmailSender, TestEmailSender>();
         builder.Services.AddSingleton<IGoogleTokenValidator, TestGoogleTokenValidator>();
