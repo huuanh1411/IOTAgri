@@ -84,6 +84,29 @@ public class ProductionRuntimeTests
     }
 
     [Fact]
+    public void Continuous_deployment_uses_the_triggering_commit_without_discarding_vps_operational_files()
+    {
+        var workflow = File.ReadAllText(RepoFile(".github/workflows/cd.yml"));
+
+        Assert.Contains("DEPLOY_SHA: ${{ github.sha }}", workflow);
+        Assert.Contains("git fetch --prune origin main", workflow);
+        Assert.Contains("git merge-base --is-ancestor \"$deploy_sha\" FETCH_HEAD", workflow);
+        Assert.Contains("git switch --detach \"$deploy_sha\"", workflow);
+        Assert.Contains("git stash push -m \"pre-deploy-$deploy_sha\"", workflow);
+        Assert.DoesNotContain("git pull --ff-only", workflow);
+        Assert.DoesNotContain("git reset --hard", workflow);
+        Assert.DoesNotContain("git clean", workflow);
+    }
+
+    [Fact]
+    public void Continuous_deployment_allows_the_slow_frontend_release_build_to_finish()
+    {
+        var workflow = File.ReadAllText(RepoFile(".github/workflows/cd.yml"));
+
+        Assert.Contains("timeout 60m ssh", workflow);
+    }
+
+    [Fact]
     public void Mqtt_certificate_sync_requires_both_certificate_and_private_key_to_match()
     {
         var script = File.ReadAllText(RepoFile("deploy/sync-mqtt-certs.sh"));
