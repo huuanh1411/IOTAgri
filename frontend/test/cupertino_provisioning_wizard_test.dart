@@ -14,6 +14,7 @@ import 'test_app.dart';
 
 class _FakeApiService extends ApiService {
   int createCodeCalls = 0;
+  int getDeviceCalls = 0;
 
   @override
   Future<Map<String, dynamic>> createProvisioningCode(String deviceId) async {
@@ -22,10 +23,10 @@ class _FakeApiService extends ApiService {
   }
 
   @override
-  Future<Map<String, dynamic>> getDevice(String id) async => {
-    'id': id,
-    'isOnline': true,
-  };
+  Future<Map<String, dynamic>> getDevice(String id) async {
+    getDeviceCalls++;
+    return {'id': id, 'isOnline': true};
+  }
 
   @override
   Future<List<dynamic>> getDeviceReadings(
@@ -60,10 +61,13 @@ class _FakeEspService extends EspProvisioningService {
   String? provisionedSsid;
   String? provisionedPassword;
   bool scanFails = false;
+  int getStatusCalls = 0;
 
   @override
-  Future<EspDeviceStatus> getStatus() async =>
-      const EspDeviceStatus(hardwareId: 'AGRI-12F4', setupMode: true);
+  Future<EspDeviceStatus> getStatus() async {
+    getStatusCalls++;
+    return const EspDeviceStatus(hardwareId: 'AGRI-12F4', setupMode: true);
+  }
 
   @override
   Future<List<EspWifiNetwork>> scanNetworks() async {
@@ -301,6 +305,43 @@ void main() {
 
     expect(find.text('Bước 2/5'), findsOneWidget);
     expect(api.createCodeCalls, 1);
+  });
+
+  testWidgets('resumes backend polling after a rebuild during ESP handoff', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'device_setup_${device.id}_code': 'CONSUMED-CODE',
+      'device_setup_${device.id}_expires_at': '2020-01-01T00:00:00Z',
+      'device_setup_${device.id}_stage': 3,
+    });
+    final api = _FakeApiService();
+    final esp = _FakeEspService();
+
+    await tester.pumpWidget(
+      buildLocalizedCupertinoApp(
+        home: CupertinoProvisioningCodeScreen(
+          device: device,
+          apiService: api,
+          espProvisioningService: esp,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Bước 4/5'), findsOneWidget);
+    expect(api.createCodeCalls, 0);
+    expect(esp.getStatusCalls, 0);
+
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bước 5/5'), findsOneWidget);
+    expect(api.getDeviceCalls, 1);
+    expect(esp.getStatusCalls, 0);
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getString('device_setup_${device.id}_code'), isNull);
   });
 
   testWidgets('restores setup route when the devices API is offline', (

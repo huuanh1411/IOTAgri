@@ -117,36 +117,63 @@ class _CupertinoProvisioningCodeScreenState
   String get _sessionPrefix => 'device_setup_${widget.device.id}_';
 
   Future<void> _restoreOrGenerateCode() async {
-    final preferences = await SharedPreferences.getInstance();
-    final savedCode = preferences.getString('${_sessionPrefix}code');
-    final savedExpiry = preferences.getString('${_sessionPrefix}expires_at');
-    final expiresAt = DateTime.tryParse(savedExpiry ?? '');
-    if (savedCode == null ||
-        savedCode.trim().isEmpty ||
-        expiresAt == null ||
-        !expiresAt.isAfter(DateTime.now().toUtc())) {
-      await _clearSession();
-      if (!mounted) return;
-      await _generateCode();
-      return;
-    }
+    try {
+      final preferences = await SharedPreferences.getInstance();
+      final savedStage =
+          preferences.getInt('${_sessionPrefix}stage') ??
+          _SetupStage.prepare.index;
 
-    final savedStage = preferences.getInt('${_sessionPrefix}stage') ?? 0;
-    if (!mounted) return;
-    setState(() {
-      _code = ProvisioningCode(
-        code: savedCode,
-        expiresAt: savedExpiry!,
-        createdAt: '',
-      );
-      // A restored web tab must reconnect to the ESP and rescan networks.
-      _stage = savedStage > _SetupStage.prepare.index
-          ? _SetupStage.connect
-          : _SetupStage.prepare;
-      _loading = false;
-      _fatalError = null;
-    });
-    _startExpiryTimer();
+      // Once provisioning starts, the ESP may already have consumed the code,
+      // restarted, and stopped advertising its setup access point. Resume the
+      // backend handoff instead of trying to reach 192.168.4.1 again.
+      if (savedStage >= _SetupStage.progress.index) {
+        if (!mounted) return;
+        setState(() {
+          _code = null;
+          _stage = _SetupStage.progress;
+          _progress = 3;
+          _loading = false;
+          _fatalError = null;
+          _message = () => context.l10n.provisioningOutcomeChecking;
+        });
+        unawaited(_waitForBackendOnline());
+        return;
+      }
+
+      final savedCode = preferences.getString('${_sessionPrefix}code');
+      final savedExpiry = preferences.getString('${_sessionPrefix}expires_at');
+      final expiresAt = DateTime.tryParse(savedExpiry ?? '');
+      if (savedCode == null ||
+          savedCode.trim().isEmpty ||
+          expiresAt == null ||
+          !expiresAt.isAfter(DateTime.now().toUtc())) {
+        await _clearSession();
+        if (!mounted) return;
+        await _generateCode();
+        return;
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _code = ProvisioningCode(
+          code: savedCode,
+          expiresAt: savedExpiry!,
+          createdAt: '',
+        );
+        // Wi-Fi credentials are intentionally not persisted, so pre-handoff
+        // sessions must reconnect to the ESP and select the network again.
+        _stage = savedStage > _SetupStage.prepare.index
+            ? _SetupStage.connect
+            : _SetupStage.prepare;
+        _loading = false;
+        _fatalError = null;
+      });
+      _startExpiryTimer();
+    } catch (_) {
+      // Session persistence is recovery-only. Storage failures must not leave
+      // the setup screen stuck on its loading indicator.
+      if (mounted) await _generateCode();
+    }
   }
 
   void _startExpiryTimer() {
@@ -160,28 +187,39 @@ class _CupertinoProvisioningCodeScreenState
     ProvisioningCode? code,
     _SetupStage? stage,
   }) async {
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.setString(_activeDeviceIdKey, widget.device.id);
-    await preferences.setString(_activeDeviceNameKey, widget.device.name);
-    final currentCode = code ?? _code;
-    if (currentCode != null) {
-      await preferences.setString('${_sessionPrefix}code', currentCode.code);
-      await preferences.setString(
-        '${_sessionPrefix}expires_at',
-        currentCode.expiresAt,
+    try {
+      final preferences = await SharedPreferences.getInstance();
+      await preferences.setString(_activeDeviceIdKey, widget.device.id);
+      await preferences.setString(_activeDeviceNameKey, widget.device.name);
+      final currentCode = code ?? _code;
+      if (currentCode != null) {
+        await preferences.setString('${_sessionPrefix}code', currentCode.code);
+        await preferences.setString(
+          '${_sessionPrefix}expires_at',
+          currentCode.expiresAt,
+        );
+      }
+      await preferences.setInt(
+        '${_sessionPrefix}stage',
+        (stage ?? _stage).index,
       );
+    } catch (_) {
+      // Provisioning remains usable when browser storage is unavailable.
     }
-    await preferences.setInt('${_sessionPrefix}stage', (stage ?? _stage).index);
   }
 
   Future<void> _clearSession() async {
-    final preferences = await SharedPreferences.getInstance();
-    await preferences.remove('${_sessionPrefix}code');
-    await preferences.remove('${_sessionPrefix}expires_at');
-    await preferences.remove('${_sessionPrefix}stage');
-    if (preferences.getString(_activeDeviceIdKey) == widget.device.id) {
-      await preferences.remove(_activeDeviceIdKey);
-      await preferences.remove(_activeDeviceNameKey);
+    try {
+      final preferences = await SharedPreferences.getInstance();
+      await preferences.remove('${_sessionPrefix}code');
+      await preferences.remove('${_sessionPrefix}expires_at');
+      await preferences.remove('${_sessionPrefix}stage');
+      if (preferences.getString(_activeDeviceIdKey) == widget.device.id) {
+        await preferences.remove(_activeDeviceIdKey);
+        await preferences.remove(_activeDeviceNameKey);
+      }
+    } catch (_) {
+      // Session cleanup is best-effort and must not block successful setup.
     }
   }
 
@@ -255,7 +293,8 @@ class _CupertinoProvisioningCodeScreenState
       _progress = 1;
       _message = null;
     });
-    unawaited(_persistSession(stage: _SetupStage.progress));
+    await _persistSession(stage: _SetupStage.progress);
+    if (!mounted) return;
     try {
       await _espService.provision(
         ssid: _ssid.text.trim(),
