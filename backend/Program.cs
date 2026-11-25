@@ -78,6 +78,8 @@ builder.Services.AddApplicationWebSecurity(builder.Configuration, builder.Enviro
 
 builder.Services.Configure<EmailVerificationOptions>(builder.Configuration.GetSection("Smtp"));
 builder.Services.Configure<GoogleAuthOptions>(builder.Configuration.GetSection("GoogleAuth"));
+builder.Services.Configure<SubscriptionOptions>(builder.Configuration.GetSection("Subscription"));
+builder.Services.Configure<SePayOptions>(builder.Configuration.GetSection("SePay"));
 builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddSingleton<IGoogleIdTokenVerifier, GoogleIdTokenVerifier>();
 builder.Services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
@@ -125,6 +127,7 @@ app.MapDeviceEndpoints();
 app.MapDeviceProvisioningEndpoints();
 app.MapSensorEndpoints();
 app.MapDashboardEndpoints();
+app.MapSubscriptionEndpoints();
 app.MapGet("/health", async (ApplicationDbContext db, CancellationToken cancellationToken) =>
     await db.Database.CanConnectAsync(cancellationToken)
         ? Results.Ok(new { status = "ready" })

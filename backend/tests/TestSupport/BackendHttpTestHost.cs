@@ -35,6 +35,11 @@ internal static class BackendHttpTestHost
             ["Jwt:Key"] = key, ["Jwt:Issuer"] = "qa-http", ["Jwt:Audience"] = "qa-clients",
             ["EmailVerification:Pepper"] = "qa-email-verification-pepper-0123456789abcdef",
             ["DeviceProvisioning:MqttHost"] = "qa-broker",
+            ["Subscription:MonthlyPriceVnd"] = "50000",
+            ["Subscription:BankCode"] = "MB",
+            ["Subscription:AccountNumber"] = "1234567890",
+            ["Subscription:AccountName"] = "AEROGREEN",
+            ["SePay:WebhookSecret"] = "qa-sepay-webhook-secret",
             ["Cors:AllowedOrigins:0"] = "https://app.aerogreen.vn",
             ["Cors:AllowedOrigins:1"] = "https://aerogreen.vn",
             ["Cors:AllowPrivateLanOrigins"] = "true"
@@ -72,6 +77,7 @@ internal static class BackendHttpTestHost
         app.MapDeviceProvisioningEndpoints();
         app.MapSensorEndpoints();
         app.MapDashboardEndpoints();
+        app.MapSubscriptionEndpoints();
         await RoleSeeder.SeedAsync(app.Services, app.Configuration);
         await app.StartAsync();
         return app;

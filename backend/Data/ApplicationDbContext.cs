@@ -26,6 +26,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<SystemAlertDefaults> SystemAlertDefaults => Set<SystemAlertDefaults>();
     public DbSet<EmailVerificationCode> EmailVerificationCodes => Set<EmailVerificationCode>();
     public DbSet<AccountDeletionAudit> AccountDeletionAudits => Set<AccountDeletionAudit>();
+    public DbSet<CropSubscription> CropSubscriptions => Set<CropSubscription>();
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -73,6 +74,21 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
                 .WithMany(u => u.Devices)
                 .HasForeignKey(d => d.OwnerId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        builder.Entity<CropSubscription>(entity =>
+        {
+            entity.Property(item => item.CropName).HasMaxLength(100);
+            entity.Property(item => item.PaymentCode).HasMaxLength(34);
+            entity.Property(item => item.Status).HasMaxLength(16);
+            entity.HasIndex(item => item.PaymentCode).IsUnique();
+            entity.HasIndex(item => item.SePayTransactionId).IsUnique();
+            entity.HasIndex(item => new { item.DeviceId, item.CreatedAt });
+            entity.ToTable(table => table.HasCheckConstraint("CK_CropSubscriptions_AmountVnd", "\"AmountVnd\" > 0"));
+            entity.HasOne(item => item.Device)
+                .WithMany()
+                .HasForeignKey(item => item.DeviceId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<SensorReading>(entity =>

@@ -52,6 +52,21 @@ public class ProductionRuntimeTests
     }
 
     [Fact]
+    public void Production_compose_exposes_subscription_and_sepay_settings()
+    {
+        var compose = File.ReadAllText(RepoFile("compose.production.yaml"));
+        var environment = File.ReadAllText(RepoFile(".env.production.example"));
+
+        Assert.Contains("Subscription__MonthlyPriceVnd", compose);
+        Assert.Contains("Subscription__BankCode", compose);
+        Assert.Contains("Subscription__AccountNumber", compose);
+        Assert.Contains("Subscription__AccountName", compose);
+        Assert.Contains("SePay__WebhookSecret", compose);
+        Assert.Contains("SUBSCRIPTION_MONTHLY_PRICE_VND=", environment);
+        Assert.Contains("SEPAY_WEBHOOK_SECRET=", environment);
+    }
+
+    [Fact]
     public void Production_compose_has_health_checks_single_api_replica_and_resource_limits()
     {
         var compose = File.ReadAllText(RepoFile("compose.production.yaml"));

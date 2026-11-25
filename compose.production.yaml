@@ -99,6 +99,11 @@ services:
       MqttBrokerAdmin__ClientId: iotagribackend-dynsec
       MqttBrokerAdmin__DeviceRole: device
       DeviceProvisioning__MqttHost: mqtt.aerogreen.vn
+      Subscription__MonthlyPriceVnd: ${SUBSCRIPTION_MONTHLY_PRICE_VND:-0}
+      Subscription__BankCode: ${SUBSCRIPTION_BANK_CODE:-}
+      Subscription__AccountNumber: ${SUBSCRIPTION_ACCOUNT_NUMBER:-}
+      Subscription__AccountName: ${SUBSCRIPTION_ACCOUNT_NAME:-}
+      SePay__WebhookSecret: ${SEPAY_WEBHOOK_SECRET:-}
       PumpScheduling__Enabled: "true"
       PumpScheduling__PollSeconds: ${PUMP_SCHEDULING_POLL_SECONDS:-30}
       PumpScheduling__DueWindowSeconds: ${PUMP_SCHEDULING_DUE_WINDOW_SECONDS:-90}

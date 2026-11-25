@@ -4,13 +4,18 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using IOTAgriBackend.Dtos.Auth;
 using IOTAgriBackend.Dtos.Devices;
+using IOTAgriBackend.Dtos.Subscriptions;
 using IOTAgriBackend.Dtos.Tickets;
 using IOTAgriBackend.Models;
+using IOTAgriBackend.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -231,5 +236,45 @@ public class HttpIntegrationTests : IClassFixture<PostgresTestFixture>
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokens.AccessToken);
         using var response = await client.PostAsJsonAsync("/api/devices/", new CreateDeviceRequest(" "));
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Subscription_payment_activates_owned_device_crop_after_valid_sepay_webhook()
+    {
+        await using var db = await _fixture.CreateDatabaseAsync();
+        await using var app = await BackendHttpTestHost.CreateAsync(db);
+        using var client = app.GetTestClient();
+        var tokens = await RegisterLogin(client);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokens.AccessToken);
+
+        using var deviceResponse = await client.PostAsJsonAsync("/api/devices/", new CreateDeviceRequest("Grow rack"));
+        var device = await deviceResponse.Content.ReadFromJsonAsync<DeviceResponse>();
+        Assert.NotNull(device);
+        using var subscriptionResponse = await client.PostAsJsonAsync($"/api/subscriptions/devices/{device!.Id}", new CreateCropSubscriptionRequest("Lettuce"));
+        Assert.Equal(HttpStatusCode.Created, subscriptionResponse.StatusCode);
+        var payment = await subscriptionResponse.Content.ReadFromJsonAsync<CropSubscriptionPaymentResponse>();
+        Assert.NotNull(payment);
+        Assert.Equal(50_000, payment!.Subscription.AmountVnd);
+
+        var rawBody = JsonSerializer.Serialize(new
+        {
+            id = 92704, accountNumber = "1234567890", code = payment.Subscription.PaymentCode,
+            transferType = "in", transferAmount = payment.Subscription.AmountVnd
+        });
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        using var webhook = new HttpRequestMessage(HttpMethod.Post, "/api/payments/sepay/webhook")
+        {
+            Content = new StringContent(rawBody, Encoding.UTF8, "application/json")
+        };
+        webhook.Headers.Add("X-SePay-Timestamp", timestamp.ToString());
+        webhook.Headers.Add("X-SePay-Signature", SePayWebhookVerifier.Sign("qa-sepay-webhook-secret", timestamp, rawBody));
+        using var webhookResponse = await client.SendAsync(webhook);
+
+        Assert.Equal(HttpStatusCode.OK, webhookResponse.StatusCode);
+        db.ChangeTracker.Clear();
+        var saved = await db.CropSubscriptions.SingleAsync();
+        Assert.Equal("Active", saved.Status);
+        Assert.Equal(92704, saved.SePayTransactionId);
+        Assert.NotNull(saved.ExpiresAt);
     }
 }

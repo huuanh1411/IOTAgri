@@ -150,6 +150,67 @@ namespace IOTAgriBackend.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("IOTAgriBackend.Models.CropSubscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AmountVnd")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CropName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("DeviceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentCode")
+                        .IsRequired()
+                        .HasMaxLength(34)
+                        .HasColumnType("character varying(34)");
+
+                    b.Property<DateTime>("PaymentExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SePayRawPayload")
+                        .HasColumnType("text");
+
+                    b.Property<long?>("SePayTransactionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentCode")
+                        .IsUnique();
+
+                    b.HasIndex("SePayTransactionId")
+                        .IsUnique();
+
+                    b.HasIndex("DeviceId", "CreatedAt");
+
+                    b.ToTable("CropSubscriptions", t =>
+                        {
+                            t.HasCheckConstraint("CK_CropSubscriptions_AmountVnd", "\"AmountVnd\" > 0");
+                        });
+                });
+
             modelBuilder.Entity("IOTAgriBackend.Models.Device", b =>
                 {
                     b.Property<Guid>("Id")
@@ -786,6 +847,17 @@ namespace IOTAgriBackend.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("IOTAgriBackend.Models.CropSubscription", b =>
+                {
+                    b.HasOne("IOTAgriBackend.Models.Device", "Device")
+                        .WithMany()
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Device");
                 });
 
             modelBuilder.Entity("IOTAgriBackend.Models.Device", b =>
