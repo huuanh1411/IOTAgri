@@ -49,6 +49,7 @@ class _CupertinoProvisioningCodeScreenState
   bool _obscurePassword = true;
   bool _manualNetwork = false;
   bool _sensorDataReceived = false;
+  bool _checkingBackend = false;
   int _progress = 0;
   String Function()? _fatalError;
   String Function()? _message;
@@ -357,7 +358,13 @@ class _CupertinoProvisioningCodeScreenState
   }
 
   Future<void> _waitForBackendOnline() async {
+    if (!mounted || _checkingBackend) return;
     final generation = ++_pollGeneration;
+    setState(() {
+      _checkingBackend = true;
+      _progress = 3;
+      _message = () => context.l10n.provisioningOutcomeChecking;
+    });
     for (var attempt = 0; attempt < 20; attempt++) {
       await Future<void>.delayed(const Duration(seconds: 3));
       if (!mounted || generation != _pollGeneration) return;
@@ -370,6 +377,7 @@ class _CupertinoProvisioningCodeScreenState
           );
           if (!mounted || generation != _pollGeneration) return;
           setState(() {
+            _checkingBackend = false;
             _progress = 5;
             _sensorDataReceived = readings.isNotEmpty;
             _stage = _SetupStage.success;
@@ -378,17 +386,22 @@ class _CupertinoProvisioningCodeScreenState
           await _clearSession();
           return;
         }
-        if (attempt >= 2 && mounted) setState(() => _progress = 4);
       } catch (_) {
         // The ESP's local HTTP connection normally disappears during handoff.
       }
     }
     if (mounted && generation == _pollGeneration) {
       setState(() {
+        _checkingBackend = false;
         _busy = false;
         _message = () => context.l10n.deviceWifiButNotOnline;
       });
     }
+  }
+
+  void _retryBackendCheck() {
+    if (_checkingBackend) return;
+    unawaited(_waitForBackendOnline());
   }
 
   void _goBack() {
@@ -631,6 +644,13 @@ class _CupertinoProvisioningCodeScreenState
       if (_message != null) ...[
         const SizedBox(height: 18),
         _InfoBanner(text: _message!()),
+      ],
+      if (!_checkingBackend && _message != null) ...[
+        const SizedBox(height: 10),
+        CupertinoButton(
+          onPressed: _retryBackendCheck,
+          child: Text(context.l10n.retry),
+        ),
       ],
     ],
   );

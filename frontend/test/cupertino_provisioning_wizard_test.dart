@@ -15,6 +15,7 @@ import 'test_app.dart';
 class _FakeApiService extends ApiService {
   int createCodeCalls = 0;
   int getDeviceCalls = 0;
+  bool deviceOnline = true;
 
   @override
   Future<Map<String, dynamic>> createProvisioningCode(String deviceId) async {
@@ -25,7 +26,7 @@ class _FakeApiService extends ApiService {
   @override
   Future<Map<String, dynamic>> getDevice(String id) async {
     getDeviceCalls++;
-    return {'id': id, 'isOnline': true};
+    return {'id': id, 'isOnline': deviceOnline};
   }
 
   @override
@@ -342,6 +343,47 @@ void main() {
     expect(esp.getStatusCalls, 0);
     final preferences = await SharedPreferences.getInstance();
     expect(preferences.getString('device_setup_${device.id}_code'), isNull);
+  });
+
+  testWidgets('keeps registration pending and allows retry after timeout', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'device_setup_${device.id}_code': 'CONSUMED-CODE',
+      'device_setup_${device.id}_expires_at': '2020-01-01T00:00:00Z',
+      'device_setup_${device.id}_stage': 3,
+    });
+    final api = _FakeApiService()..deviceOnline = false;
+
+    await tester.pumpWidget(
+      buildLocalizedCupertinoApp(
+        home: CupertinoProvisioningCodeScreen(
+          device: device,
+          apiService: api,
+          espProvisioningService: _FakeEspService(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    for (var attempt = 0; attempt < 20; attempt++) {
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+    }
+
+    expect(api.getDeviceCalls, 20);
+    expect(find.text('Thử lại'), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.checkmark_circle_fill), findsNWidgets(3));
+    expect(find.byIcon(CupertinoIcons.circle_filled), findsOneWidget);
+
+    api.deviceOnline = true;
+    await tester.tap(find.text('Thử lại'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
+    expect(api.getDeviceCalls, 21);
+    expect(find.text('Bước 5/5'), findsOneWidget);
   });
 
   testWidgets('restores setup route when the devices API is offline', (
