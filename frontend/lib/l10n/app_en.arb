@@ -850,5 +850,21 @@
   "demoPlantBabyLeaf": "Spinach",
   "demoPlantSpearmint": "Mint",
   "demoPlantTuscan": "Kale",
-  "demoPlantSlowBolt": "Coriander"
+  "demoPlantSlowBolt": "Coriander",
+  "subscriptionRealPaymentNotice": "Create a payment request for one device. The amount and transfer reference are issued by Aerogreen.",
+  "subscriptionDeviceLabel": "Device",
+  "subscriptionCropLabel": "Crop name",
+  "subscriptionCropHint": "For example: Lettuce",
+  "subscriptionPriceFromServer": "The official monthly amount will be shown after the payment request is created.",
+  "subscriptionNoDevices": "Create a device before purchasing a subscription.",
+  "subscriptionFormRequired": "Choose a device and enter the crop name.",
+  "subscriptionLoadFailed": "Unable to load your devices. Please try again.",
+  "subscriptionCreateFailed": "Unable to create the payment request. The device may already have a pending or active subscription.",
+  "subscriptionQrLoadFailed": "The payment QR could not be loaded. Use the transfer details below.",
+  "subscriptionBankLabel": "Bank",
+  "subscriptionAccountLabel": "Account number",
+  "subscriptionAccountNameLabel": "Account holder",
+  "subscriptionTransferContentLabel": "Transfer content",
+  "subscriptionExpiryLabel": "Pay before",
+  "subscriptionRefreshStatus": "Refresh payment status"
 }

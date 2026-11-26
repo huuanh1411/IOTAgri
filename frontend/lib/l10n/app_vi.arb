@@ -850,5 +850,21 @@
   "demoPlantBabyLeaf": "Rau chân vịt",
   "demoPlantSpearmint": "Bạc hà",
   "demoPlantTuscan": "Cải xoăn",
-  "demoPlantSlowBolt": "Rau mùi"
+  "demoPlantSlowBolt": "Rau mùi",
+  "subscriptionRealPaymentNotice": "Tạo yêu cầu thanh toán cho một thiết bị. Số tiền và nội dung chuyển khoản được Aerogreen cấp.",
+  "subscriptionDeviceLabel": "Thiết bị",
+  "subscriptionCropLabel": "Tên cây trồng",
+  "subscriptionCropHint": "Ví dụ: Xà lách",
+  "subscriptionPriceFromServer": "Số tiền gói tháng chính thức sẽ hiển thị sau khi tạo yêu cầu thanh toán.",
+  "subscriptionNoDevices": "Hãy tạo thiết bị trước khi mua gói dịch vụ.",
+  "subscriptionFormRequired": "Hãy chọn thiết bị và nhập tên cây trồng.",
+  "subscriptionLoadFailed": "Không thể tải danh sách thiết bị. Vui lòng thử lại.",
+  "subscriptionCreateFailed": "Không thể tạo yêu cầu thanh toán. Thiết bị có thể đã có gói đang chờ hoặc còn hiệu lực.",
+  "subscriptionQrLoadFailed": "Không tải được mã QR thanh toán. Hãy dùng thông tin chuyển khoản bên dưới.",
+  "subscriptionBankLabel": "Ngân hàng",
+  "subscriptionAccountLabel": "Số tài khoản",
+  "subscriptionAccountNameLabel": "Chủ tài khoản",
+  "subscriptionTransferContentLabel": "Nội dung chuyển khoản",
+  "subscriptionExpiryLabel": "Thanh toán trước",
+  "subscriptionRefreshStatus": "Cập nhật trạng thái thanh toán"
 }

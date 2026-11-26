@@ -1778,60 +1778,239 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccountInfoContactBody =>
       'For deletion help, email xteam.aerogreen@gmail.com.';
 
-  @override String get payment => 'Payment';
-  @override String get paymentSubtitle => 'Manage service plans and payments';
-  @override String get subscription => 'Subscription';
-  @override String get subscriptionSubtitle => 'Choose a service plan for your growing towers';
-  @override String get subscriptionUnavailable => 'Subscription plans are not available yet';
-  @override String get subscriptionUnavailableDetail => 'Plans and official prices will appear here when they are provided.';
-  @override String get choosePlan => 'Choose plan';
-  @override String get choosePlants => 'Choose plants';
-  @override String get choosePlantsSubtitle => 'Each selected plant uses one growing tower.';
-  @override String get selectedPlan => 'Selected plan';
-  @override String get selectedPlants => 'Selected plants';
-  @override String get growingTowers => 'Growing towers';
-  @override String get continueToPayment => 'Continue to payment';
-  @override String get paymentDetails => 'Payment details';
-  @override String get paymentWaiting => 'Waiting for payment information';
-  @override String get paymentWaitingDetail => 'The payment QR code and order total will be shown here when they are provided.';
-  @override String get paymentInstructions => 'Open your banking app, scan the QR code, then confirm the transfer details before paying.';
-  @override String get paymentPending => 'Waiting for payment';
-  @override String get paymentSucceeded => 'Payment successful';
-  @override String get paymentFailed => 'Payment failed';
-  @override String get paymentExpired => 'Payment expired';
-  @override String get backToPlans => 'Back to plans';
-  @override String get demoDataNotice => 'Demo data only — plans, prices and payment details are not official.';
-  @override String get openDemoQr => 'Open demo QR';
-  @override String get oneTower => '1 growing tower';
-  @override String get orderSummary => 'Order summary';
-  @override String get seedlings => 'Seedlings';
-  @override String get nutrientSolution => 'Nutrient solution';
-  @override String get planPrice => 'Service plan';
-  @override String get seedlingPrice => 'Seedlings';
-  @override String get nutrientPrice => 'Nutrient solution';
-  @override String get demoTotal => 'Demo total';
-  @override String get demoPriceDisclaimer => 'Demo prices only. They are not official prices or a payment request.';
-  @override String get demoOrderReference => 'Demo order: AG-DEMO-2026';
-  @override String get demoQrNotice => 'Test QR only. Do not use it for a real payment.';
-  @override String get tryDemoStatus => 'Try payment states';
-  @override String get paymentSucceededDemo => 'Demo payment successful — no transaction was made';
-  @override String get paymentFailedDemo => 'Demo payment failed — no transaction was made';
-  @override String get paymentSuccessStatus => 'Success (demo)';
-  @override String get paymentFailedStatus => 'Failed (demo)';
-  @override String get demoPlanStarterName => 'Starter';
-  @override String get demoPlanStarterDescription => 'A simple starting point for one growing tower.';
-  @override String get demoPlanGardenName => 'Garden';
-  @override String get demoPlanGardenDescription => 'More guidance for a small home garden.';
-  @override String get demoPlanProName => 'Pro';
-  @override String get demoPlanProDescription => 'Expanded support for your growing routine.';
-  @override String get demoBenefitMonitoring => 'Growing environment overview';
-  @override String get demoBenefitSupport => 'In-app support guidance';
-  @override String get demoBenefitInsights => 'Weekly growing insights';
-  @override String get demoBenefitPriority => 'Priority demo support';
-  @override String get demoPlantButterhead => 'Lettuce';
-  @override String get demoPlantGenovese => 'Basil';
-  @override String get demoPlantBabyLeaf => 'Spinach';
-  @override String get demoPlantSpearmint => 'Mint';
-  @override String get demoPlantTuscan => 'Kale';
-  @override String get demoPlantSlowBolt => 'Coriander';
+  @override
+  String get payment => 'Payment';
+
+  @override
+  String get paymentSubtitle => 'Manage service plans and payments';
+
+  @override
+  String get subscription => 'Subscription';
+
+  @override
+  String get subscriptionSubtitle =>
+      'Choose a service plan for your growing towers';
+
+  @override
+  String get subscriptionUnavailable =>
+      'Subscription plans are not available yet';
+
+  @override
+  String get subscriptionUnavailableDetail =>
+      'Plans and official prices will appear here when they are provided.';
+
+  @override
+  String get choosePlan => 'Choose plan';
+
+  @override
+  String get choosePlants => 'Choose plants';
+
+  @override
+  String get choosePlantsSubtitle =>
+      'Each selected plant uses one growing tower.';
+
+  @override
+  String get selectedPlan => 'Selected plan';
+
+  @override
+  String get selectedPlants => 'Selected plants';
+
+  @override
+  String get growingTowers => 'Growing towers';
+
+  @override
+  String get continueToPayment => 'Continue to payment';
+
+  @override
+  String get paymentDetails => 'Payment details';
+
+  @override
+  String get paymentWaiting => 'Waiting for payment information';
+
+  @override
+  String get paymentWaitingDetail =>
+      'The payment QR code and order total will be shown here when they are provided.';
+
+  @override
+  String get paymentInstructions =>
+      'Open your banking app, scan the QR code, then confirm the transfer details before paying.';
+
+  @override
+  String get paymentPending => 'Waiting for payment';
+
+  @override
+  String get paymentSucceeded => 'Payment successful';
+
+  @override
+  String get paymentFailed => 'Payment failed';
+
+  @override
+  String get paymentExpired => 'Payment expired';
+
+  @override
+  String get backToPlans => 'Back to plans';
+
+  @override
+  String get demoDataNotice =>
+      'Demo data only — plans, prices and payment details are not official.';
+
+  @override
+  String get openDemoQr => 'Open demo QR';
+
+  @override
+  String get oneTower => '1 growing tower';
+
+  @override
+  String get orderSummary => 'Order summary';
+
+  @override
+  String get seedlings => 'Seedlings';
+
+  @override
+  String get nutrientSolution => 'Nutrient solution';
+
+  @override
+  String get planPrice => 'Service plan';
+
+  @override
+  String get seedlingPrice => 'Seedlings';
+
+  @override
+  String get nutrientPrice => 'Nutrient solution';
+
+  @override
+  String get demoTotal => 'Demo total';
+
+  @override
+  String get demoPriceDisclaimer =>
+      'Demo prices only. They are not official prices or a payment request.';
+
+  @override
+  String get demoOrderReference => 'Demo order: AG-DEMO-2026';
+
+  @override
+  String get demoQrNotice => 'Test QR only. Do not use it for a real payment.';
+
+  @override
+  String get tryDemoStatus => 'Try payment states';
+
+  @override
+  String get paymentSucceededDemo =>
+      'Demo payment successful — no transaction was made';
+
+  @override
+  String get paymentFailedDemo =>
+      'Demo payment failed — no transaction was made';
+
+  @override
+  String get paymentSuccessStatus => 'Success (demo)';
+
+  @override
+  String get paymentFailedStatus => 'Failed (demo)';
+
+  @override
+  String get demoPlanStarterName => 'Starter';
+
+  @override
+  String get demoPlanStarterDescription =>
+      'A simple starting point for one growing tower.';
+
+  @override
+  String get demoPlanGardenName => 'Garden';
+
+  @override
+  String get demoPlanGardenDescription =>
+      'More guidance for a small home garden.';
+
+  @override
+  String get demoPlanProName => 'Pro';
+
+  @override
+  String get demoPlanProDescription =>
+      'Expanded support for your growing routine.';
+
+  @override
+  String get demoBenefitMonitoring => 'Growing environment overview';
+
+  @override
+  String get demoBenefitSupport => 'In-app support guidance';
+
+  @override
+  String get demoBenefitInsights => 'Weekly growing insights';
+
+  @override
+  String get demoBenefitPriority => 'Priority demo support';
+
+  @override
+  String get demoPlantButterhead => 'Lettuce';
+
+  @override
+  String get demoPlantGenovese => 'Basil';
+
+  @override
+  String get demoPlantBabyLeaf => 'Spinach';
+
+  @override
+  String get demoPlantSpearmint => 'Mint';
+
+  @override
+  String get demoPlantTuscan => 'Kale';
+
+  @override
+  String get demoPlantSlowBolt => 'Coriander';
+
+  @override
+  String get subscriptionRealPaymentNotice =>
+      'Create a payment request for one device. The amount and transfer reference are issued by Aerogreen.';
+
+  @override
+  String get subscriptionDeviceLabel => 'Device';
+
+  @override
+  String get subscriptionCropLabel => 'Crop name';
+
+  @override
+  String get subscriptionCropHint => 'For example: Lettuce';
+
+  @override
+  String get subscriptionPriceFromServer =>
+      'The official monthly amount will be shown after the payment request is created.';
+
+  @override
+  String get subscriptionNoDevices =>
+      'Create a device before purchasing a subscription.';
+
+  @override
+  String get subscriptionFormRequired =>
+      'Choose a device and enter the crop name.';
+
+  @override
+  String get subscriptionLoadFailed =>
+      'Unable to load your devices. Please try again.';
+
+  @override
+  String get subscriptionCreateFailed =>
+      'Unable to create the payment request. The device may already have a pending or active subscription.';
+
+  @override
+  String get subscriptionQrLoadFailed =>
+      'The payment QR could not be loaded. Use the transfer details below.';
+
+  @override
+  String get subscriptionBankLabel => 'Bank';
+
+  @override
+  String get subscriptionAccountLabel => 'Account number';
+
+  @override
+  String get subscriptionAccountNameLabel => 'Account holder';
+
+  @override
+  String get subscriptionTransferContentLabel => 'Transfer content';
+
+  @override
+  String get subscriptionExpiryLabel => 'Pay before';
+
+  @override
+  String get subscriptionRefreshStatus => 'Refresh payment status';
 }

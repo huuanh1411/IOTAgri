@@ -3187,62 +3187,437 @@ abstract class AppLocalizations {
   /// **'For deletion help, email xteam.aerogreen@gmail.com.'**
   String get deleteAccountInfoContactBody;
 
+  /// No description provided for @payment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
   String get payment;
+
+  /// No description provided for @paymentSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage service plans and payments'**
   String get paymentSubtitle;
+
+  /// No description provided for @subscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
   String get subscription;
+
+  /// No description provided for @subscriptionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a service plan for your growing towers'**
   String get subscriptionSubtitle;
+
+  /// No description provided for @subscriptionUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription plans are not available yet'**
   String get subscriptionUnavailable;
+
+  /// No description provided for @subscriptionUnavailableDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Plans and official prices will appear here when they are provided.'**
   String get subscriptionUnavailableDetail;
+
+  /// No description provided for @choosePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose plan'**
   String get choosePlan;
+
+  /// No description provided for @choosePlants.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose plants'**
   String get choosePlants;
+
+  /// No description provided for @choosePlantsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Each selected plant uses one growing tower.'**
   String get choosePlantsSubtitle;
+
+  /// No description provided for @selectedPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected plan'**
   String get selectedPlan;
+
+  /// No description provided for @selectedPlants.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected plants'**
   String get selectedPlants;
+
+  /// No description provided for @growingTowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Growing towers'**
   String get growingTowers;
+
+  /// No description provided for @continueToPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to payment'**
   String get continueToPayment;
+
+  /// No description provided for @paymentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment details'**
   String get paymentDetails;
+
+  /// No description provided for @paymentWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for payment information'**
   String get paymentWaiting;
+
+  /// No description provided for @paymentWaitingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The payment QR code and order total will be shown here when they are provided.'**
   String get paymentWaitingDetail;
+
+  /// No description provided for @paymentInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Open your banking app, scan the QR code, then confirm the transfer details before paying.'**
   String get paymentInstructions;
+
+  /// No description provided for @paymentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for payment'**
   String get paymentPending;
+
+  /// No description provided for @paymentSucceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment successful'**
   String get paymentSucceeded;
+
+  /// No description provided for @paymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failed'**
   String get paymentFailed;
+
+  /// No description provided for @paymentExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment expired'**
   String get paymentExpired;
+
+  /// No description provided for @backToPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to plans'**
   String get backToPlans;
+
+  /// No description provided for @demoDataNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo data only — plans, prices and payment details are not official.'**
   String get demoDataNotice;
+
+  /// No description provided for @openDemoQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Open demo QR'**
   String get openDemoQr;
+
+  /// No description provided for @oneTower.
+  ///
+  /// In en, this message translates to:
+  /// **'1 growing tower'**
   String get oneTower;
+
+  /// No description provided for @orderSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Order summary'**
   String get orderSummary;
+
+  /// No description provided for @seedlings.
+  ///
+  /// In en, this message translates to:
+  /// **'Seedlings'**
   String get seedlings;
+
+  /// No description provided for @nutrientSolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrient solution'**
   String get nutrientSolution;
+
+  /// No description provided for @planPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Service plan'**
   String get planPrice;
+
+  /// No description provided for @seedlingPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Seedlings'**
   String get seedlingPrice;
+
+  /// No description provided for @nutrientPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrient solution'**
   String get nutrientPrice;
+
+  /// No description provided for @demoTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo total'**
   String get demoTotal;
+
+  /// No description provided for @demoPriceDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo prices only. They are not official prices or a payment request.'**
   String get demoPriceDisclaimer;
+
+  /// No description provided for @demoOrderReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo order: AG-DEMO-2026'**
   String get demoOrderReference;
+
+  /// No description provided for @demoQrNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Test QR only. Do not use it for a real payment.'**
   String get demoQrNotice;
+
+  /// No description provided for @tryDemoStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Try payment states'**
   String get tryDemoStatus;
+
+  /// No description provided for @paymentSucceededDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo payment successful — no transaction was made'**
   String get paymentSucceededDemo;
+
+  /// No description provided for @paymentFailedDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo payment failed — no transaction was made'**
   String get paymentFailedDemo;
+
+  /// No description provided for @paymentSuccessStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Success (demo)'**
   String get paymentSuccessStatus;
+
+  /// No description provided for @paymentFailedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed (demo)'**
   String get paymentFailedStatus;
+
+  /// No description provided for @demoPlanStarterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Starter'**
   String get demoPlanStarterName;
+
+  /// No description provided for @demoPlanStarterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A simple starting point for one growing tower.'**
   String get demoPlanStarterDescription;
+
+  /// No description provided for @demoPlanGardenName.
+  ///
+  /// In en, this message translates to:
+  /// **'Garden'**
   String get demoPlanGardenName;
+
+  /// No description provided for @demoPlanGardenDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'More guidance for a small home garden.'**
   String get demoPlanGardenDescription;
+
+  /// No description provided for @demoPlanProName.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
   String get demoPlanProName;
+
+  /// No description provided for @demoPlanProDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Expanded support for your growing routine.'**
   String get demoPlanProDescription;
+
+  /// No description provided for @demoBenefitMonitoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Growing environment overview'**
   String get demoBenefitMonitoring;
+
+  /// No description provided for @demoBenefitSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'In-app support guidance'**
   String get demoBenefitSupport;
+
+  /// No description provided for @demoBenefitInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly growing insights'**
   String get demoBenefitInsights;
+
+  /// No description provided for @demoBenefitPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority demo support'**
   String get demoBenefitPriority;
+
+  /// No description provided for @demoPlantButterhead.
+  ///
+  /// In en, this message translates to:
+  /// **'Lettuce'**
   String get demoPlantButterhead;
+
+  /// No description provided for @demoPlantGenovese.
+  ///
+  /// In en, this message translates to:
+  /// **'Basil'**
   String get demoPlantGenovese;
+
+  /// No description provided for @demoPlantBabyLeaf.
+  ///
+  /// In en, this message translates to:
+  /// **'Spinach'**
   String get demoPlantBabyLeaf;
+
+  /// No description provided for @demoPlantSpearmint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mint'**
   String get demoPlantSpearmint;
+
+  /// No description provided for @demoPlantTuscan.
+  ///
+  /// In en, this message translates to:
+  /// **'Kale'**
   String get demoPlantTuscan;
+
+  /// No description provided for @demoPlantSlowBolt.
+  ///
+  /// In en, this message translates to:
+  /// **'Coriander'**
   String get demoPlantSlowBolt;
+
+  /// No description provided for @subscriptionRealPaymentNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a payment request for one device. The amount and transfer reference are issued by Aerogreen.'**
+  String get subscriptionRealPaymentNotice;
+
+  /// No description provided for @subscriptionDeviceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Device'**
+  String get subscriptionDeviceLabel;
+
+  /// No description provided for @subscriptionCropLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop name'**
+  String get subscriptionCropLabel;
+
+  /// No description provided for @subscriptionCropHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: Lettuce'**
+  String get subscriptionCropHint;
+
+  /// No description provided for @subscriptionPriceFromServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The official monthly amount will be shown after the payment request is created.'**
+  String get subscriptionPriceFromServer;
+
+  /// No description provided for @subscriptionNoDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a device before purchasing a subscription.'**
+  String get subscriptionNoDevices;
+
+  /// No description provided for @subscriptionFormRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a device and enter the crop name.'**
+  String get subscriptionFormRequired;
+
+  /// No description provided for @subscriptionLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load your devices. Please try again.'**
+  String get subscriptionLoadFailed;
+
+  /// No description provided for @subscriptionCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to create the payment request. The device may already have a pending or active subscription.'**
+  String get subscriptionCreateFailed;
+
+  /// No description provided for @subscriptionQrLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The payment QR could not be loaded. Use the transfer details below.'**
+  String get subscriptionQrLoadFailed;
+
+  /// No description provided for @subscriptionBankLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get subscriptionBankLabel;
+
+  /// No description provided for @subscriptionAccountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account number'**
+  String get subscriptionAccountLabel;
+
+  /// No description provided for @subscriptionAccountNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account holder'**
+  String get subscriptionAccountNameLabel;
+
+  /// No description provided for @subscriptionTransferContentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer content'**
+  String get subscriptionTransferContentLabel;
+
+  /// No description provided for @subscriptionExpiryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay before'**
+  String get subscriptionExpiryLabel;
+
+  /// No description provided for @subscriptionRefreshStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh payment status'**
+  String get subscriptionRefreshStatus;
 }
 
 class _AppLocalizationsDelegate

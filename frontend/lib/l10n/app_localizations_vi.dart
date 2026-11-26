@@ -1769,60 +1769,237 @@ class AppLocalizationsVi extends AppLocalizations {
   String get deleteAccountInfoContactBody =>
       'Để được hỗ trợ xóa tài khoản, hãy gửi email đến xteam.aerogreen@gmail.com.';
 
-  @override String get payment => 'Thanh toán';
-  @override String get paymentSubtitle => 'Quản lý gói dịch vụ và thanh toán';
-  @override String get subscription => 'Gói dịch vụ';
-  @override String get subscriptionSubtitle => 'Chọn gói dịch vụ cho các tháp trồng của bạn';
-  @override String get subscriptionUnavailable => 'Chưa có gói dịch vụ khả dụng';
-  @override String get subscriptionUnavailableDetail => 'Gói và giá chính thức sẽ hiển thị ở đây khi được cung cấp.';
-  @override String get choosePlan => 'Chọn gói';
-  @override String get choosePlants => 'Chọn loại cây';
-  @override String get choosePlantsSubtitle => 'Mỗi loại cây được chọn sử dụng một tháp trồng.';
-  @override String get selectedPlan => 'Gói đã chọn';
-  @override String get selectedPlants => 'Cây đã chọn';
-  @override String get growingTowers => 'Tháp trồng';
-  @override String get continueToPayment => 'Tiếp tục thanh toán';
-  @override String get paymentDetails => 'Thông tin thanh toán';
-  @override String get paymentWaiting => 'Đang chờ thông tin thanh toán';
-  @override String get paymentWaitingDetail => 'Mã QR và tổng tiền sẽ hiển thị ở đây khi được cung cấp.';
-  @override String get paymentInstructions => 'Mở ứng dụng ngân hàng, quét mã QR, sau đó kiểm tra thông tin chuyển khoản trước khi thanh toán.';
-  @override String get paymentPending => 'Đang chờ thanh toán';
-  @override String get paymentSucceeded => 'Thanh toán thành công';
-  @override String get paymentFailed => 'Thanh toán thất bại';
-  @override String get paymentExpired => 'Thanh toán đã hết hạn';
-  @override String get backToPlans => 'Quay lại chọn gói';
-  @override String get demoDataNotice => 'Dữ liệu minh họa — gói, giá và thông tin thanh toán chưa phải thông tin chính thức.';
-  @override String get openDemoQr => 'Mở QR minh họa';
-  @override String get oneTower => '1 tháp trồng';
-  @override String get orderSummary => 'Tổng hợp đơn hàng';
-  @override String get seedlings => 'Cây con';
-  @override String get nutrientSolution => 'Dung dịch dinh dưỡng';
-  @override String get planPrice => 'Gói dịch vụ';
-  @override String get seedlingPrice => 'Cây con';
-  @override String get nutrientPrice => 'Dung dịch dinh dưỡng';
-  @override String get demoTotal => 'Tổng thanh toán minh họa';
-  @override String get demoPriceDisclaimer => 'Giá chỉ để minh họa, không phải báo giá hoặc yêu cầu thanh toán chính thức.';
-  @override String get demoOrderReference => 'Đơn minh họa: AG-DEMO-2026';
-  @override String get demoQrNotice => 'QR thử nghiệm. Không sử dụng để thanh toán thật.';
-  @override String get tryDemoStatus => 'Trải nghiệm trạng thái thanh toán';
-  @override String get paymentSucceededDemo => 'Thanh toán minh họa thành công — không có giao dịch thật';
-  @override String get paymentFailedDemo => 'Thanh toán minh họa thất bại — không có giao dịch thật';
-  @override String get paymentSuccessStatus => 'Thành công (minh họa)';
-  @override String get paymentFailedStatus => 'Thất bại (minh họa)';
-  @override String get demoPlanStarterName => 'Khởi đầu';
-  @override String get demoPlanStarterDescription => 'Lựa chọn đơn giản cho một tháp trồng.';
-  @override String get demoPlanGardenName => 'Vườn nhà';
-  @override String get demoPlanGardenDescription => 'Thêm hướng dẫn cho khu vườn nhỏ tại nhà.';
-  @override String get demoPlanProName => 'Chuyên nghiệp';
-  @override String get demoPlanProDescription => 'Hỗ trợ mở rộng cho lịch chăm sóc cây.';
-  @override String get demoBenefitMonitoring => 'Tổng quan môi trường trồng';
-  @override String get demoBenefitSupport => 'Hướng dẫn hỗ trợ trong ứng dụng';
-  @override String get demoBenefitInsights => 'Gợi ý trồng cây hằng tuần';
-  @override String get demoBenefitPriority => 'Hỗ trợ minh họa ưu tiên';
-  @override String get demoPlantButterhead => 'Xà lách';
-  @override String get demoPlantGenovese => 'Húng quế';
-  @override String get demoPlantBabyLeaf => 'Rau chân vịt';
-  @override String get demoPlantSpearmint => 'Bạc hà';
-  @override String get demoPlantTuscan => 'Cải xoăn';
-  @override String get demoPlantSlowBolt => 'Rau mùi';
+  @override
+  String get payment => 'Thanh toán';
+
+  @override
+  String get paymentSubtitle => 'Quản lý gói dịch vụ và thanh toán';
+
+  @override
+  String get subscription => 'Gói dịch vụ';
+
+  @override
+  String get subscriptionSubtitle =>
+      'Chọn gói dịch vụ cho các tháp trồng của bạn';
+
+  @override
+  String get subscriptionUnavailable => 'Chưa có gói dịch vụ khả dụng';
+
+  @override
+  String get subscriptionUnavailableDetail =>
+      'Gói và giá chính thức sẽ hiển thị ở đây khi được cung cấp.';
+
+  @override
+  String get choosePlan => 'Chọn gói';
+
+  @override
+  String get choosePlants => 'Chọn loại cây';
+
+  @override
+  String get choosePlantsSubtitle =>
+      'Mỗi loại cây được chọn sử dụng một tháp trồng.';
+
+  @override
+  String get selectedPlan => 'Gói đã chọn';
+
+  @override
+  String get selectedPlants => 'Cây đã chọn';
+
+  @override
+  String get growingTowers => 'Tháp trồng';
+
+  @override
+  String get continueToPayment => 'Tiếp tục thanh toán';
+
+  @override
+  String get paymentDetails => 'Thông tin thanh toán';
+
+  @override
+  String get paymentWaiting => 'Đang chờ thông tin thanh toán';
+
+  @override
+  String get paymentWaitingDetail =>
+      'Mã QR và tổng tiền sẽ hiển thị ở đây khi được cung cấp.';
+
+  @override
+  String get paymentInstructions =>
+      'Mở ứng dụng ngân hàng, quét mã QR, sau đó kiểm tra thông tin chuyển khoản trước khi thanh toán.';
+
+  @override
+  String get paymentPending => 'Đang chờ thanh toán';
+
+  @override
+  String get paymentSucceeded => 'Thanh toán thành công';
+
+  @override
+  String get paymentFailed => 'Thanh toán thất bại';
+
+  @override
+  String get paymentExpired => 'Thanh toán đã hết hạn';
+
+  @override
+  String get backToPlans => 'Quay lại chọn gói';
+
+  @override
+  String get demoDataNotice =>
+      'Dữ liệu minh họa — gói, giá và thông tin thanh toán chưa phải thông tin chính thức.';
+
+  @override
+  String get openDemoQr => 'Mở QR minh họa';
+
+  @override
+  String get oneTower => '1 tháp trồng';
+
+  @override
+  String get orderSummary => 'Tổng hợp đơn hàng';
+
+  @override
+  String get seedlings => 'Cây con';
+
+  @override
+  String get nutrientSolution => 'Dung dịch dinh dưỡng';
+
+  @override
+  String get planPrice => 'Gói dịch vụ';
+
+  @override
+  String get seedlingPrice => 'Cây con';
+
+  @override
+  String get nutrientPrice => 'Dung dịch dinh dưỡng';
+
+  @override
+  String get demoTotal => 'Tổng thanh toán minh họa';
+
+  @override
+  String get demoPriceDisclaimer =>
+      'Giá chỉ để minh họa, không phải báo giá hoặc yêu cầu thanh toán chính thức.';
+
+  @override
+  String get demoOrderReference => 'Đơn minh họa: AG-DEMO-2026';
+
+  @override
+  String get demoQrNotice => 'QR thử nghiệm. Không sử dụng để thanh toán thật.';
+
+  @override
+  String get tryDemoStatus => 'Trải nghiệm trạng thái thanh toán';
+
+  @override
+  String get paymentSucceededDemo =>
+      'Thanh toán minh họa thành công — không có giao dịch thật';
+
+  @override
+  String get paymentFailedDemo =>
+      'Thanh toán minh họa thất bại — không có giao dịch thật';
+
+  @override
+  String get paymentSuccessStatus => 'Thành công (minh họa)';
+
+  @override
+  String get paymentFailedStatus => 'Thất bại (minh họa)';
+
+  @override
+  String get demoPlanStarterName => 'Khởi đầu';
+
+  @override
+  String get demoPlanStarterDescription =>
+      'Lựa chọn đơn giản cho một tháp trồng.';
+
+  @override
+  String get demoPlanGardenName => 'Vườn nhà';
+
+  @override
+  String get demoPlanGardenDescription =>
+      'Thêm hướng dẫn cho khu vườn nhỏ tại nhà.';
+
+  @override
+  String get demoPlanProName => 'Chuyên nghiệp';
+
+  @override
+  String get demoPlanProDescription => 'Hỗ trợ mở rộng cho lịch chăm sóc cây.';
+
+  @override
+  String get demoBenefitMonitoring => 'Tổng quan môi trường trồng';
+
+  @override
+  String get demoBenefitSupport => 'Hướng dẫn hỗ trợ trong ứng dụng';
+
+  @override
+  String get demoBenefitInsights => 'Gợi ý trồng cây hằng tuần';
+
+  @override
+  String get demoBenefitPriority => 'Hỗ trợ minh họa ưu tiên';
+
+  @override
+  String get demoPlantButterhead => 'Xà lách';
+
+  @override
+  String get demoPlantGenovese => 'Húng quế';
+
+  @override
+  String get demoPlantBabyLeaf => 'Rau chân vịt';
+
+  @override
+  String get demoPlantSpearmint => 'Bạc hà';
+
+  @override
+  String get demoPlantTuscan => 'Cải xoăn';
+
+  @override
+  String get demoPlantSlowBolt => 'Rau mùi';
+
+  @override
+  String get subscriptionRealPaymentNotice =>
+      'Tạo yêu cầu thanh toán cho một thiết bị. Số tiền và nội dung chuyển khoản được Aerogreen cấp.';
+
+  @override
+  String get subscriptionDeviceLabel => 'Thiết bị';
+
+  @override
+  String get subscriptionCropLabel => 'Tên cây trồng';
+
+  @override
+  String get subscriptionCropHint => 'Ví dụ: Xà lách';
+
+  @override
+  String get subscriptionPriceFromServer =>
+      'Số tiền gói tháng chính thức sẽ hiển thị sau khi tạo yêu cầu thanh toán.';
+
+  @override
+  String get subscriptionNoDevices =>
+      'Hãy tạo thiết bị trước khi mua gói dịch vụ.';
+
+  @override
+  String get subscriptionFormRequired =>
+      'Hãy chọn thiết bị và nhập tên cây trồng.';
+
+  @override
+  String get subscriptionLoadFailed =>
+      'Không thể tải danh sách thiết bị. Vui lòng thử lại.';
+
+  @override
+  String get subscriptionCreateFailed =>
+      'Không thể tạo yêu cầu thanh toán. Thiết bị có thể đã có gói đang chờ hoặc còn hiệu lực.';
+
+  @override
+  String get subscriptionQrLoadFailed =>
+      'Không tải được mã QR thanh toán. Hãy dùng thông tin chuyển khoản bên dưới.';
+
+  @override
+  String get subscriptionBankLabel => 'Ngân hàng';
+
+  @override
+  String get subscriptionAccountLabel => 'Số tài khoản';
+
+  @override
+  String get subscriptionAccountNameLabel => 'Chủ tài khoản';
+
+  @override
+  String get subscriptionTransferContentLabel => 'Nội dung chuyển khoản';
+
+  @override
+  String get subscriptionExpiryLabel => 'Thanh toán trước';
+
+  @override
+  String get subscriptionRefreshStatus => 'Cập nhật trạng thái thanh toán';
 }

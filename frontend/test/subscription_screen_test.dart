@@ -1,63 +1,121 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:iotagri_app/l10n/app_localizations.dart';
+import 'package:iotagri_app/models/crop_subscription.dart';
 import 'package:iotagri_app/screens/subscription_screen.dart';
+import 'package:iotagri_app/services/api_service.dart';
 
-Widget _app() => const MaterialApp(
-  locale: Locale('vi'),
+class _FakeApiService extends ApiService {
+  _FakeApiService({this.active = false});
+
+  bool active;
+  String? createdDeviceId;
+  String? createdCropName;
+
+  @override
+  Future<List<dynamic>> getDevices() async => [
+    {
+      'id': 'device-1',
+      'name': 'Giàn rau sân thượng',
+      'isOnline': true,
+      'createdAt': '2026-11-25T00:00:00Z',
+    },
+  ];
+
+  @override
+  Future<CropSubscriptionPayment> createCropSubscription({
+    required String deviceId,
+    required String cropName,
+  }) async {
+    createdDeviceId = deviceId;
+    createdCropName = cropName;
+    return _payment(status: 'Pending');
+  }
+
+  @override
+  Future<List<CropSubscription>> getSubscriptions() async => [
+    _payment(status: active ? 'Active' : 'Pending').subscription,
+  ];
+
+  CropSubscriptionPayment _payment({required String status}) => CropSubscriptionPayment(
+    subscription: CropSubscription(
+      id: 'subscription-1',
+      deviceId: 'device-1',
+      cropName: 'Xà lách',
+      amountVnd: 50000,
+      paymentCode: 'AGPAYMENT123',
+      status: status,
+      createdAt: DateTime.utc(2030, 11, 25),
+      paymentExpiresAt: DateTime.utc(2030, 11, 25, 1),
+      paidAt: status == 'Active' ? DateTime.utc(2030, 11, 25, 0, 5) : null,
+      expiresAt: status == 'Active' ? DateTime.utc(2030, 12, 25, 0, 5) : null,
+    ),
+    bankCode: 'MB',
+    accountNumber: '1234567890',
+    accountName: 'AEROGREEN',
+  );
+}
+
+Widget _app(ApiService api) => MaterialApp(
+  locale: const Locale('vi'),
   supportedLocales: AppLocalizations.supportedLocales,
   localizationsDelegates: AppLocalizations.localizationsDelegates,
-  home: SubscriptionScreen(),
+  home: SubscriptionScreen(apiService: api),
 );
 
 void main() {
-  testWidgets('shows demo plans and reveals plants after plan selection', (tester) async {
-    await tester.pumpWidget(_app());
-
-    expect(find.text('Khởi đầu'), findsOneWidget);
-    expect(find.text('Vườn nhà'), findsOneWidget);
-    expect(find.text('Chuyên nghiệp'), findsOneWidget);
-    expect(find.text('Xà lách'), findsNothing);
-
-    await tester.tap(find.text('Vườn nhà'));
+  testWidgets('creates a server-backed payment request for the selected device', (
+    tester,
+  ) async {
+    final api = _FakeApiService();
+    await tester.pumpWidget(_app(api));
     await tester.pumpAndSettle();
 
-    expect(find.text('Xà lách'), findsOneWidget);
-    expect(find.text('Rau mùi'), findsOneWidget);
+    expect(find.text('Giàn rau sân thượng'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Xà lách');
+    await tester.tap(find.text('Tiếp tục thanh toán'));
+    await tester.pumpAndSettle();
+
+    expect(api.createdDeviceId, 'device-1');
+    expect(api.createdCropName, 'Xà lách');
+    expect(find.text('50.000 đ'), findsOneWidget);
+    expect(find.text('AGPAYMENT123'), findsOneWidget);
+    expect(find.text('1234567890'), findsOneWidget);
+    expect(find.text('Đang chờ thanh toán'), findsOneWidget);
   });
 
-  testWidgets('selects multiple plants and updates demo quantities', (tester) async {
-    await tester.pumpWidget(_app());
-    await tester.tap(find.text('Khởi đầu'));
+  testWidgets('refreshes the status supplied by the subscription endpoint', (
+    tester,
+  ) async {
+    final api = _FakeApiService();
+    await tester.pumpWidget(_app(api));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Xà lách'));
-    await tester.tap(find.text('Xà lách'));
-    await tester.ensureVisible(find.text('Húng quế'));
-    await tester.tap(find.text('Húng quế'));
+    await tester.enterText(find.byType(TextField), 'Xà lách');
+    await tester.tap(find.text('Tiếp tục thanh toán'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Cây đã chọn'), findsOneWidget);
-    expect(find.text('2'), findsWidgets);
-    expect(find.text('24'), findsOneWidget);
-    expect(find.text('500 ml'), findsOneWidget);
+    api.active = true;
+    final refresh = find.text('Cập nhật trạng thái thanh toán');
+    await tester.ensureVisible(refresh);
+    await tester.tap(refresh);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Thanh toán thành công'), findsOneWidget);
   });
 
-  testWidgets('opens a test QR and lets the user try non-transactional states', (tester) async {
-    await tester.pumpWidget(_app());
-    await tester.tap(find.text('Khởi đầu'));
+  testWidgets('payment details fit a 320 px phone without overflow', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 568));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final api = _FakeApiService();
+    await tester.pumpWidget(_app(api));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-      find.text('Mở QR minh họa'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Mở QR minh họa'));
-    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Xà lách');
+    await tester.tap(find.text('Tiếp tục thanh toán'));
+    await tester.pump();
 
-    expect(find.text('QR thử nghiệm. Không sử dụng để thanh toán thật.'), findsOneWidget);
-    expect(find.text('Thành công (minh họa)'), findsOneWidget);
-    await tester.tap(find.text('Thành công (minh họa)'));
-    await tester.pumpAndSettle();
-    expect(find.text('Thanh toán minh họa thành công — không có giao dịch thật'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    expect(find.text('AGPAYMENT123'), findsOneWidget);
   });
 }

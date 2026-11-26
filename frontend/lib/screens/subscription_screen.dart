@@ -1,32 +1,129 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../core/theme/app_colors.dart';
-import '../demo/subscription_demo_catalog.dart';
+import '../models/crop_subscription.dart';
+import '../models/device.dart';
+import '../services/api_service.dart';
 import '../utils/l10n.dart';
 
-enum _DemoPaymentStatus { pending, success, failed }
-
 class SubscriptionScreen extends StatefulWidget {
-  const SubscriptionScreen({super.key});
+  const SubscriptionScreen({super.key, ApiService? apiService})
+    : _apiService = apiService;
+
+  final ApiService? _apiService;
 
   @override
   State<SubscriptionScreen> createState() => _SubscriptionScreenState();
 }
 
 class _SubscriptionScreenState extends State<SubscriptionScreen> {
-  DemoSubscriptionPlan? _selectedPlan;
-  final Set<String> _selectedPlantIds = {};
-  bool _showPayment = false;
-  _DemoPaymentStatus _paymentStatus = _DemoPaymentStatus.pending;
+  late final ApiService _apiService = widget._apiService ?? ApiService();
+  final _cropName = TextEditingController();
+  List<Device> _devices = const [];
+  Device? _selectedDevice;
+  CropSubscriptionPayment? _payment;
+  Timer? _statusTimer;
+  bool _loadingDevices = true;
+  bool _creating = false;
+  bool _refreshing = false;
+  String? _error;
 
-  List<DemoPlantOption> get _selectedPlants => SubscriptionDemoCatalog.plants
-      .where((plant) => _selectedPlantIds.contains(plant.id))
-      .toList();
-  int get _seedlings => _selectedPlants.fold(0, (n, plant) => n + plant.seedlingsPerTower);
-  int get _nutrientMl => _selectedPlants.fold(0, (n, plant) => n + plant.nutrientMlPerTower);
-  int get _plantPackTotal => _selectedPlants.length * SubscriptionDemoCatalog.plantPackPricePerTower;
-  int get _nutrientTotal => _selectedPlants.length * SubscriptionDemoCatalog.nutrientPricePerTower;
-  int get _orderTotal => (_selectedPlan?.monthlyPrice ?? 0) + _plantPackTotal + _nutrientTotal;
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadDevices());
+  }
+
+  @override
+  void dispose() {
+    _statusTimer?.cancel();
+    _cropName.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadDevices() async {
+    setState(() {
+      _loadingDevices = true;
+      _error = null;
+    });
+    try {
+      final devices = (await _apiService.getDevices())
+          .map((item) => Device.fromJson(item as Map<String, dynamic>))
+          .toList();
+      if (!mounted) return;
+      setState(() {
+        _devices = devices;
+        _selectedDevice = devices.isEmpty ? null : devices.first;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _error = context.l10n.subscriptionLoadFailed);
+    } finally {
+      if (mounted) setState(() => _loadingDevices = false);
+    }
+  }
+
+  Future<void> _createPayment() async {
+    final device = _selectedDevice;
+    final cropName = _cropName.text.trim();
+    if (device == null || cropName.isEmpty) {
+      setState(() => _error = context.l10n.subscriptionFormRequired);
+      return;
+    }
+    setState(() {
+      _creating = true;
+      _error = null;
+    });
+    try {
+      final payment = await _apiService.createCropSubscription(
+        deviceId: device.id,
+        cropName: cropName,
+      );
+      if (!mounted) return;
+      setState(() => _payment = payment);
+      _startStatusPolling();
+    } catch (_) {
+      if (mounted) setState(() => _error = context.l10n.subscriptionCreateFailed);
+    } finally {
+      if (mounted) setState(() => _creating = false);
+    }
+  }
+
+  void _startStatusPolling() {
+    _statusTimer?.cancel();
+    _statusTimer = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) => unawaited(_refreshStatus()),
+    );
+  }
+
+  Future<void> _refreshStatus() async {
+    final payment = _payment;
+    if (payment == null || _refreshing || payment.subscription.isActive) return;
+    setState(() => _refreshing = true);
+    try {
+      final subscriptions = await _apiService.getSubscriptions();
+      final matches = subscriptions.where(
+        (item) => item.id == payment.subscription.id,
+      );
+      if (!mounted || matches.isEmpty) return;
+      final subscription = matches.single;
+      setState(() {
+        _payment = CropSubscriptionPayment(
+          subscription: subscription,
+          bankCode: payment.bankCode,
+          accountNumber: payment.accountNumber,
+          accountName: payment.accountName,
+        );
+      });
+      if (subscription.isActive) _statusTimer?.cancel();
+    } catch (_) {
+      // Keep the issued payment reference visible through a transient failure.
+    } finally {
+      if (mounted) setState(() => _refreshing = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -34,126 +131,203 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     appBar: AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      title: Text(_showPayment ? context.l10n.paymentDetails : context.l10n.subscription),
-      leading: _showPayment ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => setState(() => _showPayment = false)) : null,
+      title: Text(context.l10n.subscription),
     ),
     body: SafeArea(
       top: false,
       child: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 760),
+          constraints: const BoxConstraints(maxWidth: 640),
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-            child: _showPayment ? _paymentView() : _selectionView(),
+            child: _payment == null ? _form() : _paymentDetails(),
           ),
         ),
       ),
     ),
   );
 
-  Widget _selectionView() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    Text(context.l10n.subscriptionSubtitle, style: const TextStyle(color: AppColors.secondaryText)),
-    const SizedBox(height: 10), _demoNotice(), const SizedBox(height: 20),
-    Text(context.l10n.choosePlan, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 10),
-    ...SubscriptionDemoCatalog.plans.map(_planCard),
-    if (_selectedPlan != null) ...[
-      const SizedBox(height: 20), Text(context.l10n.choosePlants, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 4),
-      Text(context.l10n.choosePlantsSubtitle, style: const TextStyle(color: AppColors.secondaryText)), const SizedBox(height: 12),
-      LayoutBuilder(builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 620 ? 3 : 2;
-        return GridView.builder(
-          shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), itemCount: SubscriptionDemoCatalog.plants.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: columns, mainAxisSpacing: 12, crossAxisSpacing: 12, childAspectRatio: .82),
-          itemBuilder: (context, index) => _plantCard(SubscriptionDemoCatalog.plants[index]),
-        );
-      }),
+  Widget _form() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        context.l10n.subscriptionRealPaymentNotice,
+        style: const TextStyle(color: AppColors.secondaryText),
+      ),
+      const SizedBox(height: 20),
+      if (_loadingDevices)
+        const Center(
+          child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()),
+        )
+      else if (_devices.isEmpty)
+        _messageCard(context.l10n.subscriptionNoDevices)
+      else ...[
+        Text(context.l10n.subscriptionDeviceLabel, style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<Device>(
+          value: _selectedDevice,
+          isExpanded: true,
+          decoration: const InputDecoration(border: OutlineInputBorder()),
+          items: _devices
+              .map((device) => DropdownMenuItem(value: device, child: Text(device.name)))
+              .toList(),
+          onChanged: (device) => setState(() => _selectedDevice = device),
+        ),
+        const SizedBox(height: 18),
+        Text(context.l10n.subscriptionCropLabel, style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _cropName,
+          maxLength: 100,
+          textInputAction: TextInputAction.done,
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            hintText: context.l10n.subscriptionCropHint,
+          ),
+          onSubmitted: (_) => _createPayment(),
+        ),
+        Text(
+          context.l10n.subscriptionPriceFromServer,
+          style: const TextStyle(color: AppColors.mutedSage, fontSize: 13),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: _creating ? null : _createPayment,
+            icon: _creating
+                ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.qr_code_2_outlined),
+            label: Text(context.l10n.continueToPayment),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.forestGreen,
+              padding: const EdgeInsets.symmetric(vertical: 15),
+            ),
+          ),
+        ),
+      ],
+      if (_error != null) ...[
+        const SizedBox(height: 16),
+        _messageCard(_error!, isError: true),
+        if (!_loadingDevices)
+          TextButton(onPressed: _loadDevices, child: Text(context.l10n.retry)),
+      ],
     ],
-    const SizedBox(height: 20), _orderSummary(), const SizedBox(height: 16),
-    SizedBox(width: double.infinity, child: FilledButton.icon(
-      onPressed: _selectedPlan == null ? null : () => setState(() => _showPayment = true), icon: const Icon(Icons.qr_code_2_outlined), label: Text(context.l10n.openDemoQr),
-      style: FilledButton.styleFrom(backgroundColor: AppColors.forestGreen, padding: const EdgeInsets.symmetric(vertical: 15)),
-    )),
-  ]);
-
-  Widget _demoNotice() => Container(
-    width: double.infinity, padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(color: AppColors.mintChip, borderRadius: BorderRadius.circular(12)),
-    child: Row(children: [const Icon(Icons.info_outline, color: AppColors.forestGreen), const SizedBox(width: 10), Expanded(child: Text(context.l10n.demoDataNotice, style: const TextStyle(color: AppColors.secondaryText)))]),
   );
 
-  Widget _planCard(DemoSubscriptionPlan plan) {
-    final selected = _selectedPlan?.id == plan.id;
-    return Card(margin: const EdgeInsets.only(bottom: 10), color: selected ? AppColors.mintChip : AppColors.surface, shape: RoundedRectangleBorder(side: BorderSide(color: selected ? AppColors.forestGreen : Colors.transparent, width: 1.5), borderRadius: BorderRadius.circular(16)), child: InkWell(
-      borderRadius: BorderRadius.circular(16), onTap: () => setState(() => _selectedPlan = plan), child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [Expanded(child: Text(_planName(plan), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700))), Icon(selected ? Icons.check_circle : Icons.radio_button_unchecked, color: selected ? AppColors.forestGreen : AppColors.mutedSage)]),
-        const SizedBox(height: 4), Text(_planDescription(plan), style: const TextStyle(color: AppColors.secondaryText)),
-        Padding(padding: const EdgeInsets.only(top: 10, bottom: 6), child: Text(_money(plan.monthlyPrice), style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.forestGreen))),
-        ...plan.benefitKeys.map((key) => Padding(padding: const EdgeInsets.only(top: 3), child: Text('• ${_benefit(key)}'))),
-      ])),
-    ));
-  }
-
-  Widget _plantCard(DemoPlantOption plant) {
-    final selected = _selectedPlantIds.contains(plant.id);
-    return Semantics(selected: selected, button: true, label: _plantName(plant), child: InkWell(
-      borderRadius: BorderRadius.circular(16), onTap: () => setState(() => selected ? _selectedPlantIds.remove(plant.id) : _selectedPlantIds.add(plant.id)), child: Ink(
-        decoration: BoxDecoration(color: selected ? AppColors.mintChip : AppColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: selected ? AppColors.forestGreen : Colors.transparent, width: 1.5)), padding: const EdgeInsets.all(12),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Align(alignment: Alignment.topRight, child: Icon(selected ? Icons.check_circle : Icons.add_circle_outline, color: selected ? AppColors.forestGreen : AppColors.mutedSage)),
-          Expanded(child: Center(child: Image.asset(plant.imageAsset, fit: BoxFit.contain))),
-          Text(_plantName(plant), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
-          Text(_plantVariety(plant), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: AppColors.secondaryText, fontSize: 12)), const SizedBox(height: 3),
-          Text(context.l10n.oneTower, style: const TextStyle(color: AppColors.mutedSage, fontSize: 12)),
-        ]),
-      ),
-    ));
-  }
-
-  Widget _orderSummary() => Card(color: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    Text(context.l10n.orderSummary, style: Theme.of(context).textTheme.titleLarge), const SizedBox(height: 10),
-    _summaryRow(context.l10n.selectedPlan, _selectedPlan == null ? '—' : _planName(_selectedPlan!)), _summaryRow(context.l10n.selectedPlants, '${_selectedPlants.length}'), _summaryRow(context.l10n.growingTowers, '${_selectedPlants.length}'), _summaryRow(context.l10n.seedlings, '$_seedlings'), _summaryRow(context.l10n.nutrientSolution, '$_nutrientMl ml'), const Divider(height: 24),
-    _summaryRow(context.l10n.planPrice, _selectedPlan == null ? '—' : _money(_selectedPlan!.monthlyPrice)), _summaryRow(context.l10n.seedlingPrice, _money(_plantPackTotal)), _summaryRow(context.l10n.nutrientPrice, _money(_nutrientTotal)), const Divider(height: 24),
-    _summaryRow(context.l10n.demoTotal, _money(_orderTotal), bold: true), const SizedBox(height: 8), Text(context.l10n.demoPriceDisclaimer, style: const TextStyle(color: AppColors.mutedSage, fontSize: 12)),
-  ])));
-  Widget _summaryRow(String label, String value, {bool bold = false}) => Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: Row(children: [Expanded(child: Text(label, style: TextStyle(fontWeight: bold ? FontWeight.w700 : null))), Text(value, style: TextStyle(fontWeight: bold ? FontWeight.w700 : null, color: bold ? AppColors.forestGreen : null))]));
-
-  Widget _paymentView() => Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-    _demoNotice(), const SizedBox(height: 16), _orderSummary(), const SizedBox(height: 16),
-    Card(color: AppColors.surface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), child: Padding(padding: const EdgeInsets.all(20), child: Column(children: [
-      _paymentStatusLabel(), const SizedBox(height: 16), const _DemoQrCode(), const SizedBox(height: 16), Text(_money(_orderTotal), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.forestGreen)), const SizedBox(height: 6), Text(context.l10n.demoOrderReference, style: const TextStyle(color: AppColors.secondaryText)), const SizedBox(height: 14), Text(context.l10n.demoQrNotice, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.mutedSage)),
-    ]))), const SizedBox(height: 16), Text(context.l10n.paymentInstructions, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.secondaryText)), const SizedBox(height: 20), Text(context.l10n.tryDemoStatus, style: Theme.of(context).textTheme.titleMedium), const SizedBox(height: 8),
-    Wrap(spacing: 8, runSpacing: 8, children: _DemoPaymentStatus.values.map((status) => ChoiceChip(label: Text(_statusText(status)), selected: _paymentStatus == status, onSelected: (_) => setState(() => _paymentStatus = status))).toList()),
-  ]);
-
-  Widget _paymentStatusLabel() {
-    final (text, color, icon) = switch (_paymentStatus) { _DemoPaymentStatus.pending => (context.l10n.paymentPending, AppColors.mutedSage, Icons.schedule_outlined), _DemoPaymentStatus.success => (context.l10n.paymentSucceededDemo, AppColors.mint, Icons.check_circle_outline), _DemoPaymentStatus.failed => (context.l10n.paymentFailedDemo, AppColors.danger, Icons.error_outline) };
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+  Widget _paymentDetails() {
+    final payment = _payment!;
+    final subscription = payment.subscription;
+    final expired = subscription.isPending && !subscription.paymentExpiresAt.isAfter(DateTime.now().toUtc());
+    final status = subscription.isActive
+        ? context.l10n.paymentSucceeded
+        : expired
+        ? context.l10n.paymentExpired
+        : context.l10n.paymentPending;
+    final qrUri = Uri.https(
+      'img.vietqr.io',
+      '/image/${payment.bankCode}-${payment.accountNumber}-compact2.png',
+      {
+        'amount': subscription.amountVnd.toString(),
+        'addInfo': subscription.paymentCode,
+        'accountName': payment.accountName,
+      },
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Icon(icon, color: color),
-        const SizedBox(width: 8),
-        Flexible(
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: color, fontWeight: FontWeight.w700),
+        _statusCard(status, subscription.isActive, expired),
+        const SizedBox(height: 16),
+        Card(
+          color: AppColors.surface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                if (!subscription.isActive && !expired)
+                  LayoutBuilder(
+                    builder: (context, constraints) => Image.network(
+                      qrUri.toString(),
+                      height: constraints.maxWidth,
+                      width: constraints.maxWidth,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => _messageCard(
+                        context.l10n.subscriptionQrLoadFailed,
+                        isError: true,
+                      ),
+                    ),
+                  ),
+                if (!subscription.isActive && !expired) const SizedBox(height: 16),
+                Text(_money(subscription.amountVnd), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.forestGreen)),
+                const SizedBox(height: 16),
+                _paymentRow(context.l10n.subscriptionBankLabel, payment.bankCode),
+                _paymentRow(context.l10n.subscriptionAccountLabel, payment.accountNumber),
+                _paymentRow(context.l10n.subscriptionAccountNameLabel, payment.accountName),
+                _paymentRow(context.l10n.subscriptionTransferContentLabel, subscription.paymentCode),
+                _paymentRow(context.l10n.subscriptionExpiryLabel, _dateTime(subscription.paymentExpiresAt)),
+              ],
+            ),
           ),
+        ),
+        const SizedBox(height: 16),
+        Text(context.l10n.paymentInstructions, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.secondaryText)),
+        const SizedBox(height: 16),
+        if (!subscription.isActive && !expired)
+          OutlinedButton.icon(
+            onPressed: _refreshing ? null : _refreshStatus,
+            icon: _refreshing
+                ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.refresh),
+            label: Text(context.l10n.subscriptionRefreshStatus),
+          ),
+        TextButton(
+          onPressed: () {
+            _statusTimer?.cancel();
+            setState(() => _payment = null);
+          },
+          child: Text(context.l10n.backToPlans),
         ),
       ],
     );
   }
-  String _statusText(_DemoPaymentStatus status) => switch (status) { _DemoPaymentStatus.pending => context.l10n.paymentPending, _DemoPaymentStatus.success => context.l10n.paymentSuccessStatus, _DemoPaymentStatus.failed => context.l10n.paymentFailedStatus };
-  String _planName(DemoSubscriptionPlan p) => switch (p.id) { 'starter' => context.l10n.demoPlanStarterName, 'garden' => context.l10n.demoPlanGardenName, _ => context.l10n.demoPlanProName };
-  String _planDescription(DemoSubscriptionPlan p) => switch (p.id) { 'starter' => context.l10n.demoPlanStarterDescription, 'garden' => context.l10n.demoPlanGardenDescription, _ => context.l10n.demoPlanProDescription };
-  String _benefit(String key) => switch (key) { 'monitoring' => context.l10n.demoBenefitMonitoring, 'support' => context.l10n.demoBenefitSupport, 'insights' => context.l10n.demoBenefitInsights, _ => context.l10n.demoBenefitPriority };
-  String _plantName(DemoPlantOption p) => switch (p.id) { 'butterhead' => context.l10n.demoPlantButterhead, 'genovese' => context.l10n.demoPlantGenovese, 'baby-leaf' => context.l10n.demoPlantBabyLeaf, 'spearmint' => context.l10n.demoPlantSpearmint, 'tuscan' => context.l10n.demoPlantTuscan, _ => context.l10n.demoPlantSlowBolt };
-  String _plantVariety(DemoPlantOption p) => switch (p.id) { 'butterhead' => 'Butterhead', 'genovese' => 'Genovese', 'baby-leaf' => 'Baby leaf', 'spearmint' => 'Spearmint', 'tuscan' => 'Tuscan', _ => 'Slow-bolt' };
-  String _money(int amount) => '${amount.toString().replaceAllMapped(RegExp(r'(?=(\d{3})+(?!\d))'), (_) => '.')} đ';
-}
 
-class _DemoQrCode extends StatelessWidget { const _DemoQrCode(); @override Widget build(BuildContext context) => AspectRatio(aspectRatio: 1, child: Container(padding: const EdgeInsets.all(14), decoration: BoxDecoration(border: Border.all(color: AppColors.mutedSage), borderRadius: BorderRadius.circular(12)), child: CustomPaint(painter: _QrPainter()))); }
-class _QrPainter extends CustomPainter {
-  @override void paint(Canvas canvas, Size size) { const cells = 21; final unit = size.width / cells; final paint = Paint()..color = AppColors.primaryText; bool inFinder(int x, int y) => (x < 7 && y < 7) || (x >= 14 && y < 7) || (x < 7 && y >= 14); for (var y = 0; y < cells; y++) { for (var x = 0; x < cells; x++) { final finder = inFinder(x, y); final border = finder && ((x % 7 == 0 || x % 7 == 6) || (y % 7 == 0 || y % 7 == 6) || ((x % 7 >= 2 && x % 7 <= 4) && (y % 7 >= 2 && y % 7 <= 4))); if (border || (!finder && ((x * 13 + y * 7 + x * y) % 5 < 2))) canvas.drawRect(Rect.fromLTWH(x * unit, y * unit, unit, unit), paint); } } }
-  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  Widget _paymentRow(String label, String value) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 5),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: Text(label, style: const TextStyle(color: AppColors.secondaryText))),
+        const SizedBox(width: 16),
+        Flexible(child: SelectableText(value, textAlign: TextAlign.end, style: const TextStyle(fontWeight: FontWeight.w700))),
+      ],
+    ),
+  );
+
+  Widget _statusCard(String text, bool success, bool expired) => Card(
+    color: AppColors.mintChip,
+    child: Padding(
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        children: [
+          Icon(success ? Icons.check_circle_outline : expired ? Icons.schedule_outlined : Icons.hourglass_top, color: AppColors.forestGreen),
+          const SizedBox(width: 10),
+          Expanded(child: Text(text, style: const TextStyle(fontWeight: FontWeight.w700))),
+        ],
+      ),
+    ),
+  );
+
+  Widget _messageCard(String message, {bool isError = false}) => Card(
+    color: isError ? Theme.of(context).colorScheme.errorContainer : AppColors.surface,
+    child: Padding(padding: const EdgeInsets.all(14), child: Text(message)),
+  );
+
+  String _money(int amount) => '${amount.toString().replaceAllMapped(RegExp(r'(?=(\d{3})+(?!\d))'), (_) => '.')} đ';
+
+  String _dateTime(DateTime value) {
+    final local = value.toLocal();
+    return '${MaterialLocalizations.of(context).formatMediumDate(local)} ${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(local))}';
+  }
 }

@@ -8,6 +8,7 @@ import '../constants/api_constants.dart';
 import '../models/user.dart';
 import '../models/light_schedule.dart';
 import '../models/pump_schedule.dart';
+import '../models/crop_subscription.dart';
 import 'api_error.dart';
 
 class _RefreshTokenRejected implements Exception {
@@ -537,6 +538,44 @@ class ApiService {
     } else {
       throw ApiError.fromResponse(response);
     }
+  }
+
+  Future<List<CropSubscription>> getSubscriptions() async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.get(
+        Uri.parse('${ApiConstants.baseUrl}${ApiConstants.subscriptions}/'),
+        headers: headers,
+      ),
+    );
+    if (response.statusCode == 200) {
+      return (jsonDecode(response.body) as List<dynamic>)
+          .map(
+            (item) => CropSubscription.fromJson(item as Map<String, dynamic>),
+          )
+          .toList();
+    }
+    throw ApiError.fromResponse(response);
+  }
+
+  Future<CropSubscriptionPayment> createCropSubscription({
+    required String deviceId,
+    required String cropName,
+  }) async {
+    final response = await _authenticatedRequest(
+      (headers) => _client.post(
+        Uri.parse(
+          '${ApiConstants.baseUrl}${ApiConstants.deviceSubscriptions(deviceId)}',
+        ),
+        headers: headers,
+        body: jsonEncode({'cropName': cropName}),
+      ),
+    );
+    if (response.statusCode == 201) {
+      return CropSubscriptionPayment.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    }
+    throw ApiError.fromResponse(response);
   }
 
   // Dashboard methods

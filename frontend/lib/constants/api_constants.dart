@@ -35,6 +35,10 @@ class ApiConstants {
   static String activeProvisioningCode(String id) => deviceProvisioningCode(id);
   static const String claimDevice = '/api/device-provisioning/claims';
 
+  static const String subscriptions = '/api/subscriptions';
+  static String deviceSubscriptions(String id) =>
+      '$subscriptions/devices/$id';
+
   // Dashboard endpoints
   static const String dashboardOverview = '/api/dashboard/overview';
 
