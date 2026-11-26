@@ -55,6 +55,7 @@ class _CupertinoProvisioningCodeScreenState
   String Function()? _message;
   String? _hardwareId;
   Timer? _expiryTimer;
+  Future<void> _sessionMutation = Future<void>.value();
   int _pollGeneration = 0;
 
   @override
@@ -184,15 +185,12 @@ class _CupertinoProvisioningCodeScreenState
     });
   }
 
-  Future<void> _persistSession({
-    ProvisioningCode? code,
-    _SetupStage? stage,
-  }) async {
-    try {
-      final preferences = await SharedPreferences.getInstance();
+  Future<void> _persistSession({ProvisioningCode? code, _SetupStage? stage}) {
+    final currentCode = code ?? _code;
+    final stageIndex = (stage ?? _stage).index;
+    return _enqueueSessionMutation((preferences) async {
       await preferences.setString(_activeDeviceIdKey, widget.device.id);
       await preferences.setString(_activeDeviceNameKey, widget.device.name);
-      final currentCode = code ?? _code;
       if (currentCode != null) {
         await preferences.setString('${_sessionPrefix}code', currentCode.code);
         await preferences.setString(
@@ -200,28 +198,32 @@ class _CupertinoProvisioningCodeScreenState
           currentCode.expiresAt,
         );
       }
-      await preferences.setInt(
-        '${_sessionPrefix}stage',
-        (stage ?? _stage).index,
-      );
-    } catch (_) {
-      // Provisioning remains usable when browser storage is unavailable.
-    }
+      await preferences.setInt('${_sessionPrefix}stage', stageIndex);
+    });
   }
 
-  Future<void> _clearSession() async {
-    try {
-      final preferences = await SharedPreferences.getInstance();
-      await preferences.remove('${_sessionPrefix}code');
-      await preferences.remove('${_sessionPrefix}expires_at');
-      await preferences.remove('${_sessionPrefix}stage');
-      if (preferences.getString(_activeDeviceIdKey) == widget.device.id) {
-        await preferences.remove(_activeDeviceIdKey);
-        await preferences.remove(_activeDeviceNameKey);
-      }
-    } catch (_) {
-      // Session cleanup is best-effort and must not block successful setup.
+  Future<void> _clearSession() => _enqueueSessionMutation((preferences) async {
+    await preferences.remove('${_sessionPrefix}code');
+    await preferences.remove('${_sessionPrefix}expires_at');
+    await preferences.remove('${_sessionPrefix}stage');
+    if (preferences.getString(_activeDeviceIdKey) == widget.device.id) {
+      await preferences.remove(_activeDeviceIdKey);
+      await preferences.remove(_activeDeviceNameKey);
     }
+  });
+
+  Future<void> _enqueueSessionMutation(
+    Future<void> Function(SharedPreferences preferences) mutation,
+  ) {
+    _sessionMutation = _sessionMutation.then((_) async {
+      try {
+        final preferences = await SharedPreferences.getInstance();
+        await mutation(preferences);
+      } catch (_) {
+        // Browser storage is recovery-only and must not block provisioning.
+      }
+    });
+    return _sessionMutation;
   }
 
   void _setStage(_SetupStage stage) {

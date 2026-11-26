@@ -16,10 +16,12 @@ class _FakeApiService extends ApiService {
   int createCodeCalls = 0;
   int getDeviceCalls = 0;
   bool deviceOnline = true;
+  bool createCodeFails = false;
 
   @override
   Future<Map<String, dynamic>> createProvisioningCode(String deviceId) async {
     createCodeCalls++;
+    if (createCodeFails) throw Exception('offline');
     return {'code': 'SECRET-CODE', 'expiresAt': '2099-01-01T00:00:00Z'};
   }
 
@@ -343,6 +345,51 @@ void main() {
     expect(esp.getStatusCalls, 0);
     final preferences = await SharedPreferences.getInstance();
     expect(preferences.getString('device_setup_${device.id}_code'), isNull);
+  });
+
+  testWidgets('persists handoff before the ESP disconnects the web app', (
+    tester,
+  ) async {
+    final api = _FakeApiService()..deviceOnline = false;
+
+    Future<void> mount() => tester.pumpWidget(
+      buildLocalizedCupertinoApp(
+        home: CupertinoProvisioningCodeScreen(
+          device: device,
+          apiService: api,
+          espProvisioningService: _FakeEspService(),
+        ),
+      ),
+    );
+
+    await mount();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Thiết bị đã sẵn sàng'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kết nối với ESP').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('BETEA'));
+    await tester.enterText(find.byType(CupertinoTextField), 'wifi-secret');
+    await tester.tap(
+      find.widgetWithText(CupertinoButton, 'Thiết lập thiết bị'),
+    );
+    await tester.pump();
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getInt('device_setup_${device.id}_stage'), 3);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    api.createCodeFails = true;
+    api.deviceOnline = true;
+    await mount();
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Bước 4/5'), findsOneWidget);
+    expect(api.createCodeCalls, 1);
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('keeps registration pending and allows retry after timeout', (
