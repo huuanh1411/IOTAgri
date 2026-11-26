@@ -1656,6 +1656,9 @@ class AppLocalizationsVi extends AppLocalizations {
       'Thiết bị đã kết nối Wi-Fi nhưng chưa thể truy cập máy chủ. Hãy kiểm tra Internet và chờ thêm một chút.';
 
   @override
+  String get restartDeviceSetupAction => 'Thiết lập lại từ đầu';
+
+  @override
   String get settingUpDeviceTitle => 'Đang thiết lập';
 
   @override

@@ -759,6 +759,7 @@
   "provisioningOutcomeChecking": "Thiết bị có thể đã nhận cấu hình. Đang kiểm tra trạng thái với máy chủ…",
   "deviceSwitchingNetwork": "Thiết bị đang chuyển sang mạng Wi-Fi chính. Quá trình này có thể mất 30–60 giây.",
   "deviceWifiButNotOnline": "Thiết bị đã kết nối Wi-Fi nhưng chưa thể truy cập máy chủ. Hãy kiểm tra Internet và chờ thêm một chút.",
+  "restartDeviceSetupAction": "Thiết lập lại từ đầu",
   "settingUpDeviceTitle": "Đang thiết lập",
   "progressEspConnected": "Đã kết nối ESP",
   "progressCredentialsSent": "Đã gửi thông tin Wi-Fi",

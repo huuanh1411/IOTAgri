@@ -1665,6 +1665,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'The device connected to Wi-Fi but cannot reach the server yet. Check the Internet connection and wait a little longer.';
 
   @override
+  String get restartDeviceSetupAction => 'Restart device setup';
+
+  @override
   String get settingUpDeviceTitle => 'Setting Up';
 
   @override

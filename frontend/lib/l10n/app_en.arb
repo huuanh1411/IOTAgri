@@ -759,6 +759,7 @@
   "provisioningOutcomeChecking": "The device may have received the configuration. Checking its status with the server…",
   "deviceSwitchingNetwork": "The device is switching to your main Wi-Fi network. This may take 30–60 seconds.",
   "deviceWifiButNotOnline": "The device connected to Wi-Fi but cannot reach the server yet. Check the Internet connection and wait a little longer.",
+  "restartDeviceSetupAction": "Restart device setup",
   "settingUpDeviceTitle": "Setting Up",
   "progressEspConnected": "ESP connected",
   "progressCredentialsSent": "Wi-Fi credentials sent",

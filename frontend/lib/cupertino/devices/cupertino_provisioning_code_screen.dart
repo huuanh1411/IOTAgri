@@ -396,6 +396,30 @@ class _CupertinoProvisioningCodeScreenState
     unawaited(_waitForBackendOnline());
   }
 
+  Future<void> _restartProvisioning() async {
+    _pollGeneration++;
+    setState(() {
+      _checkingBackend = false;
+      _busy = true;
+      _message = null;
+    });
+    await _clearSession();
+    if (!mounted) return;
+
+    setState(() {
+      _code = null;
+      _progress = 0;
+      _stage = _SetupStage.prepare;
+    });
+    final generated = await _generateCode(showLoading: false);
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      if (generated) _stage = _SetupStage.connect;
+    });
+    if (generated) await _persistSession(stage: _SetupStage.connect);
+  }
+
   void _goBack() {
     final nextStage = switch (_stage) {
       _SetupStage.connect => _SetupStage.prepare,
@@ -642,6 +666,10 @@ class _CupertinoProvisioningCodeScreenState
         CupertinoButton(
           onPressed: _retryBackendCheck,
           child: Text(context.l10n.retry),
+        ),
+        CupertinoButton(
+          onPressed: _restartProvisioning,
+          child: Text(context.l10n.restartDeviceSetupAction),
         ),
       ],
     ],
