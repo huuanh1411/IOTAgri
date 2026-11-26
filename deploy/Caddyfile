@@ -1,12 +1,4 @@
 api.aerogreen.vn {
-	tls {
-		key_type rsa2048
-		issuer acme {
-			preferred_chains {
-				root_common_name "ISRG Root X1"
-			}
-		}
-	}
 	encode gzip
 	reverse_proxy api:8080
 }
@@ -22,13 +14,5 @@ www.aerogreen.vn {
 
 # Caddy only obtains and renews this certificate; deploy/sync-mqtt-certs.sh hands it to Mosquitto.
 mqtt.aerogreen.vn {
-	tls {
-		key_type rsa2048
-		issuer acme {
-			preferred_chains {
-				root_common_name "ISRG Root X1"
-			}
-		}
-	}
 	respond 404
 }

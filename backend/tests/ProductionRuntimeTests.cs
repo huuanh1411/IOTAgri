@@ -43,15 +43,6 @@ public class ProductionRuntimeTests
     }
 
     [Fact]
-    public void Firmware_endpoints_keep_an_rsa_chain_to_the_embedded_root()
-    {
-        var caddyfile = File.ReadAllText(RepoFile("deploy/Caddyfile"));
-
-        Assert.Equal(2, Count(caddyfile, "key_type rsa2048"));
-        Assert.Equal(2, Count(caddyfile, "root_common_name \"ISRG Root X1\""));
-    }
-
-    [Fact]
     public void Production_compose_allows_both_served_frontend_origins()
     {
         var compose = File.ReadAllText(RepoFile("compose.production.yaml"));
@@ -105,19 +96,6 @@ public class ProductionRuntimeTests
         Assert.True(certificateIndex >= 0, "CD must require the MQTT certificate before touching Mosquitto.");
         Assert.True(keyIndex > certificateIndex, "CD must require the matching MQTT private key.");
         Assert.True(composeIndex > keyIndex, "Certificate checks must run before Compose reconciliation.");
-    }
-
-    [Fact]
-    public void Continuous_deployment_syncs_the_compatible_mqtt_certificate()
-    {
-        var workflow = File.ReadAllText(RepoFile(".github/workflows/cd.yml"));
-
-        Assert.Contains("-servername api.aerogreen.vn", workflow);
-        Assert.Contains("-servername mqtt.aerogreen.vn", workflow);
-        Assert.Contains("grep -q 'ISRG Root X1'", workflow);
-        Assert.Contains("cert_backup_suffix=\".pre-x1-$deploy_sha\"", workflow);
-        Assert.Contains("trap rollback_cert_rotation ERR", workflow);
-        Assert.Contains("systemctl start iotagri-mqtt-cert-sync.service", workflow);
     }
 
     [Fact]

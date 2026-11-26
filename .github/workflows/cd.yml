@@ -64,55 +64,8 @@ jobs:
             git switch --detach "$deploy_sha"
             test -s deploy/mosquitto-certs/server.crt
             test -s deploy/mosquitto-certs/server.key
-            compose=(docker compose --env-file .env.production -f compose.production.yaml)
-            cert_root=/data/caddy/certificates/acme-v02.api.letsencrypt.org-directory
-            cert_backup_suffix=".pre-x1-$deploy_sha"
-            cert_rotation=false
-            rollback_cert_rotation() {
-              $cert_rotation || return 0
-              for host in api.aerogreen.vn mqtt.aerogreen.vn; do
-                "${compose[@]}" exec -T caddy sh -c '
-                  src="$1/$2"
-                  backup="$src$3"
-                  failed="$src.failed-$4"
-                  if [ -d "$backup" ]; then
-                    if [ -d "$src" ]; then mv "$src" "$failed"; fi
-                    mv "$backup" "$src"
-                  fi
-                ' sh "$cert_root" "$host" "$cert_backup_suffix" "$deploy_sha"
-              done
-              "${compose[@]}" restart caddy
-            }
-            if ! openssl s_client -connect 127.0.0.1:443 -servername api.aerogreen.vn -showcerts </dev/null 2>/dev/null | grep -q 'ISRG Root X1' ||
-               ! openssl s_client -connect 127.0.0.1:443 -servername mqtt.aerogreen.vn -showcerts </dev/null 2>/dev/null | grep -q 'ISRG Root X1'; then
-              cert_rotation=true
-              trap rollback_cert_rotation ERR
-              for host in api.aerogreen.vn mqtt.aerogreen.vn; do
-                "${compose[@]}" exec -T caddy sh -c '
-                  src="$1/$2"
-                  backup="$src$3"
-                  if [ -d "$src" ] && [ ! -e "$backup" ]; then mv "$src" "$backup"; fi
-                ' sh "$cert_root" "$host" "$cert_backup_suffix"
-              done
-            fi
-            "${compose[@]}" up -d --build --remove-orphans
-            for attempt in $(seq 1 18); do
-              api_chain=$(openssl s_client -connect 127.0.0.1:443 -servername api.aerogreen.vn -showcerts </dev/null 2>/dev/null || true)
-              mqtt_chain=$(openssl s_client -connect 127.0.0.1:443 -servername mqtt.aerogreen.vn -showcerts </dev/null 2>/dev/null || true)
-              if grep -q 'ISRG Root X1' <<<"$api_chain" && grep -q 'ISRG Root X1' <<<"$mqtt_chain"; then
-                break
-              fi
-              sleep 5
-            done
-            grep -q 'ISRG Root X1' <<<"$api_chain"
-            grep -q 'ISRG Root X1' <<<"$mqtt_chain"
-            trap - ERR
-            if [ "$(id -u)" -eq 0 ]; then
-              systemctl start iotagri-mqtt-cert-sync.service
-            else
-              sudo -n systemctl start iotagri-mqtt-cert-sync.service
-            fi
-            "${compose[@]}" ps
+            docker compose --env-file .env.production -f compose.production.yaml up -d --build --remove-orphans
+            docker compose --env-file .env.production -f compose.production.yaml ps
             for attempt in $(seq 1 12); do
               if curl --fail --silent --show-error https://api.aerogreen.vn/health; then
                 exit 0
