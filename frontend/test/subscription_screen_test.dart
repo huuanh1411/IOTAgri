@@ -62,7 +62,9 @@ Widget _app(ApiService api) => MaterialApp(
 );
 
 Future<void> _selectLettuce(WidgetTester tester) async {
-  await tester.tap(find.byType(DropdownButtonFormField<String>));
+  final cropPicker = find.byType(DropdownButtonFormField<String>);
+  await tester.ensureVisible(cropPicker);
+  await tester.tap(cropPicker);
   await tester.pumpAndSettle();
   await tester.tap(find.text('Xà lách').last);
   await tester.pumpAndSettle();
