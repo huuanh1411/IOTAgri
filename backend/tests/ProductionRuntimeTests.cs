@@ -91,7 +91,7 @@ public class ProductionRuntimeTests
         var workflow = File.ReadAllText(RepoFile(".github/workflows/cd.yml"));
         var certificateIndex = workflow.IndexOf("test -s deploy/mosquitto-certs/server.crt", StringComparison.Ordinal);
         var keyIndex = workflow.IndexOf("test -s deploy/mosquitto-certs/server.key", StringComparison.Ordinal);
-        var composeIndex = workflow.IndexOf("up -d --build --remove-orphans", StringComparison.Ordinal);
+        var composeIndex = workflow.IndexOf("\"${compose[@]}\" up -d --no-build --remove-orphans", StringComparison.Ordinal);
 
         Assert.True(certificateIndex >= 0, "CD must require the MQTT certificate before touching Mosquitto.");
         Assert.True(keyIndex > certificateIndex, "CD must require the matching MQTT private key.");
@@ -114,11 +114,24 @@ public class ProductionRuntimeTests
     }
 
     [Fact]
-    public void Continuous_deployment_allows_the_slow_frontend_release_build_to_finish()
+    public void Continuous_deployment_serializes_and_bounds_production_builds()
     {
         var workflow = File.ReadAllText(RepoFile(".github/workflows/cd.yml"));
 
-        Assert.Contains("timeout 60m ssh", workflow);
+        var buildIndex = workflow.IndexOf(
+            "timeout --foreground --signal=TERM --kill-after=30s 25m \"${compose[@]}\" build",
+            StringComparison.Ordinal);
+        var reconcileIndex = workflow.IndexOf(
+            "\"${compose[@]}\" up -d --no-build --remove-orphans",
+            StringComparison.Ordinal);
+
+        Assert.Contains("cancel-in-progress: false", workflow);
+        Assert.Contains("timeout-minutes: 40", workflow);
+        Assert.Contains("timeout 35m ssh", workflow);
+        Assert.Contains("flock -w 300 9", workflow);
+        Assert.Contains("export COMPOSE_PARALLEL_LIMIT=1", workflow);
+        Assert.True(buildIndex >= 0, "CD must bound the image build duration.");
+        Assert.True(reconcileIndex > buildIndex, "CD must finish building before replacing containers.");
     }
 
     [Fact]
