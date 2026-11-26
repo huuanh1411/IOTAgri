@@ -46,7 +46,18 @@ public class SubscriptionEndpointTests
         var resumedPayment = Assert.IsAssignableFrom<IValueHttpResult<CropSubscriptionPaymentResponse>>(resumed).Value;
         Assert.NotNull(resumedPayment);
         Assert.Equal(subscription.PaymentCode, resumedPayment!.Subscription.PaymentCode);
-        var rawBody = $"{{\"id\":92704,\"accountNumber\":\"1234567890\",\"code\":\"{subscription.PaymentCode}\",\"transferType\":\"in\",\"transferAmount\":50000}}";
+
+        var repricedOptions = Options.Create(new SubscriptionOptions
+        {
+            MonthlyPriceVnd = 239_000, BankCode = "MB", AccountNumber = "1234567890", AccountName = "AEROGREEN"
+        });
+        var repriced = await BackendTestDoubles.InvokeHandler(typeof(SubscriptionEndpoints), "CreateAsync",
+            device.Id, new CreateCropSubscriptionRequest("Lettuce"), principal, db, repricedOptions, CancellationToken.None);
+        Assert.Equal(StatusCodes.Status409Conflict, ((IStatusCodeHttpResult)repriced).StatusCode);
+        Assert.Equal(239_000, subscription.AmountVnd);
+        var repricedPayment = Assert.IsAssignableFrom<IValueHttpResult<CropSubscriptionPaymentResponse>>(repriced).Value;
+        Assert.Equal(239_000, repricedPayment!.Subscription.AmountVnd);
+        var rawBody = $"{{\"id\":92704,\"accountNumber\":\"1234567890\",\"code\":\"{subscription.PaymentCode}\",\"transferType\":\"in\",\"transferAmount\":{subscription.AmountVnd}}}";
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var context = new DefaultHttpContext();
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(rawBody));

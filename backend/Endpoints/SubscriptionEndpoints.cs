@@ -58,6 +58,15 @@ public static class SubscriptionEndpoints
             .FirstOrDefaultAsync(cancellationToken);
         if (openSubscription is not null)
         {
+            // A pending payment has not been settled yet.  When the published
+            // price changes, refresh its amount only as the owner explicitly
+            // resumes checkout; active and paid subscriptions stay immutable.
+            if (openSubscription.Status == "Pending" && openSubscription.AmountVnd != settings.MonthlyPriceVnd)
+            {
+                openSubscription.AmountVnd = settings.MonthlyPriceVnd;
+                await db.SaveChangesAsync(cancellationToken);
+            }
+
             // The request is idempotent for an open subscription.  Returning
             // its payment details lets the client resume the existing QR flow
             // instead of showing a generic conflict error.
