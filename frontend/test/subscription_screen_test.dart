@@ -105,6 +105,20 @@ void main() {
     expect(provider.url, isNot(contains('-compact2.png')));
   });
 
+  testWidgets('keeps the subscription header at the top-left on wide screens', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(_app(_FakeApiService()));
+    await tester.pumpAndSettle();
+
+    final header = tester.getTopLeft(find.text('Gói dịch vụ'));
+    expect(header.dx, 24);
+    expect(header.dy, 24);
+  });
+
   testWidgets('refreshes the status supplied by the subscription endpoint', (
     tester,
   ) async {
