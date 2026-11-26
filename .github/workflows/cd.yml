@@ -10,13 +10,15 @@ permissions:
 
 concurrency:
   group: production-deploy
-  # A newer main commit must not wait forever behind a stalled remote deploy.
-  cancel-in-progress: true
+  # Cancelling SSH can leave the Docker daemon building after the runner exits.
+  # Queue newer releases so two builds never compete for VPS resources.
+  cancel-in-progress: false
 
 jobs:
   deploy:
     name: Deploy production
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     environment: production
 
     steps:
@@ -38,7 +40,7 @@ jobs:
           VPS_USER: ${{ secrets.VPS_USER }}
           DEPLOY_SHA: ${{ github.sha }}
         run: |
-          timeout 60m ssh -i ~/.ssh/id_ed25519 \
+          timeout 35m ssh -i ~/.ssh/id_ed25519 \
             -o BatchMode=yes \
             -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile=~/.ssh/known_hosts \
@@ -52,6 +54,11 @@ jobs:
             set -euo pipefail
             deploy_sha=$1
             cd /opt/iotagri
+            exec 9>/tmp/iotagri-production-deploy.lock
+            flock -w 300 9 || {
+              echo 'Another production deployment still holds the VPS lock.' >&2
+              exit 1
+            }
             # Preserve tracked VPS changes while leaving local operational files untouched.
             if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
               git stash push -m "pre-deploy-$deploy_sha"
@@ -64,8 +71,13 @@ jobs:
             git switch --detach "$deploy_sha"
             test -s deploy/mosquitto-certs/server.crt
             test -s deploy/mosquitto-certs/server.key
-            docker compose --env-file .env.production -f compose.production.yaml up -d --build --remove-orphans
-            docker compose --env-file .env.production -f compose.production.yaml ps
+            compose=(docker compose --env-file .env.production -f compose.production.yaml)
+            export COMPOSE_PARALLEL_LIMIT=1
+            # Finish every image before replacing a running container. Serial
+            # builds prevent Flutter and .NET from exhausting a small VPS.
+            timeout --foreground --signal=TERM --kill-after=30s 25m "${compose[@]}" build
+            "${compose[@]}" up -d --no-build --remove-orphans
+            "${compose[@]}" ps
             for attempt in $(seq 1 12); do
               if curl --fail --silent --show-error https://api.aerogreen.vn/health; then
                 exit 0
