@@ -105,7 +105,7 @@ void main() {
     expect(provider.url, isNot(contains('-compact2.png')));
   });
 
-  testWidgets('keeps the subscription header at the top-left on wide screens', (
+  testWidgets('centers the subscription content on wide screens', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 800));
@@ -115,7 +115,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final header = tester.getTopLeft(find.text('Gói dịch vụ'));
-    expect(header.dx, 24);
+    expect(header.dx, 220);
     expect(header.dy, 24);
   });
 

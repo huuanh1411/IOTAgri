@@ -128,6 +128,7 @@ public class ProductionRuntimeTests
         Assert.Contains("cancel-in-progress: false", workflow);
         Assert.Contains("timeout-minutes: 40", workflow);
         Assert.Contains("timeout 35m ssh", workflow);
+        Assert.Contains("SUBSCRIPTION_MONTHLY_PRICE_VND=239000", workflow);
         Assert.Contains("flock -w 300 9", workflow);
         Assert.Contains("\"${compose[@]}\" build 9>&-", workflow);
         Assert.Contains("\"${compose[@]}\" up -d --no-build --remove-orphans 9>&-", workflow);

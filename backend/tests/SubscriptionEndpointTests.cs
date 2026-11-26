@@ -40,6 +40,12 @@ public class SubscriptionEndpointTests
             device.Id, new CreateCropSubscriptionRequest("Lettuce"), principal, db, subscriptionOptions, CancellationToken.None);
         Assert.Equal(StatusCodes.Status201Created, ((IStatusCodeHttpResult)created).StatusCode);
         var subscription = await db.CropSubscriptions.SingleAsync();
+        var resumed = await BackendTestDoubles.InvokeHandler(typeof(SubscriptionEndpoints), "CreateAsync",
+            device.Id, new CreateCropSubscriptionRequest("Lettuce"), principal, db, subscriptionOptions, CancellationToken.None);
+        Assert.Equal(StatusCodes.Status409Conflict, ((IStatusCodeHttpResult)resumed).StatusCode);
+        var resumedPayment = Assert.IsAssignableFrom<IValueHttpResult<CropSubscriptionPaymentResponse>>(resumed).Value;
+        Assert.NotNull(resumedPayment);
+        Assert.Equal(subscription.PaymentCode, resumedPayment!.Subscription.PaymentCode);
         var rawBody = $"{{\"id\":92704,\"accountNumber\":\"1234567890\",\"code\":\"{subscription.PaymentCode}\",\"transferType\":\"in\",\"transferAmount\":50000}}";
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var context = new DefaultHttpContext();

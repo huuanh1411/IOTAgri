@@ -570,7 +570,7 @@ class ApiService {
         body: jsonEncode({'cropName': cropName}),
       ),
     );
-    if (response.statusCode == 201) {
+    if (response.statusCode == 201 || response.statusCode == 409) {
       return CropSubscriptionPayment.fromJson(
         jsonDecode(response.body) as Map<String, dynamic>,
       );

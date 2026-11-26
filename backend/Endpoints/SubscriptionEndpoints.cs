@@ -51,9 +51,19 @@ public static class SubscriptionEndpoints
         if (!await db.Devices.AnyAsync(device => device.Id == deviceId && device.OwnerId == userId, cancellationToken)) return Results.NotFound();
 
         var now = DateTime.UtcNow;
-        var hasOpenSubscription = await db.CropSubscriptions.AnyAsync(item => item.DeviceId == deviceId
-            && ((item.Status == "Pending" && item.PaymentExpiresAt > now) || (item.Status == "Active" && item.ExpiresAt > now)), cancellationToken);
-        if (hasOpenSubscription) return Results.Conflict(new { error = "Device already has a pending or active subscription." });
+        var openSubscription = await db.CropSubscriptions
+            .Where(item => item.DeviceId == deviceId
+                && ((item.Status == "Pending" && item.PaymentExpiresAt > now) || (item.Status == "Active" && item.ExpiresAt > now)))
+            .OrderByDescending(item => item.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (openSubscription is not null)
+        {
+            // The request is idempotent for an open subscription.  Returning
+            // its payment details lets the client resume the existing QR flow
+            // instead of showing a generic conflict error.
+            return Results.Conflict(new CropSubscriptionPaymentResponse(
+                ToResponse(openSubscription), settings.BankCode, settings.AccountNumber, settings.AccountName));
+        }
 
         var subscription = new CropSubscription
         {

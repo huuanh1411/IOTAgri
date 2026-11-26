@@ -132,7 +132,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
         child: Align(
-          alignment: Alignment.topLeft,
+          alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 760),
             child: Column(
