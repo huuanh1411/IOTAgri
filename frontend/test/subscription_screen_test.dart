@@ -91,6 +91,20 @@ void main() {
     expect(find.text('Đang chờ thanh toán'), findsOneWidget);
   });
 
+  testWidgets('loads VietQR using its final SVG URL without a redirect', (tester) async {
+    final api = _FakeApiService();
+    await tester.pumpWidget(_app(api));
+    await tester.pumpAndSettle();
+    await _selectLettuce(tester);
+    await tester.tap(find.text('Tiếp tục thanh toán'));
+    await tester.pump();
+
+    final image = tester.widget<Image>(find.byType(Image));
+    final provider = image.image as NetworkImage;
+    expect(provider.url, contains('-compact2.svg?'));
+    expect(provider.url, isNot(contains('-compact2.png')));
+  });
+
   testWidgets('refreshes the status supplied by the subscription endpoint', (
     tester,
   ) async {

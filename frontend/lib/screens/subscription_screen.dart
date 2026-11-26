@@ -283,7 +283,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         : context.l10n.paymentPending;
     final qrUri = Uri.https(
       'img.vietqr.io',
-      '/image/${payment.bankCode}-${payment.accountNumber}-compact2.png',
+      '/image/${payment.bankCode}-${payment.accountNumber}-compact2.svg',
       {
         'amount': subscription.amountVnd.toString(),
         'addInfo': subscription.paymentCode,
