@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../core/theme/app_colors.dart';
 import '../core/widgets/page_header.dart';
@@ -304,14 +305,13 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               children: [
                 if (!subscription.isActive && !expired)
                   LayoutBuilder(
-                    builder: (context, constraints) => Image.network(
+                    builder: (context, constraints) => SvgPicture.network(
                       qrUri.toString(),
                       height: constraints.maxWidth,
                       width: constraints.maxWidth,
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => _messageCard(
-                        context.l10n.subscriptionQrLoadFailed,
-                        isError: true,
+                      placeholderBuilder: (context) => const SizedBox.square(
+                        child: Center(child: CircularProgressIndicator()),
                       ),
                     ),
                   ),
@@ -380,7 +380,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     child: Padding(padding: const EdgeInsets.all(14), child: Text(message)),
   );
 
-  String _money(int amount) => '${amount.toString().replaceAllMapped(RegExp(r'(?=(\d{3})+(?!\d))'), (_) => '.')} đ';
+  String _money(int amount) =>
+      '${amount.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => '.')} đ';
 
   String _dateTime(DateTime value) {
     final local = value.toLocal();
