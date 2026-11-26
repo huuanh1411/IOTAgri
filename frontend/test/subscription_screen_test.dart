@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:iotagri_app/l10n/app_localizations.dart';
 import 'package:iotagri_app/models/crop_subscription.dart';
@@ -92,7 +91,7 @@ void main() {
     expect(find.text('Đang chờ thanh toán'), findsOneWidget);
   });
 
-  testWidgets('renders VietQR with an SVG-capable widget', (tester) async {
+  testWidgets('renders VietQR as a PNG supported by Flutter', (tester) async {
     final api = _FakeApiService();
     await tester.pumpWidget(_app(api));
     await tester.pumpAndSettle();
@@ -100,7 +99,9 @@ void main() {
     await tester.tap(find.text('Tiếp tục thanh toán'));
     await tester.pump();
 
-    expect(find.byType(SvgPicture), findsOneWidget);
+    final image = tester.widget<Image>(find.byType(Image));
+    expect(image.image, isA<NetworkImage>());
+    expect((image.image as NetworkImage).url, contains('compact2.png'));
   });
 
   testWidgets('formats a payment amount without a leading separator', (tester) async {

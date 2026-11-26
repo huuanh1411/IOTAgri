@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../core/theme/app_colors.dart';
 import '../core/widgets/page_header.dart';
@@ -284,7 +283,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         : context.l10n.paymentPending;
     final qrUri = Uri.https(
       'img.vietqr.io',
-      '/image/${payment.bankCode}-${payment.accountNumber}-compact2.svg',
+      '/image/${payment.bankCode}-${payment.accountNumber}-compact2.png',
       {
         'amount': subscription.amountVnd.toString(),
         'addInfo': subscription.paymentCode,
@@ -305,13 +304,21 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               children: [
                 if (!subscription.isActive && !expired)
                   LayoutBuilder(
-                    builder: (context, constraints) => SvgPicture.network(
+                    builder: (context, constraints) => Image.network(
                       qrUri.toString(),
                       height: constraints.maxWidth,
                       width: constraints.maxWidth,
                       fit: BoxFit.contain,
-                      placeholderBuilder: (context) => const SizedBox.square(
-                        child: Center(child: CircularProgressIndicator()),
+                      loadingBuilder: (context, child, loadingProgress) =>
+                          loadingProgress == null
+                          ? child
+                          : const SizedBox.square(
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.qr_code_2_outlined,
+                        size: 120,
+                        color: AppColors.forestGreen,
                       ),
                     ),
                   ),
