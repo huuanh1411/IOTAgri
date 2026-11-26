@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../core/theme/app_colors.dart';
+import '../core/widgets/page_header.dart';
 import '../models/crop_subscription.dart';
 import '../models/device.dart';
 import '../services/api_service.dart';
@@ -20,9 +21,9 @@ class SubscriptionScreen extends StatefulWidget {
 
 class _SubscriptionScreenState extends State<SubscriptionScreen> {
   late final ApiService _apiService = widget._apiService ?? ApiService();
-  final _cropName = TextEditingController();
   List<Device> _devices = const [];
   Device? _selectedDevice;
+  String? _selectedCropName;
   CropSubscriptionPayment? _payment;
   Timer? _statusTimer;
   bool _loadingDevices = true;
@@ -39,7 +40,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   @override
   void dispose() {
     _statusTimer?.cancel();
-    _cropName.dispose();
     super.dispose();
   }
 
@@ -66,8 +66,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   Future<void> _createPayment() async {
     final device = _selectedDevice;
-    final cropName = _cropName.text.trim();
-    if (device == null || cropName.isEmpty) {
+    final cropName = _selectedCropName;
+    if (device == null || cropName == null) {
       setState(() => _error = context.l10n.subscriptionFormRequired);
       return;
     }
@@ -128,92 +128,148 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppColors.background,
-    appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      title: Text(context.l10n.subscription),
-    ),
     body: SafeArea(
-      top: false,
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-            child: _payment == null ? _form() : _paymentDetails(),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 760),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                PageHeader(
+                  title: context.l10n.subscription,
+                  subtitle: context.l10n.paymentSubtitle,
+                ),
+                const SizedBox(height: 28),
+                _payment == null ? _form() : _paymentDetails(),
+              ],
+            ),
           ),
         ),
       ),
     ),
   );
 
-  Widget _form() => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        context.l10n.subscriptionRealPaymentNotice,
-        style: const TextStyle(color: AppColors.secondaryText),
-      ),
-      const SizedBox(height: 20),
-      if (_loadingDevices)
-        const Center(
-          child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()),
-        )
-      else if (_devices.isEmpty)
-        _messageCard(context.l10n.subscriptionNoDevices)
-      else ...[
-        Text(context.l10n.subscriptionDeviceLabel, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<Device>(
-          initialValue: _selectedDevice,
-          isExpanded: true,
-          decoration: const InputDecoration(border: OutlineInputBorder()),
-          items: _devices
-              .map((device) => DropdownMenuItem(value: device, child: Text(device.name)))
-              .toList(),
-          onChanged: (device) => setState(() => _selectedDevice = device),
-        ),
-        const SizedBox(height: 18),
-        Text(context.l10n.subscriptionCropLabel, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _cropName,
-          maxLength: 100,
-          textInputAction: TextInputAction.done,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            hintText: context.l10n.subscriptionCropHint,
-          ),
-          onSubmitted: (_) => _createPayment(),
-        ),
-        Text(
-          context.l10n.subscriptionPriceFromServer,
-          style: const TextStyle(color: AppColors.mutedSage, fontSize: 13),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: _creating ? null : _createPayment,
-            icon: _creating
-                ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.qr_code_2_outlined),
-            label: Text(context.l10n.continueToPayment),
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.forestGreen,
-              padding: const EdgeInsets.symmetric(vertical: 15),
+  Widget _form() => Card(
+    margin: EdgeInsets.zero,
+    color: AppColors.surface,
+    elevation: 3,
+    shadowColor: AppColors.primaryText.withValues(alpha: .18),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.mintChip,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.account_balance_wallet_outlined, color: AppColors.forestGreen),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    context.l10n.subscriptionRealPaymentNotice,
+                    style: const TextStyle(color: AppColors.secondaryText, height: 1.4),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-      ],
-      if (_error != null) ...[
-        const SizedBox(height: 16),
-        _messageCard(_error!, isError: true),
-        if (!_loadingDevices)
-          TextButton(onPressed: _loadDevices, child: Text(context.l10n.retry)),
-      ],
-    ],
+          const SizedBox(height: 24),
+          if (_loadingDevices)
+            const Center(
+              child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()),
+            )
+          else if (_devices.isEmpty)
+            _messageCard(context.l10n.subscriptionNoDevices)
+          else ...[
+            _fieldLabel(context.l10n.subscriptionDeviceLabel),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<Device>(
+              initialValue: _selectedDevice,
+              isExpanded: true,
+              decoration: _fieldDecoration(),
+              items: _devices
+                  .map((device) => DropdownMenuItem(value: device, child: Text(device.name)))
+                  .toList(),
+              onChanged: (device) => setState(() => _selectedDevice = device),
+            ),
+            const SizedBox(height: 20),
+            _fieldLabel(context.l10n.subscriptionCropLabel),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: _selectedCropName,
+              isExpanded: true,
+              decoration: _fieldDecoration(hintText: context.l10n.subscriptionCropHint),
+              items: [
+                DropdownMenuItem(value: context.l10n.demoPlantButterhead, child: Text(context.l10n.demoPlantButterhead)),
+                DropdownMenuItem(value: context.l10n.demoPlantGenovese, child: Text(context.l10n.demoPlantGenovese)),
+                DropdownMenuItem(value: context.l10n.demoPlantBabyLeaf, child: Text(context.l10n.demoPlantBabyLeaf)),
+                DropdownMenuItem(value: context.l10n.demoPlantSpearmint, child: Text(context.l10n.demoPlantSpearmint)),
+                DropdownMenuItem(value: context.l10n.demoPlantTuscan, child: Text(context.l10n.demoPlantTuscan)),
+                DropdownMenuItem(value: context.l10n.demoPlantSlowBolt, child: Text(context.l10n.demoPlantSlowBolt)),
+              ],
+              onChanged: (cropName) => setState(() => _selectedCropName = cropName),
+            ),
+            const SizedBox(height: 10),
+            Text(context.l10n.subscriptionPriceFromServer, style: const TextStyle(color: AppColors.mutedSage, fontSize: 13)),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: _creating ? null : _createPayment,
+                icon: _creating
+                    ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Icon(Icons.qr_code_2_outlined),
+                label: Text(context.l10n.continueToPayment),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.forestGreen,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(54),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                ),
+              ),
+            ),
+          ],
+          if (_error != null) ...[
+            const SizedBox(height: 16),
+            _messageCard(_error!, isError: true),
+            if (!_loadingDevices)
+              TextButton(onPressed: _loadDevices, child: Text(context.l10n.retry)),
+          ],
+        ],
+      ),
+    ),
+  );
+
+  Widget _fieldLabel(String label) => Text(
+    label,
+    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primaryText),
+  );
+
+  InputDecoration _fieldDecoration({String? hintText}) => InputDecoration(
+    hintText: hintText,
+    filled: true,
+    fillColor: AppColors.rowBackground,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: AppColors.paleSageAccent),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: AppColors.forestGreen, width: 1.5),
+    ),
   );
 
   Widget _paymentDetails() {

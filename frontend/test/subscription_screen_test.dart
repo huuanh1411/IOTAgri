@@ -61,6 +61,13 @@ Widget _app(ApiService api) => MaterialApp(
   home: SubscriptionScreen(apiService: api),
 );
 
+Future<void> _selectLettuce(WidgetTester tester) async {
+  await tester.tap(find.byType(DropdownButtonFormField<String>));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Xà lách').last);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('creates a server-backed payment request for the selected device', (
     tester,
@@ -70,7 +77,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Giàn rau sân thượng'), findsOneWidget);
-    await tester.enterText(find.byType(TextField), 'Xà lách');
+    await _selectLettuce(tester);
     await tester.tap(find.text('Tiếp tục thanh toán'));
     await tester.pumpAndSettle();
 
@@ -88,7 +95,7 @@ void main() {
     final api = _FakeApiService();
     await tester.pumpWidget(_app(api));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Xà lách');
+    await _selectLettuce(tester);
     await tester.tap(find.text('Tiếp tục thanh toán'));
     await tester.pumpAndSettle();
 
@@ -109,7 +116,7 @@ void main() {
     final api = _FakeApiService();
     await tester.pumpWidget(_app(api));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Xà lách');
+    await _selectLettuce(tester);
     await tester.tap(find.text('Tiếp tục thanh toán'));
     await tester.pump();
 
