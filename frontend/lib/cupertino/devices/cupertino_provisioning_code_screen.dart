@@ -320,17 +320,7 @@ class _CupertinoProvisioningCodeScreenState
         _returnToWifi(() => context.l10n.incorrectWifiPassword);
         _passwordFocus.requestFocus();
       } else if (error.failure == EspProvisioningFailure.claimRejected) {
-        setState(() {
-          _stage = _SetupStage.wifi;
-          _busy = true;
-          _message = () => context.l10n.expiredCodeRegenerating;
-        });
-        final generated = await _generateCode(showLoading: false);
-        if (!mounted) return;
-        setState(() {
-          _busy = false;
-          if (generated) _message = () => context.l10n.expiredCodeRegenerated;
-        });
+        _returnToWifi(() => context.l10n.provisioningClaimRejected);
       } else if (error.failure == EspProvisioningFailure.persistence) {
         _returnToWifi(() => context.l10n.espCouldNotSaveConfiguration);
       } else {

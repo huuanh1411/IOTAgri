@@ -754,6 +754,7 @@
   "incompatibleWifiNetwork": "Thiết bị chỉ hỗ trợ Wi-Fi 2.4 GHz. Hãy chọn mạng tương thích rồi thử lại.",
   "expiredCodeRegenerating": "Mã thiết lập đã hết hạn. Đang tạo mã mới…",
   "expiredCodeRegenerated": "Mã thiết lập mới đã sẵn sàng. Thông tin Wi-Fi vẫn được giữ; hãy chọn Thiết lập thiết bị lần nữa.",
+  "provisioningClaimRejected": "ESP không thể đăng ký với máy chủ. Hãy kết nối máy tính lại với Wi-Fi có Internet, tải lại trang rồi thiết lập lại.",
   "espCouldNotSaveConfiguration": "ESP đã kết nối nhưng không thể lưu cấu hình. Vui lòng thử lại.",
   "provisioningOutcomeChecking": "Thiết bị có thể đã nhận cấu hình. Đang kiểm tra trạng thái với máy chủ…",
   "deviceSwitchingNetwork": "Thiết bị đang chuyển sang mạng Wi-Fi chính. Quá trình này có thể mất 30–60 giây.",

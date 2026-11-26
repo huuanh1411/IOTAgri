@@ -8,6 +8,7 @@ import unittest
 SKETCH = Path(__file__).resolve().parents[1] / "ESP32DeviceSetup.ino"
 ROOT_CA_HEADER = Path(__file__).resolve().parents[1] / "ProductionRootCa.h"
 ISRG_ROOT_X1_SHA256 = "96bcec06264976f37460779acf28c5a7cfe8a3c0aae11a8ffcee05c0bddf08c6"
+ISRG_ROOT_X2_SHA256 = "69729b8e15a86efc177a57afb7171dfc64add28c2fca8cf1507e34453ccb1470"
 
 
 class ProductionFirmwareContractTests(unittest.TestCase):
@@ -21,20 +22,25 @@ class ProductionFirmwareContractTests(unittest.TestCase):
         self.assertIn('constexpr char MQTT_PRODUCTION_HOST[] = "mqtt.aerogreen.vn";', self.source)
         self.assertIn("WiFiClientSecure network;", self.source)
         self.assertNotIn("WiFiClient network;", self.source)
-        self.assertIn("network.setCACert(ISRG_ROOT_X1);", self.source)
+        self.assertIn("network.setCACert(PRODUCTION_ROOT_CAS);", self.source)
         self.assertIn("http.begin(network, claimUrl)", self.source)
         self.assertIn("if (!jsonBool(response, \"useTls\", useTls) || !useTls)", self.source)
         self.assertNotIn("setInsecure", self.source)
 
         header = ROOT_CA_HEADER.read_text(encoding="utf-8")
-        pem = re.search(
+        pems = re.findall(
             r"-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----",
             header,
             re.DOTALL,
         )
-        self.assertIsNotNone(pem)
-        der = ssl.PEM_cert_to_DER_cert(pem.group(0))
-        self.assertEqual(ISRG_ROOT_X1_SHA256, hashlib.sha256(der).hexdigest())
+        self.assertEqual(2, len(pems))
+        fingerprints = {
+            hashlib.sha256(ssl.PEM_cert_to_DER_cert(pem)).hexdigest()
+            for pem in pems
+        }
+        self.assertEqual(
+            {ISRG_ROOT_X1_SHA256, ISRG_ROOT_X2_SHA256}, fingerprints
+        )
 
     def test_claim_credentials_are_complete_and_used_for_mqtt(self):
         for field in (

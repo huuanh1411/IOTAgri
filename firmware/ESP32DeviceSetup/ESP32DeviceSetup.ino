@@ -1073,7 +1073,7 @@ void setup() {
   ds18b20.setWaitForConversion(false);
   requestWaterTemperature(millis());
 
-  network.setCACert(ISRG_ROOT_X1);
+  network.setCACert(PRODUCTION_ROOT_CAS);
   network.setHandshakeTimeout(15);
   const bool settingsLoaded = loadSettings();
   if (settingsLoaded) configureMqttTopics();

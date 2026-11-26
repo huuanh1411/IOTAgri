@@ -1645,6 +1645,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'A new setup code is ready. Your Wi-Fi details were preserved; select Set Up Device again.';
 
   @override
+  String get provisioningClaimRejected =>
+      'The ESP could not register with the server. Reconnect this computer to an Internet Wi-Fi network, reload the page, then try setup again.';
+
+  @override
   String get espCouldNotSaveConfiguration =>
       'The ESP connected but could not save the configuration. Please try again.';
 

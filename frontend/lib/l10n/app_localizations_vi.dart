@@ -1636,6 +1636,10 @@ class AppLocalizationsVi extends AppLocalizations {
       'Mã thiết lập mới đã sẵn sàng. Thông tin Wi-Fi vẫn được giữ; hãy chọn Thiết lập thiết bị lần nữa.';
 
   @override
+  String get provisioningClaimRejected =>
+      'ESP không thể đăng ký với máy chủ. Hãy kết nối máy tính lại với Wi-Fi có Internet, tải lại trang rồi thiết lập lại.';
+
+  @override
   String get espCouldNotSaveConfiguration =>
       'ESP đã kết nối nhưng không thể lưu cấu hình. Vui lòng thử lại.';
 

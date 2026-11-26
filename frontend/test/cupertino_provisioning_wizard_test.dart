@@ -64,6 +64,7 @@ class _FakeEspService extends EspProvisioningService {
   String? provisionedSsid;
   String? provisionedPassword;
   bool scanFails = false;
+  EspProvisioningFailure? provisionFailure;
   int getStatusCalls = 0;
 
   @override
@@ -95,6 +96,9 @@ class _FakeEspService extends EspProvisioningService {
     provisionedSsid = ssid;
     provisionedPassword = password;
     expect(claimCode, 'SECRET-CODE');
+    if (provisionFailure case final failure?) {
+      throw EspProvisioningException('Provisioning failed.', failure: failure);
+    }
   }
 
   @override
@@ -272,6 +276,45 @@ void main() {
     await tester.tap(find.text('Thông tin kỹ thuật'));
     await tester.pumpAndSettle();
     expect(find.textContaining('SECRET-CODE'), findsOneWidget);
+  });
+
+  testWidgets('does not request a new code while connected to the ESP AP', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'device_setup_${device.id}_code': 'SECRET-CODE',
+      'device_setup_${device.id}_expires_at': '2099-01-01T00:00:00Z',
+      'device_setup_${device.id}_stage': 1,
+    });
+    final api = _FakeApiService();
+    final esp = _FakeEspService()
+      ..provisionFailure = EspProvisioningFailure.claimRejected;
+    await tester.pumpWidget(
+      buildLocalizedCupertinoApp(
+        home: CupertinoProvisioningCodeScreen(
+          device: device,
+          apiService: api,
+          espProvisioningService: esp,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final context = tester.element(
+      find.byType(CupertinoProvisioningCodeScreen),
+    );
+    final l10n = AppLocalizations.of(context)!;
+    await tester.tap(find.text(l10n.connectToEspAction).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('BETEA'));
+    await tester.enterText(find.byType(CupertinoTextField), 'wifi-secret');
+    await tester.tap(
+      find.widgetWithText(CupertinoButton, l10n.setUpDeviceAction),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.setupStepProgress(3, 5)), findsOneWidget);
+    expect(find.text(l10n.provisioningClaimRejected), findsOneWidget);
+    expect(api.createCodeCalls, 0);
   });
 
   testWidgets('restores the ESP connection step after the web tab rebuilds', (

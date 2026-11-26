@@ -754,6 +754,7 @@
   "incompatibleWifiNetwork": "This device only supports 2.4 GHz Wi-Fi. Select a compatible network and try again.",
   "expiredCodeRegenerating": "Your setup code expired. Generating a new code…",
   "expiredCodeRegenerated": "A new setup code is ready. Your Wi-Fi details were preserved; select Set Up Device again.",
+  "provisioningClaimRejected": "The ESP could not register with the server. Reconnect this computer to an Internet Wi-Fi network, reload the page, then try setup again.",
   "espCouldNotSaveConfiguration": "The ESP connected but could not save the configuration. Please try again.",
   "provisioningOutcomeChecking": "The device may have received the configuration. Checking its status with the server…",
   "deviceSwitchingNetwork": "The device is switching to your main Wi-Fi network. This may take 30–60 seconds.",

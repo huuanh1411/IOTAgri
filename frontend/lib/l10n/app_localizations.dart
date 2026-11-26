@@ -2953,6 +2953,12 @@ abstract class AppLocalizations {
   /// **'A new setup code is ready. Your Wi-Fi details were preserved; select Set Up Device again.'**
   String get expiredCodeRegenerated;
 
+  /// No description provided for @provisioningClaimRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'The ESP could not register with the server. Reconnect this computer to an Internet Wi-Fi network, reload the page, then try setup again.'**
+  String get provisioningClaimRejected;
+
   /// No description provided for @espCouldNotSaveConfiguration.
   ///
   /// In en, this message translates to:
