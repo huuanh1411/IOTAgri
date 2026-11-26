@@ -2983,6 +2983,12 @@ abstract class AppLocalizations {
   /// **'The device connected to Wi-Fi but cannot reach the server yet. Check the Internet connection and wait a little longer.'**
   String get deviceWifiButNotOnline;
 
+  /// No description provided for @restartDeviceSetupAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart device setup'**
+  String get restartDeviceSetupAction;
+
   /// No description provided for @settingUpDeviceTitle.
   ///
   /// In en, this message translates to:

@@ -476,6 +476,50 @@ void main() {
     expect(find.text('Bước 5/5'), findsOneWidget);
   });
 
+  testWidgets('can restart provisioning after backend confirmation times out', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'device_setup_${device.id}_code': 'CONSUMED-CODE',
+      'device_setup_${device.id}_expires_at': '2020-01-01T00:00:00Z',
+      'device_setup_${device.id}_stage': 3,
+    });
+    final api = _FakeApiService()..deviceOnline = false;
+
+    await tester.pumpWidget(
+      buildLocalizedCupertinoApp(
+        home: CupertinoProvisioningCodeScreen(
+          device: device,
+          apiService: api,
+          espProvisioningService: _FakeEspService(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    for (var attempt = 0; attempt < 20; attempt++) {
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+    }
+
+    final context = tester.element(
+      find.byType(CupertinoProvisioningCodeScreen),
+    );
+    final l10n = AppLocalizations.of(context)!;
+    await tester.ensureVisible(find.text(l10n.restartDeviceSetupAction));
+    await tester.tap(find.text(l10n.restartDeviceSetupAction));
+    await tester.pumpAndSettle();
+
+    expect(api.createCodeCalls, 1);
+    expect(find.text(l10n.setupStepProgress(2, 5)), findsOneWidget);
+    final preferences = await SharedPreferences.getInstance();
+    expect(
+      preferences.getString('device_setup_${device.id}_code'),
+      'SECRET-CODE',
+    );
+    expect(preferences.getInt('device_setup_${device.id}_stage'), 1);
+  });
+
   testWidgets('restores setup route when the devices API is offline', (
     tester,
   ) async {
