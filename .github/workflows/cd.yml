@@ -75,9 +75,12 @@ jobs:
             export COMPOSE_PARALLEL_LIMIT=1
             # Finish every image before replacing a running container. Serial
             # builds prevent Flutter and .NET from exhausting a small VPS.
-            timeout --foreground --signal=TERM --kill-after=30s 25m "${compose[@]}" build
-            "${compose[@]}" up -d --no-build --remove-orphans
-            "${compose[@]}" ps
+            # Keep the deployment lock in this shell only.  Docker Compose
+            # must not inherit it, or a cancelled runner can leave a child
+            # process holding the lock after SSH has exited.
+            timeout --foreground --signal=TERM --kill-after=30s 25m "${compose[@]}" build 9>&-
+            "${compose[@]}" up -d --no-build --remove-orphans 9>&-
+            "${compose[@]}" ps 9>&-
             for attempt in $(seq 1 12); do
               if curl --fail --silent --show-error https://api.aerogreen.vn/health; then
                 exit 0

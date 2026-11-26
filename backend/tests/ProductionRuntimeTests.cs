@@ -129,6 +129,8 @@ public class ProductionRuntimeTests
         Assert.Contains("timeout-minutes: 40", workflow);
         Assert.Contains("timeout 35m ssh", workflow);
         Assert.Contains("flock -w 300 9", workflow);
+        Assert.Contains("\"${compose[@]}\" build 9>&-", workflow);
+        Assert.Contains("\"${compose[@]}\" up -d --no-build --remove-orphans 9>&-", workflow);
         Assert.Contains("export COMPOSE_PARALLEL_LIMIT=1", workflow);
         Assert.True(buildIndex >= 0, "CD must bound the image build duration.");
         Assert.True(reconcileIndex > buildIndex, "CD must finish building before replacing containers.");
