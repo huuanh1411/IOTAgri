@@ -166,7 +166,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         Text(context.l10n.subscriptionDeviceLabel, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         DropdownButtonFormField<Device>(
-          value: _selectedDevice,
+          initialValue: _selectedDevice,
           isExpanded: true,
           decoration: const InputDecoration(border: OutlineInputBorder()),
           items: _devices
@@ -253,7 +253,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       height: constraints.maxWidth,
                       width: constraints.maxWidth,
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => _messageCard(
+                      errorBuilder: (context, error, stackTrace) => _messageCard(
                         context.l10n.subscriptionQrLoadFailed,
                         isError: true,
                       ),

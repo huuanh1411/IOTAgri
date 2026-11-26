@@ -6,9 +6,7 @@ import 'package:iotagri_app/screens/subscription_screen.dart';
 import 'package:iotagri_app/services/api_service.dart';
 
 class _FakeApiService extends ApiService {
-  _FakeApiService({this.active = false});
-
-  bool active;
+  bool active = false;
   String? createdDeviceId;
   String? createdCropName;
 
