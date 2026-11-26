@@ -624,22 +624,46 @@ bool connectWifiBlocking(const String& ssid, const String& password) {
   return WiFi.status() == WL_CONNECTED;
 }
 
-bool claimDevice(const String& code) {
-  if (apiUrl != API_BASE_URL || !syncClockBlocking()) return false;
+bool claimDevice(const String& code, String& failureReason) {
+  if (apiUrl != API_BASE_URL) {
+    failureReason = "Production API URL is invalid.";
+    return false;
+  }
+  if (!syncClockBlocking()) {
+    failureReason = "UTC clock synchronization failed.";
+    return false;
+  }
 
   HTTPClient http;
   const String claimUrl = apiUrl + "/api/device-provisioning/claims";
   network.stop();
-  if (!http.begin(network, claimUrl)) return false;
+  if (!http.begin(network, claimUrl)) {
+    failureReason = "HTTPS client initialization failed.";
+    return false;
+  }
   http.addHeader("Content-Type", "application/json");
   const String body = "{\"code\":\"" + code + "\",\"hardwareId\":\"" + hardwareId() + "\"}";
   const int status = http.POST(body);
   const String response = http.getString();
   http.end();
-  if (status != HTTP_CODE_OK) return false;
+  if (status <= 0) {
+    failureReason = "HTTPS request failed (" + String(status) + "): " +
+                    HTTPClient::errorToString(status);
+    return false;
+  }
+  if (status != HTTP_CODE_OK) {
+    const String backendError = jsonString(response, "error");
+    failureReason = backendError.isEmpty()
+                        ? "Server rejected registration with HTTP " + String(status) + "."
+                        : backendError;
+    return false;
+  }
 
   bool useTls = false;
-  if (!jsonBool(response, "useTls", useTls) || !useTls) return false;
+  if (!jsonBool(response, "useTls", useTls) || !useTls) {
+    failureReason = "Server returned an invalid TLS configuration.";
+    return false;
+  }
   const String claimedDeviceKey = jsonString(response, "deviceKey");
   const String claimedMqttHost = jsonString(response, "mqttHost");
   const int claimedMqttPort = jsonInt(response, "mqttPort");
@@ -650,6 +674,7 @@ bool claimDevice(const String& code) {
   if (claimedDeviceKey.isEmpty() || claimedMqttHost != MQTT_PRODUCTION_HOST ||
       claimedMqttPort != MQTT_PRODUCTION_PORT || claimedMqttUsername != claimedDeviceKey ||
       claimedMqttPassword.isEmpty() || claimedMqttClientId != expectedClientId) {
+    failureReason = "Server returned incomplete or mismatched device credentials.";
     return false;
   }
 
@@ -661,7 +686,11 @@ bool claimDevice(const String& code) {
   mqttPassword = claimedMqttPassword;
   mqttClientId = claimedMqttClientId;
   configureMqttTopics();
-  return credentialsComplete();
+  if (!credentialsComplete()) {
+    failureReason = "Device credentials failed local validation.";
+    return false;
+  }
+  return true;
 }
 
 String jsonEscape(const String& value) {
@@ -755,9 +784,11 @@ void handleProvisionRequest(bool jsonResponse) {
     return;
   }
 
-  if (!claimDevice(code)) {
-    const String message = "Claim failed. Check the code, backend URL, and MQTT TLS setting.";
-    if (jsonResponse) sendSetupJson(400, "{\"error\":\"" + message + "\"}");
+  String claimFailure;
+  if (!claimDevice(code, claimFailure)) {
+    const String message = "Claim failed: " + claimFailure;
+    Serial.println(message);
+    if (jsonResponse) sendSetupJson(400, "{\"error\":\"" + jsonEscape(message) + "\"}");
     else server.send(400, "text/plain", message);
     return;
   }

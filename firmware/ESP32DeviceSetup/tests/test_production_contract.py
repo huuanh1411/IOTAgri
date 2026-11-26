@@ -24,6 +24,9 @@ class ProductionFirmwareContractTests(unittest.TestCase):
         self.assertNotIn("WiFiClient network;", self.source)
         self.assertIn("network.setCACert(PRODUCTION_ROOT_CAS);", self.source)
         self.assertIn("http.begin(network, claimUrl)", self.source)
+        self.assertIn('jsonString(response, "error")', self.source)
+        self.assertIn("HTTPClient::errorToString(status)", self.source)
+        self.assertIn("Serial.println(message)", self.source)
         self.assertIn("if (!jsonBool(response, \"useTls\", useTls) || !useTls)", self.source)
         self.assertNotIn("setInsecure", self.source)
 

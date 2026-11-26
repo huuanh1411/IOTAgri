@@ -313,7 +313,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(l10n.setupStepProgress(3, 5)), findsOneWidget);
-    expect(find.text(l10n.provisioningClaimRejected), findsOneWidget);
+    expect(find.text('Provisioning failed.'), findsOneWidget);
     expect(api.createCodeCalls, 0);
   });
 

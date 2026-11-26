@@ -320,7 +320,7 @@ class _CupertinoProvisioningCodeScreenState
         _returnToWifi(() => context.l10n.incorrectWifiPassword);
         _passwordFocus.requestFocus();
       } else if (error.failure == EspProvisioningFailure.claimRejected) {
-        _returnToWifi(() => context.l10n.provisioningClaimRejected);
+        _returnToWifi(() => error.message);
       } else if (error.failure == EspProvisioningFailure.persistence) {
         _returnToWifi(() => context.l10n.espCouldNotSaveConfiguration);
       } else {
