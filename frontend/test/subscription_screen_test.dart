@@ -137,6 +137,18 @@ void main() {
     expect(header.dy, 24);
   });
 
+  testWidgets('matches the More page width for the payment form on wide screens', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(_app(_FakeApiService()));
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(Card).first).width, 600);
+  });
+
   testWidgets('refreshes the status supplied by the subscription endpoint', (
     tester,
   ) async {

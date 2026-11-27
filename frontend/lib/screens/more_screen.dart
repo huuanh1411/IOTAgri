@@ -31,18 +31,21 @@ class MoreScreen extends ConsumerWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(24, 24, 24, bottomPadding),
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 600),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  PageHeader(
-                    title: context.l10n.more,
-                    subtitle: context.l10n.moreSubtitle,
-                  ),
-                  const SizedBox(height: 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              PageHeader(
+                title: context.l10n.more,
+                subtitle: context.l10n.moreSubtitle,
+              ),
+              const SizedBox(height: 28),
+              Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   // Profile card
                   Card(
                     shape: RoundedRectangleBorder(
@@ -183,9 +186,11 @@ class MoreScreen extends ConsumerWidget {
                       }
                     },
                   ),
-                ],
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
