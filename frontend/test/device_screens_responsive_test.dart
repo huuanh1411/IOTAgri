@@ -141,7 +141,7 @@ void main() {
         );
         await pumpDeviceDetail(tester);
 
-        expect(find.text('1234.0 lx'), findsOneWidget);
+        expect(find.text('1234 lux'), findsOneWidget);
         expect(tester.takeException(), isNull);
       },
     );
@@ -171,7 +171,7 @@ void main() {
 
     expect(find.text('Tháp Thử Nghiệm 320px'), findsWidgets);
     expect(find.text('Cảm biến'), findsOneWidget);
-    expect(find.text('1234.0 lx'), findsOneWidget);
+    expect(find.text('1234 lux'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

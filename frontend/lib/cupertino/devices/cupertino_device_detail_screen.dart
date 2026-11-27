@@ -907,7 +907,7 @@ import '../../utils/display_localizations.dart';
           keyName: 'lux',
           label: context.l10n.lightSensorTitle,
           value: reading?.lux,
-          unit: 'lx',
+          unit: 'lux',
           icon: CupertinoIcons.sun_max_fill,
           warning: false,
           color: CupertinoColors.systemYellow,
@@ -1020,7 +1020,7 @@ import '../../utils/display_localizations.dart';
                     fit: BoxFit.scaleDown,
                     child: Text(
                       hasValue
-                          ? '${spec.value!.toStringAsFixed(1)} ${spec.unit}'
+                          ? '${spec.value!.toStringAsFixed(0)} ${spec.unit}'
                                 .trim()
                           : context.l10n.noData,
                       maxLines: 1,
