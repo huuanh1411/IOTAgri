@@ -2009,4 +2009,25 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get subscriptionRefreshStatus => 'Cập nhật trạng thái thanh toán';
+
+  @override
+  String get subscriptionHistory => 'Lịch sử đăng ký';
+
+  @override
+  String get subscriptionStatusPending => 'Đang chờ thanh toán';
+
+  @override
+  String get subscriptionStatusActive => 'Đang hoạt động';
+
+  @override
+  String get subscriptionStatusExpired => 'Đã hết hạn';
+
+  @override
+  String get subscriptionPaidAt => 'Đã thanh toán';
+
+  @override
+  String get subscriptionCreatedAt => 'Đã tạo';
+
+  @override
+  String get subscriptionHistoryEmpty => 'Chưa có yêu cầu đăng ký nào';
 }

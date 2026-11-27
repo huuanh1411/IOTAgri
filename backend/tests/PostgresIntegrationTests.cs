@@ -163,7 +163,7 @@ public class PostgresIntegrationTests : IClassFixture<PostgresTestFixture>
     {
         await using var db = await _fixture.CreateDatabaseAsync();
         var applied = (await db.Database.GetAppliedMigrationsAsync()).ToList();
-        Assert.Equal(22, applied.Count);
+        Assert.Equal(23, applied.Count);
         Assert.Contains("20261009120000_AddSolutionTemperatureToSensorReadings", applied);
         Assert.Contains("20261027101944_AddEmailVerificationCodes", applied);
         Assert.Contains("20261030141138_AddAccountDeletionAudits", applied);

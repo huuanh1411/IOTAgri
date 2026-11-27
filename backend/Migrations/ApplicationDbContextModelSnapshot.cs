@@ -184,9 +184,6 @@ namespace IOTAgriBackend.Migrations
                     b.Property<DateTime>("PaymentExpiresAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("SePayRawPayload")
-                        .HasColumnType("text");
-
                     b.Property<long?>("SePayTransactionId")
                         .HasColumnType("bigint");
 

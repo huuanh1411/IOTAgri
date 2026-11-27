@@ -868,5 +868,12 @@
   "subscriptionAccountNameLabel": "Chủ tài khoản",
   "subscriptionTransferContentLabel": "Nội dung chuyển khoản",
   "subscriptionExpiryLabel": "Thanh toán trước",
-  "subscriptionRefreshStatus": "Cập nhật trạng thái thanh toán"
+  "subscriptionRefreshStatus": "Cập nhật trạng thái thanh toán",
+  "subscriptionHistory": "Lịch sử đăng ký",
+  "subscriptionStatusPending": "Đang chờ thanh toán",
+  "subscriptionStatusActive": "Đang hoạt động",
+  "subscriptionStatusExpired": "Đã hết hạn",
+  "subscriptionPaidAt": "Đã thanh toán",
+  "subscriptionCreatedAt": "Đã tạo",
+  "subscriptionHistoryEmpty": "Chưa có yêu cầu đăng ký nào"
 }

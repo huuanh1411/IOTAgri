@@ -25,6 +25,9 @@ public static class SubscriptionEndpoints
         var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Results.Unauthorized();
 
+        var now = DateTime.UtcNow;
+        await NormalizeExpiredPendingSubscriptionsAsync(db, now, cancellationToken);
+
         var subscriptions = await db.CropSubscriptions
             .Where(item => item.Device!.OwnerId == userId)
             .OrderByDescending(item => item.CreatedAt)
@@ -51,6 +54,8 @@ public static class SubscriptionEndpoints
         if (!await db.Devices.AnyAsync(device => device.Id == deviceId && device.OwnerId == userId, cancellationToken)) return Results.NotFound();
 
         var now = DateTime.UtcNow;
+        await NormalizeExpiredPendingSubscriptionsAsync(db, now, cancellationToken);
+
         var openSubscription = await db.CropSubscriptions
             .Where(item => item.DeviceId == deviceId
                 && ((item.Status == "Pending" && item.PaymentExpiresAt > now) || (item.Status == "Active" && item.ExpiresAt > now)))
@@ -123,9 +128,26 @@ public static class SubscriptionEndpoints
         subscription.PaidAt = DateTime.UtcNow;
         subscription.ExpiresAt = subscription.PaidAt.Value.AddMonths(1);
         subscription.SePayTransactionId = payment.Id;
-        subscription.SePayRawPayload = rawBody;
         await db.SaveChangesAsync(cancellationToken);
         return Results.Ok(new { success = true });
+    }
+
+    private static async Task NormalizeExpiredPendingSubscriptionsAsync(
+        ApplicationDbContext db, DateTime utcNow, CancellationToken cancellationToken)
+    {
+        var overdue = await db.CropSubscriptions
+            .Where(item => item.Status == "Pending" && item.PaymentExpiresAt <= utcNow)
+            .ToListAsync(cancellationToken);
+
+        foreach (var item in overdue)
+        {
+            item.Status = "Expired";
+        }
+
+        if (overdue.Count > 0)
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
     }
 
     private static CropSubscriptionResponse ToResponse(CropSubscription item) => new(

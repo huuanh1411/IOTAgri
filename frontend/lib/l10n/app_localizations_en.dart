@@ -2020,4 +2020,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionRefreshStatus => 'Refresh payment status';
+
+  @override
+  String get subscriptionHistory => 'Subscription history';
+
+  @override
+  String get subscriptionStatusPending => 'Waiting for payment';
+
+  @override
+  String get subscriptionStatusActive => 'Active';
+
+  @override
+  String get subscriptionStatusExpired => 'Expired';
+
+  @override
+  String get subscriptionPaidAt => 'Paid';
+
+  @override
+  String get subscriptionCreatedAt => 'Created';
+
+  @override
+  String get subscriptionHistoryEmpty => 'No subscription requests yet';
 }
