@@ -123,7 +123,7 @@ void main() {
     expect(find.text('50.000 đ'), findsOneWidget);
   });
 
-  testWidgets('centers the subscription content on wide screens', (
+  testWidgets('keeps the subscription header at the left on wide screens', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(1200, 800));
@@ -133,7 +133,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final header = tester.getTopLeft(find.text('Gói dịch vụ'));
-    expect(header.dx, 220);
+    expect(header.dx, 84);
     expect(header.dy, 24);
   });
 

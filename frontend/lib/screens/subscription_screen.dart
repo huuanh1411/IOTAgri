@@ -133,22 +133,25 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
         child: Stack(
           children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 760),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    PageHeader(
-                      title: context.l10n.subscription,
-                      subtitle: context.l10n.paymentSubtitle,
-                    ),
-                    const SizedBox(height: 28),
-                    _payment == null ? _form() : _paymentDetails(),
-                  ],
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 60),
+                  child: PageHeader(
+                    title: context.l10n.subscription,
+                    subtitle: context.l10n.paymentSubtitle,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 28),
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 760),
+                    child: _payment == null ? _form() : _paymentDetails(),
+                  ),
+                ),
+              ],
             ),
             IconButton(
               tooltip: MaterialLocalizations.of(context).backButtonTooltip,
