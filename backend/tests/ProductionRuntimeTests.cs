@@ -64,7 +64,26 @@ public class ProductionRuntimeTests
         Assert.Contains("Subscription__AccountName", compose);
         Assert.Contains("SePay__WebhookSecret", compose);
         Assert.Contains("SUBSCRIPTION_MONTHLY_PRICE_VND=", environment);
+        Assert.Contains("SUBSCRIPTION_BANK_CODE=", environment);
+        Assert.Contains("SUBSCRIPTION_ACCOUNT_NUMBER=", environment);
+        Assert.Contains("SUBSCRIPTION_ACCOUNT_NAME=", environment);
         Assert.Contains("SEPAY_WEBHOOK_SECRET=", environment);
+    }
+
+    [Fact]
+    public void Deployment_runbook_documents_the_SePay_subscription_callback_contract()
+    {
+        var readme = File.ReadAllText(RepoFile("deploy/README.md"));
+
+        Assert.Contains("## SePay subscription callback", readme);
+        Assert.Contains("https://api.aerogreen.vn/api/payments/sepay/webhook", readme);
+        Assert.Contains("SEPAY_WEBHOOK_SECRET", readme);
+        Assert.Contains("X-SePay-Timestamp", readme);
+        Assert.Contains("X-SePay-Signature", readme);
+        Assert.Contains("HMAC-SHA256", readme);
+        Assert.Contains("five minutes", readme);
+        Assert.Contains("GET /api/subscriptions/", readme);
+        Assert.Contains("record-only", readme);
     }
 
     [Fact]

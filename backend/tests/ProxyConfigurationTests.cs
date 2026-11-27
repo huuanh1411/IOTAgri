@@ -1,10 +1,44 @@
+using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using IOTAgriBackend.Data;
+using IOTAgriBackend.Endpoints;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace IOTAgriBackend.Tests;
+
+public class SePayWebhookRouteTests
+{
+    [Fact]
+    public async Task SePay_webhook_route_is_explicitly_anonymous()
+    {
+        var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+        {
+            EnvironmentName = "Testing",
+            Args = Array.Empty<string>()
+        });
+        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseInMemoryDatabase("sepay-anonymous-route-metadata"));
+        var app = builder.Build();
+        app.MapSubscriptionEndpoints();
+        await app.StartAsync();
+
+        var endpoint = app.Services.GetRequiredService<EndpointDataSource>().Endpoints
+            .Single(candidate => candidate is RouteEndpoint route
+                && route.RoutePattern.RawText == "/api/payments/sepay/webhook");
+
+        Assert.NotNull(endpoint.Metadata.GetMetadata<IAllowAnonymous>());
+        await app.DisposeAsync();
+    }
+}
 
 [Trait("Category", "Integration")]
 public class ProxyConfigurationTests : IClassFixture<PostgresTestFixture>

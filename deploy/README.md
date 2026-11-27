@@ -38,6 +38,18 @@ The `iotagri-deploy` user must own `/opt/iotagri`, belong to the `docker` group,
 
 The first deployment still needs the manual bootstrap above. Later deployments run `git pull --ff-only`, rebuild services with production Compose, and wait for `https://api.aerogreen.vn/health`.
 
+## SePay subscription callback
+
+1. On the VPS, set `SEPAY_WEBHOOK_SECRET` in `/opt/iotagri/.env.production` to a high-entropy secret. Deploy after changing it.
+2. In SePay, configure callback URL `https://api.aerogreen.vn/api/payments/sepay/webhook` and configure exactly the same callback secret.
+3. SePay must send `X-SePay-Timestamp` and `X-SePay-Signature`. API accepts an HMAC-SHA256 signature for `<unix timestamp>.<raw body>` only within five minutes.
+4. Create an authenticated subscription payment request. Transfer its exact quoted amount using its exact transfer content.
+5. Confirm SePay reports callback success. Then call authenticated `GET /api/subscriptions/` or refresh app; matching request must become `Active` and show transaction timestamp.
+6. If callback fails, inspect API container logs without printing `.env.production` or payment secrets:
+   `docker compose --env-file .env.production -f compose.production.yaml logs --tail=200 api`.
+
+This record-only system records payment history; it does not unlock or restrict features.
+
 ## PostgreSQL backup
 
 Backup target setup is deferred until VPS deployment.
