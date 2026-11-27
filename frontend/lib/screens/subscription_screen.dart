@@ -125,10 +125,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   Future<void> _refreshStatus() async {
     final payment = _payment;
-    if (payment == null || _refreshing || _isTerminal(payment.subscription)) {
+    if (payment == null || _isTerminal(payment.subscription)) {
       _statusTimer?.cancel();
       return;
     }
+    if (_refreshing) return;
     setState(() => _refreshing = true);
     try {
       final subscriptions = await _apiService.getSubscriptions();

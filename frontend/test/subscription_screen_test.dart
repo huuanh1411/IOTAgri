@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:iotagri_app/l10n/app_localizations.dart';
@@ -9,6 +11,7 @@ class _FakeApiService extends ApiService {
   bool active = false;
   DateTime? paymentExpiresAt;
   int subscriptionRequests = 0;
+  Completer<List<CropSubscription>>? pendingSubscriptionResponse;
   List<CropSubscription> history = const [];
   String? createdDeviceId;
   String? createdCropName;
@@ -36,6 +39,8 @@ class _FakeApiService extends ApiService {
   @override
   Future<List<CropSubscription>> getSubscriptions() async {
     subscriptionRequests++;
+    final pendingResponse = pendingSubscriptionResponse;
+    if (pendingResponse != null) return pendingResponse.future;
     return history.isEmpty
         ? [_payment(status: active ? 'Active' : 'Pending').subscription]
         : history;
@@ -137,6 +142,33 @@ void main() {
     await tester.pump(const Duration(seconds: 6));
 
     expect(api.subscriptionRequests, initialRequests);
+  });
+
+  testWidgets('keeps polling while a pending status refresh is slow', (
+    tester,
+  ) async {
+    final api = _FakeApiService();
+    await tester.pumpWidget(_app(api));
+    await tester.pumpAndSettle();
+    await _selectLettuce(tester);
+    await tester.tap(find.text('Tiếp tục thanh toán'));
+    await tester.pump();
+
+    final initialRequests = api.subscriptionRequests;
+    api.pendingSubscriptionResponse = Completer<List<CropSubscription>>();
+    await tester.pump(const Duration(seconds: 5));
+    expect(api.subscriptionRequests, initialRequests + 1);
+
+    await tester.pump(const Duration(seconds: 5));
+    expect(api.subscriptionRequests, initialRequests + 1);
+
+    api.pendingSubscriptionResponse!.complete([
+      api._payment(status: 'Pending').subscription,
+    ]);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+
+    expect(api.subscriptionRequests, initialRequests + 2);
   });
 
   testWidgets('shows pending active and expired subscription history', (
