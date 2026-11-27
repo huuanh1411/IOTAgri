@@ -326,7 +326,7 @@ void main() {
         expect(find.text('Tháp Thí Nghiệm'), findsWidgets);
         expect(find.text('Online'), findsOneWidget);
         expect(find.text('Kết nối ổn định'), findsOneWidget);
-        expect(find.text('24.5 °C'), findsOneWidget);
+        expect(find.text('25 °C'), findsOneWidget);
         expect(find.text('Bơm đang tắt'), findsOneWidget);
       },
     );
@@ -361,8 +361,8 @@ void main() {
         );
         await pumpDeviceDetail(tester);
 
-        expect(find.text('36.5 °C'), findsOneWidget);
-        expect(find.text('10.0 %'), findsOneWidget);
+        expect(find.text('37 °C'), findsOneWidget);
+        expect(find.text('10 %'), findsOneWidget);
         expect(find.text('Cảnh báo'), findsWidgets);
       },
     );

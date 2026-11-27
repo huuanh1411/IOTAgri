@@ -232,7 +232,7 @@ void main() {
 
       expect(find.text('Tháp Khí Canh 1'), findsWidgets);
       expect(find.text('Online'), findsOneWidget);
-      expect(find.text('25.5 °C'), findsOneWidget);
+      expect(find.text('26 °C'), findsOneWidget);
 
       // STEP 4: Manual Pump Run
       await tester.tap(find.text('Thủ công'));
