@@ -799,11 +799,11 @@ void main() {
       ),
     );
 
-    final waterValue = tester.widget<Text>(find.text('12.0 %'));
+    final waterValue = tester.widget<Text>(find.text('12 %'));
     expect(waterValue.style?.color, CupertinoColors.systemOrange);
-    expect(find.text('24.5 °C'), findsOneWidget);
-    expect(find.text('520.0 ppm'), findsOneWidget);
-    expect(find.text('840.0 lx'), findsOneWidget);
+    expect(find.text('25 °C'), findsOneWidget);
+    expect(find.text('520 ppm'), findsOneWidget);
+    expect(find.text('840 lux'), findsOneWidget);
   });
 
   testWidgets('pump control shows command-sending state', (
