@@ -94,6 +94,43 @@ class HistorySample {
       values: values,
     );
   }
+
+  /// Averages readings that land in the same fixed time bucket for charting.
+  /// The original samples remain available for exports and detailed history.
+  static List<HistorySample> averageByInterval(
+    Iterable<HistorySample> samples, {
+    required Duration interval,
+  }) {
+    final intervalMilliseconds = interval.inMilliseconds;
+    assert(intervalMilliseconds > 0);
+    final buckets = <int, List<HistorySample>>{};
+    for (final sample in samples) {
+      final bucketStart =
+          sample.recordedAt.millisecondsSinceEpoch ~/ intervalMilliseconds *
+          intervalMilliseconds;
+      (buckets[bucketStart] ??= []).add(sample);
+    }
+
+    return buckets.entries.map((entry) {
+      final totals = <HistorySensor, double>{};
+      final counts = <HistorySensor, int>{};
+      for (final sample in entry.value) {
+        sample.values.forEach((sensor, value) {
+          totals[sensor] = (totals[sensor] ?? 0) + value;
+          counts[sensor] = (counts[sensor] ?? 0) + 1;
+        });
+      }
+      return HistorySample(
+        recordedAt: DateTime.fromMillisecondsSinceEpoch(
+          entry.key,
+          isUtc: entry.value.first.recordedAt.isUtc,
+        ),
+        values: {
+          for (final sensor in totals.keys) sensor: totals[sensor]! / counts[sensor]!,
+        },
+      );
+    }).toList()..sort((a, b) => a.recordedAt.compareTo(b.recordedAt));
+  }
 }
 
 class PumpHistoryEvent {

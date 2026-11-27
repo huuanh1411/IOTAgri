@@ -756,31 +756,32 @@ import '../../utils/display_localizations.dart';
               ],
             ),
             const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Stack(
+              alignment: Alignment.center,
               children: [
-                Icon(
-                  online ? CupertinoIcons.wifi : CupertinoIcons.wifi_slash,
-                  color: accent,
-                  size: 16,
-                ),
-                const SizedBox(width: 7),
-                Expanded(
-                  child: Text(
-                    online
-                        ? context.l10n.stableConnection
-                        : context.l10n.deviceOffline,
-                    style: TextStyle(
+                Row(
+                  children: [
+                    Icon(
+                      online ? CupertinoIcons.wifi : CupertinoIcons.wifi_slash,
                       color: accent,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                      size: 16,
                     ),
-                  ),
+                    const SizedBox(width: 7),
+                    Expanded(
+                      child: Text(
+                        online
+                            ? context.l10n.stableConnection
+                            : context.l10n.deviceOffline,
+                        style: TextStyle(
+                          color: accent,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Center(
-                    child: Text(
+                Text(
                     lastUpdated == null
                         ? context.l10n.noReadingsYet
                         : context.l10n.updatedAt(
@@ -793,9 +794,7 @@ import '../../utils/display_localizations.dart';
                       color: AppColors.secondaryText,
                       fontSize: 11,
                     ),
-                    ),
                   ),
-                ),
               ],
             ),
             if (scheduleContinuesOffline) ...[

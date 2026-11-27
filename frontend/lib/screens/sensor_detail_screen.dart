@@ -143,11 +143,18 @@ class _SensorHistoryCardState extends State<_SensorHistoryCard> {
       window: window,
       downsample: _range != HistoryRange.day,
     );
+    final visibleSamples = samples
+        .where((sample) => sample.values[_sensor] != null)
+        .toList(growable: false);
     return _ChartHistory(
       window: window,
-      samples: samples
-          .where((sample) => sample.values[_sensor] != null)
-          .toList(growable: false),
+      // Sensor devices can report within seconds of each other. A 30-minute
+      // average keeps the compact trend chart readable without altering raw
+      // history used elsewhere in the app.
+      samples: HistorySample.averageByInterval(
+        visibleSamples,
+        interval: const Duration(minutes: 30),
+      ),
     );
   }
 

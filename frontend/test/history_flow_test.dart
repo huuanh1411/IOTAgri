@@ -54,6 +54,32 @@ void main() {
     expect(HistorySensor.lux.valueFromAggregate(aggregate), 18250);
   });
 
+  test('averages chart readings into 30-minute time buckets', () {
+    final chartSamples = HistorySample.averageByInterval(
+      [
+        HistorySample(
+          recordedAt: DateTime.utc(2026, 10, 8, 8, 5),
+          values: const {HistorySensor.temperature: 24},
+        ),
+        HistorySample(
+          recordedAt: DateTime.utc(2026, 10, 8, 8, 25),
+          values: const {HistorySensor.temperature: 26},
+        ),
+        HistorySample(
+          recordedAt: DateTime.utc(2026, 10, 8, 8, 35),
+          values: const {HistorySensor.temperature: 30},
+        ),
+      ],
+      interval: const Duration(minutes: 30),
+    );
+
+    expect(chartSamples, hasLength(2));
+    expect(chartSamples[0].recordedAt, DateTime.utc(2026, 10, 8, 8));
+    expect(chartSamples[0].values[HistorySensor.temperature], 25);
+    expect(chartSamples[1].recordedAt, DateTime.utc(2026, 10, 8, 8, 30));
+    expect(chartSamples[1].values[HistorySensor.temperature], 30);
+  });
+
   test('generates a real CSV export with readings and pump events', () async {
     final file = await const HistoryExportService().generate(
       format: HistoryExportFormat.csv,
