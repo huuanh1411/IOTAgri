@@ -78,7 +78,7 @@ import '../../utils/display_localizations.dart';
       }
       if (widget.enableBackgroundRefresh) {
         _refreshTimer = Timer.periodic(
-          const Duration(seconds: 20),
+          const Duration(seconds: 10),
           (_) => _loadDeviceData(showLoading: false),
         );
       }
@@ -778,8 +778,9 @@ import '../../utils/display_localizations.dart';
                   ),
                 ),
                 const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
+                Expanded(
+                  child: Center(
+                    child: Text(
                     lastUpdated == null
                         ? context.l10n.noReadingsYet
                         : context.l10n.updatedAt(
@@ -787,10 +788,11 @@ import '../../utils/display_localizations.dart';
                               'HH:mm',
                             ).format(lastUpdated!.toLocal())).toString(),
                           ),
-                    textAlign: TextAlign.right,
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: AppColors.secondaryText,
                       fontSize: 11,
+                    ),
                     ),
                   ),
                 ),

@@ -36,7 +36,15 @@ class HelpScreen extends ConsumerWidget {
                 subtitle: '',
               ),
               const SizedBox(height: 24),
-              const _FaqAccordion(),
+              Card(
+                color: Colors.white,
+                elevation: 3,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                child: const Padding(
+                  padding: EdgeInsets.all(8),
+                  child: _FaqAccordion(),
+                ),
+              ),
               const SizedBox(height: 24),
               Center(
                 child: ElevatedButton.icon(
