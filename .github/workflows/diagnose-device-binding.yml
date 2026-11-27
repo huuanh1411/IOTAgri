@@ -1,0 +1,83 @@
+name: Diagnose device binding
+
+on:
+  workflow_dispatch:
+    inputs:
+      hardware_id:
+        description: ESP hardware ID (hex only)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    name: Inspect production binding
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+
+    steps:
+      - name: Validate input
+        env:
+          HARDWARE_ID: ${{ inputs.hardware_id }}
+        run: |
+          [[ "$HARDWARE_ID" =~ ^[A-Fa-f0-9]{12,32}$ ]] || {
+            echo "hardware_id must contain 12-32 hexadecimal characters." >&2
+            exit 2
+          }
+
+      - name: Configure SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Query binding read-only
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          HARDWARE_ID: ${{ inputs.hardware_id }}
+        run: |
+          ssh -i ~/.ssh/id_ed25519 \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            -o ConnectTimeout=30 \
+            -p "$VPS_PORT" \
+            "$VPS_USER@$VPS_HOST" \
+            "bash -s -- '$HARDWARE_ID'" <<'REMOTE_SCRIPT'
+          set -euo pipefail
+          hardware_id=$1
+          [[ "$hardware_id" =~ ^[A-Fa-f0-9]{12,32}$ ]]
+          cd /opt/iotagri
+          compose=(docker compose --env-file .env.production -f compose.production.yaml)
+          "${compose[@]}" exec -T \
+            -e DIAGNOSTIC_HARDWARE_ID="$hardware_id" \
+            postgres sh -lc \
+            'psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" --set=ON_ERROR_STOP=1 --set=hardware_id="$DIAGNOSTIC_HARDWARE_ID" --pset=pager=off' <<'SQL'
+          BEGIN TRANSACTION READ ONLY;
+          \pset null '(null)'
+          \x on
+          SELECT
+              d."Id" AS "DeviceId",
+              d."Name" AS "DeviceName",
+              d."OwnerId",
+              u."Email" AS "OwnerEmail",
+              d."CreatedAt",
+              d."ProvisionedAt",
+              d."IsOnline",
+              d."LastSeenAt"
+          FROM "Devices" AS d
+          LEFT JOIN "AspNetUsers" AS u ON u."Id" = d."OwnerId"
+          WHERE UPPER(d."ProvisionedHardwareId") = UPPER(:'hardware_id');
+          COMMIT;
+          SQL
+          REMOTE_SCRIPT
