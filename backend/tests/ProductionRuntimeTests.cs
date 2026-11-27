@@ -127,10 +127,10 @@ public class ProductionRuntimeTests
             StringComparison.Ordinal);
 
         Assert.Contains("cancel-in-progress: false", workflow);
-        Assert.Contains("timeout-minutes: 40", workflow);
-        Assert.Contains("timeout 35m ssh", workflow);
+        Assert.Contains("timeout-minutes: 70", workflow);
+        Assert.Contains("timeout 65m ssh", workflow);
         Assert.Contains("SUBSCRIPTION_MONTHLY_PRICE_VND=239000", workflow);
-        Assert.Contains("flock -w 300 9", workflow);
+        Assert.Contains("flock -w 1800 9", workflow);
         Assert.Contains("\"${compose[@]}\" build 9>&-", workflow);
         Assert.Contains("\"${compose[@]}\" up -d --no-build --remove-orphans 9>&-", workflow);
         Assert.Contains("export COMPOSE_PARALLEL_LIMIT=1", workflow);

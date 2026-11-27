@@ -18,7 +18,7 @@ jobs:
   deploy:
     name: Deploy production
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 70
     environment: production
 
     steps:
@@ -40,7 +40,7 @@ jobs:
           VPS_USER: ${{ secrets.VPS_USER }}
           DEPLOY_SHA: ${{ github.sha }}
         run: |
-          timeout 35m ssh -i ~/.ssh/id_ed25519 \
+          timeout 65m ssh -i ~/.ssh/id_ed25519 \
             -o BatchMode=yes \
             -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile=~/.ssh/known_hosts \
@@ -63,7 +63,10 @@ jobs:
               printf '\nSUBSCRIPTION_MONTHLY_PRICE_VND=239000\n' >> .env.production
             fi
             exec 9>/tmp/iotagri-production-deploy.lock
-            flock -w 300 9 || {
+            # A cancelled runner can leave its remote Docker build draining for
+            # up to the 25-minute build timeout. Wait for it instead of failing
+            # a queued release after only five minutes.
+            flock -w 1800 9 || {
               echo 'Another production deployment still holds the VPS lock.' >&2
               exit 1
             }
