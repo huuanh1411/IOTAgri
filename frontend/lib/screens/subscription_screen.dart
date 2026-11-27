@@ -68,9 +68,27 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   Future<void> _loadSubscriptions() async {
     try {
-      final subscriptions = await _apiService.getSubscriptions();
+      final subscriptions = (await _apiService.getSubscriptions())
+          .map(_normalizeExpiredSubscription)
+          .toList();
       if (!mounted) return;
-      setState(() => _subscriptions = subscriptions);
+      setState(() {
+        _subscriptions = subscriptions;
+        final payment = _payment;
+        final match = payment == null
+            ? null
+            : subscriptions
+                  .where((item) => item.id == payment.subscription.id)
+                  .firstOrNull;
+        if (match != null && payment != null) {
+          _payment = CropSubscriptionPayment(
+            subscription: match,
+            bankCode: payment.bankCode,
+            accountNumber: payment.accountNumber,
+            accountName: payment.accountName,
+          );
+        }
+      });
     } catch (_) {
       // Keep checkout usable if history cannot be loaded.
     }
@@ -94,8 +112,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       );
       if (!mounted) return;
       setState(() => _payment = payment);
-      unawaited(_loadSubscriptions());
       _startStatusPolling();
+      unawaited(_loadSubscriptions());
     } catch (_) {
       if (mounted) {
         setState(() => _error = context.l10n.subscriptionCreateFailed);
@@ -107,6 +125,27 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     }
   }
 
+  CropSubscription _normalizeExpiredSubscription(
+    CropSubscription subscription,
+  ) {
+    if (!subscription.isPending ||
+        subscription.paymentExpiresAt.isAfter(DateTime.now().toUtc())) {
+      return subscription;
+    }
+    return CropSubscription(
+      id: subscription.id,
+      deviceId: subscription.deviceId,
+      cropName: subscription.cropName,
+      amountVnd: subscription.amountVnd,
+      paymentCode: subscription.paymentCode,
+      status: 'Expired',
+      createdAt: subscription.createdAt,
+      paymentExpiresAt: subscription.paymentExpiresAt,
+      paidAt: subscription.paidAt,
+      expiresAt: subscription.expiresAt,
+    );
+  }
+
   bool _isTerminal(CropSubscription subscription) =>
       subscription.isActive ||
       (subscription.isPending &&
@@ -116,7 +155,13 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   void _startStatusPolling() {
     _statusTimer?.cancel();
     final payment = _payment;
-    if (payment == null || _isTerminal(payment.subscription)) return;
+    if (payment == null) return;
+    if (_isTerminal(payment.subscription)) {
+      if (payment.subscription.isPending) {
+        _markPaymentExpired(payment);
+      }
+      return;
+    }
     _statusTimer = Timer.periodic(
       const Duration(seconds: 5),
       (_) => unawaited(_refreshStatus()),
@@ -125,8 +170,15 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   Future<void> _refreshStatus() async {
     final payment = _payment;
-    if (payment == null || _isTerminal(payment.subscription)) {
+    if (payment == null) {
       _statusTimer?.cancel();
+      return;
+    }
+    if (_isTerminal(payment.subscription)) {
+      _statusTimer?.cancel();
+      if (payment.subscription.isPending) {
+        _markPaymentExpired(payment);
+      }
       return;
     }
     if (_refreshing) return;
@@ -149,12 +201,42 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       });
       if (_isTerminal(subscription)) {
         _statusTimer?.cancel();
+        if (subscription.isPending) {
+          _markPaymentExpired(_payment!);
+        }
       }
     } catch (_) {
       // Keep the issued payment reference visible through a transient failure.
     } finally {
       if (mounted) setState(() => _refreshing = false);
     }
+  }
+
+  void _markPaymentExpired(CropSubscriptionPayment payment) {
+    final expired = CropSubscription(
+      id: payment.subscription.id,
+      deviceId: payment.subscription.deviceId,
+      cropName: payment.subscription.cropName,
+      amountVnd: payment.subscription.amountVnd,
+      paymentCode: payment.subscription.paymentCode,
+      status: 'Expired',
+      createdAt: payment.subscription.createdAt,
+      paymentExpiresAt: payment.subscription.paymentExpiresAt,
+      paidAt: payment.subscription.paidAt,
+      expiresAt: payment.subscription.expiresAt,
+    );
+    if (!mounted) return;
+    setState(() {
+      _payment = CropSubscriptionPayment(
+        subscription: expired,
+        bankCode: payment.bankCode,
+        accountNumber: payment.accountNumber,
+        accountName: payment.accountName,
+      );
+      _subscriptions = _subscriptions
+          .map((item) => item.id == expired.id ? expired : item)
+          .toList();
+    });
   }
 
   @override
@@ -229,8 +311,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(_deviceLabel(subscription)),
                         Text(_money(subscription.amountVnd)),
                         Text(_subscriptionStatusLabel(subscription)),
+                        Text(
+                          '${context.l10n.subscriptionCreatedAt}: ${_dateTime(subscription.createdAt)}',
+                        ),
                         Text(
                           '${_historyDateLabel(subscription)}: ${_dateTime(_historyDate(subscription))}',
                         ),
@@ -244,6 +330,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         ),
     ],
   );
+
+  String _deviceLabel(CropSubscription subscription) {
+    final deviceName = _devices
+        .where((device) => device.id == subscription.deviceId)
+        .map((device) => device.name)
+        .firstOrNull;
+    return '${context.l10n.subscriptionDeviceLabel}: ${deviceName ?? subscription.deviceId}';
+  }
 
   String _subscriptionStatusLabel(CropSubscription subscription) =>
       switch (subscription.status) {

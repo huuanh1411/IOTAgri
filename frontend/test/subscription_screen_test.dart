@@ -142,6 +142,7 @@ void main() {
     await tester.pump(const Duration(seconds: 6));
 
     expect(api.subscriptionRequests, initialRequests);
+    expect(find.text('Đã hết hạn'), findsOneWidget);
   });
 
   testWidgets('keeps polling while a pending status refresh is slow', (
@@ -218,6 +219,10 @@ void main() {
     expect(find.text('Đang chờ thanh toán'), findsOneWidget);
     expect(find.text('Đang hoạt động'), findsOneWidget);
     expect(find.text('Đã hết hạn'), findsOneWidget);
+    expect(find.text('Thiết bị: Giàn rau sân thượng'), findsNWidgets(3));
+    expect(find.textContaining('Đã tạo:'), findsNWidgets(4));
+    expect(find.textContaining('Thanh toán trước:'), findsOneWidget);
+    expect(find.textContaining('Đã thanh toán:'), findsOneWidget);
   });
 
   testWidgets('formats a payment amount without a leading separator', (
