@@ -30,6 +30,7 @@ public class ProductionRuntimeTests
         Assert.Contains("app.aerogreen.vn", caddyfile);
         Assert.Contains("aerogreen.vn", caddyfile);
         Assert.Contains("reverse_proxy frontend:80", caddyfile);
+        Assert.Contains("ghcr.io/cirruslabs/flutter:3.38.7", frontendDockerfile);
         Assert.Contains("--dart-define=API_BASE_URL=$API_BASE_URL", frontendDockerfile);
     }
 

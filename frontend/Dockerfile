@@ -1,4 +1,5 @@
-FROM ghcr.io/cirruslabs/flutter:stable AS build
+# Keep the VPS build on the same Flutter release validated by CI.
+FROM ghcr.io/cirruslabs/flutter:3.38.7 AS build
 WORKDIR /app
 ARG API_BASE_URL=https://api.aerogreen.vn
 ARG GOOGLE_WEB_CLIENT_ID
