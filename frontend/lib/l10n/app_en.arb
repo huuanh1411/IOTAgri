@@ -868,5 +868,12 @@
   "subscriptionAccountNameLabel": "Account holder",
   "subscriptionTransferContentLabel": "Transfer content",
   "subscriptionExpiryLabel": "Pay before",
-  "subscriptionRefreshStatus": "Refresh payment status"
+  "subscriptionRefreshStatus": "Refresh payment status",
+  "subscriptionHistory": "Subscription history",
+  "subscriptionStatusPending": "Waiting for payment",
+  "subscriptionStatusActive": "Active",
+  "subscriptionStatusExpired": "Expired",
+  "subscriptionPaidAt": "Paid",
+  "subscriptionCreatedAt": "Created",
+  "subscriptionHistoryEmpty": "No subscription requests yet"
 }

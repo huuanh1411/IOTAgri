@@ -22,6 +22,7 @@ class SubscriptionScreen extends StatefulWidget {
 class _SubscriptionScreenState extends State<SubscriptionScreen> {
   late final ApiService _apiService = widget._apiService ?? ApiService();
   List<Device> _devices = const [];
+  List<CropSubscription> _subscriptions = const [];
   Device? _selectedDevice;
   String? _selectedCropName;
   CropSubscriptionPayment? _payment;
@@ -35,6 +36,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   void initState() {
     super.initState();
     unawaited(_loadDevices());
+    unawaited(_loadSubscriptions());
   }
 
   @override
@@ -64,6 +66,16 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     }
   }
 
+  Future<void> _loadSubscriptions() async {
+    try {
+      final subscriptions = await _apiService.getSubscriptions();
+      if (!mounted) return;
+      setState(() => _subscriptions = subscriptions);
+    } catch (_) {
+      // Keep checkout usable if history cannot be loaded.
+    }
+  }
+
   Future<void> _createPayment() async {
     final device = _selectedDevice;
     final cropName = _selectedCropName;
@@ -82,16 +94,29 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       );
       if (!mounted) return;
       setState(() => _payment = payment);
+      unawaited(_loadSubscriptions());
       _startStatusPolling();
     } catch (_) {
-      if (mounted) setState(() => _error = context.l10n.subscriptionCreateFailed);
+      if (mounted) {
+        setState(() => _error = context.l10n.subscriptionCreateFailed);
+      }
     } finally {
-      if (mounted) setState(() => _creating = false);
+      if (mounted) {
+        setState(() => _creating = false);
+      }
     }
   }
 
+  bool _isTerminal(CropSubscription subscription) =>
+      subscription.isActive ||
+      (subscription.isPending &&
+          !subscription.paymentExpiresAt.isAfter(DateTime.now().toUtc())) ||
+      subscription.status == 'Expired';
+
   void _startStatusPolling() {
     _statusTimer?.cancel();
+    final payment = _payment;
+    if (payment == null || _isTerminal(payment.subscription)) return;
     _statusTimer = Timer.periodic(
       const Duration(seconds: 5),
       (_) => unawaited(_refreshStatus()),
@@ -100,7 +125,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   Future<void> _refreshStatus() async {
     final payment = _payment;
-    if (payment == null || _refreshing || payment.subscription.isActive) return;
+    if (payment == null || _refreshing || _isTerminal(payment.subscription)) {
+      _statusTimer?.cancel();
+      return;
+    }
     setState(() => _refreshing = true);
     try {
       final subscriptions = await _apiService.getSubscriptions();
@@ -110,6 +138,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       if (!mounted || matches.isEmpty) return;
       final subscription = matches.single;
       setState(() {
+        _subscriptions = subscriptions;
         _payment = CropSubscriptionPayment(
           subscription: subscription,
           bankCode: payment.bankCode,
@@ -117,7 +146,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           accountName: payment.accountName,
         );
       });
-      if (subscription.isActive) _statusTimer?.cancel();
+      if (_isTerminal(subscription)) {
+        _statusTimer?.cancel();
+      }
     } catch (_) {
       // Keep the issued payment reference visible through a transient failure.
     } finally {
@@ -148,7 +179,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   alignment: Alignment.topCenter,
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 600),
-                    child: _payment == null ? _form() : _paymentDetails(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _payment == null ? _form() : _paymentDetails(),
+                        const SizedBox(height: 24),
+                        _history(),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -163,6 +201,69 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       ),
     ),
   );
+
+  Widget _history() => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        context.l10n.subscriptionHistory,
+        style: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: AppColors.primaryText,
+        ),
+      ),
+      const SizedBox(height: 12),
+      if (_subscriptions.isEmpty)
+        _messageCard(context.l10n.subscriptionHistoryEmpty)
+      else
+        Card(
+          margin: EdgeInsets.zero,
+          color: AppColors.surface,
+          child: Column(
+            children: _subscriptions
+                .map(
+                  (subscription) => ListTile(
+                    title: Text(subscription.cropName),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(_money(subscription.amountVnd)),
+                        Text(_subscriptionStatusLabel(subscription)),
+                        Text(
+                          '${_historyDateLabel(subscription)}: ${_dateTime(_historyDate(subscription))}',
+                        ),
+                      ],
+                    ),
+                    isThreeLine: true,
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+    ],
+  );
+
+  String _subscriptionStatusLabel(CropSubscription subscription) =>
+      switch (subscription.status) {
+        'Pending' => context.l10n.subscriptionStatusPending,
+        'Active' => context.l10n.subscriptionStatusActive,
+        'Expired' => context.l10n.subscriptionStatusExpired,
+        _ => subscription.status,
+      };
+
+  String _historyDateLabel(CropSubscription subscription) =>
+      subscription.isActive
+      ? context.l10n.subscriptionPaidAt
+      : subscription.isPending
+      ? context.l10n.subscriptionExpiryLabel
+      : context.l10n.subscriptionCreatedAt;
+
+  DateTime _historyDate(CropSubscription subscription) => subscription.isActive
+      ? subscription.paidAt ?? subscription.createdAt
+      : subscription.isPending
+      ? subscription.paymentExpiresAt
+      : subscription.createdAt;
 
   Widget _form() => Card(
     margin: EdgeInsets.zero,
@@ -185,12 +286,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.account_balance_wallet_outlined, color: AppColors.forestGreen),
+                const Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: AppColors.forestGreen,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     context.l10n.subscriptionRealPaymentNotice,
-                    style: const TextStyle(color: AppColors.secondaryText, height: 1.4),
+                    style: const TextStyle(
+                      color: AppColors.secondaryText,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ],
@@ -199,7 +306,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           const SizedBox(height: 24),
           if (_loadingDevices)
             const Center(
-              child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()),
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: CircularProgressIndicator(),
+              ),
             )
           else if (_devices.isEmpty)
             _messageCard(context.l10n.subscriptionNoDevices)
@@ -211,7 +321,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               isExpanded: true,
               decoration: _fieldDecoration(),
               items: _devices
-                  .map((device) => DropdownMenuItem(value: device, child: Text(device.name)))
+                  .map(
+                    (device) => DropdownMenuItem(
+                      value: device,
+                      child: Text(device.name),
+                    ),
+                  )
                   .toList(),
               onChanged: (device) => setState(() => _selectedDevice = device),
             ),
@@ -221,33 +336,62 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             DropdownButtonFormField<String>(
               initialValue: _selectedCropName,
               isExpanded: true,
-              decoration: _fieldDecoration(hintText: context.l10n.subscriptionCropHint),
+              decoration: _fieldDecoration(
+                hintText: context.l10n.subscriptionCropHint,
+              ),
               items: [
-                DropdownMenuItem(value: context.l10n.demoPlantButterhead, child: Text(context.l10n.demoPlantButterhead)),
-                DropdownMenuItem(value: context.l10n.demoPlantGenovese, child: Text(context.l10n.demoPlantGenovese)),
-                DropdownMenuItem(value: context.l10n.demoPlantBabyLeaf, child: Text(context.l10n.demoPlantBabyLeaf)),
-                DropdownMenuItem(value: context.l10n.demoPlantSpearmint, child: Text(context.l10n.demoPlantSpearmint)),
-                DropdownMenuItem(value: context.l10n.demoPlantTuscan, child: Text(context.l10n.demoPlantTuscan)),
-                DropdownMenuItem(value: context.l10n.demoPlantSlowBolt, child: Text(context.l10n.demoPlantSlowBolt)),
+                DropdownMenuItem(
+                  value: context.l10n.demoPlantButterhead,
+                  child: Text(context.l10n.demoPlantButterhead),
+                ),
+                DropdownMenuItem(
+                  value: context.l10n.demoPlantGenovese,
+                  child: Text(context.l10n.demoPlantGenovese),
+                ),
+                DropdownMenuItem(
+                  value: context.l10n.demoPlantBabyLeaf,
+                  child: Text(context.l10n.demoPlantBabyLeaf),
+                ),
+                DropdownMenuItem(
+                  value: context.l10n.demoPlantSpearmint,
+                  child: Text(context.l10n.demoPlantSpearmint),
+                ),
+                DropdownMenuItem(
+                  value: context.l10n.demoPlantTuscan,
+                  child: Text(context.l10n.demoPlantTuscan),
+                ),
+                DropdownMenuItem(
+                  value: context.l10n.demoPlantSlowBolt,
+                  child: Text(context.l10n.demoPlantSlowBolt),
+                ),
               ],
-              onChanged: (cropName) => setState(() => _selectedCropName = cropName),
+              onChanged: (cropName) =>
+                  setState(() => _selectedCropName = cropName),
             ),
             const SizedBox(height: 10),
-            Text(context.l10n.subscriptionPriceFromServer, style: const TextStyle(color: AppColors.mutedSage, fontSize: 13)),
+            Text(
+              context.l10n.subscriptionPriceFromServer,
+              style: const TextStyle(color: AppColors.mutedSage, fontSize: 13),
+            ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: _creating ? null : _createPayment,
                 icon: _creating
-                    ? const SizedBox.square(dimension: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Icon(Icons.qr_code_2_outlined),
                 label: Text(context.l10n.continueToPayment),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.forestGreen,
                   foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(54),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
                 ),
               ),
             ),
@@ -256,7 +400,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             const SizedBox(height: 16),
             _messageCard(_error!, isError: true),
             if (!_loadingDevices)
-              TextButton(onPressed: _loadDevices, child: Text(context.l10n.retry)),
+              TextButton(
+                onPressed: _loadDevices,
+                child: Text(context.l10n.retry),
+              ),
           ],
         ],
       ),
@@ -265,7 +412,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   Widget _fieldLabel(String label) => Text(
     label,
-    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primaryText),
+    style: const TextStyle(
+      fontSize: 15,
+      fontWeight: FontWeight.w700,
+      color: AppColors.primaryText,
+    ),
   );
 
   InputDecoration _fieldDecoration({String? hintText}) => InputDecoration(
@@ -273,7 +424,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     filled: true,
     fillColor: AppColors.rowBackground,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide.none,
+    ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
       borderSide: const BorderSide(color: AppColors.paleSageAccent),
@@ -287,7 +441,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   Widget _paymentDetails() {
     final payment = _payment!;
     final subscription = payment.subscription;
-    final expired = subscription.isPending && !subscription.paymentExpiresAt.isAfter(DateTime.now().toUtc());
+    final expired =
+        subscription.isPending &&
+        !subscription.paymentExpiresAt.isAfter(DateTime.now().toUtc());
     final status = subscription.isActive
         ? context.l10n.paymentSucceeded
         : expired
@@ -295,7 +451,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         : context.l10n.paymentPending;
     final qrUri = Uri.https(
       'img.vietqr.io',
-      '/image/${payment.bankCode}-${payment.accountNumber}-compact2.png',
+      '/image/${payment.bankCode}-${payment.accountNumber}-compact2.svg',
       {
         'amount': subscription.amountVnd.toString(),
         'addInfo': subscription.paymentCode,
@@ -309,7 +465,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         const SizedBox(height: 16),
         Card(
           color: AppColors.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -334,26 +492,56 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       ),
                     ),
                   ),
-                if (!subscription.isActive && !expired) const SizedBox(height: 16),
-                Text(_money(subscription.amountVnd), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.forestGreen)),
+                if (!subscription.isActive && !expired)
+                  const SizedBox(height: 16),
+                Text(
+                  _money(subscription.amountVnd),
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.forestGreen,
+                  ),
+                ),
                 const SizedBox(height: 16),
-                _paymentRow(context.l10n.subscriptionBankLabel, payment.bankCode),
-                _paymentRow(context.l10n.subscriptionAccountLabel, payment.accountNumber),
-                _paymentRow(context.l10n.subscriptionAccountNameLabel, payment.accountName),
-                _paymentRow(context.l10n.subscriptionTransferContentLabel, subscription.paymentCode),
-                _paymentRow(context.l10n.subscriptionExpiryLabel, _dateTime(subscription.paymentExpiresAt)),
+                _paymentRow(
+                  context.l10n.subscriptionBankLabel,
+                  payment.bankCode,
+                ),
+                _paymentRow(
+                  context.l10n.subscriptionAccountLabel,
+                  payment.accountNumber,
+                ),
+                _paymentRow(
+                  context.l10n.subscriptionAccountNameLabel,
+                  payment.accountName,
+                ),
+                _paymentRow(
+                  context.l10n.subscriptionTransferContentLabel,
+                  subscription.paymentCode,
+                ),
+                _paymentRow(
+                  context.l10n.subscriptionExpiryLabel,
+                  _dateTime(subscription.paymentExpiresAt),
+                ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 16),
-        Text(context.l10n.paymentInstructions, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.secondaryText)),
+        Text(
+          context.l10n.paymentInstructions,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppColors.secondaryText),
+        ),
         const SizedBox(height: 16),
-        if (!subscription.isActive && !expired)
+        if (!_isTerminal(subscription))
           OutlinedButton.icon(
             onPressed: _refreshing ? null : _refreshStatus,
             icon: _refreshing
-                ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                ? const SizedBox.square(
+                    dimension: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                 : const Icon(Icons.refresh),
             label: Text(context.l10n.subscriptionRefreshStatus),
           ),
@@ -373,9 +561,20 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: Text(label, style: const TextStyle(color: AppColors.secondaryText))),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(color: AppColors.secondaryText),
+          ),
+        ),
         const SizedBox(width: 16),
-        Flexible(child: SelectableText(value, textAlign: TextAlign.end, style: const TextStyle(fontWeight: FontWeight.w700))),
+        Flexible(
+          child: SelectableText(
+            value,
+            textAlign: TextAlign.end,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
       ],
     ),
   );
@@ -386,16 +585,30 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       padding: const EdgeInsets.all(14),
       child: Row(
         children: [
-          Icon(success ? Icons.check_circle_outline : expired ? Icons.schedule_outlined : Icons.hourglass_top, color: AppColors.forestGreen),
+          Icon(
+            success
+                ? Icons.check_circle_outline
+                : expired
+                ? Icons.schedule_outlined
+                : Icons.hourglass_top,
+            color: AppColors.forestGreen,
+          ),
           const SizedBox(width: 10),
-          Expanded(child: Text(text, style: const TextStyle(fontWeight: FontWeight.w700))),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
         ],
       ),
     ),
   );
 
   Widget _messageCard(String message, {bool isError = false}) => Card(
-    color: isError ? Theme.of(context).colorScheme.errorContainer : AppColors.surface,
+    color: isError
+        ? Theme.of(context).colorScheme.errorContainer
+        : AppColors.surface,
     child: Padding(padding: const EdgeInsets.all(14), child: Text(message)),
   );
 

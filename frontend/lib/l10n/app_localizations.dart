@@ -3630,6 +3630,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refresh payment status'**
   String get subscriptionRefreshStatus;
+
+  /// No description provided for @subscriptionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription history'**
+  String get subscriptionHistory;
+
+  /// No description provided for @subscriptionStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for payment'**
+  String get subscriptionStatusPending;
+
+  /// No description provided for @subscriptionStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get subscriptionStatusActive;
+
+  /// No description provided for @subscriptionStatusExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get subscriptionStatusExpired;
+
+  /// No description provided for @subscriptionPaidAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get subscriptionPaidAt;
+
+  /// No description provided for @subscriptionCreatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get subscriptionCreatedAt;
+
+  /// No description provided for @subscriptionHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscription requests yet'**
+  String get subscriptionHistoryEmpty;
 }
 
 class _AppLocalizationsDelegate
