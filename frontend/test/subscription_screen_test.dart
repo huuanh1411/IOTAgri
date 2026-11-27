@@ -71,6 +71,13 @@ Future<void> _selectLettuce(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets('shows a back button in the subscription header', (tester) async {
+    await tester.pumpWidget(_app(_FakeApiService()));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+  });
+
   testWidgets('creates a server-backed payment request for the selected device', (
     tester,
   ) async {

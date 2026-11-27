@@ -131,22 +131,31 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     body: SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                PageHeader(
-                  title: context.l10n.subscription,
-                  subtitle: context.l10n.paymentSubtitle,
+        child: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    PageHeader(
+                      title: context.l10n.subscription,
+                      subtitle: context.l10n.paymentSubtitle,
+                    ),
+                    const SizedBox(height: 28),
+                    _payment == null ? _form() : _paymentDetails(),
+                  ],
                 ),
-                const SizedBox(height: 28),
-                _payment == null ? _form() : _paymentDetails(),
-              ],
+              ),
             ),
-          ),
+            IconButton(
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
+          ],
         ),
       ),
     ),
