@@ -14,5 +14,4 @@ public class CropSubscription
     public DateTime? PaidAt { get; set; }
     public DateTime? ExpiresAt { get; set; }
     public long? SePayTransactionId { get; set; }
-    public string? SePayRawPayload { get; set; }
 }

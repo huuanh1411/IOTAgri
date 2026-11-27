@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading;
@@ -19,6 +21,63 @@ namespace IOTAgriBackend.Tests;
 
 public class SubscriptionEndpointTests
 {
+    [Fact]
+    public async Task Listing_subscriptions_marks_overdue_pending_payment_expired()
+    {
+        await using var fixture = await SubscriptionFixture.CreateAsync();
+        var subscription = fixture.CreateSubscription(paymentExpiresAt: DateTime.UtcNow.AddMinutes(-1));
+        fixture.Db.CropSubscriptions.Add(subscription);
+        await fixture.Db.SaveChangesAsync();
+
+        var result = await BackendTestDoubles.InvokeHandler(typeof(SubscriptionEndpoints), "ListAsync",
+            fixture.Principal, fixture.Db, CancellationToken.None);
+
+        var response = Assert.IsAssignableFrom<IValueHttpResult<List<CropSubscriptionResponse>>>(result).Value;
+        Assert.NotNull(response);
+        Assert.Equal("Expired", Assert.Single(response!).Status);
+        fixture.Db.ChangeTracker.Clear();
+        Assert.Equal("Expired", (await fixture.Db.CropSubscriptions.SingleAsync()).Status);
+    }
+
+    [Fact]
+    public async Task Expired_pending_payment_allows_a_replacement_checkout()
+    {
+        await using var fixture = await SubscriptionFixture.CreateAsync();
+        var expired = fixture.CreateSubscription(paymentExpiresAt: DateTime.UtcNow.AddMinutes(-1));
+        fixture.Db.CropSubscriptions.Add(expired);
+        await fixture.Db.SaveChangesAsync();
+
+        var result = await BackendTestDoubles.InvokeHandler(typeof(SubscriptionEndpoints), "CreateAsync",
+            fixture.Device.Id, new CreateCropSubscriptionRequest("Lettuce"), fixture.Principal, fixture.Db,
+            fixture.SubscriptionOptions, CancellationToken.None);
+
+        Assert.Equal(StatusCodes.Status201Created, ((IStatusCodeHttpResult)result).StatusCode);
+        var replacement = Assert.IsAssignableFrom<IValueHttpResult<CropSubscriptionPaymentResponse>>(result).Value;
+        Assert.NotNull(replacement);
+        Assert.NotEqual(expired.PaymentCode, replacement!.Subscription.PaymentCode);
+        fixture.Db.ChangeTracker.Clear();
+        Assert.Equal(new[] { "Expired", "Pending" }, await fixture.Db.CropSubscriptions
+            .OrderBy(item => item.Status).Select(item => item.Status).ToArrayAsync());
+    }
+
+    [Fact]
+    public async Task Expired_pending_payment_rejects_validly_signed_webhook()
+    {
+        await using var fixture = await SubscriptionFixture.CreateAsync();
+        var subscription = fixture.CreateSubscription(paymentExpiresAt: DateTime.UtcNow.AddMinutes(-1));
+        fixture.Db.CropSubscriptions.Add(subscription);
+        await fixture.Db.SaveChangesAsync();
+        var request = CreateWebhookRequest(subscription.PaymentCode, subscription.AmountVnd);
+
+        var result = await BackendTestDoubles.InvokeHandler(typeof(SubscriptionEndpoints), "ReceiveSePayWebhookAsync",
+            request, fixture.Db, Options.Create(new SePayOptions { WebhookSecret = "secret" }),
+            fixture.SubscriptionOptions, CancellationToken.None);
+
+        Assert.Equal(StatusCodes.Status409Conflict, ((IStatusCodeHttpResult)result).StatusCode);
+        fixture.Db.ChangeTracker.Clear();
+        Assert.Equal("Pending", (await fixture.Db.CropSubscriptions.SingleAsync()).Status);
+    }
+
     [Fact]
     public async Task Valid_sepay_payment_activates_pending_crop_subscription()
     {
@@ -70,6 +129,74 @@ public class SubscriptionEndpointTests
         Assert.Equal(StatusCodes.Status200OK, ((IStatusCodeHttpResult)paid).StatusCode);
         Assert.Equal("Active", subscription.Status);
         Assert.Equal(92704, subscription.SePayTransactionId);
+        Assert.NotNull(subscription.PaidAt);
         Assert.NotNull(subscription.ExpiresAt);
+        Assert.Null(typeof(CropSubscription).GetProperty("SePayRawPayload"));
+    }
+
+    private static HttpRequest CreateWebhookRequest(string paymentCode, int amountVnd)
+    {
+        var rawBody = $"{{\"id\":92704,\"accountNumber\":\"1234567890\",\"code\":\"{paymentCode}\",\"transferType\":\"in\",\"transferAmount\":{amountVnd}}}";
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var context = new DefaultHttpContext();
+        context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(rawBody));
+        context.Request.Headers["X-SePay-Timestamp"] = timestamp.ToString();
+        context.Request.Headers["X-SePay-Signature"] = SePayWebhookVerifier.Sign("secret", timestamp, rawBody);
+        return context.Request;
+    }
+
+    private sealed class SubscriptionFixture : IAsyncDisposable
+    {
+        private readonly SqliteConnection _connection;
+
+        private SubscriptionFixture(SqliteConnection connection, ApplicationDbContext db, ApplicationUser user, Device device,
+            ClaimsPrincipal principal, IOptions<SubscriptionOptions> subscriptionOptions)
+        {
+            _connection = connection;
+            Db = db;
+            User = user;
+            Device = device;
+            Principal = principal;
+            SubscriptionOptions = subscriptionOptions;
+        }
+
+        public ApplicationDbContext Db { get; }
+        public ApplicationUser User { get; }
+        public Device Device { get; }
+        public ClaimsPrincipal Principal { get; }
+        public IOptions<SubscriptionOptions> SubscriptionOptions { get; }
+
+        public static async Task<SubscriptionFixture> CreateAsync()
+        {
+            var connection = new SqliteConnection("DataSource=:memory:");
+            await connection.OpenAsync();
+            var db = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>().UseSqlite(connection).Options);
+            await db.Database.EnsureCreatedAsync();
+            var user = new ApplicationUser { Id = "subscriber", UserName = "subscriber@example.test", Email = "subscriber@example.test" };
+            var device = new Device { Name = "Grow rack", DeviceKey = "device-key", OwnerId = user.Id };
+            db.AddRange(user, device);
+            await db.SaveChangesAsync();
+            var principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, user.Id)]));
+            var subscriptionOptions = Options.Create(new SubscriptionOptions
+            {
+                MonthlyPriceVnd = 50_000, BankCode = "MB", AccountNumber = "1234567890", AccountName = "AEROGREEN"
+            });
+            return new SubscriptionFixture(connection, db, user, device, principal, subscriptionOptions);
+        }
+
+        public CropSubscription CreateSubscription(DateTime paymentExpiresAt) => new()
+        {
+            DeviceId = Device.Id,
+            CropName = "Lettuce",
+            AmountVnd = 50_000,
+            PaymentCode = $"AG{Guid.NewGuid():N}".ToUpperInvariant(),
+            PaymentExpiresAt = paymentExpiresAt
+        };
+
+        public async ValueTask DisposeAsync()
+        {
+            await Db.DisposeAsync();
+            await _connection.DisposeAsync();
+        }
     }
 }
