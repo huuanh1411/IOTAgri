@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:iotagri_app/l10n/app_localizations.dart';
 import 'package:iotagri_app/models/crop_subscription.dart';
 import 'package:iotagri_app/screens/subscription_screen.dart';
@@ -72,7 +75,12 @@ Widget _app(ApiService api) => MaterialApp(
   locale: const Locale('vi'),
   supportedLocales: AppLocalizations.supportedLocales,
   localizationsDelegates: AppLocalizations.localizationsDelegates,
-  home: SubscriptionScreen(apiService: api),
+  home: SubscriptionScreen(
+    apiService: api,
+    svgHttpClient: MockClient(
+      (_) async => http.Response('<svg xmlns="http://www.w3.org/2000/svg"/>', 200),
+    ),
+  ),
 );
 
 Future<void> _selectLettuce(WidgetTester tester) async {
@@ -113,7 +121,7 @@ void main() {
     },
   );
 
-  testWidgets('renders VietQR using a direct PNG endpoint', (tester) async {
+  testWidgets('renders VietQR using its SVG endpoint', (tester) async {
     final api = _FakeApiService();
     await tester.pumpWidget(_app(api));
     await tester.pumpAndSettle();
@@ -121,10 +129,8 @@ void main() {
     await tester.tap(find.text('Tiếp tục thanh toán'));
     await tester.pump();
 
-    final image = tester.widget<Image>(find.byType(Image));
-    final provider = image.image as NetworkImage;
-    expect(provider.url, contains('compact2.png'));
-    expect(provider.url, isNot(contains('compact2.svg')));
+    expect(find.byType(SvgPicture), findsOneWidget);
+    expect(find.byKey(const Key('vietqr-payment-image')), findsOneWidget);
   });
 
   testWidgets('does not poll an expired payment', (tester) async {

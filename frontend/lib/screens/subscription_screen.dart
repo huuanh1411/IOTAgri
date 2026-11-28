@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
 
 import '../core/theme/app_colors.dart';
 import '../core/widgets/page_header.dart';
@@ -10,10 +12,12 @@ import '../services/api_service.dart';
 import '../utils/l10n.dart';
 
 class SubscriptionScreen extends StatefulWidget {
-  const SubscriptionScreen({super.key, ApiService? apiService})
-    : _apiService = apiService;
+  const SubscriptionScreen({super.key, ApiService? apiService, http.Client? svgHttpClient})
+    : _apiService = apiService,
+      _svgHttpClient = svgHttpClient;
 
   final ApiService? _apiService;
+  final http.Client? _svgHttpClient;
 
   @override
   State<SubscriptionScreen> createState() => _SubscriptionScreenState();
@@ -546,7 +550,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         : context.l10n.paymentPending;
     final qrUri = Uri.https(
       'img.vietqr.io',
-      '/image/${payment.bankCode}-${payment.accountNumber}-compact2.png',
+      '/image/${payment.bankCode}-${payment.accountNumber}-compact2.svg',
       {
         'amount': subscription.amountVnd.toString(),
         'addInfo': subscription.paymentCode,
@@ -569,17 +573,16 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               children: [
                 if (!subscription.isActive && !expired)
                   LayoutBuilder(
-                    builder: (context, constraints) => Image.network(
+                    builder: (context, constraints) => SvgPicture.network(
                       qrUri.toString(),
+                      key: const Key('vietqr-payment-image'),
                       height: constraints.maxWidth,
                       width: constraints.maxWidth,
                       fit: BoxFit.contain,
-                      loadingBuilder: (context, child, loadingProgress) =>
-                          loadingProgress == null
-                          ? child
-                          : const SizedBox.square(
-                              child: Center(child: CircularProgressIndicator()),
-                            ),
+                      httpClient: widget._svgHttpClient,
+                      placeholderBuilder: (context) => const SizedBox.square(
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
                       errorBuilder: (context, error, stackTrace) => const Icon(
                         Icons.qr_code_2_outlined,
                         size: 120,
