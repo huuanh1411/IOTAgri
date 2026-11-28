@@ -27,6 +27,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<EmailVerificationCode> EmailVerificationCodes => Set<EmailVerificationCode>();
     public DbSet<AccountDeletionAudit> AccountDeletionAudits => Set<AccountDeletionAudit>();
     public DbSet<CropSubscription> CropSubscriptions => Set<CropSubscription>();
+    public DbSet<SePayWebhookEvent> SePayWebhookEvents => Set<SePayWebhookEvent>();
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -89,6 +90,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
                 .WithMany()
                 .HasForeignKey(item => item.DeviceId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<SePayWebhookEvent>(entity =>
+        {
+            entity.HasKey(item => item.TransactionId);
+            entity.Property(item => item.TransactionId).ValueGeneratedNever();
+            entity.Property(item => item.Status).HasMaxLength(16);
         });
 
         builder.Entity<SensorReading>(entity =>

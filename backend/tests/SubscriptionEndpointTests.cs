@@ -73,9 +73,19 @@ public class SubscriptionEndpointTests
             request, fixture.Db, Options.Create(new SePayOptions { WebhookSecret = "secret" }),
             fixture.SubscriptionOptions, CancellationToken.None);
 
-        Assert.Equal(StatusCodes.Status409Conflict, ((IStatusCodeHttpResult)result).StatusCode);
+        Assert.Equal(StatusCodes.Status200OK, ((IStatusCodeHttpResult)result).StatusCode);
         fixture.Db.ChangeTracker.Clear();
         Assert.Equal("Pending", (await fixture.Db.CropSubscriptions.SingleAsync()).Status);
+        var webhookEvent = await fixture.Db.SePayWebhookEvents.SingleAsync();
+        Assert.False(webhookEvent.Success);
+        Assert.Equal("Unmatched", webhookEvent.Status);
+
+        fixture.Db.ChangeTracker.Clear();
+        var replay = await BackendTestDoubles.InvokeHandler(typeof(SubscriptionEndpoints), "ReceiveSePayWebhookAsync",
+            CreateWebhookRequest(subscription.PaymentCode, subscription.AmountVnd), fixture.Db,
+            Options.Create(new SePayOptions { WebhookSecret = "secret" }), fixture.SubscriptionOptions, CancellationToken.None);
+        Assert.Equal(StatusCodes.Status200OK, ((IStatusCodeHttpResult)replay).StatusCode);
+        Assert.Equal(1, await fixture.Db.SePayWebhookEvents.CountAsync());
     }
 
     [Fact]
@@ -127,16 +137,28 @@ public class SubscriptionEndpointTests
             context.Request, db, Options.Create(new SePayOptions { WebhookSecret = "secret" }), subscriptionOptions, CancellationToken.None);
 
         Assert.Equal(StatusCodes.Status200OK, ((IStatusCodeHttpResult)paid).StatusCode);
-        Assert.Equal("Active", subscription.Status);
-        Assert.Equal(92704, subscription.SePayTransactionId);
-        Assert.NotNull(subscription.PaidAt);
-        Assert.NotNull(subscription.ExpiresAt);
+        db.ChangeTracker.Clear();
+        var activated = await db.CropSubscriptions.SingleAsync();
+        Assert.Equal("Active", activated.Status);
+        Assert.Equal(92704, activated.SePayTransactionId);
+        Assert.NotNull(activated.PaidAt);
+        Assert.NotNull(activated.ExpiresAt);
         Assert.Null(typeof(CropSubscription).GetProperty("SePayRawPayload"));
+
+        var secondPayment = CreateWebhookRequest(subscription.PaymentCode, subscription.AmountVnd, transactionId: 92705);
+        var rejected = await BackendTestDoubles.InvokeHandler(typeof(SubscriptionEndpoints), "ReceiveSePayWebhookAsync",
+            secondPayment, db, Options.Create(new SePayOptions { WebhookSecret = "secret" }), subscriptionOptions, CancellationToken.None);
+
+        Assert.Equal(StatusCodes.Status200OK, ((IStatusCodeHttpResult)rejected).StatusCode);
+        db.ChangeTracker.Clear();
+        Assert.Equal(92704, (await db.CropSubscriptions.SingleAsync()).SePayTransactionId);
+        Assert.Equal(new[] { true, false }, await db.SePayWebhookEvents
+            .OrderBy(item => item.TransactionId).Select(item => item.Success).ToArrayAsync());
     }
 
-    private static HttpRequest CreateWebhookRequest(string paymentCode, int amountVnd)
+    private static HttpRequest CreateWebhookRequest(string paymentCode, int amountVnd, long transactionId = 92704)
     {
-        var rawBody = $"{{\"id\":92704,\"accountNumber\":\"1234567890\",\"code\":\"{paymentCode}\",\"transferType\":\"in\",\"transferAmount\":{amountVnd}}}";
+        var rawBody = $"{{\"id\":{transactionId},\"accountNumber\":\"1234567890\",\"code\":\"{paymentCode}\",\"transferType\":\"in\",\"transferAmount\":{amountVnd}}}";
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         var context = new DefaultHttpContext();
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(rawBody));

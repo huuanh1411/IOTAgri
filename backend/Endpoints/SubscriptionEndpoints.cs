@@ -104,32 +104,62 @@ public static class SubscriptionEndpoints
             return Results.Unauthorized();
         }
 
-        var payment = JsonSerializer.Deserialize<SePayPayment>(rawBody, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        SePayPayment? payment;
+        try
+        {
+            payment = JsonSerializer.Deserialize<SePayPayment>(rawBody, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        }
+        catch (JsonException)
+        {
+            return Results.Ok(new { success = false });
+        }
+
         var settings = subscriptionOptions.Value;
-        if (payment is null || payment.Id <= 0 || payment.TransferType != "in"
-            || string.IsNullOrWhiteSpace(payment.Code) || payment.AccountNumber != settings.AccountNumber)
+        if (payment is null || payment.Id <= 0)
         {
-            return Results.BadRequest(new { success = false });
+            return Results.Ok(new { success = false });
         }
 
-        var subscription = await db.CropSubscriptions.SingleOrDefaultAsync(item => item.PaymentCode == payment.Code, cancellationToken);
-        if (subscription is null) return Results.NotFound(new { success = false });
-        if (subscription.SePayTransactionId == payment.Id) return Results.Ok(new { success = true });
-        if (subscription.Status != "Pending" || subscription.PaymentExpiresAt <= DateTime.UtcNow || payment.TransferAmount != subscription.AmountVnd)
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+        var webhookEvent = new SePayWebhookEvent { TransactionId = payment.Id };
+        db.SePayWebhookEvents.Add(webhookEvent);
+        try
         {
-            return Results.Conflict(new { success = false });
+            await db.SaveChangesAsync(cancellationToken);
         }
-        if (await db.CropSubscriptions.AnyAsync(item => item.SePayTransactionId == payment.Id, cancellationToken))
+        catch (DbUpdateException)
         {
-            return Results.Conflict(new { success = false });
+            await transaction.RollbackAsync(cancellationToken);
+            db.ChangeTracker.Clear();
+            var priorEvent = await db.SePayWebhookEvents
+                .AsNoTracking()
+                .SingleOrDefaultAsync(item => item.TransactionId == payment.Id, cancellationToken);
+            return priorEvent is null
+                ? Results.StatusCode(StatusCodes.Status500InternalServerError)
+                : Results.Ok(new { success = priorEvent.Success });
         }
 
-        subscription.Status = "Active";
-        subscription.PaidAt = DateTime.UtcNow;
-        subscription.ExpiresAt = subscription.PaidAt.Value.AddMonths(1);
-        subscription.SePayTransactionId = payment.Id;
+        var paidAt = DateTime.UtcNow;
+        var activated = payment.TransferType == "in"
+            && !string.IsNullOrWhiteSpace(payment.Code)
+            && payment.AccountNumber == settings.AccountNumber
+            && await db.CropSubscriptions
+                .Where(item => item.PaymentCode == payment.Code
+                    && item.Status == "Pending"
+                    && item.PaymentExpiresAt > paidAt
+                    && item.AmountVnd == payment.TransferAmount)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(item => item.Status, "Active")
+                    .SetProperty(item => item.PaidAt, (DateTime?)paidAt)
+                    .SetProperty(item => item.ExpiresAt, (DateTime?)paidAt.AddMonths(1))
+                    .SetProperty(item => item.SePayTransactionId, (long?)payment.Id), cancellationToken) == 1;
+
+        webhookEvent.Success = activated;
+        webhookEvent.Status = activated ? "Processed" : "Unmatched";
+        webhookEvent.ProcessedAt = paidAt;
         await db.SaveChangesAsync(cancellationToken);
-        return Results.Ok(new { success = true });
+        await transaction.CommitAsync(cancellationToken);
+        return Results.Ok(new { success = activated });
     }
 
     private static async Task NormalizeExpiredPendingSubscriptionsAsync(

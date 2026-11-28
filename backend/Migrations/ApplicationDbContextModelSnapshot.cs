@@ -561,6 +561,27 @@ namespace IOTAgriBackend.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
+            modelBuilder.Entity("IOTAgriBackend.Models.SePayWebhookEvent", b =>
+                {
+                    b.Property<long>("TransactionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("TransactionId");
+
+                    b.ToTable("SePayWebhookEvents");
+                });
+
             modelBuilder.Entity("IOTAgriBackend.Models.SensorReading", b =>
                 {
                     b.Property<Guid>("Id")
