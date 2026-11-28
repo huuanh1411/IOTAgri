@@ -78,7 +78,10 @@ Widget _app(ApiService api) => MaterialApp(
   home: SubscriptionScreen(
     apiService: api,
     svgHttpClient: MockClient(
-      (_) async => http.Response('<svg xmlns="http://www.w3.org/2000/svg"/>', 200),
+      (_) async => http.Response(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10"/></svg>',
+        200,
+      ),
     ),
   ),
 );
