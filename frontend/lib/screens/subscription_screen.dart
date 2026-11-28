@@ -307,29 +307,37 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         Card(
           margin: EdgeInsets.zero,
           color: AppColors.surface,
-          child: Column(
-            children: _subscriptions
-                .map(
-                  (subscription) => ListTile(
-                    title: Text(subscription.cropName),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(_deviceLabel(subscription)),
-                        Text(_money(subscription.amountVnd)),
-                        Text(_subscriptionStatusLabel(subscription)),
-                        Text(
-                          '${context.l10n.subscriptionCreatedAt}: ${_dateTime(subscription.createdAt)}',
+          clipBehavior: Clip.antiAlias,
+          child: SizedBox(
+            height: 300,
+            child: SingleChildScrollView(
+              key: const Key('subscription-history-scroll'),
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Column(
+                children: _subscriptions
+                    .map(
+                      (subscription) => ListTile(
+                        title: Text(subscription.cropName),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(_deviceLabel(subscription)),
+                            Text(_money(subscription.amountVnd)),
+                            Text(_subscriptionStatusLabel(subscription)),
+                            Text(
+                              '${context.l10n.subscriptionCreatedAt}: ${_dateTime(subscription.createdAt)}',
+                            ),
+                            Text(
+                              '${_historyDateLabel(subscription)}: ${_dateTime(_historyDate(subscription))}',
+                            ),
+                          ],
                         ),
-                        Text(
-                          '${_historyDateLabel(subscription)}: ${_dateTime(_historyDate(subscription))}',
-                        ),
-                      ],
+                        isThreeLine: true,
+                      ),
                     ),
-                    isThreeLine: true,
-                  ),
-                )
-                .toList(),
+                    .toList(),
+              ),
+            ),
           ),
         ),
     ],
