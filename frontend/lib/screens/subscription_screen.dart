@@ -314,28 +314,27 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               key: const Key('subscription-history-scroll'),
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Column(
-                children: _subscriptions
-                    .map(
-                      (subscription) => ListTile(
-                        title: Text(subscription.cropName),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(_deviceLabel(subscription)),
-                            Text(_money(subscription.amountVnd)),
-                            Text(_subscriptionStatusLabel(subscription)),
-                            Text(
-                              '${context.l10n.subscriptionCreatedAt}: ${_dateTime(subscription.createdAt)}',
-                            ),
-                            Text(
-                              '${_historyDateLabel(subscription)}: ${_dateTime(_historyDate(subscription))}',
-                            ),
-                          ],
-                        ),
-                        isThreeLine: true,
+                children: [
+                  for (final subscription in _subscriptions)
+                    ListTile(
+                      title: Text(subscription.cropName),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(_deviceLabel(subscription)),
+                          Text(_money(subscription.amountVnd)),
+                          Text(_subscriptionStatusLabel(subscription)),
+                          Text(
+                            '${context.l10n.subscriptionCreatedAt}: ${_dateTime(subscription.createdAt)}',
+                          ),
+                          Text(
+                            '${_historyDateLabel(subscription)}: ${_dateTime(_historyDate(subscription))}',
+                          ),
+                        ],
                       ),
+                      isThreeLine: true,
                     ),
-                    .toList(),
+                ],
               ),
             ),
           ),
