@@ -113,7 +113,7 @@ void main() {
     },
   );
 
-  testWidgets('renders VietQR using direct SVG endpoint', (tester) async {
+  testWidgets('renders VietQR using a direct PNG endpoint', (tester) async {
     final api = _FakeApiService();
     await tester.pumpWidget(_app(api));
     await tester.pumpAndSettle();
@@ -123,8 +123,8 @@ void main() {
 
     final image = tester.widget<Image>(find.byType(Image));
     final provider = image.image as NetworkImage;
-    expect(provider.url, contains('compact2.svg'));
-    expect(provider.url, isNot(contains('compact2.png')));
+    expect(provider.url, contains('compact2.png'));
+    expect(provider.url, isNot(contains('compact2.svg')));
   });
 
   testWidgets('does not poll an expired payment', (tester) async {
